@@ -1,0 +1,25 @@
+//! Ports data/abilities.ts:2547; no direct PRNG draws. Core queries retain their event semantics.
+use crate::{
+    Battle,
+    dex::{self, HookId},
+    effects::{HookWaiver, support::*},
+    event::{HookCtx, Relay},
+    ids::*,
+    log::LogSink,
+};
+pub const ID: EffectId = dex::ABILITY_MEGALAUNCHER;
+pub const HOOKS: &[HookId] = &[dex::HOOK_ABILITY_MEGALAUNCHER_ONBASEPOWER];
+pub const PAYLOAD_WORDS: usize = 0;
+pub const WAIVERS: &[HookWaiver] = &[];
+pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
+    match hook {
+        dex::HOOK_ABILITY_MEGALAUNCHER_ONBASEPOWER => {
+            let mov = move_arg(b, cx, 3);
+            if move_overlay(b, mov).flags & dex::FLAG_PULSE != 0 {
+                b.chain_modify(1.5, 1.0);
+            }
+        }
+        _ => unreachable!("unexpected callback for megalauncher"),
+    }
+    Relay::Undefined
+}
