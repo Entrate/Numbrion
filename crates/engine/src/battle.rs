@@ -9,8 +9,10 @@ use crate::{
 /// the Copy simulation snapshot. Battle::new deliberately stops before start().
 pub struct Battle<L: LogSink = NoLog> {
     pub state: BattleState,
-    teams: TeamDefs,
+    pub(crate) teams: TeamDefs,
     pub log: L,
+    pub(crate) names: [String; 2],
+    pub(crate) scratch: crate::event::Scratch,
 }
 impl Battle<NoLog> {
     pub fn new(seed: [u16; 4], p1_packed: &str, p2_packed: &str) -> Result<Self, TeamError> {
@@ -112,7 +114,46 @@ impl<L: LogSink> Battle<L> {
                 state.sides[side].party[pos] = mon;
             }
         }
-        Ok(Self { state, teams, log })
+        Ok(Self {
+            state,
+            teams,
+            log,
+            names: ["Player 1".into(), "Player 2".into()],
+            scratch: crate::event::Scratch::default(),
+        })
+    }
+    /// Named pre-start constructor for the difftest adapter (battle.ts:3224-3257).
+    /// PRNG: only the existing constructor's gender samples; names draw nothing.
+    pub fn from_players(
+        seed: [u16; 4],
+        p1: (&str, &str),
+        p2: (&str, &str),
+        log: L,
+    ) -> Result<Self, TeamError> {
+        let mut b = Self::with_log(seed, p1.1, p2.1, log)?;
+        b.set_names(p1.0, p2.0);
+        Ok(b)
+    }
+    /// Ports battle.ts:3224-3257. PRNG: none. Set before start; strings stay outside state.
+    pub fn set_names(&mut self, p1: &str, p2: &str) {
+        assert_eq!(
+            self.state.phase,
+            Phase::Created,
+            "names must be set before start"
+        );
+        self.names = [p1.into(), p2.into()];
+    }
+    /// Ports side.ts:353. PRNG: none. Protocol/request boundary metadata.
+    pub fn player_name(&self, side: SideId) -> &str {
+        &self.names[side.0 as usize]
+    }
+    /// Ports battle.ts:346. PRNG: none; observation only.
+    pub fn seed(&self) -> [u16; 4] {
+        self.state.prng.seed()
+    }
+    /// Ports battle.ts:1627. PRNG: none; observation only.
+    pub fn turn(&self) -> u32 {
+        self.state.turn as u32
     }
     /// Formatting is a boundary operation. No String lives in BattleState.
     pub fn details(&self, mon: MonId) -> String {
@@ -138,7 +179,11 @@ impl<L: LogSink> Battle<L> {
         result
     }
 }
-fn compute_stats(s: &dex::SpeciesData, set: &crate::teams::SetDef) -> Result<[u16; 6], TeamError> {
+/// Shared constructor/form stat calculation (battle.ts:2350-2376). PRNG: none.
+pub(crate) fn compute_stats(
+    s: &dex::SpeciesData,
+    set: &crate::teams::SetDef,
+) -> Result<[u16; 6], TeamError> {
     let mut result = [0; 6];
     for (i, out) in result.iter_mut().enumerate() {
         let base = s.base_stats[i] as u32;

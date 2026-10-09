@@ -77,7 +77,13 @@ pub fn randomizer(base_damage: u32, roll: u32) -> u32 {
 /// `clampIntRange(num, min, max)` for integral input.
 #[inline(always)]
 pub const fn clamp_int(num: i64, min: i64, max: i64) -> i64 {
-    if num < min { min } else if num > max { max } else { num }
+    if num < min {
+        min
+    } else if num > max {
+        max
+    } else {
+        num
+    }
 }
 
 #[cfg(test)]

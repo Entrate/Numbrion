@@ -1,9 +1,13 @@
 //! Generated immutable Dex. Numeric ids and typed hot tables; integer-keyed trees
 //! retain all declarative fields and their JS insertion order for effect authors.
 use crate::ids::{EffectId, EffectKind, TypeId};
+#[rustfmt::skip]
 mod data_generated;
+#[rustfmt::skip]
 mod events_generated;
+#[rustfmt::skip]
 mod hooks_generated;
+#[rustfmt::skip]
 mod ids_generated;
 pub use data_generated::*;
 pub use events_generated::*;

@@ -86,3 +86,56 @@ impl Holder {
     }
 }
 pub use crate::dex::EventId;
+
+/// Copy attribution at a queued faint (pokemon.ts:1581; battle.ts:2539).
+/// Low 13 bits are a dex ID (or synthetic ordinal); high 3 bits select its view.
+/// PRNG: none. Live ActiveMove must first be projected through Battle.freeze_effect.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(transparent)]
+pub struct EffectToken(pub u16);
+impl EffectToken {
+    pub const NONE: Self = Self(0);
+    pub const fn from_ref(effect: crate::state::scratch::EffectRef) -> Self {
+        use crate::state::scratch::EffectRef::*;
+        let (view, id) = match effect {
+            None => (0, 0),
+            Dex(id) => (0, id.0),
+            SpeciesCondition(id) => (1, id.0),
+            MoveCondition(id) => (2, id.0),
+            AbilityCondition(id) => (3, id.0),
+            ItemCondition(id) => (4, id.0),
+            Synthetic(s) => (5, s as u16),
+            ActiveMove(_) => panic!("cannot store a live move in a snapshot"),
+        };
+        assert!(id < 8192, "effect token ID overflow");
+        Self((view << 13) | id)
+    }
+    pub const fn resolve(self) -> crate::state::scratch::EffectRef {
+        use crate::state::scratch::{EffectRef::*, SyntheticEffect};
+        let id = EffectId(self.0 & 8191);
+        match self.0 >> 13 {
+            0 => {
+                if id.0 == 0 {
+                    None
+                } else {
+                    Dex(id)
+                }
+            }
+            1 => SpeciesCondition(id),
+            2 => MoveCondition(id),
+            3 => AbilityCondition(id),
+            4 => ItemCondition(id),
+            5 => Synthetic(match id.0 {
+                0 => SyntheticEffect::Format,
+                1 => SyntheticEffect::Confused,
+                2 => SyntheticEffect::StruggleRecoil,
+                3 => SyntheticEffect::Recharge,
+                4 => SyntheticEffect::Fainted,
+                5 => SyntheticEffect::MindBlownRecoil,
+                _ => panic!("invalid synthetic effect token"),
+            }),
+            _ => panic!("invalid effect token view"),
+        }
+    }
+}
+const _: () = assert!(core::mem::size_of::<EffectToken>() == 2);

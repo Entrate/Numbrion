@@ -14,13 +14,21 @@ const ADD: u64 = 0x0026_9EC3;
 
 impl Prng {
     pub const fn from_seed(seed: [u16; 4]) -> Self {
-        let state = (seed[0] as u64) << 48 | (seed[1] as u64) << 32 | (seed[2] as u64) << 16 | seed[3] as u64;
+        let state = (seed[0] as u64) << 48
+            | (seed[1] as u64) << 32
+            | (seed[2] as u64) << 16
+            | seed[3] as u64;
         Prng { state }
     }
 
     pub const fn seed(&self) -> [u16; 4] {
         let s = self.state;
-        [(s >> 48) as u16, (s >> 32) as u16, (s >> 16) as u16, s as u16]
+        [
+            (s >> 48) as u16,
+            (s >> 32) as u16,
+            (s >> 16) as u16,
+            s as u16,
+        ]
     }
 
     /// `Gen5RNG.next()`: advance one frame, return the upper 32 bits.

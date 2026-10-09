@@ -240,7 +240,7 @@ pub enum Phase {
 pub struct FaintEntry {
     pub target: MonId,
     pub source: MonId,
-    pub effect: EffectId,
+    pub effect: EffectToken,
 }
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
@@ -392,8 +392,10 @@ impl BattleState {
         }
     }
 }
-const _: () = assert!(core::mem::size_of::<BattleState>() == 37664);
+const _: () = assert!(core::mem::size_of::<BattleState>() == 37688);
 const _: () = assert!(core::mem::size_of::<Pokemon>() == 540);
+const _: () = assert!(core::mem::size_of::<Side>() == 74);
+const _: () = assert!(core::mem::size_of::<FaintEntry>() == 4);
 const _: () = assert!(core::mem::size_of::<AttackRecord>() == 24);
 const _: () = assert!(core::mem::size_of::<choices::Action>() == 40);
 const _: () = assert!(core::mem::size_of::<choices::SideRequest>() == 96);

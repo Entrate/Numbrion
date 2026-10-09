@@ -1,7 +1,8 @@
 # Numbrion architecture v1
 
-Status: Stage 1 implemented. This is the contract for subsequent stages, not a claim
-that battle execution already exists. The only format is `gen9randomdoublesbattle`.
+Status: Stage 1 implemented; Stage 2A compiling API skeleton added. Behavior in
+the new core modules is still `todo!()`. IMPLEMENTATION-PLAN.md defines parallel
+ownership and integration gates. The only format is `gen9randomdoublesbattle`.
 Oracle: `/home/aminaliu/src/pokemon-showdown`, commit
 `7332b60e22b9e8194bb53549549eba241d73cc9a`, built `dist/`; never write there.
 The TypeScript outranks `docs/showdown/01..04` and `06` when they disagree.
@@ -114,13 +115,13 @@ as well as the per-file content hashes and scope fingerprint.
 | Component | Count/capacity | Bytes |
 |---|---:|---:|
 | Pokemon | 12, 540 each | 6,480 |
-| Side | 2, 64 each | 128 |
+| Side | 2, 74 each | 148 |
 | Field | 1 | 34 |
 | EffectArena | 640 cells, 44 each, free head/length | 28,164 |
 | ActionQueue | 64 actions, 40 each, length/padding | 2,568 |
 | SideRequest | 2, 96 each | 192 |
-| Remaining battle fields and alignment | PRNG, faint queue, counters, flags | 98 |
-| **BattleState** | **Copy** | **37,664** |
+| Remaining battle fields and alignment | PRNG, faint queue, counters, flags | 102 |
+| **BattleState** | **Copy** | **37,688** |
 
 Each Pokemon retains persistent and active data together: base/current species,
 base/current ability, item/last item; HP; base/current stored stats; base and virtual
@@ -210,7 +211,7 @@ covers mixed numeric/non-numeric attacks, allies, slot changes and pruning.
 ## Scratch, relay and callback interface
 
 Scratch is owned by a worker, allocated once at construction, never in snapshots.
-Stage 2 adds eight EventFrames, eight move frames, eight listener buffers of 2,304
+`event::Scratch` preallocates eight EventFrames, eight move frames, eight listener buffers of 2,304
 entries, tie-index buffers of the same capacity, eight ordered boost/type/
 secondary frames, and sixteen CallArgs frames (event plus direct-callback nesting).
 A conservative Pokemon-array collection bound is
@@ -249,6 +250,9 @@ Direct callbacks and rule Begin do not create a singleEvent/runEvent context or
 increment eventDepth. Their argument frame is separate, and the current
 event/effect/effectState remain the caller's; event-frame index 255 means the
 initial empty context. Direct invocation must not invent a modifier or effect owner.
+Only Pokemon sources participate in source-handler discovery; preserve the original
+uncoerced source in event arguments. singleEvent defaults only undefined relay to
+true, while runEvent defaults both undefined and null and omits the relay argument.
 
 ActiveMove is a per-use scratch object with id/sourceEffect, flags/runtime flags,
 bp/accuracy/type/category/target/priority/crit/multihit, recoil/drain/damage,
@@ -266,7 +270,7 @@ Only events restore their parent context. A queued move stores its pre-run
 priority/Prankster/ignoreAbility edits, then initializes that use's scratch frame.
 lastMove can retain an id: scoped consumers use id/name or immutable failinstruct/
 charge/recharge flags, not mutable type or bp. Snapshots require no surviving
-active frame; generic scratch stack storage is a Stage 2 implementation task.
+active frame; generic scratch storage now exists, with behavior supplied in 2B/M.
 
 ## Event execution and generated dispatch
 
@@ -291,6 +295,10 @@ suppression rules separately. Apply numeric nonnegative-integer relay modifiers
 at the runEvent epilogue. Array targets keep independent relays; only the prescribed
 falsy/fastExit updates propagate. fieldEvent has distinct Side/Field hook names,
 location checks, duration expiry before callback, and its exact faint-message sites.
+singleEvent's 1,000-unsent-line guard counts logical protocol lines even with NoLog.
+Keep this count in worker scratch and reset only at the matching sendUpdates point;
+decision snapshots are exported after that flush. Pre-start construction has four
+pending lines (time, gametype, two players), derived when restoring Created state.
 
 Generate static dispatch by effect then HookId with generic direct calls. Metadata
 and constants are always supplied by the manifest. No effect file sets priorities,
@@ -302,7 +310,7 @@ per-event partitioning without changing ordering or RNG.
 
 One file per behavioural effect under `effects/{moves,abilities,items,conditions,
 rules,species}/<canonical-id>.rs`. File authors edit only that file and its local
-tests. Stage 2 build.rs discovers files in lexical directory order and generates
+tests. build.rs now discovers files in lexical directory order and generates
 module declarations and the outer dispatcher; no author edits a shared registry.
 Each file exports:
 
@@ -313,6 +321,7 @@ pub const HOOKS: &[HookId] = &[
     dex::HOOK_MOVE_DIRECLAW_SECONDARIES_0_ONHIT,
 ];
 pub const PAYLOAD_WORDS: usize = 0;
+pub const WAIVERS: &[effects::HookWaiver] = &[];
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
         dex::HOOK_MOVE_DIRECLAW_SECONDARY_ONHIT |
@@ -358,12 +367,15 @@ Tera and cantUndo. Request structs retain field-presence/hidden-disable bits,
 move id/PP/maxPP/target/disable source, trapping hypotheses, Tera, forceSwitch,
 wait/update/noCancel. Team/condition/details/stat fields are derived at request
 emission from state plus TeamDefs. No team-preview/Z/Mega/Dynamax action API.
-Stage 3 ports text choice validation and default choice, joint switch/Tera rules,
-request generation and mid-turn queue continuation before adding policy action masks.
+Owners C/L implement the predeclared choice/request and lifecycle APIs in parallel.
+The typed legal-action interface is authoritative, fixed-size and draw-free.
+SlotChoice retains the resolved move ID and a Dex/Recharge kind; QueuedMove keeps
+that kind in existing padding. Action adds EventId/targetLoc presence in existing
+padding. The larger SideChoice and battle alignment account for the 24-byte snapshot increase.
 
 `Battle<L=NoLog>` uses `LogSink::ENABLED`. Call sites gate emit/edit with that
-constant; NoLog never formats. The trait receives state, TeamDefs and typed
-LogEntry/LogArg, and supports MoveLineEdit. Stage 4 implements TextLog owning its
+constant; NoLog never formats. The trait receives a LogView (state, teams, names, live move overlays), typed
+LogEntry/LogArg/LogTag, and supports MoveLineEdit. Owner T implements TextLog owning its
 protocol buffer, split secret/public pairs and mutable last move line. Constructor
 logs, HP percentages, Illusion details, and time-line normalization belong to that
 sink/difftest boundary, not alternate mechanics.
@@ -383,7 +395,48 @@ sink/difftest boundary, not alternate mechanics.
   specification. Its ~3.5 KiB proposal excludes alignment and generic arena storage.
 
 No implementation of start/turns/move damage/text logs or full differential battle
-replay is claimed at this stage. Stages 2/3/4/5 implement event registry, lifecycle,
-move pipeline, and battle difftest before distributing effects. Capacity high-water
+replay is claimed at this stage. Stage 2B supplies events/registry while owners L, C,
+M, D and T implement their predeclared modules. EFFECTS.md freezes the file contract;
+IMPLEMENTATION-PLAN.md and EFFECT-BATCHES.json define the slice and 18-way fan-out. Capacity high-water
 checks and snapshot-copy benchmarks decide later state compaction, including a
 possible four-active-block split, under regression coverage.
+
+
+## Stage 2A interface refinements
+
+Precreated `event/`, `effects/`, `sim/{lifecycle,choices}/`,
+`actions/{moves,damage,mutators}/` and `log/` isolate owner edits. Parent mod files,
+ids/state, Battle construction and shared action/log types stay lead-owned. Owners
+coordinate cross-module changes through the lead before rebasing their worktrees.
+No dependency or per-agent shared registry edit is required.
+
+EffectRef::ActiveMove preserves live source overlays for Pressure/suppression.
+EventArg::Relay represents explicit typed callback arguments. FaintEntry stores a
+2-byte EffectToken, retaining synthetic/condition views without scratch references;
+D projects a live move to its ID when enqueueing. Its entry remains four bytes.
+Boost, raw heal, status and damage APIs return Relay wherever TS exposes mixed
+sentinels. Mutator Attribution preserves undefined/null sources and method-specific
+defaulting. Numeric move scratch basePower/accuracy are f64; immutable dex numbers
+retain their compact integer representation.
+
+ActiveMove adds traits/stat/selfdestruct overlays, type-changer and four Ruin
+holder references, and named runtime flags for multihit presence/range, deleted
+multiaccuracy, smartTarget and willCrit presence, immunity, bounce and suppression.
+MoveEffectsScratch retains mutable chance/heal/forceSwitch/selfSwitch and a hook
+suppression mask. Primary boosts live only in effects.boosts; selfBoost is separate.
+All mutable overlays are initialized fully: explicit deletion/zero never falls
+back to static data. These additions affect worker scratch, not the Copy snapshot.
+The state spec's intentionally dropped Gen 9 dead stores remain dropped.
+
+The named constructor plus start/seed/turn/drain_log/request_json/choose/outcome
+is sufficient for the DIFFTEST.md adapter. start and a committing choose run to the
+next request/end synchronously. Names stay outside snapshots. Cached request JSON
+never invokes request rebuilding. Rejections emit side updates, not battle lines.
+NoLog still maintains the logical line count needed by singleEvent's limit.
+
+build.rs discovers canonical Rust filenames and generates metadata and generic
+static calls. Each effect exports ID, HOOKS, PAYLOAD_WORDS, WAIVERS and dispatch;
+registered files must cover every generated function site or explicit waiver.
+Constants/absent hooks are central. Missing reached functions panic with site
+information; the empty registry is not a full-coverage assertion. Validator-only
+and inherited/alias exceptions are reviewed explicitly in 2B. See EFFECTS.md.
