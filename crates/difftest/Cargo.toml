@@ -1,0 +1,36 @@
+[package]
+name = "difftest"
+description = "Differential-test harness: replays Showdown oracle fixtures through an engine and reports the first divergence per battle"
+edition = "2024"
+version = "0.1.0"
+license = "MIT"
+
+# Own workspace on purpose: this crate has registry dependencies, the root workspace excludes it,
+# and it keeps its own Cargo.lock and target directory.
+[workspace]
+
+[features]
+default = ["engine"]
+# Links the real engine (src/engine_sim.rs). Build with `--no-default-features` to test the harness
+# alone while the engine is mid-edit.
+engine = ["dep:engine"]
+
+[dependencies]
+engine = { path = "../engine", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "raw_value"] }
+flate2 = "1"
+
+# Profiles are only read from a workspace root, so they must be repeated here.
+[profile.release]
+opt-level = 3
+debug = "line-tables-only"
+lto = "thin"
+codegen-units = 4
+
+[profile.dev]
+opt-level = 1
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 3

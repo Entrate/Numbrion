@@ -1,0 +1,8 @@
+/target
+**/target
+node_modules/
+*.cpuprofile
+/scratch/
+/fuzz-out/
+__pycache__/
+/data/fixtures/*.jsonl
