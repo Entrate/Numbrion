@@ -1,0 +1,3073 @@
+# mask	user	method	ids
+0	0	alliesAndSelf	
+0	0	allies	
+0	0	adjacentAllies	
+0	0	foes	
+0	0	foesAll	6
+0	0	adjacentFoes	
+0	6	alliesAndSelf	
+0	6	allies	
+0	6	adjacentAllies	
+0	6	foes	
+0	6	foesAll	0
+0	6	adjacentFoes	
+1	0	alliesAndSelf	0
+1	0	allies	
+1	0	adjacentAllies	
+1	0	foes	
+1	0	foesAll	6,7
+1	0	adjacentFoes	
+1	6	alliesAndSelf	
+1	6	allies	
+1	6	adjacentAllies	
+1	6	foes	0
+1	6	foesAll	0,1
+1	6	adjacentFoes	0
+2	0	alliesAndSelf	1
+2	0	allies	1
+2	0	adjacentAllies	1
+2	0	foes	
+2	0	foesAll	6,7
+2	0	adjacentFoes	
+2	6	alliesAndSelf	
+2	6	allies	
+2	6	adjacentAllies	
+2	6	foes	1
+2	6	foesAll	0,1
+2	6	adjacentFoes	1
+3	0	alliesAndSelf	0
+3	0	allies	
+3	0	adjacentAllies	
+3	0	foes	
+3	0	foesAll	6,7
+3	0	adjacentFoes	
+3	6	alliesAndSelf	
+3	6	allies	
+3	6	adjacentAllies	
+3	6	foes	0
+3	6	foesAll	0
+3	6	adjacentFoes	0
+4	0	alliesAndSelf	
+4	0	allies	
+4	0	adjacentAllies	
+4	0	foes	6
+4	0	foesAll	6,7
+4	0	adjacentFoes	6
+4	6	alliesAndSelf	6
+4	6	allies	
+4	6	adjacentAllies	
+4	6	foes	
+4	6	foesAll	0,1
+4	6	adjacentFoes	
+5	0	alliesAndSelf	0
+5	0	allies	
+5	0	adjacentAllies	
+5	0	foes	6
+5	0	foesAll	6
+5	0	adjacentFoes	6
+5	6	alliesAndSelf	6
+5	6	allies	
+5	6	adjacentAllies	
+5	6	foes	0
+5	6	foesAll	0,1
+5	6	adjacentFoes	0
+6	0	alliesAndSelf	
+6	0	allies	
+6	0	adjacentAllies	
+6	0	foes	6
+6	0	foesAll	6,7
+6	0	adjacentFoes	6
+6	6	alliesAndSelf	6
+6	6	allies	
+6	6	adjacentAllies	
+6	6	foes	
+6	6	foesAll	0
+6	6	adjacentFoes	
+7	0	alliesAndSelf	0,1
+7	0	allies	1
+7	0	adjacentAllies	1
+7	0	foes	6
+7	0	foesAll	6,7
+7	0	adjacentFoes	6
+7	6	alliesAndSelf	6
+7	6	allies	
+7	6	adjacentAllies	
+7	6	foes	0,1
+7	6	foesAll	0,1
+7	6	adjacentFoes	0,1
+8	0	alliesAndSelf	
+8	0	allies	
+8	0	adjacentAllies	
+8	0	foes	7
+8	0	foesAll	6,7
+8	0	adjacentFoes	7
+8	6	alliesAndSelf	7
+8	6	allies	7
+8	6	adjacentAllies	7
+8	6	foes	
+8	6	foesAll	0,1
+8	6	adjacentFoes	
+9	0	alliesAndSelf	0
+9	0	allies	
+9	0	adjacentAllies	
+9	0	foes	7
+9	0	foesAll	6,7
+9	0	adjacentFoes	7
+9	6	alliesAndSelf	7
+9	6	allies	7
+9	6	adjacentAllies	7
+9	6	foes	0
+9	6	foesAll	0
+9	6	adjacentFoes	0
+10	0	alliesAndSelf	1
+10	0	allies	1
+10	0	adjacentAllies	1
+10	0	foes	
+10	0	foesAll	6
+10	0	adjacentFoes	
+10	6	alliesAndSelf	
+10	6	allies	
+10	6	adjacentAllies	
+10	6	foes	1
+10	6	foesAll	0,1
+10	6	adjacentFoes	1
+11	0	alliesAndSelf	0,1
+11	0	allies	1
+11	0	adjacentAllies	1
+11	0	foes	7
+11	0	foesAll	6,7
+11	0	adjacentFoes	7
+11	6	alliesAndSelf	7
+11	6	allies	7
+11	6	adjacentAllies	7
+11	6	foes	0,1
+11	6	foesAll	0,1
+11	6	adjacentFoes	0,1
+12	0	alliesAndSelf	
+12	0	allies	
+12	0	adjacentAllies	
+12	0	foes	6,7
+12	0	foesAll	6,7
+12	0	adjacentFoes	6,7
+12	6	alliesAndSelf	6,7
+12	6	allies	7
+12	6	adjacentAllies	7
+12	6	foes	
+12	6	foesAll	0
+12	6	adjacentFoes	
+13	0	alliesAndSelf	0
+13	0	allies	
+13	0	adjacentAllies	
+13	0	foes	6,7
+13	0	foesAll	6,7
+13	0	adjacentFoes	6,7
+13	6	alliesAndSelf	6,7
+13	6	allies	7
+13	6	adjacentAllies	7
+13	6	foes	0
+13	6	foesAll	0,1
+13	6	adjacentFoes	0
+14	0	alliesAndSelf	1
+14	0	allies	1
+14	0	adjacentAllies	1
+14	0	foes	6,7
+14	0	foesAll	6,7
+14	0	adjacentFoes	6,7
+14	6	alliesAndSelf	6,7
+14	6	allies	7
+14	6	adjacentAllies	7
+14	6	foes	1
+14	6	foesAll	0,1
+14	6	adjacentFoes	1
+15	0	alliesAndSelf	0
+15	0	allies	
+15	0	adjacentAllies	
+15	0	foes	6
+15	0	foesAll	6
+15	0	adjacentFoes	6
+15	6	alliesAndSelf	6
+15	6	allies	
+15	6	adjacentAllies	
+15	6	foes	0
+15	6	foesAll	0
+15	6	adjacentFoes	0
+16	0	alliesAndSelf	
+16	0	allies	
+16	0	adjacentAllies	
+16	0	foes	
+16	0	foesAll	6,7
+16	0	adjacentFoes	
+16	6	alliesAndSelf	
+16	6	allies	
+16	6	adjacentAllies	
+16	6	foes	
+16	6	foesAll	0,1
+16	6	adjacentFoes	
+17	0	alliesAndSelf	0
+17	0	allies	
+17	0	adjacentAllies	
+17	0	foes	
+17	0	foesAll	6,7
+17	0	adjacentFoes	
+17	6	alliesAndSelf	
+17	6	allies	
+17	6	adjacentAllies	
+17	6	foes	0
+17	6	foesAll	0,1
+17	6	adjacentFoes	0
+18	0	alliesAndSelf	
+18	0	allies	
+18	0	adjacentAllies	
+18	0	foes	
+18	0	foesAll	6,7
+18	0	adjacentFoes	
+18	6	alliesAndSelf	
+18	6	allies	
+18	6	adjacentAllies	
+18	6	foes	
+18	6	foesAll	0
+18	6	adjacentFoes	
+19	0	alliesAndSelf	0,1
+19	0	allies	1
+19	0	adjacentAllies	
+19	0	foes	
+19	0	foesAll	6,7
+19	0	adjacentFoes	
+19	6	alliesAndSelf	
+19	6	allies	
+19	6	adjacentAllies	
+19	6	foes	0,1
+19	6	foesAll	0,1
+19	6	adjacentFoes	0,1
+20	0	alliesAndSelf	
+20	0	allies	
+20	0	adjacentAllies	
+20	0	foes	6
+20	0	foesAll	6
+20	0	adjacentFoes	6
+20	6	alliesAndSelf	6
+20	6	allies	
+20	6	adjacentAllies	
+20	6	foes	
+20	6	foesAll	0,1
+20	6	adjacentFoes	
+21	0	alliesAndSelf	0
+21	0	allies	
+21	0	adjacentAllies	
+21	0	foes	6
+21	0	foesAll	6,7
+21	0	adjacentFoes	6
+21	6	alliesAndSelf	6
+21	6	allies	
+21	6	adjacentAllies	
+21	6	foes	0
+21	6	foesAll	0
+21	6	adjacentFoes	0
+22	0	alliesAndSelf	1
+22	0	allies	1
+22	0	adjacentAllies	
+22	0	foes	6
+22	0	foesAll	6,7
+22	0	adjacentFoes	6
+22	6	alliesAndSelf	6
+22	6	allies	
+22	6	adjacentAllies	
+22	6	foes	1
+22	6	foesAll	0,1
+22	6	adjacentFoes	1
+23	0	alliesAndSelf	0,1
+23	0	allies	1
+23	0	adjacentAllies	
+23	0	foes	6
+23	0	foesAll	6,7
+23	0	adjacentFoes	6
+23	6	alliesAndSelf	6
+23	6	allies	
+23	6	adjacentAllies	
+23	6	foes	0,1
+23	6	foesAll	0,1
+23	6	adjacentFoes	0,1
+24	0	alliesAndSelf	
+24	0	allies	
+24	0	adjacentAllies	
+24	0	foes	7
+24	0	foesAll	6,7
+24	0	adjacentFoes	7
+24	6	alliesAndSelf	7
+24	6	allies	7
+24	6	adjacentAllies	7
+24	6	foes	
+24	6	foesAll	0
+24	6	adjacentFoes	
+25	0	alliesAndSelf	0
+25	0	allies	
+25	0	adjacentAllies	
+25	0	foes	
+25	0	foesAll	6
+25	0	adjacentFoes	
+25	6	alliesAndSelf	
+25	6	allies	
+25	6	adjacentAllies	
+25	6	foes	0
+25	6	foesAll	0,1
+25	6	adjacentFoes	0
+26	0	alliesAndSelf	1
+26	0	allies	1
+26	0	adjacentAllies	
+26	0	foes	7
+26	0	foesAll	6,7
+26	0	adjacentFoes	7
+26	6	alliesAndSelf	7
+26	6	allies	7
+26	6	adjacentAllies	7
+26	6	foes	1
+26	6	foesAll	0,1
+26	6	adjacentFoes	1
+27	0	alliesAndSelf	0
+27	0	allies	
+27	0	adjacentAllies	
+27	0	foes	7
+27	0	foesAll	6,7
+27	0	adjacentFoes	7
+27	6	alliesAndSelf	7
+27	6	allies	7
+27	6	adjacentAllies	7
+27	6	foes	0
+27	6	foesAll	0
+27	6	adjacentFoes	0
+28	0	alliesAndSelf	
+28	0	allies	
+28	0	adjacentAllies	
+28	0	foes	6,7
+28	0	foesAll	6,7
+28	0	adjacentFoes	6,7
+28	6	alliesAndSelf	6,7
+28	6	allies	7
+28	6	adjacentAllies	7
+28	6	foes	
+28	6	foesAll	0,1
+28	6	adjacentFoes	
+29	0	alliesAndSelf	0
+29	0	allies	
+29	0	adjacentAllies	
+29	0	foes	6,7
+29	0	foesAll	6,7
+29	0	adjacentFoes	6,7
+29	6	alliesAndSelf	6,7
+29	6	allies	7
+29	6	adjacentAllies	7
+29	6	foes	0
+29	6	foesAll	0,1
+29	6	adjacentFoes	0
+30	0	alliesAndSelf	
+30	0	allies	
+30	0	adjacentAllies	
+30	0	foes	6
+30	0	foesAll	6
+30	0	adjacentFoes	6
+30	6	alliesAndSelf	6
+30	6	allies	
+30	6	adjacentAllies	
+30	6	foes	
+30	6	foesAll	0
+30	6	adjacentFoes	
+31	0	alliesAndSelf	0,1
+31	0	allies	1
+31	0	adjacentAllies	
+31	0	foes	6,7
+31	0	foesAll	6,7
+31	0	adjacentFoes	6,7
+31	6	alliesAndSelf	6,7
+31	6	allies	7
+31	6	adjacentAllies	7
+31	6	foes	0,1
+31	6	foesAll	0,1
+31	6	adjacentFoes	0,1
+32	0	alliesAndSelf	
+32	0	allies	
+32	0	adjacentAllies	
+32	0	foes	
+32	0	foesAll	6,7
+32	0	adjacentFoes	
+32	6	alliesAndSelf	
+32	6	allies	
+32	6	adjacentAllies	
+32	6	foes	
+32	6	foesAll	0,1
+32	6	adjacentFoes	
+33	0	alliesAndSelf	0
+33	0	allies	
+33	0	adjacentAllies	
+33	0	foes	
+33	0	foesAll	6,7
+33	0	adjacentFoes	
+33	6	alliesAndSelf	
+33	6	allies	
+33	6	adjacentAllies	
+33	6	foes	0
+33	6	foesAll	0
+33	6	adjacentFoes	0
+34	0	alliesAndSelf	1
+34	0	allies	1
+34	0	adjacentAllies	
+34	0	foes	
+34	0	foesAll	6,7
+34	0	adjacentFoes	
+34	6	alliesAndSelf	
+34	6	allies	
+34	6	adjacentAllies	
+34	6	foes	1
+34	6	foesAll	0,1
+34	6	adjacentFoes	1
+35	0	alliesAndSelf	0,1
+35	0	allies	1
+35	0	adjacentAllies	
+35	0	foes	
+35	0	foesAll	6
+35	0	adjacentFoes	
+35	6	alliesAndSelf	
+35	6	allies	
+35	6	adjacentAllies	
+35	6	foes	0,1
+35	6	foesAll	0,1
+35	6	adjacentFoes	0,1
+36	0	alliesAndSelf	
+36	0	allies	
+36	0	adjacentAllies	
+36	0	foes	6
+36	0	foesAll	6,7
+36	0	adjacentFoes	6
+36	6	alliesAndSelf	6
+36	6	allies	
+36	6	adjacentAllies	
+36	6	foes	
+36	6	foesAll	0
+36	6	adjacentFoes	
+37	0	alliesAndSelf	0
+37	0	allies	
+37	0	adjacentAllies	
+37	0	foes	6
+37	0	foesAll	6,7
+37	0	adjacentFoes	6
+37	6	alliesAndSelf	6
+37	6	allies	
+37	6	adjacentAllies	
+37	6	foes	0
+37	6	foesAll	0,1
+37	6	adjacentFoes	0
+38	0	alliesAndSelf	1
+38	0	allies	1
+38	0	adjacentAllies	
+38	0	foes	6
+38	0	foesAll	6,7
+38	0	adjacentFoes	6
+38	6	alliesAndSelf	6
+38	6	allies	
+38	6	adjacentAllies	
+38	6	foes	1
+38	6	foesAll	0,1
+38	6	adjacentFoes	1
+39	0	alliesAndSelf	0
+39	0	allies	
+39	0	adjacentAllies	
+39	0	foes	6
+39	0	foesAll	6,7
+39	0	adjacentFoes	6
+39	6	alliesAndSelf	6
+39	6	allies	
+39	6	adjacentAllies	
+39	6	foes	0
+39	6	foesAll	0
+39	6	adjacentFoes	0
+40	0	alliesAndSelf	
+40	0	allies	
+40	0	adjacentAllies	
+40	0	foes	
+40	0	foesAll	6
+40	0	adjacentFoes	
+40	6	alliesAndSelf	
+40	6	allies	
+40	6	adjacentAllies	
+40	6	foes	
+40	6	foesAll	0,1
+40	6	adjacentFoes	
+41	0	alliesAndSelf	0
+41	0	allies	
+41	0	adjacentAllies	
+41	0	foes	7
+41	0	foesAll	6,7
+41	0	adjacentFoes	7
+41	6	alliesAndSelf	7
+41	6	allies	7
+41	6	adjacentAllies	7
+41	6	foes	0
+41	6	foesAll	0,1
+41	6	adjacentFoes	0
+42	0	alliesAndSelf	
+42	0	allies	
+42	0	adjacentAllies	
+42	0	foes	7
+42	0	foesAll	6,7
+42	0	adjacentFoes	7
+42	6	alliesAndSelf	7
+42	6	allies	7
+42	6	adjacentAllies	7
+42	6	foes	
+42	6	foesAll	0
+42	6	adjacentFoes	
+43	0	alliesAndSelf	0,1
+43	0	allies	1
+43	0	adjacentAllies	
+43	0	foes	7
+43	0	foesAll	6,7
+43	0	adjacentFoes	7
+43	6	alliesAndSelf	7
+43	6	allies	7
+43	6	adjacentAllies	7
+43	6	foes	0,1
+43	6	foesAll	0,1
+43	6	adjacentFoes	0,1
+44	0	alliesAndSelf	
+44	0	allies	
+44	0	adjacentAllies	
+44	0	foes	6,7
+44	0	foesAll	6,7
+44	0	adjacentFoes	6,7
+44	6	alliesAndSelf	6,7
+44	6	allies	7
+44	6	adjacentAllies	7
+44	6	foes	
+44	6	foesAll	0,1
+44	6	adjacentFoes	
+45	0	alliesAndSelf	0
+45	0	allies	
+45	0	adjacentAllies	
+45	0	foes	6
+45	0	foesAll	6
+45	0	adjacentFoes	6
+45	6	alliesAndSelf	6
+45	6	allies	
+45	6	adjacentAllies	
+45	6	foes	0
+45	6	foesAll	0
+45	6	adjacentFoes	0
+46	0	alliesAndSelf	1
+46	0	allies	1
+46	0	adjacentAllies	
+46	0	foes	6,7
+46	0	foesAll	6,7
+46	0	adjacentFoes	6,7
+46	6	alliesAndSelf	6,7
+46	6	allies	7
+46	6	adjacentAllies	7
+46	6	foes	1
+46	6	foesAll	0,1
+46	6	adjacentFoes	1
+47	0	alliesAndSelf	0,1
+47	0	allies	1
+47	0	adjacentAllies	
+47	0	foes	6,7
+47	0	foesAll	6,7
+47	0	adjacentFoes	6,7
+47	6	alliesAndSelf	6,7
+47	6	allies	7
+47	6	adjacentAllies	7
+47	6	foes	0,1
+47	6	foesAll	0,1
+47	6	adjacentFoes	0,1
+48	0	alliesAndSelf	
+48	0	allies	
+48	0	adjacentAllies	
+48	0	foes	
+48	0	foesAll	6,7
+48	0	adjacentFoes	
+48	6	alliesAndSelf	
+48	6	allies	
+48	6	adjacentAllies	
+48	6	foes	
+48	6	foesAll	0
+48	6	adjacentFoes	
+49	0	alliesAndSelf	0
+49	0	allies	
+49	0	adjacentAllies	
+49	0	foes	
+49	0	foesAll	6,7
+49	0	adjacentFoes	
+49	6	alliesAndSelf	
+49	6	allies	
+49	6	adjacentAllies	
+49	6	foes	0
+49	6	foesAll	0,1
+49	6	adjacentFoes	0
+50	0	alliesAndSelf	1
+50	0	allies	1
+50	0	adjacentAllies	
+50	0	foes	
+50	0	foesAll	6
+50	0	adjacentFoes	
+50	6	alliesAndSelf	
+50	6	allies	
+50	6	adjacentAllies	
+50	6	foes	1
+50	6	foesAll	0,1
+50	6	adjacentFoes	1
+51	0	alliesAndSelf	0
+51	0	allies	
+51	0	adjacentAllies	
+51	0	foes	
+51	0	foesAll	6,7
+51	0	adjacentFoes	
+51	6	alliesAndSelf	
+51	6	allies	
+51	6	adjacentAllies	
+51	6	foes	0
+51	6	foesAll	0
+51	6	adjacentFoes	0
+52	0	alliesAndSelf	
+52	0	allies	
+52	0	adjacentAllies	
+52	0	foes	6
+52	0	foesAll	6,7
+52	0	adjacentFoes	6
+52	6	alliesAndSelf	6
+52	6	allies	
+52	6	adjacentAllies	
+52	6	foes	
+52	6	foesAll	0,1
+52	6	adjacentFoes	
+53	0	alliesAndSelf	0
+53	0	allies	
+53	0	adjacentAllies	
+53	0	foes	6
+53	0	foesAll	6,7
+53	0	adjacentFoes	6
+53	6	alliesAndSelf	6
+53	6	allies	
+53	6	adjacentAllies	
+53	6	foes	0
+53	6	foesAll	0,1
+53	6	adjacentFoes	0
+54	0	alliesAndSelf	
+54	0	allies	
+54	0	adjacentAllies	
+54	0	foes	6
+54	0	foesAll	6,7
+54	0	adjacentFoes	6
+54	6	alliesAndSelf	6
+54	6	allies	
+54	6	adjacentAllies	
+54	6	foes	
+54	6	foesAll	0
+54	6	adjacentFoes	
+55	0	alliesAndSelf	0,1
+55	0	allies	1
+55	0	adjacentAllies	
+55	0	foes	6
+55	0	foesAll	6
+55	0	adjacentFoes	6
+55	6	alliesAndSelf	6
+55	6	allies	
+55	6	adjacentAllies	
+55	6	foes	0,1
+55	6	foesAll	0,1
+55	6	adjacentFoes	0,1
+56	0	alliesAndSelf	
+56	0	allies	
+56	0	adjacentAllies	
+56	0	foes	7
+56	0	foesAll	6,7
+56	0	adjacentFoes	7
+56	6	alliesAndSelf	7
+56	6	allies	7
+56	6	adjacentAllies	7
+56	6	foes	
+56	6	foesAll	0,1
+56	6	adjacentFoes	
+57	0	alliesAndSelf	0
+57	0	allies	
+57	0	adjacentAllies	
+57	0	foes	7
+57	0	foesAll	6,7
+57	0	adjacentFoes	7
+57	6	alliesAndSelf	7
+57	6	allies	7
+57	6	adjacentAllies	7
+57	6	foes	0
+57	6	foesAll	0
+57	6	adjacentFoes	0
+58	0	alliesAndSelf	1
+58	0	allies	1
+58	0	adjacentAllies	
+58	0	foes	7
+58	0	foesAll	6,7
+58	0	adjacentFoes	7
+58	6	alliesAndSelf	7
+58	6	allies	7
+58	6	adjacentAllies	7
+58	6	foes	1
+58	6	foesAll	0,1
+58	6	adjacentFoes	1
+59	0	alliesAndSelf	0,1
+59	0	allies	1
+59	0	adjacentAllies	
+59	0	foes	7
+59	0	foesAll	6,7
+59	0	adjacentFoes	7
+59	6	alliesAndSelf	7
+59	6	allies	7
+59	6	adjacentAllies	7
+59	6	foes	0,1
+59	6	foesAll	0,1
+59	6	adjacentFoes	0,1
+60	0	alliesAndSelf	
+60	0	allies	
+60	0	adjacentAllies	
+60	0	foes	6
+60	0	foesAll	6
+60	0	adjacentFoes	6
+60	6	alliesAndSelf	6
+60	6	allies	
+60	6	adjacentAllies	
+60	6	foes	
+60	6	foesAll	0
+60	6	adjacentFoes	
+61	0	alliesAndSelf	0
+61	0	allies	
+61	0	adjacentAllies	
+61	0	foes	6,7
+61	0	foesAll	6,7
+61	0	adjacentFoes	6,7
+61	6	alliesAndSelf	6,7
+61	6	allies	7
+61	6	adjacentAllies	7
+61	6	foes	0
+61	6	foesAll	0,1
+61	6	adjacentFoes	0
+62	0	alliesAndSelf	1
+62	0	allies	1
+62	0	adjacentAllies	
+62	0	foes	6,7
+62	0	foesAll	6,7
+62	0	adjacentFoes	6,7
+62	6	alliesAndSelf	6,7
+62	6	allies	7
+62	6	adjacentAllies	7
+62	6	foes	1
+62	6	foesAll	0,1
+62	6	adjacentFoes	1
+63	0	alliesAndSelf	0
+63	0	allies	
+63	0	adjacentAllies	
+63	0	foes	6,7
+63	0	foesAll	6,7
+63	0	adjacentFoes	6,7
+63	6	alliesAndSelf	6,7
+63	6	allies	7
+63	6	adjacentAllies	7
+63	6	foes	0
+63	6	foesAll	0
+63	6	adjacentFoes	0
+64	0	alliesAndSelf	
+64	0	allies	
+64	0	adjacentAllies	
+64	0	foes	
+64	0	foesAll	6,7
+64	0	adjacentFoes	
+64	6	alliesAndSelf	
+64	6	allies	
+64	6	adjacentAllies	
+64	6	foes	
+64	6	foesAll	0,1
+64	6	adjacentFoes	
+65	0	alliesAndSelf	0
+65	0	allies	
+65	0	adjacentAllies	
+65	0	foes	
+65	0	foesAll	6
+65	0	adjacentFoes	
+65	6	alliesAndSelf	
+65	6	allies	
+65	6	adjacentAllies	
+65	6	foes	0
+65	6	foesAll	0,1
+65	6	adjacentFoes	0
+66	0	alliesAndSelf	
+66	0	allies	
+66	0	adjacentAllies	
+66	0	foes	
+66	0	foesAll	6,7
+66	0	adjacentFoes	
+66	6	alliesAndSelf	
+66	6	allies	
+66	6	adjacentAllies	
+66	6	foes	
+66	6	foesAll	0
+66	6	adjacentFoes	
+67	0	alliesAndSelf	0,1
+67	0	allies	1
+67	0	adjacentAllies	1
+67	0	foes	
+67	0	foesAll	6,7
+67	0	adjacentFoes	
+67	6	alliesAndSelf	
+67	6	allies	
+67	6	adjacentAllies	
+67	6	foes	0,1
+67	6	foesAll	0,1
+67	6	adjacentFoes	0,1
+68	0	alliesAndSelf	
+68	0	allies	
+68	0	adjacentAllies	
+68	0	foes	6
+68	0	foesAll	6,7
+68	0	adjacentFoes	6
+68	6	alliesAndSelf	6
+68	6	allies	
+68	6	adjacentAllies	
+68	6	foes	
+68	6	foesAll	0,1
+68	6	adjacentFoes	
+69	0	alliesAndSelf	0
+69	0	allies	
+69	0	adjacentAllies	
+69	0	foes	6
+69	0	foesAll	6,7
+69	0	adjacentFoes	6
+69	6	alliesAndSelf	6
+69	6	allies	
+69	6	adjacentAllies	
+69	6	foes	0
+69	6	foesAll	0
+69	6	adjacentFoes	0
+70	0	alliesAndSelf	1
+70	0	allies	1
+70	0	adjacentAllies	1
+70	0	foes	6
+70	0	foesAll	6
+70	0	adjacentFoes	6
+70	6	alliesAndSelf	6
+70	6	allies	
+70	6	adjacentAllies	
+70	6	foes	1
+70	6	foesAll	0,1
+70	6	adjacentFoes	1
+71	0	alliesAndSelf	0,1
+71	0	allies	1
+71	0	adjacentAllies	1
+71	0	foes	6
+71	0	foesAll	6,7
+71	0	adjacentFoes	6
+71	6	alliesAndSelf	6
+71	6	allies	
+71	6	adjacentAllies	
+71	6	foes	0,1
+71	6	foesAll	0,1
+71	6	adjacentFoes	0,1
+72	0	alliesAndSelf	
+72	0	allies	
+72	0	adjacentAllies	
+72	0	foes	7
+72	0	foesAll	6,7
+72	0	adjacentFoes	7
+72	6	alliesAndSelf	7
+72	6	allies	7
+72	6	adjacentAllies	
+72	6	foes	
+72	6	foesAll	0
+72	6	adjacentFoes	
+73	0	alliesAndSelf	0
+73	0	allies	
+73	0	adjacentAllies	
+73	0	foes	7
+73	0	foesAll	6,7
+73	0	adjacentFoes	7
+73	6	alliesAndSelf	7
+73	6	allies	7
+73	6	adjacentAllies	
+73	6	foes	0
+73	6	foesAll	0,1
+73	6	adjacentFoes	0
+74	0	alliesAndSelf	1
+74	0	allies	1
+74	0	adjacentAllies	1
+74	0	foes	7
+74	0	foesAll	6,7
+74	0	adjacentFoes	7
+74	6	alliesAndSelf	7
+74	6	allies	7
+74	6	adjacentAllies	
+74	6	foes	1
+74	6	foesAll	0,1
+74	6	adjacentFoes	1
+75	0	alliesAndSelf	0
+75	0	allies	
+75	0	adjacentAllies	
+75	0	foes	
+75	0	foesAll	6
+75	0	adjacentFoes	
+75	6	alliesAndSelf	
+75	6	allies	
+75	6	adjacentAllies	
+75	6	foes	0
+75	6	foesAll	0
+75	6	adjacentFoes	0
+76	0	alliesAndSelf	
+76	0	allies	
+76	0	adjacentAllies	
+76	0	foes	6,7
+76	0	foesAll	6,7
+76	0	adjacentFoes	6,7
+76	6	alliesAndSelf	6,7
+76	6	allies	7
+76	6	adjacentAllies	
+76	6	foes	
+76	6	foesAll	0,1
+76	6	adjacentFoes	
+77	0	alliesAndSelf	0
+77	0	allies	
+77	0	adjacentAllies	
+77	0	foes	6,7
+77	0	foesAll	6,7
+77	0	adjacentFoes	6,7
+77	6	alliesAndSelf	6,7
+77	6	allies	7
+77	6	adjacentAllies	
+77	6	foes	0
+77	6	foesAll	0,1
+77	6	adjacentFoes	0
+78	0	alliesAndSelf	
+78	0	allies	
+78	0	adjacentAllies	
+78	0	foes	6,7
+78	0	foesAll	6,7
+78	0	adjacentFoes	6,7
+78	6	alliesAndSelf	6,7
+78	6	allies	7
+78	6	adjacentAllies	
+78	6	foes	
+78	6	foesAll	0
+78	6	adjacentFoes	
+79	0	alliesAndSelf	0,1
+79	0	allies	1
+79	0	adjacentAllies	1
+79	0	foes	6,7
+79	0	foesAll	6,7
+79	0	adjacentFoes	6,7
+79	6	alliesAndSelf	6,7
+79	6	allies	7
+79	6	adjacentAllies	
+79	6	foes	0,1
+79	6	foesAll	0,1
+79	6	adjacentFoes	0,1
+80	0	alliesAndSelf	
+80	0	allies	
+80	0	adjacentAllies	
+80	0	foes	
+80	0	foesAll	6
+80	0	adjacentFoes	
+80	6	alliesAndSelf	
+80	6	allies	
+80	6	adjacentAllies	
+80	6	foes	
+80	6	foesAll	0,1
+80	6	adjacentFoes	
+81	0	alliesAndSelf	0
+81	0	allies	
+81	0	adjacentAllies	
+81	0	foes	
+81	0	foesAll	6,7
+81	0	adjacentFoes	
+81	6	alliesAndSelf	
+81	6	allies	
+81	6	adjacentAllies	
+81	6	foes	0
+81	6	foesAll	0
+81	6	adjacentFoes	0
+82	0	alliesAndSelf	1
+82	0	allies	1
+82	0	adjacentAllies	
+82	0	foes	
+82	0	foesAll	6,7
+82	0	adjacentFoes	
+82	6	alliesAndSelf	
+82	6	allies	
+82	6	adjacentAllies	
+82	6	foes	1
+82	6	foesAll	0,1
+82	6	adjacentFoes	1
+83	0	alliesAndSelf	0,1
+83	0	allies	1
+83	0	adjacentAllies	
+83	0	foes	
+83	0	foesAll	6,7
+83	0	adjacentFoes	
+83	6	alliesAndSelf	
+83	6	allies	
+83	6	adjacentAllies	
+83	6	foes	0,1
+83	6	foesAll	0,1
+83	6	adjacentFoes	0,1
+84	0	alliesAndSelf	
+84	0	allies	
+84	0	adjacentAllies	
+84	0	foes	6
+84	0	foesAll	6,7
+84	0	adjacentFoes	6
+84	6	alliesAndSelf	6
+84	6	allies	
+84	6	adjacentAllies	
+84	6	foes	
+84	6	foesAll	0
+84	6	adjacentFoes	
+85	0	alliesAndSelf	0
+85	0	allies	
+85	0	adjacentAllies	
+85	0	foes	6
+85	0	foesAll	6
+85	0	adjacentFoes	6
+85	6	alliesAndSelf	6
+85	6	allies	
+85	6	adjacentAllies	
+85	6	foes	0
+85	6	foesAll	0,1
+85	6	adjacentFoes	0
+86	0	alliesAndSelf	1
+86	0	allies	1
+86	0	adjacentAllies	
+86	0	foes	6
+86	0	foesAll	6,7
+86	0	adjacentFoes	6
+86	6	alliesAndSelf	6
+86	6	allies	
+86	6	adjacentAllies	
+86	6	foes	1
+86	6	foesAll	0,1
+86	6	adjacentFoes	1
+87	0	alliesAndSelf	0
+87	0	allies	
+87	0	adjacentAllies	
+87	0	foes	6
+87	0	foesAll	6,7
+87	0	adjacentFoes	6
+87	6	alliesAndSelf	6
+87	6	allies	
+87	6	adjacentAllies	
+87	6	foes	0
+87	6	foesAll	0
+87	6	adjacentFoes	0
+88	0	alliesAndSelf	
+88	0	allies	
+88	0	adjacentAllies	
+88	0	foes	7
+88	0	foesAll	6,7
+88	0	adjacentFoes	7
+88	6	alliesAndSelf	7
+88	6	allies	7
+88	6	adjacentAllies	
+88	6	foes	
+88	6	foesAll	0,1
+88	6	adjacentFoes	
+89	0	alliesAndSelf	0
+89	0	allies	
+89	0	adjacentAllies	
+89	0	foes	7
+89	0	foesAll	6,7
+89	0	adjacentFoes	7
+89	6	alliesAndSelf	7
+89	6	allies	7
+89	6	adjacentAllies	
+89	6	foes	0
+89	6	foesAll	0,1
+89	6	adjacentFoes	0
+90	0	alliesAndSelf	
+90	0	allies	
+90	0	adjacentAllies	
+90	0	foes	
+90	0	foesAll	6
+90	0	adjacentFoes	
+90	6	alliesAndSelf	
+90	6	allies	
+90	6	adjacentAllies	
+90	6	foes	
+90	6	foesAll	0
+90	6	adjacentFoes	
+91	0	alliesAndSelf	0,1
+91	0	allies	1
+91	0	adjacentAllies	
+91	0	foes	7
+91	0	foesAll	6,7
+91	0	adjacentFoes	7
+91	6	alliesAndSelf	7
+91	6	allies	7
+91	6	adjacentAllies	
+91	6	foes	0,1
+91	6	foesAll	0,1
+91	6	adjacentFoes	0,1
+92	0	alliesAndSelf	
+92	0	allies	
+92	0	adjacentAllies	
+92	0	foes	6,7
+92	0	foesAll	6,7
+92	0	adjacentFoes	6,7
+92	6	alliesAndSelf	6,7
+92	6	allies	7
+92	6	adjacentAllies	
+92	6	foes	
+92	6	foesAll	0,1
+92	6	adjacentFoes	
+93	0	alliesAndSelf	0
+93	0	allies	
+93	0	adjacentAllies	
+93	0	foes	6,7
+93	0	foesAll	6,7
+93	0	adjacentFoes	6,7
+93	6	alliesAndSelf	6,7
+93	6	allies	7
+93	6	adjacentAllies	
+93	6	foes	0
+93	6	foesAll	0
+93	6	adjacentFoes	0
+94	0	alliesAndSelf	1
+94	0	allies	1
+94	0	adjacentAllies	
+94	0	foes	6,7
+94	0	foesAll	6,7
+94	0	adjacentFoes	6,7
+94	6	alliesAndSelf	6,7
+94	6	allies	7
+94	6	adjacentAllies	
+94	6	foes	1
+94	6	foesAll	0,1
+94	6	adjacentFoes	1
+95	0	alliesAndSelf	0,1
+95	0	allies	1
+95	0	adjacentAllies	
+95	0	foes	6
+95	0	foesAll	6
+95	0	adjacentFoes	6
+95	6	alliesAndSelf	6
+95	6	allies	
+95	6	adjacentAllies	
+95	6	foes	0,1
+95	6	foesAll	0,1
+95	6	adjacentFoes	0,1
+96	0	alliesAndSelf	
+96	0	allies	
+96	0	adjacentAllies	
+96	0	foes	
+96	0	foesAll	6,7
+96	0	adjacentFoes	
+96	6	alliesAndSelf	
+96	6	allies	
+96	6	adjacentAllies	
+96	6	foes	
+96	6	foesAll	0
+96	6	adjacentFoes	
+97	0	alliesAndSelf	0
+97	0	allies	
+97	0	adjacentAllies	
+97	0	foes	
+97	0	foesAll	6,7
+97	0	adjacentFoes	
+97	6	alliesAndSelf	
+97	6	allies	
+97	6	adjacentAllies	
+97	6	foes	0
+97	6	foesAll	0,1
+97	6	adjacentFoes	0
+98	0	alliesAndSelf	1
+98	0	allies	1
+98	0	adjacentAllies	
+98	0	foes	
+98	0	foesAll	6,7
+98	0	adjacentFoes	
+98	6	alliesAndSelf	
+98	6	allies	
+98	6	adjacentAllies	
+98	6	foes	1
+98	6	foesAll	0,1
+98	6	adjacentFoes	1
+99	0	alliesAndSelf	0
+99	0	allies	
+99	0	adjacentAllies	
+99	0	foes	
+99	0	foesAll	6,7
+99	0	adjacentFoes	
+99	6	alliesAndSelf	
+99	6	allies	
+99	6	adjacentAllies	
+99	6	foes	0
+99	6	foesAll	0
+99	6	adjacentFoes	0
+100	0	alliesAndSelf	
+100	0	allies	
+100	0	adjacentAllies	
+100	0	foes	6
+100	0	foesAll	6
+100	0	adjacentFoes	6
+100	6	alliesAndSelf	6
+100	6	allies	
+100	6	adjacentAllies	
+100	6	foes	
+100	6	foesAll	0,1
+100	6	adjacentFoes	
+101	0	alliesAndSelf	0
+101	0	allies	
+101	0	adjacentAllies	
+101	0	foes	6
+101	0	foesAll	6,7
+101	0	adjacentFoes	6
+101	6	alliesAndSelf	6
+101	6	allies	
+101	6	adjacentAllies	
+101	6	foes	0
+101	6	foesAll	0,1
+101	6	adjacentFoes	0
+102	0	alliesAndSelf	
+102	0	allies	
+102	0	adjacentAllies	
+102	0	foes	6
+102	0	foesAll	6,7
+102	0	adjacentFoes	6
+102	6	alliesAndSelf	6
+102	6	allies	
+102	6	adjacentAllies	
+102	6	foes	
+102	6	foesAll	0
+102	6	adjacentFoes	
+103	0	alliesAndSelf	0,1
+103	0	allies	1
+103	0	adjacentAllies	
+103	0	foes	6
+103	0	foesAll	6,7
+103	0	adjacentFoes	6
+103	6	alliesAndSelf	6
+103	6	allies	
+103	6	adjacentAllies	
+103	6	foes	0,1
+103	6	foesAll	0,1
+103	6	adjacentFoes	0,1
+104	0	alliesAndSelf	
+104	0	allies	
+104	0	adjacentAllies	
+104	0	foes	7
+104	0	foesAll	6,7
+104	0	adjacentFoes	7
+104	6	alliesAndSelf	7
+104	6	allies	7
+104	6	adjacentAllies	
+104	6	foes	
+104	6	foesAll	0,1
+104	6	adjacentFoes	
+105	0	alliesAndSelf	0
+105	0	allies	
+105	0	adjacentAllies	
+105	0	foes	
+105	0	foesAll	6
+105	0	adjacentFoes	
+105	6	alliesAndSelf	
+105	6	allies	
+105	6	adjacentAllies	
+105	6	foes	0
+105	6	foesAll	0
+105	6	adjacentFoes	0
+106	0	alliesAndSelf	1
+106	0	allies	1
+106	0	adjacentAllies	
+106	0	foes	7
+106	0	foesAll	6,7
+106	0	adjacentFoes	7
+106	6	alliesAndSelf	7
+106	6	allies	7
+106	6	adjacentAllies	
+106	6	foes	1
+106	6	foesAll	0,1
+106	6	adjacentFoes	1
+107	0	alliesAndSelf	0,1
+107	0	allies	1
+107	0	adjacentAllies	
+107	0	foes	7
+107	0	foesAll	6,7
+107	0	adjacentFoes	7
+107	6	alliesAndSelf	7
+107	6	allies	7
+107	6	adjacentAllies	
+107	6	foes	0,1
+107	6	foesAll	0,1
+107	6	adjacentFoes	0,1
+108	0	alliesAndSelf	
+108	0	allies	
+108	0	adjacentAllies	
+108	0	foes	6,7
+108	0	foesAll	6,7
+108	0	adjacentFoes	6,7
+108	6	alliesAndSelf	6,7
+108	6	allies	7
+108	6	adjacentAllies	
+108	6	foes	
+108	6	foesAll	0
+108	6	adjacentFoes	
+109	0	alliesAndSelf	0
+109	0	allies	
+109	0	adjacentAllies	
+109	0	foes	6,7
+109	0	foesAll	6,7
+109	0	adjacentFoes	6,7
+109	6	alliesAndSelf	6,7
+109	6	allies	7
+109	6	adjacentAllies	
+109	6	foes	0
+109	6	foesAll	0,1
+109	6	adjacentFoes	0
+110	0	alliesAndSelf	1
+110	0	allies	1
+110	0	adjacentAllies	
+110	0	foes	6
+110	0	foesAll	6
+110	0	adjacentFoes	6
+110	6	alliesAndSelf	6
+110	6	allies	
+110	6	adjacentAllies	
+110	6	foes	1
+110	6	foesAll	0,1
+110	6	adjacentFoes	1
+111	0	alliesAndSelf	0
+111	0	allies	
+111	0	adjacentAllies	
+111	0	foes	6,7
+111	0	foesAll	6,7
+111	0	adjacentFoes	6,7
+111	6	alliesAndSelf	6,7
+111	6	allies	7
+111	6	adjacentAllies	
+111	6	foes	0
+111	6	foesAll	0
+111	6	adjacentFoes	0
+112	0	alliesAndSelf	
+112	0	allies	
+112	0	adjacentAllies	
+112	0	foes	
+112	0	foesAll	6,7
+112	0	adjacentFoes	
+112	6	alliesAndSelf	
+112	6	allies	
+112	6	adjacentAllies	
+112	6	foes	
+112	6	foesAll	0,1
+112	6	adjacentFoes	
+113	0	alliesAndSelf	0
+113	0	allies	
+113	0	adjacentAllies	
+113	0	foes	
+113	0	foesAll	6,7
+113	0	adjacentFoes	
+113	6	alliesAndSelf	
+113	6	allies	
+113	6	adjacentAllies	
+113	6	foes	0
+113	6	foesAll	0,1
+113	6	adjacentFoes	0
+114	0	alliesAndSelf	
+114	0	allies	
+114	0	adjacentAllies	
+114	0	foes	
+114	0	foesAll	6,7
+114	0	adjacentFoes	
+114	6	alliesAndSelf	
+114	6	allies	
+114	6	adjacentAllies	
+114	6	foes	
+114	6	foesAll	0
+114	6	adjacentFoes	
+115	0	alliesAndSelf	0,1
+115	0	allies	1
+115	0	adjacentAllies	
+115	0	foes	
+115	0	foesAll	6
+115	0	adjacentFoes	
+115	6	alliesAndSelf	
+115	6	allies	
+115	6	adjacentAllies	
+115	6	foes	0,1
+115	6	foesAll	0,1
+115	6	adjacentFoes	0,1
+116	0	alliesAndSelf	
+116	0	allies	
+116	0	adjacentAllies	
+116	0	foes	6
+116	0	foesAll	6,7
+116	0	adjacentFoes	6
+116	6	alliesAndSelf	6
+116	6	allies	
+116	6	adjacentAllies	
+116	6	foes	
+116	6	foesAll	0,1
+116	6	adjacentFoes	
+117	0	alliesAndSelf	0
+117	0	allies	
+117	0	adjacentAllies	
+117	0	foes	6
+117	0	foesAll	6,7
+117	0	adjacentFoes	6
+117	6	alliesAndSelf	6
+117	6	allies	
+117	6	adjacentAllies	
+117	6	foes	0
+117	6	foesAll	0
+117	6	adjacentFoes	0
+118	0	alliesAndSelf	1
+118	0	allies	1
+118	0	adjacentAllies	
+118	0	foes	6
+118	0	foesAll	6,7
+118	0	adjacentFoes	6
+118	6	alliesAndSelf	6
+118	6	allies	
+118	6	adjacentAllies	
+118	6	foes	1
+118	6	foesAll	0,1
+118	6	adjacentFoes	1
+119	0	alliesAndSelf	0,1
+119	0	allies	1
+119	0	adjacentAllies	
+119	0	foes	6
+119	0	foesAll	6,7
+119	0	adjacentFoes	6
+119	6	alliesAndSelf	6
+119	6	allies	
+119	6	adjacentAllies	
+119	6	foes	0,1
+119	6	foesAll	0,1
+119	6	adjacentFoes	0,1
+120	0	alliesAndSelf	
+120	0	allies	
+120	0	adjacentAllies	
+120	0	foes	
+120	0	foesAll	6
+120	0	adjacentFoes	
+120	6	alliesAndSelf	
+120	6	allies	
+120	6	adjacentAllies	
+120	6	foes	
+120	6	foesAll	0
+120	6	adjacentFoes	
+121	0	alliesAndSelf	0
+121	0	allies	
+121	0	adjacentAllies	
+121	0	foes	7
+121	0	foesAll	6,7
+121	0	adjacentFoes	7
+121	6	alliesAndSelf	7
+121	6	allies	7
+121	6	adjacentAllies	
+121	6	foes	0
+121	6	foesAll	0,1
+121	6	adjacentFoes	0
+122	0	alliesAndSelf	1
+122	0	allies	1
+122	0	adjacentAllies	
+122	0	foes	7
+122	0	foesAll	6,7
+122	0	adjacentFoes	7
+122	6	alliesAndSelf	7
+122	6	allies	7
+122	6	adjacentAllies	
+122	6	foes	1
+122	6	foesAll	0,1
+122	6	adjacentFoes	1
+123	0	alliesAndSelf	0
+123	0	allies	
+123	0	adjacentAllies	
+123	0	foes	7
+123	0	foesAll	6,7
+123	0	adjacentFoes	7
+123	6	alliesAndSelf	7
+123	6	allies	7
+123	6	adjacentAllies	
+123	6	foes	0
+123	6	foesAll	0
+123	6	adjacentFoes	0
+124	0	alliesAndSelf	
+124	0	allies	
+124	0	adjacentAllies	
+124	0	foes	6,7
+124	0	foesAll	6,7
+124	0	adjacentFoes	6,7
+124	6	alliesAndSelf	6,7
+124	6	allies	7
+124	6	adjacentAllies	
+124	6	foes	
+124	6	foesAll	0,1
+124	6	adjacentFoes	
+125	0	alliesAndSelf	0
+125	0	allies	
+125	0	adjacentAllies	
+125	0	foes	6
+125	0	foesAll	6
+125	0	adjacentFoes	6
+125	6	alliesAndSelf	6
+125	6	allies	
+125	6	adjacentAllies	
+125	6	foes	0
+125	6	foesAll	0,1
+125	6	adjacentFoes	0
+126	0	alliesAndSelf	
+126	0	allies	
+126	0	adjacentAllies	
+126	0	foes	6,7
+126	0	foesAll	6,7
+126	0	adjacentFoes	6,7
+126	6	alliesAndSelf	6,7
+126	6	allies	7
+126	6	adjacentAllies	
+126	6	foes	
+126	6	foesAll	0
+126	6	adjacentFoes	
+127	0	alliesAndSelf	0,1
+127	0	allies	1
+127	0	adjacentAllies	
+127	0	foes	6,7
+127	0	foesAll	6,7
+127	0	adjacentFoes	6,7
+127	6	alliesAndSelf	6,7
+127	6	allies	7
+127	6	adjacentAllies	
+127	6	foes	0,1
+127	6	foesAll	0,1
+127	6	adjacentFoes	0,1
+128	0	alliesAndSelf	
+128	0	allies	
+128	0	adjacentAllies	
+128	0	foes	
+128	0	foesAll	6,7
+128	0	adjacentFoes	
+128	6	alliesAndSelf	
+128	6	allies	
+128	6	adjacentAllies	
+128	6	foes	
+128	6	foesAll	0,1
+128	6	adjacentFoes	
+129	0	alliesAndSelf	0
+129	0	allies	
+129	0	adjacentAllies	
+129	0	foes	
+129	0	foesAll	6,7
+129	0	adjacentFoes	
+129	6	alliesAndSelf	
+129	6	allies	
+129	6	adjacentAllies	
+129	6	foes	0
+129	6	foesAll	0
+129	6	adjacentFoes	0
+130	0	alliesAndSelf	1
+130	0	allies	1
+130	0	adjacentAllies	1
+130	0	foes	
+130	0	foesAll	6
+130	0	adjacentFoes	
+130	6	alliesAndSelf	
+130	6	allies	
+130	6	adjacentAllies	
+130	6	foes	1
+130	6	foesAll	0,1
+130	6	adjacentFoes	1
+131	0	alliesAndSelf	0,1
+131	0	allies	1
+131	0	adjacentAllies	1
+131	0	foes	
+131	0	foesAll	6,7
+131	0	adjacentFoes	
+131	6	alliesAndSelf	
+131	6	allies	
+131	6	adjacentAllies	
+131	6	foes	0,1
+131	6	foesAll	0,1
+131	6	adjacentFoes	0,1
+132	0	alliesAndSelf	
+132	0	allies	
+132	0	adjacentAllies	
+132	0	foes	6
+132	0	foesAll	6,7
+132	0	adjacentFoes	6
+132	6	alliesAndSelf	6
+132	6	allies	
+132	6	adjacentAllies	
+132	6	foes	
+132	6	foesAll	0
+132	6	adjacentFoes	
+133	0	alliesAndSelf	0
+133	0	allies	
+133	0	adjacentAllies	
+133	0	foes	6
+133	0	foesAll	6,7
+133	0	adjacentFoes	6
+133	6	alliesAndSelf	6
+133	6	allies	
+133	6	adjacentAllies	
+133	6	foes	0
+133	6	foesAll	0,1
+133	6	adjacentFoes	0
+134	0	alliesAndSelf	1
+134	0	allies	1
+134	0	adjacentAllies	1
+134	0	foes	6
+134	0	foesAll	6,7
+134	0	adjacentFoes	6
+134	6	alliesAndSelf	6
+134	6	allies	
+134	6	adjacentAllies	
+134	6	foes	1
+134	6	foesAll	0,1
+134	6	adjacentFoes	1
+135	0	alliesAndSelf	0
+135	0	allies	
+135	0	adjacentAllies	
+135	0	foes	6
+135	0	foesAll	6
+135	0	adjacentFoes	6
+135	6	alliesAndSelf	6
+135	6	allies	
+135	6	adjacentAllies	
+135	6	foes	0
+135	6	foesAll	0
+135	6	adjacentFoes	0
+136	0	alliesAndSelf	
+136	0	allies	
+136	0	adjacentAllies	
+136	0	foes	7
+136	0	foesAll	6,7
+136	0	adjacentFoes	7
+136	6	alliesAndSelf	7
+136	6	allies	7
+136	6	adjacentAllies	
+136	6	foes	
+136	6	foesAll	0,1
+136	6	adjacentFoes	
+137	0	alliesAndSelf	0
+137	0	allies	
+137	0	adjacentAllies	
+137	0	foes	7
+137	0	foesAll	6,7
+137	0	adjacentFoes	7
+137	6	alliesAndSelf	7
+137	6	allies	7
+137	6	adjacentAllies	
+137	6	foes	0
+137	6	foesAll	0,1
+137	6	adjacentFoes	0
+138	0	alliesAndSelf	
+138	0	allies	
+138	0	adjacentAllies	
+138	0	foes	7
+138	0	foesAll	6,7
+138	0	adjacentFoes	7
+138	6	alliesAndSelf	7
+138	6	allies	7
+138	6	adjacentAllies	
+138	6	foes	
+138	6	foesAll	0
+138	6	adjacentFoes	
+139	0	alliesAndSelf	0,1
+139	0	allies	1
+139	0	adjacentAllies	1
+139	0	foes	7
+139	0	foesAll	6,7
+139	0	adjacentFoes	7
+139	6	alliesAndSelf	7
+139	6	allies	7
+139	6	adjacentAllies	
+139	6	foes	0,1
+139	6	foesAll	0,1
+139	6	adjacentFoes	0,1
+140	0	alliesAndSelf	
+140	0	allies	
+140	0	adjacentAllies	
+140	0	foes	6
+140	0	foesAll	6
+140	0	adjacentFoes	6
+140	6	alliesAndSelf	6
+140	6	allies	
+140	6	adjacentAllies	
+140	6	foes	
+140	6	foesAll	0,1
+140	6	adjacentFoes	
+141	0	alliesAndSelf	0
+141	0	allies	
+141	0	adjacentAllies	
+141	0	foes	6,7
+141	0	foesAll	6,7
+141	0	adjacentFoes	6,7
+141	6	alliesAndSelf	6,7
+141	6	allies	7
+141	6	adjacentAllies	
+141	6	foes	0
+141	6	foesAll	0
+141	6	adjacentFoes	0
+142	0	alliesAndSelf	1
+142	0	allies	1
+142	0	adjacentAllies	1
+142	0	foes	6,7
+142	0	foesAll	6,7
+142	0	adjacentFoes	6,7
+142	6	alliesAndSelf	6,7
+142	6	allies	7
+142	6	adjacentAllies	
+142	6	foes	1
+142	6	foesAll	0,1
+142	6	adjacentFoes	1
+143	0	alliesAndSelf	0,1
+143	0	allies	1
+143	0	adjacentAllies	1
+143	0	foes	6,7
+143	0	foesAll	6,7
+143	0	adjacentFoes	6,7
+143	6	alliesAndSelf	6,7
+143	6	allies	7
+143	6	adjacentAllies	
+143	6	foes	0,1
+143	6	foesAll	0,1
+143	6	adjacentFoes	0,1
+144	0	alliesAndSelf	
+144	0	allies	
+144	0	adjacentAllies	
+144	0	foes	
+144	0	foesAll	6,7
+144	0	adjacentFoes	
+144	6	alliesAndSelf	
+144	6	allies	
+144	6	adjacentAllies	
+144	6	foes	
+144	6	foesAll	0
+144	6	adjacentFoes	
+145	0	alliesAndSelf	0
+145	0	allies	
+145	0	adjacentAllies	
+145	0	foes	
+145	0	foesAll	6
+145	0	adjacentFoes	
+145	6	alliesAndSelf	
+145	6	allies	
+145	6	adjacentAllies	
+145	6	foes	0
+145	6	foesAll	0,1
+145	6	adjacentFoes	0
+146	0	alliesAndSelf	1
+146	0	allies	1
+146	0	adjacentAllies	
+146	0	foes	
+146	0	foesAll	6,7
+146	0	adjacentFoes	
+146	6	alliesAndSelf	
+146	6	allies	
+146	6	adjacentAllies	
+146	6	foes	1
+146	6	foesAll	0,1
+146	6	adjacentFoes	1
+147	0	alliesAndSelf	0
+147	0	allies	
+147	0	adjacentAllies	
+147	0	foes	
+147	0	foesAll	6,7
+147	0	adjacentFoes	
+147	6	alliesAndSelf	
+147	6	allies	
+147	6	adjacentAllies	
+147	6	foes	0
+147	6	foesAll	0
+147	6	adjacentFoes	0
+148	0	alliesAndSelf	
+148	0	allies	
+148	0	adjacentAllies	
+148	0	foes	6
+148	0	foesAll	6,7
+148	0	adjacentFoes	6
+148	6	alliesAndSelf	6
+148	6	allies	
+148	6	adjacentAllies	
+148	6	foes	
+148	6	foesAll	0,1
+148	6	adjacentFoes	
+149	0	alliesAndSelf	0
+149	0	allies	
+149	0	adjacentAllies	
+149	0	foes	6
+149	0	foesAll	6,7
+149	0	adjacentFoes	6
+149	6	alliesAndSelf	6
+149	6	allies	
+149	6	adjacentAllies	
+149	6	foes	0
+149	6	foesAll	0,1
+149	6	adjacentFoes	0
+150	0	alliesAndSelf	
+150	0	allies	
+150	0	adjacentAllies	
+150	0	foes	6
+150	0	foesAll	6
+150	0	adjacentFoes	6
+150	6	alliesAndSelf	6
+150	6	allies	
+150	6	adjacentAllies	
+150	6	foes	
+150	6	foesAll	0
+150	6	adjacentFoes	
+151	0	alliesAndSelf	0,1
+151	0	allies	1
+151	0	adjacentAllies	
+151	0	foes	6
+151	0	foesAll	6,7
+151	0	adjacentFoes	6
+151	6	alliesAndSelf	6
+151	6	allies	
+151	6	adjacentAllies	
+151	6	foes	0,1
+151	6	foesAll	0,1
+151	6	adjacentFoes	0,1
+152	0	alliesAndSelf	
+152	0	allies	
+152	0	adjacentAllies	
+152	0	foes	7
+152	0	foesAll	6,7
+152	0	adjacentFoes	7
+152	6	alliesAndSelf	7
+152	6	allies	7
+152	6	adjacentAllies	
+152	6	foes	
+152	6	foesAll	0,1
+152	6	adjacentFoes	
+153	0	alliesAndSelf	0
+153	0	allies	
+153	0	adjacentAllies	
+153	0	foes	7
+153	0	foesAll	6,7
+153	0	adjacentFoes	7
+153	6	alliesAndSelf	7
+153	6	allies	7
+153	6	adjacentAllies	
+153	6	foes	0
+153	6	foesAll	0
+153	6	adjacentFoes	0
+154	0	alliesAndSelf	1
+154	0	allies	1
+154	0	adjacentAllies	
+154	0	foes	7
+154	0	foesAll	6,7
+154	0	adjacentFoes	7
+154	6	alliesAndSelf	7
+154	6	allies	7
+154	6	adjacentAllies	
+154	6	foes	1
+154	6	foesAll	0,1
+154	6	adjacentFoes	1
+155	0	alliesAndSelf	0,1
+155	0	allies	1
+155	0	adjacentAllies	
+155	0	foes	
+155	0	foesAll	6
+155	0	adjacentFoes	
+155	6	alliesAndSelf	
+155	6	allies	
+155	6	adjacentAllies	
+155	6	foes	0,1
+155	6	foesAll	0,1
+155	6	adjacentFoes	0,1
+156	0	alliesAndSelf	
+156	0	allies	
+156	0	adjacentAllies	
+156	0	foes	6,7
+156	0	foesAll	6,7
+156	0	adjacentFoes	6,7
+156	6	alliesAndSelf	6,7
+156	6	allies	7
+156	6	adjacentAllies	
+156	6	foes	
+156	6	foesAll	0
+156	6	adjacentFoes	
+157	0	alliesAndSelf	0
+157	0	allies	
+157	0	adjacentAllies	
+157	0	foes	6,7
+157	0	foesAll	6,7
+157	0	adjacentFoes	6,7
+157	6	alliesAndSelf	6,7
+157	6	allies	7
+157	6	adjacentAllies	
+157	6	foes	0
+157	6	foesAll	0,1
+157	6	adjacentFoes	0
+158	0	alliesAndSelf	1
+158	0	allies	1
+158	0	adjacentAllies	
+158	0	foes	6,7
+158	0	foesAll	6,7
+158	0	adjacentFoes	6,7
+158	6	alliesAndSelf	6,7
+158	6	allies	7
+158	6	adjacentAllies	
+158	6	foes	1
+158	6	foesAll	0,1
+158	6	adjacentFoes	1
+159	0	alliesAndSelf	0
+159	0	allies	
+159	0	adjacentAllies	
+159	0	foes	6,7
+159	0	foesAll	6,7
+159	0	adjacentFoes	6,7
+159	6	alliesAndSelf	6,7
+159	6	allies	7
+159	6	adjacentAllies	
+159	6	foes	0
+159	6	foesAll	0
+159	6	adjacentFoes	0
+160	0	alliesAndSelf	
+160	0	allies	
+160	0	adjacentAllies	
+160	0	foes	
+160	0	foesAll	6
+160	0	adjacentFoes	
+160	6	alliesAndSelf	
+160	6	allies	
+160	6	adjacentAllies	
+160	6	foes	
+160	6	foesAll	0,1
+160	6	adjacentFoes	
+161	0	alliesAndSelf	0
+161	0	allies	
+161	0	adjacentAllies	
+161	0	foes	
+161	0	foesAll	6,7
+161	0	adjacentFoes	
+161	6	alliesAndSelf	
+161	6	allies	
+161	6	adjacentAllies	
+161	6	foes	0
+161	6	foesAll	0,1
+161	6	adjacentFoes	0
+162	0	alliesAndSelf	
+162	0	allies	
+162	0	adjacentAllies	
+162	0	foes	
+162	0	foesAll	6,7
+162	0	adjacentFoes	
+162	6	alliesAndSelf	
+162	6	allies	
+162	6	adjacentAllies	
+162	6	foes	
+162	6	foesAll	0
+162	6	adjacentFoes	
+163	0	alliesAndSelf	0,1
+163	0	allies	1
+163	0	adjacentAllies	
+163	0	foes	
+163	0	foesAll	6,7
+163	0	adjacentFoes	
+163	6	alliesAndSelf	
+163	6	allies	
+163	6	adjacentAllies	
+163	6	foes	0,1
+163	6	foesAll	0,1
+163	6	adjacentFoes	0,1
+164	0	alliesAndSelf	
+164	0	allies	
+164	0	adjacentAllies	
+164	0	foes	6
+164	0	foesAll	6,7
+164	0	adjacentFoes	6
+164	6	alliesAndSelf	6
+164	6	allies	
+164	6	adjacentAllies	
+164	6	foes	
+164	6	foesAll	0,1
+164	6	adjacentFoes	
+165	0	alliesAndSelf	0
+165	0	allies	
+165	0	adjacentAllies	
+165	0	foes	6
+165	0	foesAll	6
+165	0	adjacentFoes	6
+165	6	alliesAndSelf	6
+165	6	allies	
+165	6	adjacentAllies	
+165	6	foes	0
+165	6	foesAll	0
+165	6	adjacentFoes	0
+166	0	alliesAndSelf	1
+166	0	allies	1
+166	0	adjacentAllies	
+166	0	foes	6
+166	0	foesAll	6,7
+166	0	adjacentFoes	6
+166	6	alliesAndSelf	6
+166	6	allies	
+166	6	adjacentAllies	
+166	6	foes	1
+166	6	foesAll	0,1
+166	6	adjacentFoes	1
+167	0	alliesAndSelf	0,1
+167	0	allies	1
+167	0	adjacentAllies	
+167	0	foes	6
+167	0	foesAll	6,7
+167	0	adjacentFoes	6
+167	6	alliesAndSelf	6
+167	6	allies	
+167	6	adjacentAllies	
+167	6	foes	0,1
+167	6	foesAll	0,1
+167	6	adjacentFoes	0,1
+168	0	alliesAndSelf	
+168	0	allies	
+168	0	adjacentAllies	
+168	0	foes	7
+168	0	foesAll	6,7
+168	0	adjacentFoes	7
+168	6	alliesAndSelf	7
+168	6	allies	7
+168	6	adjacentAllies	
+168	6	foes	
+168	6	foesAll	0
+168	6	adjacentFoes	
+169	0	alliesAndSelf	0
+169	0	allies	
+169	0	adjacentAllies	
+169	0	foes	7
+169	0	foesAll	6,7
+169	0	adjacentFoes	7
+169	6	alliesAndSelf	7
+169	6	allies	7
+169	6	adjacentAllies	
+169	6	foes	0
+169	6	foesAll	0,1
+169	6	adjacentFoes	0
+170	0	alliesAndSelf	1
+170	0	allies	1
+170	0	adjacentAllies	
+170	0	foes	
+170	0	foesAll	6
+170	0	adjacentFoes	
+170	6	alliesAndSelf	
+170	6	allies	
+170	6	adjacentAllies	
+170	6	foes	1
+170	6	foesAll	0,1
+170	6	adjacentFoes	1
+171	0	alliesAndSelf	0
+171	0	allies	
+171	0	adjacentAllies	
+171	0	foes	7
+171	0	foesAll	6,7
+171	0	adjacentFoes	7
+171	6	alliesAndSelf	7
+171	6	allies	7
+171	6	adjacentAllies	
+171	6	foes	0
+171	6	foesAll	0
+171	6	adjacentFoes	0
+172	0	alliesAndSelf	
+172	0	allies	
+172	0	adjacentAllies	
+172	0	foes	6,7
+172	0	foesAll	6,7
+172	0	adjacentFoes	6,7
+172	6	alliesAndSelf	6,7
+172	6	allies	7
+172	6	adjacentAllies	
+172	6	foes	
+172	6	foesAll	0,1
+172	6	adjacentFoes	
+173	0	alliesAndSelf	0
+173	0	allies	
+173	0	adjacentAllies	
+173	0	foes	6,7
+173	0	foesAll	6,7
+173	0	adjacentFoes	6,7
+173	6	alliesAndSelf	6,7
+173	6	allies	7
+173	6	adjacentAllies	
+173	6	foes	0
+173	6	foesAll	0,1
+173	6	adjacentFoes	0
+174	0	alliesAndSelf	
+174	0	allies	
+174	0	adjacentAllies	
+174	0	foes	6,7
+174	0	foesAll	6,7
+174	0	adjacentFoes	6,7
+174	6	alliesAndSelf	6,7
+174	6	allies	7
+174	6	adjacentAllies	
+174	6	foes	
+174	6	foesAll	0
+174	6	adjacentFoes	
+175	0	alliesAndSelf	0,1
+175	0	allies	1
+175	0	adjacentAllies	
+175	0	foes	6
+175	0	foesAll	6
+175	0	adjacentFoes	6
+175	6	alliesAndSelf	6
+175	6	allies	
+175	6	adjacentAllies	
+175	6	foes	0,1
+175	6	foesAll	0,1
+175	6	adjacentFoes	0,1
+176	0	alliesAndSelf	
+176	0	allies	
+176	0	adjacentAllies	
+176	0	foes	
+176	0	foesAll	6,7
+176	0	adjacentFoes	
+176	6	alliesAndSelf	
+176	6	allies	
+176	6	adjacentAllies	
+176	6	foes	
+176	6	foesAll	0,1
+176	6	adjacentFoes	
+177	0	alliesAndSelf	0
+177	0	allies	
+177	0	adjacentAllies	
+177	0	foes	
+177	0	foesAll	6,7
+177	0	adjacentFoes	
+177	6	alliesAndSelf	
+177	6	allies	
+177	6	adjacentAllies	
+177	6	foes	0
+177	6	foesAll	0
+177	6	adjacentFoes	0
+178	0	alliesAndSelf	1
+178	0	allies	1
+178	0	adjacentAllies	
+178	0	foes	
+178	0	foesAll	6,7
+178	0	adjacentFoes	
+178	6	alliesAndSelf	
+178	6	allies	
+178	6	adjacentAllies	
+178	6	foes	1
+178	6	foesAll	0,1
+178	6	adjacentFoes	1
+179	0	alliesAndSelf	0,1
+179	0	allies	1
+179	0	adjacentAllies	
+179	0	foes	
+179	0	foesAll	6,7
+179	0	adjacentFoes	
+179	6	alliesAndSelf	
+179	6	allies	
+179	6	adjacentAllies	
+179	6	foes	0,1
+179	6	foesAll	0,1
+179	6	adjacentFoes	0,1
+180	0	alliesAndSelf	
+180	0	allies	
+180	0	adjacentAllies	
+180	0	foes	6
+180	0	foesAll	6
+180	0	adjacentFoes	6
+180	6	alliesAndSelf	6
+180	6	allies	
+180	6	adjacentAllies	
+180	6	foes	
+180	6	foesAll	0
+180	6	adjacentFoes	
+181	0	alliesAndSelf	0
+181	0	allies	
+181	0	adjacentAllies	
+181	0	foes	6
+181	0	foesAll	6,7
+181	0	adjacentFoes	6
+181	6	alliesAndSelf	6
+181	6	allies	
+181	6	adjacentAllies	
+181	6	foes	0
+181	6	foesAll	0,1
+181	6	adjacentFoes	0
+182	0	alliesAndSelf	1
+182	0	allies	1
+182	0	adjacentAllies	
+182	0	foes	6
+182	0	foesAll	6,7
+182	0	adjacentFoes	6
+182	6	alliesAndSelf	6
+182	6	allies	
+182	6	adjacentAllies	
+182	6	foes	1
+182	6	foesAll	0,1
+182	6	adjacentFoes	1
+183	0	alliesAndSelf	0
+183	0	allies	
+183	0	adjacentAllies	
+183	0	foes	6
+183	0	foesAll	6,7
+183	0	adjacentFoes	6
+183	6	alliesAndSelf	6
+183	6	allies	
+183	6	adjacentAllies	
+183	6	foes	0
+183	6	foesAll	0
+183	6	adjacentFoes	0
+184	0	alliesAndSelf	
+184	0	allies	
+184	0	adjacentAllies	
+184	0	foes	7
+184	0	foesAll	6,7
+184	0	adjacentFoes	7
+184	6	alliesAndSelf	7
+184	6	allies	7
+184	6	adjacentAllies	
+184	6	foes	
+184	6	foesAll	0,1
+184	6	adjacentFoes	
+185	0	alliesAndSelf	0
+185	0	allies	
+185	0	adjacentAllies	
+185	0	foes	
+185	0	foesAll	6
+185	0	adjacentFoes	
+185	6	alliesAndSelf	
+185	6	allies	
+185	6	adjacentAllies	
+185	6	foes	0
+185	6	foesAll	0,1
+185	6	adjacentFoes	0
+186	0	alliesAndSelf	
+186	0	allies	
+186	0	adjacentAllies	
+186	0	foes	7
+186	0	foesAll	6,7
+186	0	adjacentFoes	7
+186	6	alliesAndSelf	7
+186	6	allies	7
+186	6	adjacentAllies	
+186	6	foes	
+186	6	foesAll	0
+186	6	adjacentFoes	
+187	0	alliesAndSelf	0,1
+187	0	allies	1
+187	0	adjacentAllies	
+187	0	foes	7
+187	0	foesAll	6,7
+187	0	adjacentFoes	7
+187	6	alliesAndSelf	7
+187	6	allies	7
+187	6	adjacentAllies	
+187	6	foes	0,1
+187	6	foesAll	0,1
+187	6	adjacentFoes	0,1
+188	0	alliesAndSelf	
+188	0	allies	
+188	0	adjacentAllies	
+188	0	foes	6,7
+188	0	foesAll	6,7
+188	0	adjacentFoes	6,7
+188	6	alliesAndSelf	6,7
+188	6	allies	7
+188	6	adjacentAllies	
+188	6	foes	
+188	6	foesAll	0,1
+188	6	adjacentFoes	
+189	0	alliesAndSelf	0
+189	0	allies	
+189	0	adjacentAllies	
+189	0	foes	6,7
+189	0	foesAll	6,7
+189	0	adjacentFoes	6,7
+189	6	alliesAndSelf	6,7
+189	6	allies	7
+189	6	adjacentAllies	
+189	6	foes	0
+189	6	foesAll	0
+189	6	adjacentFoes	0
+190	0	alliesAndSelf	1
+190	0	allies	1
+190	0	adjacentAllies	
+190	0	foes	6
+190	0	foesAll	6
+190	0	adjacentFoes	6
+190	6	alliesAndSelf	6
+190	6	allies	
+190	6	adjacentAllies	
+190	6	foes	1
+190	6	foesAll	0,1
+190	6	adjacentFoes	1
+191	0	alliesAndSelf	0,1
+191	0	allies	1
+191	0	adjacentAllies	
+191	0	foes	6,7
+191	0	foesAll	6,7
+191	0	adjacentFoes	6,7
+191	6	alliesAndSelf	6,7
+191	6	allies	7
+191	6	adjacentAllies	
+191	6	foes	0,1
+191	6	foesAll	0,1
+191	6	adjacentFoes	0,1
+192	0	alliesAndSelf	
+192	0	allies	
+192	0	adjacentAllies	
+192	0	foes	
+192	0	foesAll	6,7
+192	0	adjacentFoes	
+192	6	alliesAndSelf	
+192	6	allies	
+192	6	adjacentAllies	
+192	6	foes	
+192	6	foesAll	0
+192	6	adjacentFoes	
+193	0	alliesAndSelf	0
+193	0	allies	
+193	0	adjacentAllies	
+193	0	foes	
+193	0	foesAll	6,7
+193	0	adjacentFoes	
+193	6	alliesAndSelf	
+193	6	allies	
+193	6	adjacentAllies	
+193	6	foes	0
+193	6	foesAll	0,1
+193	6	adjacentFoes	0
+194	0	alliesAndSelf	1
+194	0	allies	1
+194	0	adjacentAllies	1
+194	0	foes	
+194	0	foesAll	6,7
+194	0	adjacentFoes	
+194	6	alliesAndSelf	
+194	6	allies	
+194	6	adjacentAllies	
+194	6	foes	1
+194	6	foesAll	0,1
+194	6	adjacentFoes	1
+195	0	alliesAndSelf	0
+195	0	allies	
+195	0	adjacentAllies	
+195	0	foes	
+195	0	foesAll	6
+195	0	adjacentFoes	
+195	6	alliesAndSelf	
+195	6	allies	
+195	6	adjacentAllies	
+195	6	foes	0
+195	6	foesAll	0
+195	6	adjacentFoes	0
+196	0	alliesAndSelf	
+196	0	allies	
+196	0	adjacentAllies	
+196	0	foes	6
+196	0	foesAll	6,7
+196	0	adjacentFoes	6
+196	6	alliesAndSelf	6
+196	6	allies	
+196	6	adjacentAllies	
+196	6	foes	
+196	6	foesAll	0,1
+196	6	adjacentFoes	
+197	0	alliesAndSelf	0
+197	0	allies	
+197	0	adjacentAllies	
+197	0	foes	6
+197	0	foesAll	6,7
+197	0	adjacentFoes	6
+197	6	alliesAndSelf	6
+197	6	allies	
+197	6	adjacentAllies	
+197	6	foes	0
+197	6	foesAll	0,1
+197	6	adjacentFoes	0
+198	0	alliesAndSelf	
+198	0	allies	
+198	0	adjacentAllies	
+198	0	foes	6
+198	0	foesAll	6,7
+198	0	adjacentFoes	6
+198	6	alliesAndSelf	6
+198	6	allies	
+198	6	adjacentAllies	
+198	6	foes	
+198	6	foesAll	0
+198	6	adjacentFoes	
+199	0	alliesAndSelf	0,1
+199	0	allies	1
+199	0	adjacentAllies	1
+199	0	foes	6
+199	0	foesAll	6,7
+199	0	adjacentFoes	6
+199	6	alliesAndSelf	6
+199	6	allies	
+199	6	adjacentAllies	
+199	6	foes	0,1
+199	6	foesAll	0,1
+199	6	adjacentFoes	0,1
+200	0	alliesAndSelf	
+200	0	allies	
+200	0	adjacentAllies	
+200	0	foes	
+200	0	foesAll	6
+200	0	adjacentFoes	
+200	6	alliesAndSelf	
+200	6	allies	
+200	6	adjacentAllies	
+200	6	foes	
+200	6	foesAll	0,1
+200	6	adjacentFoes	
+201	0	alliesAndSelf	0
+201	0	allies	
+201	0	adjacentAllies	
+201	0	foes	7
+201	0	foesAll	6,7
+201	0	adjacentFoes	7
+201	6	alliesAndSelf	7
+201	6	allies	7
+201	6	adjacentAllies	
+201	6	foes	0
+201	6	foesAll	0
+201	6	adjacentFoes	0
+202	0	alliesAndSelf	1
+202	0	allies	1
+202	0	adjacentAllies	1
+202	0	foes	7
+202	0	foesAll	6,7
+202	0	adjacentFoes	7
+202	6	alliesAndSelf	7
+202	6	allies	7
+202	6	adjacentAllies	
+202	6	foes	1
+202	6	foesAll	0,1
+202	6	adjacentFoes	1
+203	0	alliesAndSelf	0,1
+203	0	allies	1
+203	0	adjacentAllies	1
+203	0	foes	7
+203	0	foesAll	6,7
+203	0	adjacentFoes	7
+203	6	alliesAndSelf	7
+203	6	allies	7
+203	6	adjacentAllies	
+203	6	foes	0,1
+203	6	foesAll	0,1
+203	6	adjacentFoes	0,1
+204	0	alliesAndSelf	
+204	0	allies	
+204	0	adjacentAllies	
+204	0	foes	6,7
+204	0	foesAll	6,7
+204	0	adjacentFoes	6,7
+204	6	alliesAndSelf	6,7
+204	6	allies	7
+204	6	adjacentAllies	
+204	6	foes	
+204	6	foesAll	0
+204	6	adjacentFoes	
+205	0	alliesAndSelf	0
+205	0	allies	
+205	0	adjacentAllies	
+205	0	foes	6
+205	0	foesAll	6
+205	0	adjacentFoes	6
+205	6	alliesAndSelf	6
+205	6	allies	
+205	6	adjacentAllies	
+205	6	foes	0
+205	6	foesAll	0,1
+205	6	adjacentFoes	0
+206	0	alliesAndSelf	1
+206	0	allies	1
+206	0	adjacentAllies	1
+206	0	foes	6,7
+206	0	foesAll	6,7
+206	0	adjacentFoes	6,7
+206	6	alliesAndSelf	6,7
+206	6	allies	7
+206	6	adjacentAllies	
+206	6	foes	1
+206	6	foesAll	0,1
+206	6	adjacentFoes	1
+207	0	alliesAndSelf	0
+207	0	allies	
+207	0	adjacentAllies	
+207	0	foes	6,7
+207	0	foesAll	6,7
+207	0	adjacentFoes	6,7
+207	6	alliesAndSelf	6,7
+207	6	allies	7
+207	6	adjacentAllies	
+207	6	foes	0
+207	6	foesAll	0
+207	6	adjacentFoes	0
+208	0	alliesAndSelf	
+208	0	allies	
+208	0	adjacentAllies	
+208	0	foes	
+208	0	foesAll	6,7
+208	0	adjacentFoes	
+208	6	alliesAndSelf	
+208	6	allies	
+208	6	adjacentAllies	
+208	6	foes	
+208	6	foesAll	0,1
+208	6	adjacentFoes	
+209	0	alliesAndSelf	0
+209	0	allies	
+209	0	adjacentAllies	
+209	0	foes	
+209	0	foesAll	6,7
+209	0	adjacentFoes	
+209	6	alliesAndSelf	
+209	6	allies	
+209	6	adjacentAllies	
+209	6	foes	0
+209	6	foesAll	0,1
+209	6	adjacentFoes	0
+210	0	alliesAndSelf	
+210	0	allies	
+210	0	adjacentAllies	
+210	0	foes	
+210	0	foesAll	6
+210	0	adjacentFoes	
+210	6	alliesAndSelf	
+210	6	allies	
+210	6	adjacentAllies	
+210	6	foes	
+210	6	foesAll	0
+210	6	adjacentFoes	
+211	0	alliesAndSelf	0,1
+211	0	allies	1
+211	0	adjacentAllies	
+211	0	foes	
+211	0	foesAll	6,7
+211	0	adjacentFoes	
+211	6	alliesAndSelf	
+211	6	allies	
+211	6	adjacentAllies	
+211	6	foes	0,1
+211	6	foesAll	0,1
+211	6	adjacentFoes	0,1
+212	0	alliesAndSelf	
+212	0	allies	
+212	0	adjacentAllies	
+212	0	foes	6
+212	0	foesAll	6,7
+212	0	adjacentFoes	6
+212	6	alliesAndSelf	6
+212	6	allies	
+212	6	adjacentAllies	
+212	6	foes	
+212	6	foesAll	0,1
+212	6	adjacentFoes	
+213	0	alliesAndSelf	0
+213	0	allies	
+213	0	adjacentAllies	
+213	0	foes	6
+213	0	foesAll	6,7
+213	0	adjacentFoes	6
+213	6	alliesAndSelf	6
+213	6	allies	
+213	6	adjacentAllies	
+213	6	foes	0
+213	6	foesAll	0
+213	6	adjacentFoes	0
+214	0	alliesAndSelf	1
+214	0	allies	1
+214	0	adjacentAllies	
+214	0	foes	6
+214	0	foesAll	6,7
+214	0	adjacentFoes	6
+214	6	alliesAndSelf	6
+214	6	allies	
+214	6	adjacentAllies	
+214	6	foes	1
+214	6	foesAll	0,1
+214	6	adjacentFoes	1
+215	0	alliesAndSelf	0,1
+215	0	allies	1
+215	0	adjacentAllies	
+215	0	foes	6
+215	0	foesAll	6
+215	0	adjacentFoes	6
+215	6	alliesAndSelf	6
+215	6	allies	
+215	6	adjacentAllies	
+215	6	foes	0,1
+215	6	foesAll	0,1
+215	6	adjacentFoes	0,1
+216	0	alliesAndSelf	
+216	0	allies	
+216	0	adjacentAllies	
+216	0	foes	7
+216	0	foesAll	6,7
+216	0	adjacentFoes	7
+216	6	alliesAndSelf	7
+216	6	allies	7
+216	6	adjacentAllies	
+216	6	foes	
+216	6	foesAll	0
+216	6	adjacentFoes	
+217	0	alliesAndSelf	0
+217	0	allies	
+217	0	adjacentAllies	
+217	0	foes	7
+217	0	foesAll	6,7
+217	0	adjacentFoes	7
+217	6	alliesAndSelf	7
+217	6	allies	7
+217	6	adjacentAllies	
+217	6	foes	0
+217	6	foesAll	0,1
+217	6	adjacentFoes	0
+218	0	alliesAndSelf	1
+218	0	allies	1
+218	0	adjacentAllies	
+218	0	foes	7
+218	0	foesAll	6,7
+218	0	adjacentFoes	7
+218	6	alliesAndSelf	7
+218	6	allies	7
+218	6	adjacentAllies	
+218	6	foes	1
+218	6	foesAll	0,1
+218	6	adjacentFoes	1
+219	0	alliesAndSelf	0
+219	0	allies	
+219	0	adjacentAllies	
+219	0	foes	7
+219	0	foesAll	6,7
+219	0	adjacentFoes	7
+219	6	alliesAndSelf	7
+219	6	allies	7
+219	6	adjacentAllies	
+219	6	foes	0
+219	6	foesAll	0
+219	6	adjacentFoes	0
+220	0	alliesAndSelf	
+220	0	allies	
+220	0	adjacentAllies	
+220	0	foes	6
+220	0	foesAll	6
+220	0	adjacentFoes	6
+220	6	alliesAndSelf	6
+220	6	allies	
+220	6	adjacentAllies	
+220	6	foes	
+220	6	foesAll	0,1
+220	6	adjacentFoes	
+221	0	alliesAndSelf	0
+221	0	allies	
+221	0	adjacentAllies	
+221	0	foes	6,7
+221	0	foesAll	6,7
+221	0	adjacentFoes	6,7
+221	6	alliesAndSelf	6,7
+221	6	allies	7
+221	6	adjacentAllies	
+221	6	foes	0
+221	6	foesAll	0,1
+221	6	adjacentFoes	0
+222	0	alliesAndSelf	
+222	0	allies	
+222	0	adjacentAllies	
+222	0	foes	6,7
+222	0	foesAll	6,7
+222	0	adjacentFoes	6,7
+222	6	alliesAndSelf	6,7
+222	6	allies	7
+222	6	adjacentAllies	
+222	6	foes	
+222	6	foesAll	0
+222	6	adjacentFoes	
+223	0	alliesAndSelf	0,1
+223	0	allies	1
+223	0	adjacentAllies	
+223	0	foes	6,7
+223	0	foesAll	6,7
+223	0	adjacentFoes	6,7
+223	6	alliesAndSelf	6,7
+223	6	allies	7
+223	6	adjacentAllies	
+223	6	foes	0,1
+223	6	foesAll	0,1
+223	6	adjacentFoes	0,1
+224	0	alliesAndSelf	
+224	0	allies	
+224	0	adjacentAllies	
+224	0	foes	
+224	0	foesAll	6,7
+224	0	adjacentFoes	
+224	6	alliesAndSelf	
+224	6	allies	
+224	6	adjacentAllies	
+224	6	foes	
+224	6	foesAll	0,1
+224	6	adjacentFoes	
+225	0	alliesAndSelf	0
+225	0	allies	
+225	0	adjacentAllies	
+225	0	foes	
+225	0	foesAll	6
+225	0	adjacentFoes	
+225	6	alliesAndSelf	
+225	6	allies	
+225	6	adjacentAllies	
+225	6	foes	0
+225	6	foesAll	0
+225	6	adjacentFoes	0
+226	0	alliesAndSelf	1
+226	0	allies	1
+226	0	adjacentAllies	
+226	0	foes	
+226	0	foesAll	6,7
+226	0	adjacentFoes	
+226	6	alliesAndSelf	
+226	6	allies	
+226	6	adjacentAllies	
+226	6	foes	1
+226	6	foesAll	0,1
+226	6	adjacentFoes	1
+227	0	alliesAndSelf	0,1
+227	0	allies	1
+227	0	adjacentAllies	
+227	0	foes	
+227	0	foesAll	6,7
+227	0	adjacentFoes	
+227	6	alliesAndSelf	
+227	6	allies	
+227	6	adjacentAllies	
+227	6	foes	0,1
+227	6	foesAll	0,1
+227	6	adjacentFoes	0,1
+228	0	alliesAndSelf	
+228	0	allies	
+228	0	adjacentAllies	
+228	0	foes	6
+228	0	foesAll	6,7
+228	0	adjacentFoes	6
+228	6	alliesAndSelf	6
+228	6	allies	
+228	6	adjacentAllies	
+228	6	foes	
+228	6	foesAll	0
+228	6	adjacentFoes	
+229	0	alliesAndSelf	0
+229	0	allies	
+229	0	adjacentAllies	
+229	0	foes	6
+229	0	foesAll	6,7
+229	0	adjacentFoes	6
+229	6	alliesAndSelf	6
+229	6	allies	
+229	6	adjacentAllies	
+229	6	foes	0
+229	6	foesAll	0,1
+229	6	adjacentFoes	0
+230	0	alliesAndSelf	1
+230	0	allies	1
+230	0	adjacentAllies	
+230	0	foes	6
+230	0	foesAll	6
+230	0	adjacentFoes	6
+230	6	alliesAndSelf	6
+230	6	allies	
+230	6	adjacentAllies	
+230	6	foes	1
+230	6	foesAll	0,1
+230	6	adjacentFoes	1
+231	0	alliesAndSelf	0
+231	0	allies	
+231	0	adjacentAllies	
+231	0	foes	6
+231	0	foesAll	6,7
+231	0	adjacentFoes	6
+231	6	alliesAndSelf	6
+231	6	allies	
+231	6	adjacentAllies	
+231	6	foes	0
+231	6	foesAll	0
+231	6	adjacentFoes	0
+232	0	alliesAndSelf	
+232	0	allies	
+232	0	adjacentAllies	
+232	0	foes	7
+232	0	foesAll	6,7
+232	0	adjacentFoes	7
+232	6	alliesAndSelf	7
+232	6	allies	7
+232	6	adjacentAllies	
+232	6	foes	
+232	6	foesAll	0,1
+232	6	adjacentFoes	
+233	0	alliesAndSelf	0
+233	0	allies	
+233	0	adjacentAllies	
+233	0	foes	7
+233	0	foesAll	6,7
+233	0	adjacentFoes	7
+233	6	alliesAndSelf	7
+233	6	allies	7
+233	6	adjacentAllies	
+233	6	foes	0
+233	6	foesAll	0,1
+233	6	adjacentFoes	0
+234	0	alliesAndSelf	
+234	0	allies	
+234	0	adjacentAllies	
+234	0	foes	7
+234	0	foesAll	6,7
+234	0	adjacentFoes	7
+234	6	alliesAndSelf	7
+234	6	allies	7
+234	6	adjacentAllies	
+234	6	foes	
+234	6	foesAll	0
+234	6	adjacentFoes	
+235	0	alliesAndSelf	0,1
+235	0	allies	1
+235	0	adjacentAllies	
+235	0	foes	
+235	0	foesAll	6
+235	0	adjacentFoes	
+235	6	alliesAndSelf	
+235	6	allies	
+235	6	adjacentAllies	
+235	6	foes	0,1
+235	6	foesAll	0,1
+235	6	adjacentFoes	0,1
+236	0	alliesAndSelf	
+236	0	allies	
+236	0	adjacentAllies	
+236	0	foes	6,7
+236	0	foesAll	6,7
+236	0	adjacentFoes	6,7
+236	6	alliesAndSelf	6,7
+236	6	allies	7
+236	6	adjacentAllies	
+236	6	foes	
+236	6	foesAll	0,1
+236	6	adjacentFoes	
+237	0	alliesAndSelf	0
+237	0	allies	
+237	0	adjacentAllies	
+237	0	foes	6,7
+237	0	foesAll	6,7
+237	0	adjacentFoes	6,7
+237	6	alliesAndSelf	6,7
+237	6	allies	7
+237	6	adjacentAllies	
+237	6	foes	0
+237	6	foesAll	0
+237	6	adjacentFoes	0
+238	0	alliesAndSelf	1
+238	0	allies	1
+238	0	adjacentAllies	
+238	0	foes	6,7
+238	0	foesAll	6,7
+238	0	adjacentFoes	6,7
+238	6	alliesAndSelf	6,7
+238	6	allies	7
+238	6	adjacentAllies	
+238	6	foes	1
+238	6	foesAll	0,1
+238	6	adjacentFoes	1
+239	0	alliesAndSelf	0,1
+239	0	allies	1
+239	0	adjacentAllies	
+239	0	foes	6,7
+239	0	foesAll	6,7
+239	0	adjacentFoes	6,7
+239	6	alliesAndSelf	6,7
+239	6	allies	7
+239	6	adjacentAllies	
+239	6	foes	0,1
+239	6	foesAll	0,1
+239	6	adjacentFoes	0,1
+240	0	alliesAndSelf	
+240	0	allies	
+240	0	adjacentAllies	
+240	0	foes	
+240	0	foesAll	6
+240	0	adjacentFoes	
+240	6	alliesAndSelf	
+240	6	allies	
+240	6	adjacentAllies	
+240	6	foes	
+240	6	foesAll	0
+240	6	adjacentFoes	
+241	0	alliesAndSelf	0
+241	0	allies	
+241	0	adjacentAllies	
+241	0	foes	
+241	0	foesAll	6,7
+241	0	adjacentFoes	
+241	6	alliesAndSelf	
+241	6	allies	
+241	6	adjacentAllies	
+241	6	foes	0
+241	6	foesAll	0,1
+241	6	adjacentFoes	0
+242	0	alliesAndSelf	1
+242	0	allies	1
+242	0	adjacentAllies	
+242	0	foes	
+242	0	foesAll	6,7
+242	0	adjacentFoes	
+242	6	alliesAndSelf	
+242	6	allies	
+242	6	adjacentAllies	
+242	6	foes	1
+242	6	foesAll	0,1
+242	6	adjacentFoes	1
+243	0	alliesAndSelf	0
+243	0	allies	
+243	0	adjacentAllies	
+243	0	foes	
+243	0	foesAll	6,7
+243	0	adjacentFoes	
+243	6	alliesAndSelf	
+243	6	allies	
+243	6	adjacentAllies	
+243	6	foes	0
+243	6	foesAll	0
+243	6	adjacentFoes	0
+244	0	alliesAndSelf	
+244	0	allies	
+244	0	adjacentAllies	
+244	0	foes	6
+244	0	foesAll	6,7
+244	0	adjacentFoes	6
+244	6	alliesAndSelf	6
+244	6	allies	
+244	6	adjacentAllies	
+244	6	foes	
+244	6	foesAll	0,1
+244	6	adjacentFoes	
+245	0	alliesAndSelf	0
+245	0	allies	
+245	0	adjacentAllies	
+245	0	foes	6
+245	0	foesAll	6
+245	0	adjacentFoes	6
+245	6	alliesAndSelf	6
+245	6	allies	
+245	6	adjacentAllies	
+245	6	foes	0
+245	6	foesAll	0,1
+245	6	adjacentFoes	0
+246	0	alliesAndSelf	
+246	0	allies	
+246	0	adjacentAllies	
+246	0	foes	6
+246	0	foesAll	6,7
+246	0	adjacentFoes	6
+246	6	alliesAndSelf	6
+246	6	allies	
+246	6	adjacentAllies	
+246	6	foes	
+246	6	foesAll	0
+246	6	adjacentFoes	
+247	0	alliesAndSelf	0,1
+247	0	allies	1
+247	0	adjacentAllies	
+247	0	foes	6
+247	0	foesAll	6,7
+247	0	adjacentFoes	6
+247	6	alliesAndSelf	6
+247	6	allies	
+247	6	adjacentAllies	
+247	6	foes	0,1
+247	6	foesAll	0,1
+247	6	adjacentFoes	0,1
+248	0	alliesAndSelf	
+248	0	allies	
+248	0	adjacentAllies	
+248	0	foes	7
+248	0	foesAll	6,7
+248	0	adjacentFoes	7
+248	6	alliesAndSelf	7
+248	6	allies	7
+248	6	adjacentAllies	
+248	6	foes	
+248	6	foesAll	0,1
+248	6	adjacentFoes	
+249	0	alliesAndSelf	0
+249	0	allies	
+249	0	adjacentAllies	
+249	0	foes	7
+249	0	foesAll	6,7
+249	0	adjacentFoes	7
+249	6	alliesAndSelf	7
+249	6	allies	7
+249	6	adjacentAllies	
+249	6	foes	0
+249	6	foesAll	0
+249	6	adjacentFoes	0
+250	0	alliesAndSelf	1
+250	0	allies	1
+250	0	adjacentAllies	
+250	0	foes	
+250	0	foesAll	6
+250	0	adjacentFoes	
+250	6	alliesAndSelf	
+250	6	allies	
+250	6	adjacentAllies	
+250	6	foes	1
+250	6	foesAll	0,1
+250	6	adjacentFoes	1
+251	0	alliesAndSelf	0,1
+251	0	allies	1
+251	0	adjacentAllies	
+251	0	foes	7
+251	0	foesAll	6,7
+251	0	adjacentFoes	7
+251	6	alliesAndSelf	7
+251	6	allies	7
+251	6	adjacentAllies	
+251	6	foes	0,1
+251	6	foesAll	0,1
+251	6	adjacentFoes	0,1
+252	0	alliesAndSelf	
+252	0	allies	
+252	0	adjacentAllies	
+252	0	foes	6,7
+252	0	foesAll	6,7
+252	0	adjacentFoes	6,7
+252	6	alliesAndSelf	6,7
+252	6	allies	7
+252	6	adjacentAllies	
+252	6	foes	
+252	6	foesAll	0
+252	6	adjacentFoes	
+253	0	alliesAndSelf	0
+253	0	allies	
+253	0	adjacentAllies	
+253	0	foes	6,7
+253	0	foesAll	6,7
+253	0	adjacentFoes	6,7
+253	6	alliesAndSelf	6,7
+253	6	allies	7
+253	6	adjacentAllies	
+253	6	foes	0
+253	6	foesAll	0,1
+253	6	adjacentFoes	0
+254	0	alliesAndSelf	1
+254	0	allies	1
+254	0	adjacentAllies	
+254	0	foes	6,7
+254	0	foesAll	6,7
+254	0	adjacentFoes	6,7
+254	6	alliesAndSelf	6,7
+254	6	allies	7
+254	6	adjacentAllies	
+254	6	foes	1
+254	6	foesAll	0,1
+254	6	adjacentFoes	1
+255	0	alliesAndSelf	0
+255	0	allies	
+255	0	adjacentAllies	
+255	0	foes	6
+255	0	foesAll	6
+255	0	adjacentFoes	6
+255	6	alliesAndSelf	6
+255	6	allies	
+255	6	adjacentAllies	
+255	6	foes	0
+255	6	foesAll	0
+255	6	adjacentFoes	0
