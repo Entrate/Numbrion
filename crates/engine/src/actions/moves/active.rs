@@ -30,14 +30,22 @@ impl<L: LogSink> Battle<L> {
     /// Scratch handles are scoped to a running action and cannot enter snapshots.
     /// PRNG: none.
     pub fn active_move(&self, move_handle: MoveHandle) -> &ActiveMove {
-        todo!("stage M: immutable move overlay access")
+        self.scratch
+            .moves
+            .get(move_handle.0 as usize)
+            .and_then(Option::as_ref)
+            .expect("invalid or released active move")
     }
 
     /// Ports callback writes to ActiveMove in sim/battle-actions.ts:410-442.
     /// Drop this borrow before any event or cross-module battle call.
     /// PRNG: none.
     pub fn active_move_mut(&mut self, move_handle: MoveHandle) -> &mut ActiveMove {
-        todo!("stage M: mutable move overlay access")
+        self.scratch
+            .moves
+            .get_mut(move_handle.0 as usize)
+            .and_then(Option::as_mut)
+            .expect("invalid or released active move")
     }
 
     /// Engine scratch reclamation for sim/dex.ts:316-321 allocations. A move
@@ -57,14 +65,23 @@ impl<L: LogSink> Battle<L> {
         user: Option<MonId>,
         target: Option<MonId>,
     ) {
-        todo!("stage M: assign active move context")
+        self.scratch.active_move = move_handle.unwrap_or(MoveHandle::NONE);
+        self.scratch.active_pokemon = user.unwrap_or(MonId::NONE);
+        self.scratch.active_target = target.or(user).unwrap_or(MonId::NONE);
     }
 
     /// Ports sim/battle.ts:380-389. Stores successful lastMove then clears move,
     /// user, and target together; lastMove in Copy state retains its dex ID.
     /// PRNG: none.
     pub fn clear_active_move(&mut self, failed: bool) {
-        todo!("stage M: clear active move context")
+        if self.scratch.active_move != MoveHandle::NONE {
+            if !failed {
+                self.state.last_move = self.active_move(self.scratch.active_move).id;
+            }
+            self.scratch.active_move = MoveHandle::NONE;
+            self.scratch.active_pokemon = MonId::NONE;
+            self.scratch.active_target = MonId::NONE;
+        }
     }
 
     /// Ports sim/battle-actions.ts:410-442. Executes ModifyTarget, the move's
@@ -85,6 +102,14 @@ impl<L: LogSink> Battle<L> {
     /// active user's unsuppressed Sheer Force before skipping after-secondary.
     /// PRNG: none.
     pub fn suppressing_secondaries(&self) -> bool {
-        todo!("stage M: secondary suppression query")
+        self.scratch.active_move != MoveHandle::NONE
+            && self.active_move(self.scratch.active_move).runtime_flags
+                & crate::state::scratch::move_runtime::HAS_SHEER_FORCE
+                != 0
+            && self.scratch.active_pokemon != MonId::NONE
+            && self.has_ability(
+                self.scratch.active_pokemon,
+                &[crate::dex::ABILITY_SHEERFORCE],
+            )
     }
 }

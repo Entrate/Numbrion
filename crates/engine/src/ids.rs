@@ -133,6 +133,7 @@ impl EffectToken {
                 3 => SyntheticEffect::Recharge,
                 4 => SyntheticEffect::Fainted,
                 5 => SyntheticEffect::MindBlownRecoil,
+                6 => SyntheticEffect::Recoil,
                 _ => panic!("invalid synthetic effect token"),
             }),
             6 => Synchronize(id),

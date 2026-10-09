@@ -63,7 +63,15 @@ impl<L: LogSink> Battle<L> {
     /// Insertion-list lookup; caller can inspect arena cell
     /// Ports `sim/pokemon.ts:2029-2033`. PRNG: none.
     pub fn get_volatile(&self, pokemon: MonId, status: EffectId) -> Option<CellId> {
-        todo!("stage D: get_volatile")
+        self.state
+            .pokemon
+            .get(pokemon.0 as usize)
+            .expect("invalid Pokemon volatile lookup")
+            .volatiles
+            .as_slice()
+            .iter()
+            .copied()
+            .find(|cell| self.state.effects.cells[cell.0 as usize].id == status)
     }
     /// End then retire/remove captured cell, preserving pins
     /// Ports `sim/pokemon.ts:2035-2046`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.

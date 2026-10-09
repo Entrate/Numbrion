@@ -10,6 +10,9 @@ pub mod present {
     pub const LINKED_STATUS: u32 = 1 << 4;
     pub const SLOT_CONDITION: u32 = 1 << 5;
     pub const PREFIXED_ID: u32 = 1 << 6;
+    /// Truthy abilityState.ending marker; clear covers both absent and false.
+    /// Queries only observe truthiness (pokemon.ts:872, field.ts:112).
+    pub const ENDING: u32 = 1 << 7;
     pub const CUSTOM_START: u8 = 8;
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
