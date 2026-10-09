@@ -1,14 +1,47 @@
 //! Gen 9 doubles location, target, and redirection rules. OWNER M.
 #![allow(unused_variables)]
 use crate::{
-    actions::{MoveHandle, MoveInput, MoveTargets, Targets},
+    actions::{HitTarget, MoveHandle, MoveInput, MoveTargets, Targets},
     battle::Battle,
     dex::MoveTarget,
-    ids::{MonId, SlotId},
+    ids::{MonId, SideId, SlotId},
     log::LogSink,
 };
 
 impl<L: LogSink> Battle<L> {
+    // side.ts:390-410 filters absent slots, then HP (not the fainted flag).
+    // Only adjacentAllies additionally calls isAdjacent (pokemon.ts:741-746).
+    fn active_side_targets(
+        &self,
+        side: SideId,
+        all: bool,
+        exclude: Option<MonId>,
+        adjacent: Option<MonId>,
+    ) -> Targets {
+        let mut result = Targets::default();
+        for mon in self.state.sides[side.0 as usize].active {
+            if mon == MonId::NONE || Some(mon) == exclude {
+                continue;
+            }
+            let pokemon = &self.state.pokemon[mon.0 as usize];
+            if !all && pokemon.hp == 0 {
+                continue;
+            }
+            if let Some(user) = adjacent {
+                if user == mon
+                    || pokemon.flags & crate::state::mon_flags::FAINTED != 0
+                    || self.state.pokemon[user.0 as usize].flags & crate::state::mon_flags::FAINTED
+                        != 0
+                {
+                    continue;
+                }
+            }
+            result.entries[result.len as usize] = HitTarget::Pokemon(mon);
+            result.len += 1;
+        }
+        result
+    }
+
     /// Ports sim/battle.ts:2403-2436. Checks signed locations against move target
     /// kind without resolving an occupant; used by the text validator.
     /// PRNG: none.
@@ -115,37 +148,47 @@ impl<L: LogSink> Battle<L> {
     /// allies including the user, retaining side slot order.
     /// PRNG: none.
     pub fn allies_and_self(&self, user: MonId) -> Targets {
-        todo!("stage M: allies and self")
+        self.active_side_targets(user.side(), false, None, None)
     }
 
     /// Ports sim/pokemon.ts:720-722. Returns living active allies except user.
     /// PRNG: none.
     pub fn allies(&self, user: MonId) -> Targets {
-        todo!("stage M: allies")
+        self.active_side_targets(user.side(), false, Some(user), None)
     }
 
     /// Ports sim/pokemon.ts:724-726. Applies adjacency to living active allies.
     /// PRNG: none.
     pub fn adjacent_allies(&self, user: MonId) -> Targets {
-        todo!("stage M: adjacent allies")
+        self.active_side_targets(user.side(), false, Some(user), Some(user))
     }
 
     /// Ports sim/pokemon.ts:728-730 and sim/side.ts:397-410. The all flag retains
     /// fainted active foes where Showdown's caller requests positional targets.
     /// PRNG: none.
     pub fn foes(&self, user: MonId, all: bool) -> Targets {
-        todo!("stage M: foes")
+        self.active_side_targets(SideId(user.side().0 ^ 1), all, None, None)
     }
 
     /// Ports sim/pokemon.ts:732-735. Gen 9 doubles uses the living foe list.
     /// PRNG: none.
     pub fn adjacent_foes(&self, user: MonId) -> Targets {
-        todo!("stage M: adjacent foes")
+        // In this fixed doubles format activePerHalf <= 2, so this source
+        // path does not perform individual isAdjacent/fainted-user checks.
+        self.foes(user, false)
     }
 
     /// Ports sim/battle-actions.ts:1544-1546. Tests CHOOSABLE_TARGETS for choices.
     /// PRNG: none.
     pub fn target_type_choices(&self, target_type: MoveTarget) -> bool {
-        todo!("stage M: target kind requires user selection")
+        // adjacentAllyOrSelf/adjacentFoe are not represented by scoped moves.
+        matches!(
+            target_type,
+            MoveTarget::Normal | MoveTarget::Any | MoveTarget::AdjacentAlly
+        )
     }
 }
+
+#[cfg(test)]
+#[path = "targetqueries/tests.rs"]
+mod query_tests;
