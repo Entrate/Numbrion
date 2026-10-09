@@ -1,0 +1,2278 @@
+# Actual pinned Pokemon methods 7332b60e22b9e8194bb53549549eba241d73cc9a; no event/query mechanics substituted
+C	atk	-128	undefined	0	27	1,2,3,4
+C	atk	-128	undefined	1	27	1,2,3,4
+C	atk	-128	0	0	27	1,2,3,4
+C	atk	-128	0	1	27	1,2,3,4
+C	atk	-128	NaN	0	27	1,2,3,4
+C	atk	-128	NaN	1	27	1,2,3,4
+C	atk	-128	0.75	0	20	1,2,3,4
+C	atk	-128	0.75	1	20	1,2,3,4
+C	atk	-128	1.3	0	35	1,2,3,4
+C	atk	-128	1.3	1	35	1,2,3,4
+C	atk	-128	-1	0	1048549	1,2,3,4
+C	atk	-128	-1	1	1048549	1,2,3,4
+C	atk	-128	Infinity	0	0	1,2,3,4
+C	atk	-128	Infinity	1	0	1,2,3,4
+C	atk	-7	undefined	0	27	1,2,3,4
+C	atk	-7	undefined	1	27	1,2,3,4
+C	atk	-7	0	0	27	1,2,3,4
+C	atk	-7	0	1	27	1,2,3,4
+C	atk	-7	NaN	0	27	1,2,3,4
+C	atk	-7	NaN	1	27	1,2,3,4
+C	atk	-7	0.75	0	20	1,2,3,4
+C	atk	-7	0.75	1	20	1,2,3,4
+C	atk	-7	1.3	0	35	1,2,3,4
+C	atk	-7	1.3	1	35	1,2,3,4
+C	atk	-7	-1	0	1048549	1,2,3,4
+C	atk	-7	-1	1	1048549	1,2,3,4
+C	atk	-7	Infinity	0	0	1,2,3,4
+C	atk	-7	Infinity	1	0	1,2,3,4
+C	atk	-6	undefined	0	27	1,2,3,4
+C	atk	-6	undefined	1	27	1,2,3,4
+C	atk	-6	0	0	27	1,2,3,4
+C	atk	-6	0	1	27	1,2,3,4
+C	atk	-6	NaN	0	27	1,2,3,4
+C	atk	-6	NaN	1	27	1,2,3,4
+C	atk	-6	0.75	0	20	1,2,3,4
+C	atk	-6	0.75	1	20	1,2,3,4
+C	atk	-6	1.3	0	35	1,2,3,4
+C	atk	-6	1.3	1	35	1,2,3,4
+C	atk	-6	-1	0	1048549	1,2,3,4
+C	atk	-6	-1	1	1048549	1,2,3,4
+C	atk	-6	Infinity	0	0	1,2,3,4
+C	atk	-6	Infinity	1	0	1,2,3,4
+C	atk	-5	undefined	0	31	1,2,3,4
+C	atk	-5	undefined	1	31	1,2,3,4
+C	atk	-5	0	0	31	1,2,3,4
+C	atk	-5	0	1	31	1,2,3,4
+C	atk	-5	NaN	0	31	1,2,3,4
+C	atk	-5	NaN	1	31	1,2,3,4
+C	atk	-5	0.75	0	23	1,2,3,4
+C	atk	-5	0.75	1	23	1,2,3,4
+C	atk	-5	1.3	0	40	1,2,3,4
+C	atk	-5	1.3	1	40	1,2,3,4
+C	atk	-5	-1	0	1048545	1,2,3,4
+C	atk	-5	-1	1	1048545	1,2,3,4
+C	atk	-5	Infinity	0	0	1,2,3,4
+C	atk	-5	Infinity	1	0	1,2,3,4
+C	atk	-1	undefined	0	74	1,2,3,4
+C	atk	-1	undefined	1	74	1,2,3,4
+C	atk	-1	0	0	74	1,2,3,4
+C	atk	-1	0	1	74	1,2,3,4
+C	atk	-1	NaN	0	74	1,2,3,4
+C	atk	-1	NaN	1	74	1,2,3,4
+C	atk	-1	0.75	0	55	1,2,3,4
+C	atk	-1	0.75	1	55	1,2,3,4
+C	atk	-1	1.3	0	96	1,2,3,4
+C	atk	-1	1.3	1	96	1,2,3,4
+C	atk	-1	-1	0	1048502	1,2,3,4
+C	atk	-1	-1	1	1048502	1,2,3,4
+C	atk	-1	Infinity	0	0	1,2,3,4
+C	atk	-1	Infinity	1	0	1,2,3,4
+C	atk	0	undefined	0	111	1,2,3,4
+C	atk	0	undefined	1	111	1,2,3,4
+C	atk	0	0	0	111	1,2,3,4
+C	atk	0	0	1	111	1,2,3,4
+C	atk	0	NaN	0	111	1,2,3,4
+C	atk	0	NaN	1	111	1,2,3,4
+C	atk	0	0.75	0	83	1,2,3,4
+C	atk	0	0.75	1	83	1,2,3,4
+C	atk	0	1.3	0	144	1,2,3,4
+C	atk	0	1.3	1	144	1,2,3,4
+C	atk	0	-1	0	1048465	1,2,3,4
+C	atk	0	-1	1	1048465	1,2,3,4
+C	atk	0	Infinity	0	0	1,2,3,4
+C	atk	0	Infinity	1	0	1,2,3,4
+C	atk	1	undefined	0	166	1,2,3,4
+C	atk	1	undefined	1	166	1,2,3,4
+C	atk	1	0	0	166	1,2,3,4
+C	atk	1	0	1	166	1,2,3,4
+C	atk	1	NaN	0	166	1,2,3,4
+C	atk	1	NaN	1	166	1,2,3,4
+C	atk	1	0.75	0	124	1,2,3,4
+C	atk	1	0.75	1	124	1,2,3,4
+C	atk	1	1.3	0	216	1,2,3,4
+C	atk	1	1.3	1	216	1,2,3,4
+C	atk	1	-1	0	1048410	1,2,3,4
+C	atk	1	-1	1	1048410	1,2,3,4
+C	atk	1	Infinity	0	0	1,2,3,4
+C	atk	1	Infinity	1	0	1,2,3,4
+C	atk	2	undefined	0	222	1,2,3,4
+C	atk	2	undefined	1	222	1,2,3,4
+C	atk	2	0	0	222	1,2,3,4
+C	atk	2	0	1	222	1,2,3,4
+C	atk	2	NaN	0	222	1,2,3,4
+C	atk	2	NaN	1	222	1,2,3,4
+C	atk	2	0.75	0	166	1,2,3,4
+C	atk	2	0.75	1	166	1,2,3,4
+C	atk	2	1.3	0	289	1,2,3,4
+C	atk	2	1.3	1	289	1,2,3,4
+C	atk	2	-1	0	1048354	1,2,3,4
+C	atk	2	-1	1	1048354	1,2,3,4
+C	atk	2	Infinity	0	0	1,2,3,4
+C	atk	2	Infinity	1	0	1,2,3,4
+C	atk	5	undefined	0	388	1,2,3,4
+C	atk	5	undefined	1	388	1,2,3,4
+C	atk	5	0	0	388	1,2,3,4
+C	atk	5	0	1	388	1,2,3,4
+C	atk	5	NaN	0	388	1,2,3,4
+C	atk	5	NaN	1	388	1,2,3,4
+C	atk	5	0.75	0	291	1,2,3,4
+C	atk	5	0.75	1	291	1,2,3,4
+C	atk	5	1.3	0	504	1,2,3,4
+C	atk	5	1.3	1	504	1,2,3,4
+C	atk	5	-1	0	1048188	1,2,3,4
+C	atk	5	-1	1	1048188	1,2,3,4
+C	atk	5	Infinity	0	0	1,2,3,4
+C	atk	5	Infinity	1	0	1,2,3,4
+C	atk	6	undefined	0	444	1,2,3,4
+C	atk	6	undefined	1	444	1,2,3,4
+C	atk	6	0	0	444	1,2,3,4
+C	atk	6	0	1	444	1,2,3,4
+C	atk	6	NaN	0	444	1,2,3,4
+C	atk	6	NaN	1	444	1,2,3,4
+C	atk	6	0.75	0	333	1,2,3,4
+C	atk	6	0.75	1	333	1,2,3,4
+C	atk	6	1.3	0	577	1,2,3,4
+C	atk	6	1.3	1	577	1,2,3,4
+C	atk	6	-1	0	1048132	1,2,3,4
+C	atk	6	-1	1	1048132	1,2,3,4
+C	atk	6	Infinity	0	0	1,2,3,4
+C	atk	6	Infinity	1	0	1,2,3,4
+C	atk	7	undefined	0	444	1,2,3,4
+C	atk	7	undefined	1	444	1,2,3,4
+C	atk	7	0	0	444	1,2,3,4
+C	atk	7	0	1	444	1,2,3,4
+C	atk	7	NaN	0	444	1,2,3,4
+C	atk	7	NaN	1	444	1,2,3,4
+C	atk	7	0.75	0	333	1,2,3,4
+C	atk	7	0.75	1	333	1,2,3,4
+C	atk	7	1.3	0	577	1,2,3,4
+C	atk	7	1.3	1	577	1,2,3,4
+C	atk	7	-1	0	1048132	1,2,3,4
+C	atk	7	-1	1	1048132	1,2,3,4
+C	atk	7	Infinity	0	0	1,2,3,4
+C	atk	7	Infinity	1	0	1,2,3,4
+C	atk	127	undefined	0	444	1,2,3,4
+C	atk	127	undefined	1	444	1,2,3,4
+C	atk	127	0	0	444	1,2,3,4
+C	atk	127	0	1	444	1,2,3,4
+C	atk	127	NaN	0	444	1,2,3,4
+C	atk	127	NaN	1	444	1,2,3,4
+C	atk	127	0.75	0	333	1,2,3,4
+C	atk	127	0.75	1	333	1,2,3,4
+C	atk	127	1.3	0	577	1,2,3,4
+C	atk	127	1.3	1	577	1,2,3,4
+C	atk	127	-1	0	1048132	1,2,3,4
+C	atk	127	-1	1	1048132	1,2,3,4
+C	atk	127	Infinity	0	0	1,2,3,4
+C	atk	127	Infinity	1	0	1,2,3,4
+C	def	-128	undefined	0	55	1,2,3,4
+C	def	-128	undefined	1	55	1,2,3,4
+C	def	-128	0	0	55	1,2,3,4
+C	def	-128	0	1	55	1,2,3,4
+C	def	-128	NaN	0	55	1,2,3,4
+C	def	-128	NaN	1	55	1,2,3,4
+C	def	-128	0.75	0	41	1,2,3,4
+C	def	-128	0.75	1	41	1,2,3,4
+C	def	-128	1.3	0	71	1,2,3,4
+C	def	-128	1.3	1	71	1,2,3,4
+C	def	-128	-1	0	1048521	1,2,3,4
+C	def	-128	-1	1	1048521	1,2,3,4
+C	def	-128	Infinity	0	0	1,2,3,4
+C	def	-128	Infinity	1	0	1,2,3,4
+C	def	-7	undefined	0	55	1,2,3,4
+C	def	-7	undefined	1	55	1,2,3,4
+C	def	-7	0	0	55	1,2,3,4
+C	def	-7	0	1	55	1,2,3,4
+C	def	-7	NaN	0	55	1,2,3,4
+C	def	-7	NaN	1	55	1,2,3,4
+C	def	-7	0.75	0	41	1,2,3,4
+C	def	-7	0.75	1	41	1,2,3,4
+C	def	-7	1.3	0	71	1,2,3,4
+C	def	-7	1.3	1	71	1,2,3,4
+C	def	-7	-1	0	1048521	1,2,3,4
+C	def	-7	-1	1	1048521	1,2,3,4
+C	def	-7	Infinity	0	0	1,2,3,4
+C	def	-7	Infinity	1	0	1,2,3,4
+C	def	-6	undefined	0	55	1,2,3,4
+C	def	-6	undefined	1	55	1,2,3,4
+C	def	-6	0	0	55	1,2,3,4
+C	def	-6	0	1	55	1,2,3,4
+C	def	-6	NaN	0	55	1,2,3,4
+C	def	-6	NaN	1	55	1,2,3,4
+C	def	-6	0.75	0	41	1,2,3,4
+C	def	-6	0.75	1	41	1,2,3,4
+C	def	-6	1.3	0	71	1,2,3,4
+C	def	-6	1.3	1	71	1,2,3,4
+C	def	-6	-1	0	1048521	1,2,3,4
+C	def	-6	-1	1	1048521	1,2,3,4
+C	def	-6	Infinity	0	0	1,2,3,4
+C	def	-6	Infinity	1	0	1,2,3,4
+C	def	-5	undefined	0	63	1,2,3,4
+C	def	-5	undefined	1	63	1,2,3,4
+C	def	-5	0	0	63	1,2,3,4
+C	def	-5	0	1	63	1,2,3,4
+C	def	-5	NaN	0	63	1,2,3,4
+C	def	-5	NaN	1	63	1,2,3,4
+C	def	-5	0.75	0	47	1,2,3,4
+C	def	-5	0.75	1	47	1,2,3,4
+C	def	-5	1.3	0	82	1,2,3,4
+C	def	-5	1.3	1	82	1,2,3,4
+C	def	-5	-1	0	1048513	1,2,3,4
+C	def	-5	-1	1	1048513	1,2,3,4
+C	def	-5	Infinity	0	0	1,2,3,4
+C	def	-5	Infinity	1	0	1,2,3,4
+C	def	-1	undefined	0	148	1,2,3,4
+C	def	-1	undefined	1	148	1,2,3,4
+C	def	-1	0	0	148	1,2,3,4
+C	def	-1	0	1	148	1,2,3,4
+C	def	-1	NaN	0	148	1,2,3,4
+C	def	-1	NaN	1	148	1,2,3,4
+C	def	-1	0.75	0	111	1,2,3,4
+C	def	-1	0.75	1	111	1,2,3,4
+C	def	-1	1.3	0	192	1,2,3,4
+C	def	-1	1.3	1	192	1,2,3,4
+C	def	-1	-1	0	1048428	1,2,3,4
+C	def	-1	-1	1	1048428	1,2,3,4
+C	def	-1	Infinity	0	0	1,2,3,4
+C	def	-1	Infinity	1	0	1,2,3,4
+C	def	0	undefined	0	222	1,2,3,4
+C	def	0	undefined	1	222	1,2,3,4
+C	def	0	0	0	222	1,2,3,4
+C	def	0	0	1	222	1,2,3,4
+C	def	0	NaN	0	222	1,2,3,4
+C	def	0	NaN	1	222	1,2,3,4
+C	def	0	0.75	0	166	1,2,3,4
+C	def	0	0.75	1	166	1,2,3,4
+C	def	0	1.3	0	289	1,2,3,4
+C	def	0	1.3	1	289	1,2,3,4
+C	def	0	-1	0	1048354	1,2,3,4
+C	def	0	-1	1	1048354	1,2,3,4
+C	def	0	Infinity	0	0	1,2,3,4
+C	def	0	Infinity	1	0	1,2,3,4
+C	def	1	undefined	0	333	1,2,3,4
+C	def	1	undefined	1	333	1,2,3,4
+C	def	1	0	0	333	1,2,3,4
+C	def	1	0	1	333	1,2,3,4
+C	def	1	NaN	0	333	1,2,3,4
+C	def	1	NaN	1	333	1,2,3,4
+C	def	1	0.75	0	250	1,2,3,4
+C	def	1	0.75	1	250	1,2,3,4
+C	def	1	1.3	0	433	1,2,3,4
+C	def	1	1.3	1	433	1,2,3,4
+C	def	1	-1	0	1048243	1,2,3,4
+C	def	1	-1	1	1048243	1,2,3,4
+C	def	1	Infinity	0	0	1,2,3,4
+C	def	1	Infinity	1	0	1,2,3,4
+C	def	2	undefined	0	444	1,2,3,4
+C	def	2	undefined	1	444	1,2,3,4
+C	def	2	0	0	444	1,2,3,4
+C	def	2	0	1	444	1,2,3,4
+C	def	2	NaN	0	444	1,2,3,4
+C	def	2	NaN	1	444	1,2,3,4
+C	def	2	0.75	0	333	1,2,3,4
+C	def	2	0.75	1	333	1,2,3,4
+C	def	2	1.3	0	577	1,2,3,4
+C	def	2	1.3	1	577	1,2,3,4
+C	def	2	-1	0	1048132	1,2,3,4
+C	def	2	-1	1	1048132	1,2,3,4
+C	def	2	Infinity	0	0	1,2,3,4
+C	def	2	Infinity	1	0	1,2,3,4
+C	def	5	undefined	0	777	1,2,3,4
+C	def	5	undefined	1	777	1,2,3,4
+C	def	5	0	0	777	1,2,3,4
+C	def	5	0	1	777	1,2,3,4
+C	def	5	NaN	0	777	1,2,3,4
+C	def	5	NaN	1	777	1,2,3,4
+C	def	5	0.75	0	583	1,2,3,4
+C	def	5	0.75	1	583	1,2,3,4
+C	def	5	1.3	0	1010	1,2,3,4
+C	def	5	1.3	1	1010	1,2,3,4
+C	def	5	-1	0	1047799	1,2,3,4
+C	def	5	-1	1	1047799	1,2,3,4
+C	def	5	Infinity	0	0	1,2,3,4
+C	def	5	Infinity	1	0	1,2,3,4
+C	def	6	undefined	0	888	1,2,3,4
+C	def	6	undefined	1	888	1,2,3,4
+C	def	6	0	0	888	1,2,3,4
+C	def	6	0	1	888	1,2,3,4
+C	def	6	NaN	0	888	1,2,3,4
+C	def	6	NaN	1	888	1,2,3,4
+C	def	6	0.75	0	666	1,2,3,4
+C	def	6	0.75	1	666	1,2,3,4
+C	def	6	1.3	0	1154	1,2,3,4
+C	def	6	1.3	1	1154	1,2,3,4
+C	def	6	-1	0	1047688	1,2,3,4
+C	def	6	-1	1	1047688	1,2,3,4
+C	def	6	Infinity	0	0	1,2,3,4
+C	def	6	Infinity	1	0	1,2,3,4
+C	def	7	undefined	0	888	1,2,3,4
+C	def	7	undefined	1	888	1,2,3,4
+C	def	7	0	0	888	1,2,3,4
+C	def	7	0	1	888	1,2,3,4
+C	def	7	NaN	0	888	1,2,3,4
+C	def	7	NaN	1	888	1,2,3,4
+C	def	7	0.75	0	666	1,2,3,4
+C	def	7	0.75	1	666	1,2,3,4
+C	def	7	1.3	0	1154	1,2,3,4
+C	def	7	1.3	1	1154	1,2,3,4
+C	def	7	-1	0	1047688	1,2,3,4
+C	def	7	-1	1	1047688	1,2,3,4
+C	def	7	Infinity	0	0	1,2,3,4
+C	def	7	Infinity	1	0	1,2,3,4
+C	def	127	undefined	0	888	1,2,3,4
+C	def	127	undefined	1	888	1,2,3,4
+C	def	127	0	0	888	1,2,3,4
+C	def	127	0	1	888	1,2,3,4
+C	def	127	NaN	0	888	1,2,3,4
+C	def	127	NaN	1	888	1,2,3,4
+C	def	127	0.75	0	666	1,2,3,4
+C	def	127	0.75	1	666	1,2,3,4
+C	def	127	1.3	0	1154	1,2,3,4
+C	def	127	1.3	1	1154	1,2,3,4
+C	def	127	-1	0	1047688	1,2,3,4
+C	def	127	-1	1	1047688	1,2,3,4
+C	def	127	Infinity	0	0	1,2,3,4
+C	def	127	Infinity	1	0	1,2,3,4
+C	spa	-128	undefined	0	83	1,2,3,4
+C	spa	-128	undefined	1	83	1,2,3,4
+C	spa	-128	0	0	83	1,2,3,4
+C	spa	-128	0	1	83	1,2,3,4
+C	spa	-128	NaN	0	83	1,2,3,4
+C	spa	-128	NaN	1	83	1,2,3,4
+C	spa	-128	0.75	0	62	1,2,3,4
+C	spa	-128	0.75	1	62	1,2,3,4
+C	spa	-128	1.3	0	108	1,2,3,4
+C	spa	-128	1.3	1	108	1,2,3,4
+C	spa	-128	-1	0	1048493	1,2,3,4
+C	spa	-128	-1	1	1048493	1,2,3,4
+C	spa	-128	Infinity	0	0	1,2,3,4
+C	spa	-128	Infinity	1	0	1,2,3,4
+C	spa	-7	undefined	0	83	1,2,3,4
+C	spa	-7	undefined	1	83	1,2,3,4
+C	spa	-7	0	0	83	1,2,3,4
+C	spa	-7	0	1	83	1,2,3,4
+C	spa	-7	NaN	0	83	1,2,3,4
+C	spa	-7	NaN	1	83	1,2,3,4
+C	spa	-7	0.75	0	62	1,2,3,4
+C	spa	-7	0.75	1	62	1,2,3,4
+C	spa	-7	1.3	0	108	1,2,3,4
+C	spa	-7	1.3	1	108	1,2,3,4
+C	spa	-7	-1	0	1048493	1,2,3,4
+C	spa	-7	-1	1	1048493	1,2,3,4
+C	spa	-7	Infinity	0	0	1,2,3,4
+C	spa	-7	Infinity	1	0	1,2,3,4
+C	spa	-6	undefined	0	83	1,2,3,4
+C	spa	-6	undefined	1	83	1,2,3,4
+C	spa	-6	0	0	83	1,2,3,4
+C	spa	-6	0	1	83	1,2,3,4
+C	spa	-6	NaN	0	83	1,2,3,4
+C	spa	-6	NaN	1	83	1,2,3,4
+C	spa	-6	0.75	0	62	1,2,3,4
+C	spa	-6	0.75	1	62	1,2,3,4
+C	spa	-6	1.3	0	108	1,2,3,4
+C	spa	-6	1.3	1	108	1,2,3,4
+C	spa	-6	-1	0	1048493	1,2,3,4
+C	spa	-6	-1	1	1048493	1,2,3,4
+C	spa	-6	Infinity	0	0	1,2,3,4
+C	spa	-6	Infinity	1	0	1,2,3,4
+C	spa	-5	undefined	0	95	1,2,3,4
+C	spa	-5	undefined	1	95	1,2,3,4
+C	spa	-5	0	0	95	1,2,3,4
+C	spa	-5	0	1	95	1,2,3,4
+C	spa	-5	NaN	0	95	1,2,3,4
+C	spa	-5	NaN	1	95	1,2,3,4
+C	spa	-5	0.75	0	71	1,2,3,4
+C	spa	-5	0.75	1	71	1,2,3,4
+C	spa	-5	1.3	0	123	1,2,3,4
+C	spa	-5	1.3	1	123	1,2,3,4
+C	spa	-5	-1	0	1048481	1,2,3,4
+C	spa	-5	-1	1	1048481	1,2,3,4
+C	spa	-5	Infinity	0	0	1,2,3,4
+C	spa	-5	Infinity	1	0	1,2,3,4
+C	spa	-1	undefined	0	222	1,2,3,4
+C	spa	-1	undefined	1	222	1,2,3,4
+C	spa	-1	0	0	222	1,2,3,4
+C	spa	-1	0	1	222	1,2,3,4
+C	spa	-1	NaN	0	222	1,2,3,4
+C	spa	-1	NaN	1	222	1,2,3,4
+C	spa	-1	0.75	0	166	1,2,3,4
+C	spa	-1	0.75	1	166	1,2,3,4
+C	spa	-1	1.3	0	289	1,2,3,4
+C	spa	-1	1.3	1	289	1,2,3,4
+C	spa	-1	-1	0	1048354	1,2,3,4
+C	spa	-1	-1	1	1048354	1,2,3,4
+C	spa	-1	Infinity	0	0	1,2,3,4
+C	spa	-1	Infinity	1	0	1,2,3,4
+C	spa	0	undefined	0	333	1,2,3,4
+C	spa	0	undefined	1	333	1,2,3,4
+C	spa	0	0	0	333	1,2,3,4
+C	spa	0	0	1	333	1,2,3,4
+C	spa	0	NaN	0	333	1,2,3,4
+C	spa	0	NaN	1	333	1,2,3,4
+C	spa	0	0.75	0	250	1,2,3,4
+C	spa	0	0.75	1	250	1,2,3,4
+C	spa	0	1.3	0	433	1,2,3,4
+C	spa	0	1.3	1	433	1,2,3,4
+C	spa	0	-1	0	1048243	1,2,3,4
+C	spa	0	-1	1	1048243	1,2,3,4
+C	spa	0	Infinity	0	0	1,2,3,4
+C	spa	0	Infinity	1	0	1,2,3,4
+C	spa	1	undefined	0	499	1,2,3,4
+C	spa	1	undefined	1	499	1,2,3,4
+C	spa	1	0	0	499	1,2,3,4
+C	spa	1	0	1	499	1,2,3,4
+C	spa	1	NaN	0	499	1,2,3,4
+C	spa	1	NaN	1	499	1,2,3,4
+C	spa	1	0.75	0	374	1,2,3,4
+C	spa	1	0.75	1	374	1,2,3,4
+C	spa	1	1.3	0	649	1,2,3,4
+C	spa	1	1.3	1	649	1,2,3,4
+C	spa	1	-1	0	1048077	1,2,3,4
+C	spa	1	-1	1	1048077	1,2,3,4
+C	spa	1	Infinity	0	0	1,2,3,4
+C	spa	1	Infinity	1	0	1,2,3,4
+C	spa	2	undefined	0	666	1,2,3,4
+C	spa	2	undefined	1	666	1,2,3,4
+C	spa	2	0	0	666	1,2,3,4
+C	spa	2	0	1	666	1,2,3,4
+C	spa	2	NaN	0	666	1,2,3,4
+C	spa	2	NaN	1	666	1,2,3,4
+C	spa	2	0.75	0	499	1,2,3,4
+C	spa	2	0.75	1	499	1,2,3,4
+C	spa	2	1.3	0	866	1,2,3,4
+C	spa	2	1.3	1	866	1,2,3,4
+C	spa	2	-1	0	1047910	1,2,3,4
+C	spa	2	-1	1	1047910	1,2,3,4
+C	spa	2	Infinity	0	0	1,2,3,4
+C	spa	2	Infinity	1	0	1,2,3,4
+C	spa	5	undefined	0	1165	1,2,3,4
+C	spa	5	undefined	1	1165	1,2,3,4
+C	spa	5	0	0	1165	1,2,3,4
+C	spa	5	0	1	1165	1,2,3,4
+C	spa	5	NaN	0	1165	1,2,3,4
+C	spa	5	NaN	1	1165	1,2,3,4
+C	spa	5	0.75	0	874	1,2,3,4
+C	spa	5	0.75	1	874	1,2,3,4
+C	spa	5	1.3	0	1514	1,2,3,4
+C	spa	5	1.3	1	1514	1,2,3,4
+C	spa	5	-1	0	1047411	1,2,3,4
+C	spa	5	-1	1	1047411	1,2,3,4
+C	spa	5	Infinity	0	0	1,2,3,4
+C	spa	5	Infinity	1	0	1,2,3,4
+C	spa	6	undefined	0	1332	1,2,3,4
+C	spa	6	undefined	1	1332	1,2,3,4
+C	spa	6	0	0	1332	1,2,3,4
+C	spa	6	0	1	1332	1,2,3,4
+C	spa	6	NaN	0	1332	1,2,3,4
+C	spa	6	NaN	1	1332	1,2,3,4
+C	spa	6	0.75	0	999	1,2,3,4
+C	spa	6	0.75	1	999	1,2,3,4
+C	spa	6	1.3	0	1731	1,2,3,4
+C	spa	6	1.3	1	1731	1,2,3,4
+C	spa	6	-1	0	1047244	1,2,3,4
+C	spa	6	-1	1	1047244	1,2,3,4
+C	spa	6	Infinity	0	0	1,2,3,4
+C	spa	6	Infinity	1	0	1,2,3,4
+C	spa	7	undefined	0	1332	1,2,3,4
+C	spa	7	undefined	1	1332	1,2,3,4
+C	spa	7	0	0	1332	1,2,3,4
+C	spa	7	0	1	1332	1,2,3,4
+C	spa	7	NaN	0	1332	1,2,3,4
+C	spa	7	NaN	1	1332	1,2,3,4
+C	spa	7	0.75	0	999	1,2,3,4
+C	spa	7	0.75	1	999	1,2,3,4
+C	spa	7	1.3	0	1731	1,2,3,4
+C	spa	7	1.3	1	1731	1,2,3,4
+C	spa	7	-1	0	1047244	1,2,3,4
+C	spa	7	-1	1	1047244	1,2,3,4
+C	spa	7	Infinity	0	0	1,2,3,4
+C	spa	7	Infinity	1	0	1,2,3,4
+C	spa	127	undefined	0	1332	1,2,3,4
+C	spa	127	undefined	1	1332	1,2,3,4
+C	spa	127	0	0	1332	1,2,3,4
+C	spa	127	0	1	1332	1,2,3,4
+C	spa	127	NaN	0	1332	1,2,3,4
+C	spa	127	NaN	1	1332	1,2,3,4
+C	spa	127	0.75	0	999	1,2,3,4
+C	spa	127	0.75	1	999	1,2,3,4
+C	spa	127	1.3	0	1731	1,2,3,4
+C	spa	127	1.3	1	1731	1,2,3,4
+C	spa	127	-1	0	1047244	1,2,3,4
+C	spa	127	-1	1	1047244	1,2,3,4
+C	spa	127	Infinity	0	0	1,2,3,4
+C	spa	127	Infinity	1	0	1,2,3,4
+C	spd	-128	undefined	0	111	1,2,3,4
+C	spd	-128	undefined	1	111	1,2,3,4
+C	spd	-128	0	0	111	1,2,3,4
+C	spd	-128	0	1	111	1,2,3,4
+C	spd	-128	NaN	0	111	1,2,3,4
+C	spd	-128	NaN	1	111	1,2,3,4
+C	spd	-128	0.75	0	83	1,2,3,4
+C	spd	-128	0.75	1	83	1,2,3,4
+C	spd	-128	1.3	0	144	1,2,3,4
+C	spd	-128	1.3	1	144	1,2,3,4
+C	spd	-128	-1	0	1048465	1,2,3,4
+C	spd	-128	-1	1	1048465	1,2,3,4
+C	spd	-128	Infinity	0	0	1,2,3,4
+C	spd	-128	Infinity	1	0	1,2,3,4
+C	spd	-7	undefined	0	111	1,2,3,4
+C	spd	-7	undefined	1	111	1,2,3,4
+C	spd	-7	0	0	111	1,2,3,4
+C	spd	-7	0	1	111	1,2,3,4
+C	spd	-7	NaN	0	111	1,2,3,4
+C	spd	-7	NaN	1	111	1,2,3,4
+C	spd	-7	0.75	0	83	1,2,3,4
+C	spd	-7	0.75	1	83	1,2,3,4
+C	spd	-7	1.3	0	144	1,2,3,4
+C	spd	-7	1.3	1	144	1,2,3,4
+C	spd	-7	-1	0	1048465	1,2,3,4
+C	spd	-7	-1	1	1048465	1,2,3,4
+C	spd	-7	Infinity	0	0	1,2,3,4
+C	spd	-7	Infinity	1	0	1,2,3,4
+C	spd	-6	undefined	0	111	1,2,3,4
+C	spd	-6	undefined	1	111	1,2,3,4
+C	spd	-6	0	0	111	1,2,3,4
+C	spd	-6	0	1	111	1,2,3,4
+C	spd	-6	NaN	0	111	1,2,3,4
+C	spd	-6	NaN	1	111	1,2,3,4
+C	spd	-6	0.75	0	83	1,2,3,4
+C	spd	-6	0.75	1	83	1,2,3,4
+C	spd	-6	1.3	0	144	1,2,3,4
+C	spd	-6	1.3	1	144	1,2,3,4
+C	spd	-6	-1	0	1048465	1,2,3,4
+C	spd	-6	-1	1	1048465	1,2,3,4
+C	spd	-6	Infinity	0	0	1,2,3,4
+C	spd	-6	Infinity	1	0	1,2,3,4
+C	spd	-5	undefined	0	126	1,2,3,4
+C	spd	-5	undefined	1	126	1,2,3,4
+C	spd	-5	0	0	126	1,2,3,4
+C	spd	-5	0	1	126	1,2,3,4
+C	spd	-5	NaN	0	126	1,2,3,4
+C	spd	-5	NaN	1	126	1,2,3,4
+C	spd	-5	0.75	0	94	1,2,3,4
+C	spd	-5	0.75	1	94	1,2,3,4
+C	spd	-5	1.3	0	164	1,2,3,4
+C	spd	-5	1.3	1	164	1,2,3,4
+C	spd	-5	-1	0	1048450	1,2,3,4
+C	spd	-5	-1	1	1048450	1,2,3,4
+C	spd	-5	Infinity	0	0	1,2,3,4
+C	spd	-5	Infinity	1	0	1,2,3,4
+C	spd	-1	undefined	0	296	1,2,3,4
+C	spd	-1	undefined	1	296	1,2,3,4
+C	spd	-1	0	0	296	1,2,3,4
+C	spd	-1	0	1	296	1,2,3,4
+C	spd	-1	NaN	0	296	1,2,3,4
+C	spd	-1	NaN	1	296	1,2,3,4
+C	spd	-1	0.75	0	222	1,2,3,4
+C	spd	-1	0.75	1	222	1,2,3,4
+C	spd	-1	1.3	0	385	1,2,3,4
+C	spd	-1	1.3	1	385	1,2,3,4
+C	spd	-1	-1	0	1048280	1,2,3,4
+C	spd	-1	-1	1	1048280	1,2,3,4
+C	spd	-1	Infinity	0	0	1,2,3,4
+C	spd	-1	Infinity	1	0	1,2,3,4
+C	spd	0	undefined	0	444	1,2,3,4
+C	spd	0	undefined	1	444	1,2,3,4
+C	spd	0	0	0	444	1,2,3,4
+C	spd	0	0	1	444	1,2,3,4
+C	spd	0	NaN	0	444	1,2,3,4
+C	spd	0	NaN	1	444	1,2,3,4
+C	spd	0	0.75	0	333	1,2,3,4
+C	spd	0	0.75	1	333	1,2,3,4
+C	spd	0	1.3	0	577	1,2,3,4
+C	spd	0	1.3	1	577	1,2,3,4
+C	spd	0	-1	0	1048132	1,2,3,4
+C	spd	0	-1	1	1048132	1,2,3,4
+C	spd	0	Infinity	0	0	1,2,3,4
+C	spd	0	Infinity	1	0	1,2,3,4
+C	spd	1	undefined	0	666	1,2,3,4
+C	spd	1	undefined	1	666	1,2,3,4
+C	spd	1	0	0	666	1,2,3,4
+C	spd	1	0	1	666	1,2,3,4
+C	spd	1	NaN	0	666	1,2,3,4
+C	spd	1	NaN	1	666	1,2,3,4
+C	spd	1	0.75	0	499	1,2,3,4
+C	spd	1	0.75	1	499	1,2,3,4
+C	spd	1	1.3	0	866	1,2,3,4
+C	spd	1	1.3	1	866	1,2,3,4
+C	spd	1	-1	0	1047910	1,2,3,4
+C	spd	1	-1	1	1047910	1,2,3,4
+C	spd	1	Infinity	0	0	1,2,3,4
+C	spd	1	Infinity	1	0	1,2,3,4
+C	spd	2	undefined	0	888	1,2,3,4
+C	spd	2	undefined	1	888	1,2,3,4
+C	spd	2	0	0	888	1,2,3,4
+C	spd	2	0	1	888	1,2,3,4
+C	spd	2	NaN	0	888	1,2,3,4
+C	spd	2	NaN	1	888	1,2,3,4
+C	spd	2	0.75	0	666	1,2,3,4
+C	spd	2	0.75	1	666	1,2,3,4
+C	spd	2	1.3	0	1154	1,2,3,4
+C	spd	2	1.3	1	1154	1,2,3,4
+C	spd	2	-1	0	1047688	1,2,3,4
+C	spd	2	-1	1	1047688	1,2,3,4
+C	spd	2	Infinity	0	0	1,2,3,4
+C	spd	2	Infinity	1	0	1,2,3,4
+C	spd	5	undefined	0	1554	1,2,3,4
+C	spd	5	undefined	1	1554	1,2,3,4
+C	spd	5	0	0	1554	1,2,3,4
+C	spd	5	0	1	1554	1,2,3,4
+C	spd	5	NaN	0	1554	1,2,3,4
+C	spd	5	NaN	1	1554	1,2,3,4
+C	spd	5	0.75	0	1165	1,2,3,4
+C	spd	5	0.75	1	1165	1,2,3,4
+C	spd	5	1.3	0	2020	1,2,3,4
+C	spd	5	1.3	1	2020	1,2,3,4
+C	spd	5	-1	0	1047022	1,2,3,4
+C	spd	5	-1	1	1047022	1,2,3,4
+C	spd	5	Infinity	0	0	1,2,3,4
+C	spd	5	Infinity	1	0	1,2,3,4
+C	spd	6	undefined	0	1776	1,2,3,4
+C	spd	6	undefined	1	1776	1,2,3,4
+C	spd	6	0	0	1776	1,2,3,4
+C	spd	6	0	1	1776	1,2,3,4
+C	spd	6	NaN	0	1776	1,2,3,4
+C	spd	6	NaN	1	1776	1,2,3,4
+C	spd	6	0.75	0	1332	1,2,3,4
+C	spd	6	0.75	1	1332	1,2,3,4
+C	spd	6	1.3	0	2308	1,2,3,4
+C	spd	6	1.3	1	2308	1,2,3,4
+C	spd	6	-1	0	1046800	1,2,3,4
+C	spd	6	-1	1	1046800	1,2,3,4
+C	spd	6	Infinity	0	0	1,2,3,4
+C	spd	6	Infinity	1	0	1,2,3,4
+C	spd	7	undefined	0	1776	1,2,3,4
+C	spd	7	undefined	1	1776	1,2,3,4
+C	spd	7	0	0	1776	1,2,3,4
+C	spd	7	0	1	1776	1,2,3,4
+C	spd	7	NaN	0	1776	1,2,3,4
+C	spd	7	NaN	1	1776	1,2,3,4
+C	spd	7	0.75	0	1332	1,2,3,4
+C	spd	7	0.75	1	1332	1,2,3,4
+C	spd	7	1.3	0	2308	1,2,3,4
+C	spd	7	1.3	1	2308	1,2,3,4
+C	spd	7	-1	0	1046800	1,2,3,4
+C	spd	7	-1	1	1046800	1,2,3,4
+C	spd	7	Infinity	0	0	1,2,3,4
+C	spd	7	Infinity	1	0	1,2,3,4
+C	spd	127	undefined	0	1776	1,2,3,4
+C	spd	127	undefined	1	1776	1,2,3,4
+C	spd	127	0	0	1776	1,2,3,4
+C	spd	127	0	1	1776	1,2,3,4
+C	spd	127	NaN	0	1776	1,2,3,4
+C	spd	127	NaN	1	1776	1,2,3,4
+C	spd	127	0.75	0	1332	1,2,3,4
+C	spd	127	0.75	1	1332	1,2,3,4
+C	spd	127	1.3	0	2308	1,2,3,4
+C	spd	127	1.3	1	2308	1,2,3,4
+C	spd	127	-1	0	1046800	1,2,3,4
+C	spd	127	-1	1	1046800	1,2,3,4
+C	spd	127	Infinity	0	0	1,2,3,4
+C	spd	127	Infinity	1	0	1,2,3,4
+C	spe	-128	undefined	0	138	1,2,3,4
+C	spe	-128	undefined	1	138	1,2,3,4
+C	spe	-128	0	0	138	1,2,3,4
+C	spe	-128	0	1	138	1,2,3,4
+C	spe	-128	NaN	0	138	1,2,3,4
+C	spe	-128	NaN	1	138	1,2,3,4
+C	spe	-128	0.75	0	103	1,2,3,4
+C	spe	-128	0.75	1	103	1,2,3,4
+C	spe	-128	1.3	0	179	1,2,3,4
+C	spe	-128	1.3	1	179	1,2,3,4
+C	spe	-128	-1	0	1048438	1,2,3,4
+C	spe	-128	-1	1	1048438	1,2,3,4
+C	spe	-128	Infinity	0	0	1,2,3,4
+C	spe	-128	Infinity	1	0	1,2,3,4
+C	spe	-7	undefined	0	138	1,2,3,4
+C	spe	-7	undefined	1	138	1,2,3,4
+C	spe	-7	0	0	138	1,2,3,4
+C	spe	-7	0	1	138	1,2,3,4
+C	spe	-7	NaN	0	138	1,2,3,4
+C	spe	-7	NaN	1	138	1,2,3,4
+C	spe	-7	0.75	0	103	1,2,3,4
+C	spe	-7	0.75	1	103	1,2,3,4
+C	spe	-7	1.3	0	179	1,2,3,4
+C	spe	-7	1.3	1	179	1,2,3,4
+C	spe	-7	-1	0	1048438	1,2,3,4
+C	spe	-7	-1	1	1048438	1,2,3,4
+C	spe	-7	Infinity	0	0	1,2,3,4
+C	spe	-7	Infinity	1	0	1,2,3,4
+C	spe	-6	undefined	0	138	1,2,3,4
+C	spe	-6	undefined	1	138	1,2,3,4
+C	spe	-6	0	0	138	1,2,3,4
+C	spe	-6	0	1	138	1,2,3,4
+C	spe	-6	NaN	0	138	1,2,3,4
+C	spe	-6	NaN	1	138	1,2,3,4
+C	spe	-6	0.75	0	103	1,2,3,4
+C	spe	-6	0.75	1	103	1,2,3,4
+C	spe	-6	1.3	0	179	1,2,3,4
+C	spe	-6	1.3	1	179	1,2,3,4
+C	spe	-6	-1	0	1048438	1,2,3,4
+C	spe	-6	-1	1	1048438	1,2,3,4
+C	spe	-6	Infinity	0	0	1,2,3,4
+C	spe	-6	Infinity	1	0	1,2,3,4
+C	spe	-5	undefined	0	158	1,2,3,4
+C	spe	-5	undefined	1	158	1,2,3,4
+C	spe	-5	0	0	158	1,2,3,4
+C	spe	-5	0	1	158	1,2,3,4
+C	spe	-5	NaN	0	158	1,2,3,4
+C	spe	-5	NaN	1	158	1,2,3,4
+C	spe	-5	0.75	0	118	1,2,3,4
+C	spe	-5	0.75	1	118	1,2,3,4
+C	spe	-5	1.3	0	205	1,2,3,4
+C	spe	-5	1.3	1	205	1,2,3,4
+C	spe	-5	-1	0	1048418	1,2,3,4
+C	spe	-5	-1	1	1048418	1,2,3,4
+C	spe	-5	Infinity	0	0	1,2,3,4
+C	spe	-5	Infinity	1	0	1,2,3,4
+C	spe	-1	undefined	0	370	1,2,3,4
+C	spe	-1	undefined	1	370	1,2,3,4
+C	spe	-1	0	0	370	1,2,3,4
+C	spe	-1	0	1	370	1,2,3,4
+C	spe	-1	NaN	0	370	1,2,3,4
+C	spe	-1	NaN	1	370	1,2,3,4
+C	spe	-1	0.75	0	277	1,2,3,4
+C	spe	-1	0.75	1	277	1,2,3,4
+C	spe	-1	1.3	0	481	1,2,3,4
+C	spe	-1	1.3	1	481	1,2,3,4
+C	spe	-1	-1	0	1048206	1,2,3,4
+C	spe	-1	-1	1	1048206	1,2,3,4
+C	spe	-1	Infinity	0	0	1,2,3,4
+C	spe	-1	Infinity	1	0	1,2,3,4
+C	spe	0	undefined	0	555	1,2,3,4
+C	spe	0	undefined	1	555	1,2,3,4
+C	spe	0	0	0	555	1,2,3,4
+C	spe	0	0	1	555	1,2,3,4
+C	spe	0	NaN	0	555	1,2,3,4
+C	spe	0	NaN	1	555	1,2,3,4
+C	spe	0	0.75	0	416	1,2,3,4
+C	spe	0	0.75	1	416	1,2,3,4
+C	spe	0	1.3	0	721	1,2,3,4
+C	spe	0	1.3	1	721	1,2,3,4
+C	spe	0	-1	0	1048021	1,2,3,4
+C	spe	0	-1	1	1048021	1,2,3,4
+C	spe	0	Infinity	0	0	1,2,3,4
+C	spe	0	Infinity	1	0	1,2,3,4
+C	spe	1	undefined	0	832	1,2,3,4
+C	spe	1	undefined	1	832	1,2,3,4
+C	spe	1	0	0	832	1,2,3,4
+C	spe	1	0	1	832	1,2,3,4
+C	spe	1	NaN	0	832	1,2,3,4
+C	spe	1	NaN	1	832	1,2,3,4
+C	spe	1	0.75	0	624	1,2,3,4
+C	spe	1	0.75	1	624	1,2,3,4
+C	spe	1	1.3	0	1081	1,2,3,4
+C	spe	1	1.3	1	1081	1,2,3,4
+C	spe	1	-1	0	1047744	1,2,3,4
+C	spe	1	-1	1	1047744	1,2,3,4
+C	spe	1	Infinity	0	0	1,2,3,4
+C	spe	1	Infinity	1	0	1,2,3,4
+C	spe	2	undefined	0	1110	1,2,3,4
+C	spe	2	undefined	1	1110	1,2,3,4
+C	spe	2	0	0	1110	1,2,3,4
+C	spe	2	0	1	1110	1,2,3,4
+C	spe	2	NaN	0	1110	1,2,3,4
+C	spe	2	NaN	1	1110	1,2,3,4
+C	spe	2	0.75	0	832	1,2,3,4
+C	spe	2	0.75	1	832	1,2,3,4
+C	spe	2	1.3	0	1443	1,2,3,4
+C	spe	2	1.3	1	1443	1,2,3,4
+C	spe	2	-1	0	1047466	1,2,3,4
+C	spe	2	-1	1	1047466	1,2,3,4
+C	spe	2	Infinity	0	0	1,2,3,4
+C	spe	2	Infinity	1	0	1,2,3,4
+C	spe	5	undefined	0	1942	1,2,3,4
+C	spe	5	undefined	1	1942	1,2,3,4
+C	spe	5	0	0	1942	1,2,3,4
+C	spe	5	0	1	1942	1,2,3,4
+C	spe	5	NaN	0	1942	1,2,3,4
+C	spe	5	NaN	1	1942	1,2,3,4
+C	spe	5	0.75	0	1456	1,2,3,4
+C	spe	5	0.75	1	1456	1,2,3,4
+C	spe	5	1.3	0	2524	1,2,3,4
+C	spe	5	1.3	1	2524	1,2,3,4
+C	spe	5	-1	0	1046634	1,2,3,4
+C	spe	5	-1	1	1046634	1,2,3,4
+C	spe	5	Infinity	0	0	1,2,3,4
+C	spe	5	Infinity	1	0	1,2,3,4
+C	spe	6	undefined	0	2220	1,2,3,4
+C	spe	6	undefined	1	2220	1,2,3,4
+C	spe	6	0	0	2220	1,2,3,4
+C	spe	6	0	1	2220	1,2,3,4
+C	spe	6	NaN	0	2220	1,2,3,4
+C	spe	6	NaN	1	2220	1,2,3,4
+C	spe	6	0.75	0	1665	1,2,3,4
+C	spe	6	0.75	1	1665	1,2,3,4
+C	spe	6	1.3	0	2886	1,2,3,4
+C	spe	6	1.3	1	2886	1,2,3,4
+C	spe	6	-1	0	1046356	1,2,3,4
+C	spe	6	-1	1	1046356	1,2,3,4
+C	spe	6	Infinity	0	0	1,2,3,4
+C	spe	6	Infinity	1	0	1,2,3,4
+C	spe	7	undefined	0	2220	1,2,3,4
+C	spe	7	undefined	1	2220	1,2,3,4
+C	spe	7	0	0	2220	1,2,3,4
+C	spe	7	0	1	2220	1,2,3,4
+C	spe	7	NaN	0	2220	1,2,3,4
+C	spe	7	NaN	1	2220	1,2,3,4
+C	spe	7	0.75	0	1665	1,2,3,4
+C	spe	7	0.75	1	1665	1,2,3,4
+C	spe	7	1.3	0	2886	1,2,3,4
+C	spe	7	1.3	1	2886	1,2,3,4
+C	spe	7	-1	0	1046356	1,2,3,4
+C	spe	7	-1	1	1046356	1,2,3,4
+C	spe	7	Infinity	0	0	1,2,3,4
+C	spe	7	Infinity	1	0	1,2,3,4
+C	spe	127	undefined	0	2220	1,2,3,4
+C	spe	127	undefined	1	2220	1,2,3,4
+C	spe	127	0	0	2220	1,2,3,4
+C	spe	127	0	1	2220	1,2,3,4
+C	spe	127	NaN	0	2220	1,2,3,4
+C	spe	127	NaN	1	2220	1,2,3,4
+C	spe	127	0.75	0	1665	1,2,3,4
+C	spe	127	0.75	1	1665	1,2,3,4
+C	spe	127	1.3	0	2886	1,2,3,4
+C	spe	127	1.3	1	2886	1,2,3,4
+C	spe	127	-1	0	1046356	1,2,3,4
+C	spe	127	-1	1	1046356	1,2,3,4
+C	spe	127	Infinity	0	0	1,2,3,4
+C	spe	127	Infinity	1	0	1,2,3,4
+G	static	-	0	-6	atk	0	0	27	1,2,3,4
+G	static	-	0	-6	atk	0	1	27	1,2,3,4
+G	static	-	0	-6	atk	1	0	111	1,2,3,4
+G	static	-	0	-6	atk	1	1	111	1,2,3,4
+G	static	-	0	-6	def	0	0	55	1,2,3,4
+G	static	-	0	-6	def	0	1	55	1,2,3,4
+G	static	-	0	-6	def	1	0	222	1,2,3,4
+G	static	-	0	-6	def	1	1	222	1,2,3,4
+G	static	-	0	-6	spa	0	0	83	1,2,3,4
+G	static	-	0	-6	spa	0	1	83	1,2,3,4
+G	static	-	0	-6	spa	1	0	333	1,2,3,4
+G	static	-	0	-6	spa	1	1	333	1,2,3,4
+G	static	-	0	-6	spd	0	0	111	1,2,3,4
+G	static	-	0	-6	spd	0	1	111	1,2,3,4
+G	static	-	0	-6	spd	1	0	444	1,2,3,4
+G	static	-	0	-6	spd	1	1	444	1,2,3,4
+G	static	-	0	-6	spe	0	0	138	1,2,3,4
+G	static	-	0	-6	spe	0	1	138	1,2,3,4
+G	static	-	0	-6	spe	1	0	555	1,2,3,4
+G	static	-	0	-6	spe	1	1	555	1,2,3,4
+G	static	-	0	-1	atk	0	0	74	1,2,3,4
+G	static	-	0	-1	atk	0	1	74	1,2,3,4
+G	static	-	0	-1	atk	1	0	111	1,2,3,4
+G	static	-	0	-1	atk	1	1	111	1,2,3,4
+G	static	-	0	-1	def	0	0	148	1,2,3,4
+G	static	-	0	-1	def	0	1	148	1,2,3,4
+G	static	-	0	-1	def	1	0	222	1,2,3,4
+G	static	-	0	-1	def	1	1	222	1,2,3,4
+G	static	-	0	-1	spa	0	0	222	1,2,3,4
+G	static	-	0	-1	spa	0	1	222	1,2,3,4
+G	static	-	0	-1	spa	1	0	333	1,2,3,4
+G	static	-	0	-1	spa	1	1	333	1,2,3,4
+G	static	-	0	-1	spd	0	0	296	1,2,3,4
+G	static	-	0	-1	spd	0	1	296	1,2,3,4
+G	static	-	0	-1	spd	1	0	444	1,2,3,4
+G	static	-	0	-1	spd	1	1	444	1,2,3,4
+G	static	-	0	-1	spe	0	0	370	1,2,3,4
+G	static	-	0	-1	spe	0	1	370	1,2,3,4
+G	static	-	0	-1	spe	1	0	555	1,2,3,4
+G	static	-	0	-1	spe	1	1	555	1,2,3,4
+G	static	-	0	0	atk	0	0	111	1,2,3,4
+G	static	-	0	0	atk	0	1	111	1,2,3,4
+G	static	-	0	0	atk	1	0	111	1,2,3,4
+G	static	-	0	0	atk	1	1	111	1,2,3,4
+G	static	-	0	0	def	0	0	222	1,2,3,4
+G	static	-	0	0	def	0	1	222	1,2,3,4
+G	static	-	0	0	def	1	0	222	1,2,3,4
+G	static	-	0	0	def	1	1	222	1,2,3,4
+G	static	-	0	0	spa	0	0	333	1,2,3,4
+G	static	-	0	0	spa	0	1	333	1,2,3,4
+G	static	-	0	0	spa	1	0	333	1,2,3,4
+G	static	-	0	0	spa	1	1	333	1,2,3,4
+G	static	-	0	0	spd	0	0	444	1,2,3,4
+G	static	-	0	0	spd	0	1	444	1,2,3,4
+G	static	-	0	0	spd	1	0	444	1,2,3,4
+G	static	-	0	0	spd	1	1	444	1,2,3,4
+G	static	-	0	0	spe	0	0	555	1,2,3,4
+G	static	-	0	0	spe	0	1	555	1,2,3,4
+G	static	-	0	0	spe	1	0	555	1,2,3,4
+G	static	-	0	0	spe	1	1	555	1,2,3,4
+G	static	-	0	6	atk	0	0	444	1,2,3,4
+G	static	-	0	6	atk	0	1	444	1,2,3,4
+G	static	-	0	6	atk	1	0	111	1,2,3,4
+G	static	-	0	6	atk	1	1	111	1,2,3,4
+G	static	-	0	6	def	0	0	888	1,2,3,4
+G	static	-	0	6	def	0	1	888	1,2,3,4
+G	static	-	0	6	def	1	0	222	1,2,3,4
+G	static	-	0	6	def	1	1	222	1,2,3,4
+G	static	-	0	6	spa	0	0	1332	1,2,3,4
+G	static	-	0	6	spa	0	1	1332	1,2,3,4
+G	static	-	0	6	spa	1	0	333	1,2,3,4
+G	static	-	0	6	spa	1	1	333	1,2,3,4
+G	static	-	0	6	spd	0	0	1776	1,2,3,4
+G	static	-	0	6	spd	0	1	1776	1,2,3,4
+G	static	-	0	6	spd	1	0	444	1,2,3,4
+G	static	-	0	6	spd	1	1	444	1,2,3,4
+G	static	-	0	6	spe	0	0	2220	1,2,3,4
+G	static	-	0	6	spe	0	1	2220	1,2,3,4
+G	static	-	0	6	spe	1	0	555	1,2,3,4
+G	static	-	0	6	spe	1	1	555	1,2,3,4
+G	static	-	1	-6	atk	0	0	27	1,2,3,4
+G	static	-	1	-6	atk	0	1	27	1,2,3,4
+G	static	-	1	-6	atk	1	0	111	1,2,3,4
+G	static	-	1	-6	atk	1	1	111	1,2,3,4
+G	static	-	1	-6	def	0	0	55	1,2,3,4
+G	static	-	1	-6	def	0	1	55	1,2,3,4
+G	static	-	1	-6	def	1	0	222	1,2,3,4
+G	static	-	1	-6	def	1	1	222	1,2,3,4
+G	static	-	1	-6	spa	0	0	83	1,2,3,4
+G	static	-	1	-6	spa	0	1	83	1,2,3,4
+G	static	-	1	-6	spa	1	0	333	1,2,3,4
+G	static	-	1	-6	spa	1	1	333	1,2,3,4
+G	static	-	1	-6	spd	0	0	111	1,2,3,4
+G	static	-	1	-6	spd	0	1	111	1,2,3,4
+G	static	-	1	-6	spd	1	0	444	1,2,3,4
+G	static	-	1	-6	spd	1	1	444	1,2,3,4
+G	static	-	1	-6	spe	0	0	138	1,2,3,4
+G	static	-	1	-6	spe	0	1	138	1,2,3,4
+G	static	-	1	-6	spe	1	0	555	1,2,3,4
+G	static	-	1	-6	spe	1	1	555	1,2,3,4
+G	static	-	1	-1	atk	0	0	74	1,2,3,4
+G	static	-	1	-1	atk	0	1	74	1,2,3,4
+G	static	-	1	-1	atk	1	0	111	1,2,3,4
+G	static	-	1	-1	atk	1	1	111	1,2,3,4
+G	static	-	1	-1	def	0	0	148	1,2,3,4
+G	static	-	1	-1	def	0	1	148	1,2,3,4
+G	static	-	1	-1	def	1	0	222	1,2,3,4
+G	static	-	1	-1	def	1	1	222	1,2,3,4
+G	static	-	1	-1	spa	0	0	222	1,2,3,4
+G	static	-	1	-1	spa	0	1	222	1,2,3,4
+G	static	-	1	-1	spa	1	0	333	1,2,3,4
+G	static	-	1	-1	spa	1	1	333	1,2,3,4
+G	static	-	1	-1	spd	0	0	296	1,2,3,4
+G	static	-	1	-1	spd	0	1	296	1,2,3,4
+G	static	-	1	-1	spd	1	0	444	1,2,3,4
+G	static	-	1	-1	spd	1	1	444	1,2,3,4
+G	static	-	1	-1	spe	0	0	370	1,2,3,4
+G	static	-	1	-1	spe	0	1	370	1,2,3,4
+G	static	-	1	-1	spe	1	0	555	1,2,3,4
+G	static	-	1	-1	spe	1	1	555	1,2,3,4
+G	static	-	1	0	atk	0	0	111	1,2,3,4
+G	static	-	1	0	atk	0	1	111	1,2,3,4
+G	static	-	1	0	atk	1	0	111	1,2,3,4
+G	static	-	1	0	atk	1	1	111	1,2,3,4
+G	static	-	1	0	def	0	0	222	1,2,3,4
+G	static	-	1	0	def	0	1	222	1,2,3,4
+G	static	-	1	0	def	1	0	222	1,2,3,4
+G	static	-	1	0	def	1	1	222	1,2,3,4
+G	static	-	1	0	spa	0	0	333	1,2,3,4
+G	static	-	1	0	spa	0	1	333	1,2,3,4
+G	static	-	1	0	spa	1	0	333	1,2,3,4
+G	static	-	1	0	spa	1	1	333	1,2,3,4
+G	static	-	1	0	spd	0	0	444	1,2,3,4
+G	static	-	1	0	spd	0	1	444	1,2,3,4
+G	static	-	1	0	spd	1	0	444	1,2,3,4
+G	static	-	1	0	spd	1	1	444	1,2,3,4
+G	static	-	1	0	spe	0	0	555	1,2,3,4
+G	static	-	1	0	spe	0	1	555	1,2,3,4
+G	static	-	1	0	spe	1	0	555	1,2,3,4
+G	static	-	1	0	spe	1	1	555	1,2,3,4
+G	static	-	1	6	atk	0	0	444	1,2,3,4
+G	static	-	1	6	atk	0	1	444	1,2,3,4
+G	static	-	1	6	atk	1	0	111	1,2,3,4
+G	static	-	1	6	atk	1	1	111	1,2,3,4
+G	static	-	1	6	def	0	0	888	1,2,3,4
+G	static	-	1	6	def	0	1	888	1,2,3,4
+G	static	-	1	6	def	1	0	222	1,2,3,4
+G	static	-	1	6	def	1	1	222	1,2,3,4
+G	static	-	1	6	spa	0	0	1332	1,2,3,4
+G	static	-	1	6	spa	0	1	1332	1,2,3,4
+G	static	-	1	6	spa	1	0	333	1,2,3,4
+G	static	-	1	6	spa	1	1	333	1,2,3,4
+G	static	-	1	6	spd	0	0	1776	1,2,3,4
+G	static	-	1	6	spd	0	1	1776	1,2,3,4
+G	static	-	1	6	spd	1	0	444	1,2,3,4
+G	static	-	1	6	spd	1	1	444	1,2,3,4
+G	static	-	1	6	spe	0	0	2220	1,2,3,4
+G	static	-	1	6	spe	0	1	2220	1,2,3,4
+G	static	-	1	6	spe	1	0	555	1,2,3,4
+G	static	-	1	6	spe	1	1	555	1,2,3,4
+G	static	choiceband	0	-6	atk	0	0	27	1,2,3,4
+G	static	choiceband	0	-6	atk	0	1	27	1,2,3,4
+G	static	choiceband	0	-6	atk	1	0	111	1,2,3,4
+G	static	choiceband	0	-6	atk	1	1	111	1,2,3,4
+G	static	choiceband	0	-6	def	0	0	55	1,2,3,4
+G	static	choiceband	0	-6	def	0	1	55	1,2,3,4
+G	static	choiceband	0	-6	def	1	0	222	1,2,3,4
+G	static	choiceband	0	-6	def	1	1	222	1,2,3,4
+G	static	choiceband	0	-6	spa	0	0	83	1,2,3,4
+G	static	choiceband	0	-6	spa	0	1	83	1,2,3,4
+G	static	choiceband	0	-6	spa	1	0	333	1,2,3,4
+G	static	choiceband	0	-6	spa	1	1	333	1,2,3,4
+G	static	choiceband	0	-6	spd	0	0	111	1,2,3,4
+G	static	choiceband	0	-6	spd	0	1	111	1,2,3,4
+G	static	choiceband	0	-6	spd	1	0	444	1,2,3,4
+G	static	choiceband	0	-6	spd	1	1	444	1,2,3,4
+G	static	choiceband	0	-6	spe	0	0	138	1,2,3,4
+G	static	choiceband	0	-6	spe	0	1	138	1,2,3,4
+G	static	choiceband	0	-6	spe	1	0	555	1,2,3,4
+G	static	choiceband	0	-6	spe	1	1	555	1,2,3,4
+G	static	choiceband	0	-1	atk	0	0	74	1,2,3,4
+G	static	choiceband	0	-1	atk	0	1	74	1,2,3,4
+G	static	choiceband	0	-1	atk	1	0	111	1,2,3,4
+G	static	choiceband	0	-1	atk	1	1	111	1,2,3,4
+G	static	choiceband	0	-1	def	0	0	148	1,2,3,4
+G	static	choiceband	0	-1	def	0	1	148	1,2,3,4
+G	static	choiceband	0	-1	def	1	0	222	1,2,3,4
+G	static	choiceband	0	-1	def	1	1	222	1,2,3,4
+G	static	choiceband	0	-1	spa	0	0	222	1,2,3,4
+G	static	choiceband	0	-1	spa	0	1	222	1,2,3,4
+G	static	choiceband	0	-1	spa	1	0	333	1,2,3,4
+G	static	choiceband	0	-1	spa	1	1	333	1,2,3,4
+G	static	choiceband	0	-1	spd	0	0	296	1,2,3,4
+G	static	choiceband	0	-1	spd	0	1	296	1,2,3,4
+G	static	choiceband	0	-1	spd	1	0	444	1,2,3,4
+G	static	choiceband	0	-1	spd	1	1	444	1,2,3,4
+G	static	choiceband	0	-1	spe	0	0	370	1,2,3,4
+G	static	choiceband	0	-1	spe	0	1	370	1,2,3,4
+G	static	choiceband	0	-1	spe	1	0	555	1,2,3,4
+G	static	choiceband	0	-1	spe	1	1	555	1,2,3,4
+G	static	choiceband	0	0	atk	0	0	111	1,2,3,4
+G	static	choiceband	0	0	atk	0	1	111	1,2,3,4
+G	static	choiceband	0	0	atk	1	0	111	1,2,3,4
+G	static	choiceband	0	0	atk	1	1	111	1,2,3,4
+G	static	choiceband	0	0	def	0	0	222	1,2,3,4
+G	static	choiceband	0	0	def	0	1	222	1,2,3,4
+G	static	choiceband	0	0	def	1	0	222	1,2,3,4
+G	static	choiceband	0	0	def	1	1	222	1,2,3,4
+G	static	choiceband	0	0	spa	0	0	333	1,2,3,4
+G	static	choiceband	0	0	spa	0	1	333	1,2,3,4
+G	static	choiceband	0	0	spa	1	0	333	1,2,3,4
+G	static	choiceband	0	0	spa	1	1	333	1,2,3,4
+G	static	choiceband	0	0	spd	0	0	444	1,2,3,4
+G	static	choiceband	0	0	spd	0	1	444	1,2,3,4
+G	static	choiceband	0	0	spd	1	0	444	1,2,3,4
+G	static	choiceband	0	0	spd	1	1	444	1,2,3,4
+G	static	choiceband	0	0	spe	0	0	555	1,2,3,4
+G	static	choiceband	0	0	spe	0	1	555	1,2,3,4
+G	static	choiceband	0	0	spe	1	0	555	1,2,3,4
+G	static	choiceband	0	0	spe	1	1	555	1,2,3,4
+G	static	choiceband	0	6	atk	0	0	444	1,2,3,4
+G	static	choiceband	0	6	atk	0	1	444	1,2,3,4
+G	static	choiceband	0	6	atk	1	0	111	1,2,3,4
+G	static	choiceband	0	6	atk	1	1	111	1,2,3,4
+G	static	choiceband	0	6	def	0	0	888	1,2,3,4
+G	static	choiceband	0	6	def	0	1	888	1,2,3,4
+G	static	choiceband	0	6	def	1	0	222	1,2,3,4
+G	static	choiceband	0	6	def	1	1	222	1,2,3,4
+G	static	choiceband	0	6	spa	0	0	1332	1,2,3,4
+G	static	choiceband	0	6	spa	0	1	1332	1,2,3,4
+G	static	choiceband	0	6	spa	1	0	333	1,2,3,4
+G	static	choiceband	0	6	spa	1	1	333	1,2,3,4
+G	static	choiceband	0	6	spd	0	0	1776	1,2,3,4
+G	static	choiceband	0	6	spd	0	1	1776	1,2,3,4
+G	static	choiceband	0	6	spd	1	0	444	1,2,3,4
+G	static	choiceband	0	6	spd	1	1	444	1,2,3,4
+G	static	choiceband	0	6	spe	0	0	2220	1,2,3,4
+G	static	choiceband	0	6	spe	0	1	2220	1,2,3,4
+G	static	choiceband	0	6	spe	1	0	555	1,2,3,4
+G	static	choiceband	0	6	spe	1	1	555	1,2,3,4
+G	static	choiceband	1	-6	atk	0	0	40	1,2,3,4
+G	static	choiceband	1	-6	atk	0	1	27	1,2,3,4
+G	static	choiceband	1	-6	atk	1	0	166	1,2,3,4
+G	static	choiceband	1	-6	atk	1	1	111	1,2,3,4
+G	static	choiceband	1	-6	def	0	0	55	1,2,3,4
+G	static	choiceband	1	-6	def	0	1	55	1,2,3,4
+G	static	choiceband	1	-6	def	1	0	222	1,2,3,4
+G	static	choiceband	1	-6	def	1	1	222	1,2,3,4
+G	static	choiceband	1	-6	spa	0	0	83	1,2,3,4
+G	static	choiceband	1	-6	spa	0	1	83	1,2,3,4
+G	static	choiceband	1	-6	spa	1	0	333	1,2,3,4
+G	static	choiceband	1	-6	spa	1	1	333	1,2,3,4
+G	static	choiceband	1	-6	spd	0	0	111	1,2,3,4
+G	static	choiceband	1	-6	spd	0	1	111	1,2,3,4
+G	static	choiceband	1	-6	spd	1	0	444	1,2,3,4
+G	static	choiceband	1	-6	spd	1	1	444	1,2,3,4
+G	static	choiceband	1	-6	spe	0	0	138	1,2,3,4
+G	static	choiceband	1	-6	spe	0	1	138	1,2,3,4
+G	static	choiceband	1	-6	spe	1	0	555	1,2,3,4
+G	static	choiceband	1	-6	spe	1	1	555	1,2,3,4
+G	static	choiceband	1	-1	atk	0	0	111	1,2,3,4
+G	static	choiceband	1	-1	atk	0	1	74	1,2,3,4
+G	static	choiceband	1	-1	atk	1	0	166	1,2,3,4
+G	static	choiceband	1	-1	atk	1	1	111	1,2,3,4
+G	static	choiceband	1	-1	def	0	0	148	1,2,3,4
+G	static	choiceband	1	-1	def	0	1	148	1,2,3,4
+G	static	choiceband	1	-1	def	1	0	222	1,2,3,4
+G	static	choiceband	1	-1	def	1	1	222	1,2,3,4
+G	static	choiceband	1	-1	spa	0	0	222	1,2,3,4
+G	static	choiceband	1	-1	spa	0	1	222	1,2,3,4
+G	static	choiceband	1	-1	spa	1	0	333	1,2,3,4
+G	static	choiceband	1	-1	spa	1	1	333	1,2,3,4
+G	static	choiceband	1	-1	spd	0	0	296	1,2,3,4
+G	static	choiceband	1	-1	spd	0	1	296	1,2,3,4
+G	static	choiceband	1	-1	spd	1	0	444	1,2,3,4
+G	static	choiceband	1	-1	spd	1	1	444	1,2,3,4
+G	static	choiceband	1	-1	spe	0	0	370	1,2,3,4
+G	static	choiceband	1	-1	spe	0	1	370	1,2,3,4
+G	static	choiceband	1	-1	spe	1	0	555	1,2,3,4
+G	static	choiceband	1	-1	spe	1	1	555	1,2,3,4
+G	static	choiceband	1	0	atk	0	0	166	1,2,3,4
+G	static	choiceband	1	0	atk	0	1	111	1,2,3,4
+G	static	choiceband	1	0	atk	1	0	166	1,2,3,4
+G	static	choiceband	1	0	atk	1	1	111	1,2,3,4
+G	static	choiceband	1	0	def	0	0	222	1,2,3,4
+G	static	choiceband	1	0	def	0	1	222	1,2,3,4
+G	static	choiceband	1	0	def	1	0	222	1,2,3,4
+G	static	choiceband	1	0	def	1	1	222	1,2,3,4
+G	static	choiceband	1	0	spa	0	0	333	1,2,3,4
+G	static	choiceband	1	0	spa	0	1	333	1,2,3,4
+G	static	choiceband	1	0	spa	1	0	333	1,2,3,4
+G	static	choiceband	1	0	spa	1	1	333	1,2,3,4
+G	static	choiceband	1	0	spd	0	0	444	1,2,3,4
+G	static	choiceband	1	0	spd	0	1	444	1,2,3,4
+G	static	choiceband	1	0	spd	1	0	444	1,2,3,4
+G	static	choiceband	1	0	spd	1	1	444	1,2,3,4
+G	static	choiceband	1	0	spe	0	0	555	1,2,3,4
+G	static	choiceband	1	0	spe	0	1	555	1,2,3,4
+G	static	choiceband	1	0	spe	1	0	555	1,2,3,4
+G	static	choiceband	1	0	spe	1	1	555	1,2,3,4
+G	static	choiceband	1	6	atk	0	0	666	1,2,3,4
+G	static	choiceband	1	6	atk	0	1	444	1,2,3,4
+G	static	choiceband	1	6	atk	1	0	166	1,2,3,4
+G	static	choiceband	1	6	atk	1	1	111	1,2,3,4
+G	static	choiceband	1	6	def	0	0	888	1,2,3,4
+G	static	choiceband	1	6	def	0	1	888	1,2,3,4
+G	static	choiceband	1	6	def	1	0	222	1,2,3,4
+G	static	choiceband	1	6	def	1	1	222	1,2,3,4
+G	static	choiceband	1	6	spa	0	0	1332	1,2,3,4
+G	static	choiceband	1	6	spa	0	1	1332	1,2,3,4
+G	static	choiceband	1	6	spa	1	0	333	1,2,3,4
+G	static	choiceband	1	6	spa	1	1	333	1,2,3,4
+G	static	choiceband	1	6	spd	0	0	1776	1,2,3,4
+G	static	choiceband	1	6	spd	0	1	1776	1,2,3,4
+G	static	choiceband	1	6	spd	1	0	444	1,2,3,4
+G	static	choiceband	1	6	spd	1	1	444	1,2,3,4
+G	static	choiceband	1	6	spe	0	0	2220	1,2,3,4
+G	static	choiceband	1	6	spe	0	1	2220	1,2,3,4
+G	static	choiceband	1	6	spe	1	0	555	1,2,3,4
+G	static	choiceband	1	6	spe	1	1	555	1,2,3,4
+G	static	assaultvest	0	-6	atk	0	0	27	1,2,3,4
+G	static	assaultvest	0	-6	atk	0	1	27	1,2,3,4
+G	static	assaultvest	0	-6	atk	1	0	111	1,2,3,4
+G	static	assaultvest	0	-6	atk	1	1	111	1,2,3,4
+G	static	assaultvest	0	-6	def	0	0	55	1,2,3,4
+G	static	assaultvest	0	-6	def	0	1	55	1,2,3,4
+G	static	assaultvest	0	-6	def	1	0	222	1,2,3,4
+G	static	assaultvest	0	-6	def	1	1	222	1,2,3,4
+G	static	assaultvest	0	-6	spa	0	0	83	1,2,3,4
+G	static	assaultvest	0	-6	spa	0	1	83	1,2,3,4
+G	static	assaultvest	0	-6	spa	1	0	333	1,2,3,4
+G	static	assaultvest	0	-6	spa	1	1	333	1,2,3,4
+G	static	assaultvest	0	-6	spd	0	0	111	1,2,3,4
+G	static	assaultvest	0	-6	spd	0	1	111	1,2,3,4
+G	static	assaultvest	0	-6	spd	1	0	444	1,2,3,4
+G	static	assaultvest	0	-6	spd	1	1	444	1,2,3,4
+G	static	assaultvest	0	-6	spe	0	0	138	1,2,3,4
+G	static	assaultvest	0	-6	spe	0	1	138	1,2,3,4
+G	static	assaultvest	0	-6	spe	1	0	555	1,2,3,4
+G	static	assaultvest	0	-6	spe	1	1	555	1,2,3,4
+G	static	assaultvest	0	-1	atk	0	0	74	1,2,3,4
+G	static	assaultvest	0	-1	atk	0	1	74	1,2,3,4
+G	static	assaultvest	0	-1	atk	1	0	111	1,2,3,4
+G	static	assaultvest	0	-1	atk	1	1	111	1,2,3,4
+G	static	assaultvest	0	-1	def	0	0	148	1,2,3,4
+G	static	assaultvest	0	-1	def	0	1	148	1,2,3,4
+G	static	assaultvest	0	-1	def	1	0	222	1,2,3,4
+G	static	assaultvest	0	-1	def	1	1	222	1,2,3,4
+G	static	assaultvest	0	-1	spa	0	0	222	1,2,3,4
+G	static	assaultvest	0	-1	spa	0	1	222	1,2,3,4
+G	static	assaultvest	0	-1	spa	1	0	333	1,2,3,4
+G	static	assaultvest	0	-1	spa	1	1	333	1,2,3,4
+G	static	assaultvest	0	-1	spd	0	0	296	1,2,3,4
+G	static	assaultvest	0	-1	spd	0	1	296	1,2,3,4
+G	static	assaultvest	0	-1	spd	1	0	444	1,2,3,4
+G	static	assaultvest	0	-1	spd	1	1	444	1,2,3,4
+G	static	assaultvest	0	-1	spe	0	0	370	1,2,3,4
+G	static	assaultvest	0	-1	spe	0	1	370	1,2,3,4
+G	static	assaultvest	0	-1	spe	1	0	555	1,2,3,4
+G	static	assaultvest	0	-1	spe	1	1	555	1,2,3,4
+G	static	assaultvest	0	0	atk	0	0	111	1,2,3,4
+G	static	assaultvest	0	0	atk	0	1	111	1,2,3,4
+G	static	assaultvest	0	0	atk	1	0	111	1,2,3,4
+G	static	assaultvest	0	0	atk	1	1	111	1,2,3,4
+G	static	assaultvest	0	0	def	0	0	222	1,2,3,4
+G	static	assaultvest	0	0	def	0	1	222	1,2,3,4
+G	static	assaultvest	0	0	def	1	0	222	1,2,3,4
+G	static	assaultvest	0	0	def	1	1	222	1,2,3,4
+G	static	assaultvest	0	0	spa	0	0	333	1,2,3,4
+G	static	assaultvest	0	0	spa	0	1	333	1,2,3,4
+G	static	assaultvest	0	0	spa	1	0	333	1,2,3,4
+G	static	assaultvest	0	0	spa	1	1	333	1,2,3,4
+G	static	assaultvest	0	0	spd	0	0	444	1,2,3,4
+G	static	assaultvest	0	0	spd	0	1	444	1,2,3,4
+G	static	assaultvest	0	0	spd	1	0	444	1,2,3,4
+G	static	assaultvest	0	0	spd	1	1	444	1,2,3,4
+G	static	assaultvest	0	0	spe	0	0	555	1,2,3,4
+G	static	assaultvest	0	0	spe	0	1	555	1,2,3,4
+G	static	assaultvest	0	0	spe	1	0	555	1,2,3,4
+G	static	assaultvest	0	0	spe	1	1	555	1,2,3,4
+G	static	assaultvest	0	6	atk	0	0	444	1,2,3,4
+G	static	assaultvest	0	6	atk	0	1	444	1,2,3,4
+G	static	assaultvest	0	6	atk	1	0	111	1,2,3,4
+G	static	assaultvest	0	6	atk	1	1	111	1,2,3,4
+G	static	assaultvest	0	6	def	0	0	888	1,2,3,4
+G	static	assaultvest	0	6	def	0	1	888	1,2,3,4
+G	static	assaultvest	0	6	def	1	0	222	1,2,3,4
+G	static	assaultvest	0	6	def	1	1	222	1,2,3,4
+G	static	assaultvest	0	6	spa	0	0	1332	1,2,3,4
+G	static	assaultvest	0	6	spa	0	1	1332	1,2,3,4
+G	static	assaultvest	0	6	spa	1	0	333	1,2,3,4
+G	static	assaultvest	0	6	spa	1	1	333	1,2,3,4
+G	static	assaultvest	0	6	spd	0	0	1776	1,2,3,4
+G	static	assaultvest	0	6	spd	0	1	1776	1,2,3,4
+G	static	assaultvest	0	6	spd	1	0	444	1,2,3,4
+G	static	assaultvest	0	6	spd	1	1	444	1,2,3,4
+G	static	assaultvest	0	6	spe	0	0	2220	1,2,3,4
+G	static	assaultvest	0	6	spe	0	1	2220	1,2,3,4
+G	static	assaultvest	0	6	spe	1	0	555	1,2,3,4
+G	static	assaultvest	0	6	spe	1	1	555	1,2,3,4
+G	static	assaultvest	1	-6	atk	0	0	27	1,2,3,4
+G	static	assaultvest	1	-6	atk	0	1	27	1,2,3,4
+G	static	assaultvest	1	-6	atk	1	0	111	1,2,3,4
+G	static	assaultvest	1	-6	atk	1	1	111	1,2,3,4
+G	static	assaultvest	1	-6	def	0	0	55	1,2,3,4
+G	static	assaultvest	1	-6	def	0	1	55	1,2,3,4
+G	static	assaultvest	1	-6	def	1	0	222	1,2,3,4
+G	static	assaultvest	1	-6	def	1	1	222	1,2,3,4
+G	static	assaultvest	1	-6	spa	0	0	83	1,2,3,4
+G	static	assaultvest	1	-6	spa	0	1	83	1,2,3,4
+G	static	assaultvest	1	-6	spa	1	0	333	1,2,3,4
+G	static	assaultvest	1	-6	spa	1	1	333	1,2,3,4
+G	static	assaultvest	1	-6	spd	0	0	166	1,2,3,4
+G	static	assaultvest	1	-6	spd	0	1	111	1,2,3,4
+G	static	assaultvest	1	-6	spd	1	0	666	1,2,3,4
+G	static	assaultvest	1	-6	spd	1	1	444	1,2,3,4
+G	static	assaultvest	1	-6	spe	0	0	138	1,2,3,4
+G	static	assaultvest	1	-6	spe	0	1	138	1,2,3,4
+G	static	assaultvest	1	-6	spe	1	0	555	1,2,3,4
+G	static	assaultvest	1	-6	spe	1	1	555	1,2,3,4
+G	static	assaultvest	1	-1	atk	0	0	74	1,2,3,4
+G	static	assaultvest	1	-1	atk	0	1	74	1,2,3,4
+G	static	assaultvest	1	-1	atk	1	0	111	1,2,3,4
+G	static	assaultvest	1	-1	atk	1	1	111	1,2,3,4
+G	static	assaultvest	1	-1	def	0	0	148	1,2,3,4
+G	static	assaultvest	1	-1	def	0	1	148	1,2,3,4
+G	static	assaultvest	1	-1	def	1	0	222	1,2,3,4
+G	static	assaultvest	1	-1	def	1	1	222	1,2,3,4
+G	static	assaultvest	1	-1	spa	0	0	222	1,2,3,4
+G	static	assaultvest	1	-1	spa	0	1	222	1,2,3,4
+G	static	assaultvest	1	-1	spa	1	0	333	1,2,3,4
+G	static	assaultvest	1	-1	spa	1	1	333	1,2,3,4
+G	static	assaultvest	1	-1	spd	0	0	444	1,2,3,4
+G	static	assaultvest	1	-1	spd	0	1	296	1,2,3,4
+G	static	assaultvest	1	-1	spd	1	0	666	1,2,3,4
+G	static	assaultvest	1	-1	spd	1	1	444	1,2,3,4
+G	static	assaultvest	1	-1	spe	0	0	370	1,2,3,4
+G	static	assaultvest	1	-1	spe	0	1	370	1,2,3,4
+G	static	assaultvest	1	-1	spe	1	0	555	1,2,3,4
+G	static	assaultvest	1	-1	spe	1	1	555	1,2,3,4
+G	static	assaultvest	1	0	atk	0	0	111	1,2,3,4
+G	static	assaultvest	1	0	atk	0	1	111	1,2,3,4
+G	static	assaultvest	1	0	atk	1	0	111	1,2,3,4
+G	static	assaultvest	1	0	atk	1	1	111	1,2,3,4
+G	static	assaultvest	1	0	def	0	0	222	1,2,3,4
+G	static	assaultvest	1	0	def	0	1	222	1,2,3,4
+G	static	assaultvest	1	0	def	1	0	222	1,2,3,4
+G	static	assaultvest	1	0	def	1	1	222	1,2,3,4
+G	static	assaultvest	1	0	spa	0	0	333	1,2,3,4
+G	static	assaultvest	1	0	spa	0	1	333	1,2,3,4
+G	static	assaultvest	1	0	spa	1	0	333	1,2,3,4
+G	static	assaultvest	1	0	spa	1	1	333	1,2,3,4
+G	static	assaultvest	1	0	spd	0	0	666	1,2,3,4
+G	static	assaultvest	1	0	spd	0	1	444	1,2,3,4
+G	static	assaultvest	1	0	spd	1	0	666	1,2,3,4
+G	static	assaultvest	1	0	spd	1	1	444	1,2,3,4
+G	static	assaultvest	1	0	spe	0	0	555	1,2,3,4
+G	static	assaultvest	1	0	spe	0	1	555	1,2,3,4
+G	static	assaultvest	1	0	spe	1	0	555	1,2,3,4
+G	static	assaultvest	1	0	spe	1	1	555	1,2,3,4
+G	static	assaultvest	1	6	atk	0	0	444	1,2,3,4
+G	static	assaultvest	1	6	atk	0	1	444	1,2,3,4
+G	static	assaultvest	1	6	atk	1	0	111	1,2,3,4
+G	static	assaultvest	1	6	atk	1	1	111	1,2,3,4
+G	static	assaultvest	1	6	def	0	0	888	1,2,3,4
+G	static	assaultvest	1	6	def	0	1	888	1,2,3,4
+G	static	assaultvest	1	6	def	1	0	222	1,2,3,4
+G	static	assaultvest	1	6	def	1	1	222	1,2,3,4
+G	static	assaultvest	1	6	spa	0	0	1332	1,2,3,4
+G	static	assaultvest	1	6	spa	0	1	1332	1,2,3,4
+G	static	assaultvest	1	6	spa	1	0	333	1,2,3,4
+G	static	assaultvest	1	6	spa	1	1	333	1,2,3,4
+G	static	assaultvest	1	6	spd	0	0	2664	1,2,3,4
+G	static	assaultvest	1	6	spd	0	1	1776	1,2,3,4
+G	static	assaultvest	1	6	spd	1	0	666	1,2,3,4
+G	static	assaultvest	1	6	spd	1	1	444	1,2,3,4
+G	static	assaultvest	1	6	spe	0	0	2220	1,2,3,4
+G	static	assaultvest	1	6	spe	0	1	2220	1,2,3,4
+G	static	assaultvest	1	6	spe	1	0	555	1,2,3,4
+G	static	assaultvest	1	6	spe	1	1	555	1,2,3,4
+G	static	choicescarf	0	-6	atk	0	0	27	1,2,3,4
+G	static	choicescarf	0	-6	atk	0	1	27	1,2,3,4
+G	static	choicescarf	0	-6	atk	1	0	111	1,2,3,4
+G	static	choicescarf	0	-6	atk	1	1	111	1,2,3,4
+G	static	choicescarf	0	-6	def	0	0	55	1,2,3,4
+G	static	choicescarf	0	-6	def	0	1	55	1,2,3,4
+G	static	choicescarf	0	-6	def	1	0	222	1,2,3,4
+G	static	choicescarf	0	-6	def	1	1	222	1,2,3,4
+G	static	choicescarf	0	-6	spa	0	0	83	1,2,3,4
+G	static	choicescarf	0	-6	spa	0	1	83	1,2,3,4
+G	static	choicescarf	0	-6	spa	1	0	333	1,2,3,4
+G	static	choicescarf	0	-6	spa	1	1	333	1,2,3,4
+G	static	choicescarf	0	-6	spd	0	0	111	1,2,3,4
+G	static	choicescarf	0	-6	spd	0	1	111	1,2,3,4
+G	static	choicescarf	0	-6	spd	1	0	444	1,2,3,4
+G	static	choicescarf	0	-6	spd	1	1	444	1,2,3,4
+G	static	choicescarf	0	-6	spe	0	0	138	1,2,3,4
+G	static	choicescarf	0	-6	spe	0	1	138	1,2,3,4
+G	static	choicescarf	0	-6	spe	1	0	555	1,2,3,4
+G	static	choicescarf	0	-6	spe	1	1	555	1,2,3,4
+G	static	choicescarf	0	-1	atk	0	0	74	1,2,3,4
+G	static	choicescarf	0	-1	atk	0	1	74	1,2,3,4
+G	static	choicescarf	0	-1	atk	1	0	111	1,2,3,4
+G	static	choicescarf	0	-1	atk	1	1	111	1,2,3,4
+G	static	choicescarf	0	-1	def	0	0	148	1,2,3,4
+G	static	choicescarf	0	-1	def	0	1	148	1,2,3,4
+G	static	choicescarf	0	-1	def	1	0	222	1,2,3,4
+G	static	choicescarf	0	-1	def	1	1	222	1,2,3,4
+G	static	choicescarf	0	-1	spa	0	0	222	1,2,3,4
+G	static	choicescarf	0	-1	spa	0	1	222	1,2,3,4
+G	static	choicescarf	0	-1	spa	1	0	333	1,2,3,4
+G	static	choicescarf	0	-1	spa	1	1	333	1,2,3,4
+G	static	choicescarf	0	-1	spd	0	0	296	1,2,3,4
+G	static	choicescarf	0	-1	spd	0	1	296	1,2,3,4
+G	static	choicescarf	0	-1	spd	1	0	444	1,2,3,4
+G	static	choicescarf	0	-1	spd	1	1	444	1,2,3,4
+G	static	choicescarf	0	-1	spe	0	0	370	1,2,3,4
+G	static	choicescarf	0	-1	spe	0	1	370	1,2,3,4
+G	static	choicescarf	0	-1	spe	1	0	555	1,2,3,4
+G	static	choicescarf	0	-1	spe	1	1	555	1,2,3,4
+G	static	choicescarf	0	0	atk	0	0	111	1,2,3,4
+G	static	choicescarf	0	0	atk	0	1	111	1,2,3,4
+G	static	choicescarf	0	0	atk	1	0	111	1,2,3,4
+G	static	choicescarf	0	0	atk	1	1	111	1,2,3,4
+G	static	choicescarf	0	0	def	0	0	222	1,2,3,4
+G	static	choicescarf	0	0	def	0	1	222	1,2,3,4
+G	static	choicescarf	0	0	def	1	0	222	1,2,3,4
+G	static	choicescarf	0	0	def	1	1	222	1,2,3,4
+G	static	choicescarf	0	0	spa	0	0	333	1,2,3,4
+G	static	choicescarf	0	0	spa	0	1	333	1,2,3,4
+G	static	choicescarf	0	0	spa	1	0	333	1,2,3,4
+G	static	choicescarf	0	0	spa	1	1	333	1,2,3,4
+G	static	choicescarf	0	0	spd	0	0	444	1,2,3,4
+G	static	choicescarf	0	0	spd	0	1	444	1,2,3,4
+G	static	choicescarf	0	0	spd	1	0	444	1,2,3,4
+G	static	choicescarf	0	0	spd	1	1	444	1,2,3,4
+G	static	choicescarf	0	0	spe	0	0	555	1,2,3,4
+G	static	choicescarf	0	0	spe	0	1	555	1,2,3,4
+G	static	choicescarf	0	0	spe	1	0	555	1,2,3,4
+G	static	choicescarf	0	0	spe	1	1	555	1,2,3,4
+G	static	choicescarf	0	6	atk	0	0	444	1,2,3,4
+G	static	choicescarf	0	6	atk	0	1	444	1,2,3,4
+G	static	choicescarf	0	6	atk	1	0	111	1,2,3,4
+G	static	choicescarf	0	6	atk	1	1	111	1,2,3,4
+G	static	choicescarf	0	6	def	0	0	888	1,2,3,4
+G	static	choicescarf	0	6	def	0	1	888	1,2,3,4
+G	static	choicescarf	0	6	def	1	0	222	1,2,3,4
+G	static	choicescarf	0	6	def	1	1	222	1,2,3,4
+G	static	choicescarf	0	6	spa	0	0	1332	1,2,3,4
+G	static	choicescarf	0	6	spa	0	1	1332	1,2,3,4
+G	static	choicescarf	0	6	spa	1	0	333	1,2,3,4
+G	static	choicescarf	0	6	spa	1	1	333	1,2,3,4
+G	static	choicescarf	0	6	spd	0	0	1776	1,2,3,4
+G	static	choicescarf	0	6	spd	0	1	1776	1,2,3,4
+G	static	choicescarf	0	6	spd	1	0	444	1,2,3,4
+G	static	choicescarf	0	6	spd	1	1	444	1,2,3,4
+G	static	choicescarf	0	6	spe	0	0	2220	1,2,3,4
+G	static	choicescarf	0	6	spe	0	1	2220	1,2,3,4
+G	static	choicescarf	0	6	spe	1	0	555	1,2,3,4
+G	static	choicescarf	0	6	spe	1	1	555	1,2,3,4
+G	static	choicescarf	1	-6	atk	0	0	27	1,2,3,4
+G	static	choicescarf	1	-6	atk	0	1	27	1,2,3,4
+G	static	choicescarf	1	-6	atk	1	0	111	1,2,3,4
+G	static	choicescarf	1	-6	atk	1	1	111	1,2,3,4
+G	static	choicescarf	1	-6	def	0	0	55	1,2,3,4
+G	static	choicescarf	1	-6	def	0	1	55	1,2,3,4
+G	static	choicescarf	1	-6	def	1	0	222	1,2,3,4
+G	static	choicescarf	1	-6	def	1	1	222	1,2,3,4
+G	static	choicescarf	1	-6	spa	0	0	83	1,2,3,4
+G	static	choicescarf	1	-6	spa	0	1	83	1,2,3,4
+G	static	choicescarf	1	-6	spa	1	0	333	1,2,3,4
+G	static	choicescarf	1	-6	spa	1	1	333	1,2,3,4
+G	static	choicescarf	1	-6	spd	0	0	111	1,2,3,4
+G	static	choicescarf	1	-6	spd	0	1	111	1,2,3,4
+G	static	choicescarf	1	-6	spd	1	0	444	1,2,3,4
+G	static	choicescarf	1	-6	spd	1	1	444	1,2,3,4
+G	static	choicescarf	1	-6	spe	0	0	207	1,2,3,4
+G	static	choicescarf	1	-6	spe	0	1	138	1,2,3,4
+G	static	choicescarf	1	-6	spe	1	0	832	1,2,3,4
+G	static	choicescarf	1	-6	spe	1	1	555	1,2,3,4
+G	static	choicescarf	1	-1	atk	0	0	74	1,2,3,4
+G	static	choicescarf	1	-1	atk	0	1	74	1,2,3,4
+G	static	choicescarf	1	-1	atk	1	0	111	1,2,3,4
+G	static	choicescarf	1	-1	atk	1	1	111	1,2,3,4
+G	static	choicescarf	1	-1	def	0	0	148	1,2,3,4
+G	static	choicescarf	1	-1	def	0	1	148	1,2,3,4
+G	static	choicescarf	1	-1	def	1	0	222	1,2,3,4
+G	static	choicescarf	1	-1	def	1	1	222	1,2,3,4
+G	static	choicescarf	1	-1	spa	0	0	222	1,2,3,4
+G	static	choicescarf	1	-1	spa	0	1	222	1,2,3,4
+G	static	choicescarf	1	-1	spa	1	0	333	1,2,3,4
+G	static	choicescarf	1	-1	spa	1	1	333	1,2,3,4
+G	static	choicescarf	1	-1	spd	0	0	296	1,2,3,4
+G	static	choicescarf	1	-1	spd	0	1	296	1,2,3,4
+G	static	choicescarf	1	-1	spd	1	0	444	1,2,3,4
+G	static	choicescarf	1	-1	spd	1	1	444	1,2,3,4
+G	static	choicescarf	1	-1	spe	0	0	555	1,2,3,4
+G	static	choicescarf	1	-1	spe	0	1	370	1,2,3,4
+G	static	choicescarf	1	-1	spe	1	0	832	1,2,3,4
+G	static	choicescarf	1	-1	spe	1	1	555	1,2,3,4
+G	static	choicescarf	1	0	atk	0	0	111	1,2,3,4
+G	static	choicescarf	1	0	atk	0	1	111	1,2,3,4
+G	static	choicescarf	1	0	atk	1	0	111	1,2,3,4
+G	static	choicescarf	1	0	atk	1	1	111	1,2,3,4
+G	static	choicescarf	1	0	def	0	0	222	1,2,3,4
+G	static	choicescarf	1	0	def	0	1	222	1,2,3,4
+G	static	choicescarf	1	0	def	1	0	222	1,2,3,4
+G	static	choicescarf	1	0	def	1	1	222	1,2,3,4
+G	static	choicescarf	1	0	spa	0	0	333	1,2,3,4
+G	static	choicescarf	1	0	spa	0	1	333	1,2,3,4
+G	static	choicescarf	1	0	spa	1	0	333	1,2,3,4
+G	static	choicescarf	1	0	spa	1	1	333	1,2,3,4
+G	static	choicescarf	1	0	spd	0	0	444	1,2,3,4
+G	static	choicescarf	1	0	spd	0	1	444	1,2,3,4
+G	static	choicescarf	1	0	spd	1	0	444	1,2,3,4
+G	static	choicescarf	1	0	spd	1	1	444	1,2,3,4
+G	static	choicescarf	1	0	spe	0	0	832	1,2,3,4
+G	static	choicescarf	1	0	spe	0	1	555	1,2,3,4
+G	static	choicescarf	1	0	spe	1	0	832	1,2,3,4
+G	static	choicescarf	1	0	spe	1	1	555	1,2,3,4
+G	static	choicescarf	1	6	atk	0	0	444	1,2,3,4
+G	static	choicescarf	1	6	atk	0	1	444	1,2,3,4
+G	static	choicescarf	1	6	atk	1	0	111	1,2,3,4
+G	static	choicescarf	1	6	atk	1	1	111	1,2,3,4
+G	static	choicescarf	1	6	def	0	0	888	1,2,3,4
+G	static	choicescarf	1	6	def	0	1	888	1,2,3,4
+G	static	choicescarf	1	6	def	1	0	222	1,2,3,4
+G	static	choicescarf	1	6	def	1	1	222	1,2,3,4
+G	static	choicescarf	1	6	spa	0	0	1332	1,2,3,4
+G	static	choicescarf	1	6	spa	0	1	1332	1,2,3,4
+G	static	choicescarf	1	6	spa	1	0	333	1,2,3,4
+G	static	choicescarf	1	6	spa	1	1	333	1,2,3,4
+G	static	choicescarf	1	6	spd	0	0	1776	1,2,3,4
+G	static	choicescarf	1	6	spd	0	1	1776	1,2,3,4
+G	static	choicescarf	1	6	spd	1	0	444	1,2,3,4
+G	static	choicescarf	1	6	spd	1	1	444	1,2,3,4
+G	static	choicescarf	1	6	spe	0	0	3330	1,2,3,4
+G	static	choicescarf	1	6	spe	0	1	2220	1,2,3,4
+G	static	choicescarf	1	6	spe	1	0	832	1,2,3,4
+G	static	choicescarf	1	6	spe	1	1	555	1,2,3,4
+G	hugepower	-	0	-6	atk	0	0	27	1,2,3,4
+G	hugepower	-	0	-6	atk	0	1	27	1,2,3,4
+G	hugepower	-	0	-6	atk	1	0	111	1,2,3,4
+G	hugepower	-	0	-6	atk	1	1	111	1,2,3,4
+G	hugepower	-	0	-6	def	0	0	55	1,2,3,4
+G	hugepower	-	0	-6	def	0	1	55	1,2,3,4
+G	hugepower	-	0	-6	def	1	0	222	1,2,3,4
+G	hugepower	-	0	-6	def	1	1	222	1,2,3,4
+G	hugepower	-	0	-6	spa	0	0	83	1,2,3,4
+G	hugepower	-	0	-6	spa	0	1	83	1,2,3,4
+G	hugepower	-	0	-6	spa	1	0	333	1,2,3,4
+G	hugepower	-	0	-6	spa	1	1	333	1,2,3,4
+G	hugepower	-	0	-6	spd	0	0	111	1,2,3,4
+G	hugepower	-	0	-6	spd	0	1	111	1,2,3,4
+G	hugepower	-	0	-6	spd	1	0	444	1,2,3,4
+G	hugepower	-	0	-6	spd	1	1	444	1,2,3,4
+G	hugepower	-	0	-6	spe	0	0	138	1,2,3,4
+G	hugepower	-	0	-6	spe	0	1	138	1,2,3,4
+G	hugepower	-	0	-6	spe	1	0	555	1,2,3,4
+G	hugepower	-	0	-6	spe	1	1	555	1,2,3,4
+G	hugepower	-	0	-1	atk	0	0	74	1,2,3,4
+G	hugepower	-	0	-1	atk	0	1	74	1,2,3,4
+G	hugepower	-	0	-1	atk	1	0	111	1,2,3,4
+G	hugepower	-	0	-1	atk	1	1	111	1,2,3,4
+G	hugepower	-	0	-1	def	0	0	148	1,2,3,4
+G	hugepower	-	0	-1	def	0	1	148	1,2,3,4
+G	hugepower	-	0	-1	def	1	0	222	1,2,3,4
+G	hugepower	-	0	-1	def	1	1	222	1,2,3,4
+G	hugepower	-	0	-1	spa	0	0	222	1,2,3,4
+G	hugepower	-	0	-1	spa	0	1	222	1,2,3,4
+G	hugepower	-	0	-1	spa	1	0	333	1,2,3,4
+G	hugepower	-	0	-1	spa	1	1	333	1,2,3,4
+G	hugepower	-	0	-1	spd	0	0	296	1,2,3,4
+G	hugepower	-	0	-1	spd	0	1	296	1,2,3,4
+G	hugepower	-	0	-1	spd	1	0	444	1,2,3,4
+G	hugepower	-	0	-1	spd	1	1	444	1,2,3,4
+G	hugepower	-	0	-1	spe	0	0	370	1,2,3,4
+G	hugepower	-	0	-1	spe	0	1	370	1,2,3,4
+G	hugepower	-	0	-1	spe	1	0	555	1,2,3,4
+G	hugepower	-	0	-1	spe	1	1	555	1,2,3,4
+G	hugepower	-	0	0	atk	0	0	111	1,2,3,4
+G	hugepower	-	0	0	atk	0	1	111	1,2,3,4
+G	hugepower	-	0	0	atk	1	0	111	1,2,3,4
+G	hugepower	-	0	0	atk	1	1	111	1,2,3,4
+G	hugepower	-	0	0	def	0	0	222	1,2,3,4
+G	hugepower	-	0	0	def	0	1	222	1,2,3,4
+G	hugepower	-	0	0	def	1	0	222	1,2,3,4
+G	hugepower	-	0	0	def	1	1	222	1,2,3,4
+G	hugepower	-	0	0	spa	0	0	333	1,2,3,4
+G	hugepower	-	0	0	spa	0	1	333	1,2,3,4
+G	hugepower	-	0	0	spa	1	0	333	1,2,3,4
+G	hugepower	-	0	0	spa	1	1	333	1,2,3,4
+G	hugepower	-	0	0	spd	0	0	444	1,2,3,4
+G	hugepower	-	0	0	spd	0	1	444	1,2,3,4
+G	hugepower	-	0	0	spd	1	0	444	1,2,3,4
+G	hugepower	-	0	0	spd	1	1	444	1,2,3,4
+G	hugepower	-	0	0	spe	0	0	555	1,2,3,4
+G	hugepower	-	0	0	spe	0	1	555	1,2,3,4
+G	hugepower	-	0	0	spe	1	0	555	1,2,3,4
+G	hugepower	-	0	0	spe	1	1	555	1,2,3,4
+G	hugepower	-	0	6	atk	0	0	444	1,2,3,4
+G	hugepower	-	0	6	atk	0	1	444	1,2,3,4
+G	hugepower	-	0	6	atk	1	0	111	1,2,3,4
+G	hugepower	-	0	6	atk	1	1	111	1,2,3,4
+G	hugepower	-	0	6	def	0	0	888	1,2,3,4
+G	hugepower	-	0	6	def	0	1	888	1,2,3,4
+G	hugepower	-	0	6	def	1	0	222	1,2,3,4
+G	hugepower	-	0	6	def	1	1	222	1,2,3,4
+G	hugepower	-	0	6	spa	0	0	1332	1,2,3,4
+G	hugepower	-	0	6	spa	0	1	1332	1,2,3,4
+G	hugepower	-	0	6	spa	1	0	333	1,2,3,4
+G	hugepower	-	0	6	spa	1	1	333	1,2,3,4
+G	hugepower	-	0	6	spd	0	0	1776	1,2,3,4
+G	hugepower	-	0	6	spd	0	1	1776	1,2,3,4
+G	hugepower	-	0	6	spd	1	0	444	1,2,3,4
+G	hugepower	-	0	6	spd	1	1	444	1,2,3,4
+G	hugepower	-	0	6	spe	0	0	2220	1,2,3,4
+G	hugepower	-	0	6	spe	0	1	2220	1,2,3,4
+G	hugepower	-	0	6	spe	1	0	555	1,2,3,4
+G	hugepower	-	0	6	spe	1	1	555	1,2,3,4
+G	hugepower	-	1	-6	atk	0	0	54	1,2,3,4
+G	hugepower	-	1	-6	atk	0	1	27	1,2,3,4
+G	hugepower	-	1	-6	atk	1	0	222	1,2,3,4
+G	hugepower	-	1	-6	atk	1	1	111	1,2,3,4
+G	hugepower	-	1	-6	def	0	0	55	1,2,3,4
+G	hugepower	-	1	-6	def	0	1	55	1,2,3,4
+G	hugepower	-	1	-6	def	1	0	222	1,2,3,4
+G	hugepower	-	1	-6	def	1	1	222	1,2,3,4
+G	hugepower	-	1	-6	spa	0	0	83	1,2,3,4
+G	hugepower	-	1	-6	spa	0	1	83	1,2,3,4
+G	hugepower	-	1	-6	spa	1	0	333	1,2,3,4
+G	hugepower	-	1	-6	spa	1	1	333	1,2,3,4
+G	hugepower	-	1	-6	spd	0	0	111	1,2,3,4
+G	hugepower	-	1	-6	spd	0	1	111	1,2,3,4
+G	hugepower	-	1	-6	spd	1	0	444	1,2,3,4
+G	hugepower	-	1	-6	spd	1	1	444	1,2,3,4
+G	hugepower	-	1	-6	spe	0	0	138	1,2,3,4
+G	hugepower	-	1	-6	spe	0	1	138	1,2,3,4
+G	hugepower	-	1	-6	spe	1	0	555	1,2,3,4
+G	hugepower	-	1	-6	spe	1	1	555	1,2,3,4
+G	hugepower	-	1	-1	atk	0	0	148	1,2,3,4
+G	hugepower	-	1	-1	atk	0	1	74	1,2,3,4
+G	hugepower	-	1	-1	atk	1	0	222	1,2,3,4
+G	hugepower	-	1	-1	atk	1	1	111	1,2,3,4
+G	hugepower	-	1	-1	def	0	0	148	1,2,3,4
+G	hugepower	-	1	-1	def	0	1	148	1,2,3,4
+G	hugepower	-	1	-1	def	1	0	222	1,2,3,4
+G	hugepower	-	1	-1	def	1	1	222	1,2,3,4
+G	hugepower	-	1	-1	spa	0	0	222	1,2,3,4
+G	hugepower	-	1	-1	spa	0	1	222	1,2,3,4
+G	hugepower	-	1	-1	spa	1	0	333	1,2,3,4
+G	hugepower	-	1	-1	spa	1	1	333	1,2,3,4
+G	hugepower	-	1	-1	spd	0	0	296	1,2,3,4
+G	hugepower	-	1	-1	spd	0	1	296	1,2,3,4
+G	hugepower	-	1	-1	spd	1	0	444	1,2,3,4
+G	hugepower	-	1	-1	spd	1	1	444	1,2,3,4
+G	hugepower	-	1	-1	spe	0	0	370	1,2,3,4
+G	hugepower	-	1	-1	spe	0	1	370	1,2,3,4
+G	hugepower	-	1	-1	spe	1	0	555	1,2,3,4
+G	hugepower	-	1	-1	spe	1	1	555	1,2,3,4
+G	hugepower	-	1	0	atk	0	0	222	1,2,3,4
+G	hugepower	-	1	0	atk	0	1	111	1,2,3,4
+G	hugepower	-	1	0	atk	1	0	222	1,2,3,4
+G	hugepower	-	1	0	atk	1	1	111	1,2,3,4
+G	hugepower	-	1	0	def	0	0	222	1,2,3,4
+G	hugepower	-	1	0	def	0	1	222	1,2,3,4
+G	hugepower	-	1	0	def	1	0	222	1,2,3,4
+G	hugepower	-	1	0	def	1	1	222	1,2,3,4
+G	hugepower	-	1	0	spa	0	0	333	1,2,3,4
+G	hugepower	-	1	0	spa	0	1	333	1,2,3,4
+G	hugepower	-	1	0	spa	1	0	333	1,2,3,4
+G	hugepower	-	1	0	spa	1	1	333	1,2,3,4
+G	hugepower	-	1	0	spd	0	0	444	1,2,3,4
+G	hugepower	-	1	0	spd	0	1	444	1,2,3,4
+G	hugepower	-	1	0	spd	1	0	444	1,2,3,4
+G	hugepower	-	1	0	spd	1	1	444	1,2,3,4
+G	hugepower	-	1	0	spe	0	0	555	1,2,3,4
+G	hugepower	-	1	0	spe	0	1	555	1,2,3,4
+G	hugepower	-	1	0	spe	1	0	555	1,2,3,4
+G	hugepower	-	1	0	spe	1	1	555	1,2,3,4
+G	hugepower	-	1	6	atk	0	0	888	1,2,3,4
+G	hugepower	-	1	6	atk	0	1	444	1,2,3,4
+G	hugepower	-	1	6	atk	1	0	222	1,2,3,4
+G	hugepower	-	1	6	atk	1	1	111	1,2,3,4
+G	hugepower	-	1	6	def	0	0	888	1,2,3,4
+G	hugepower	-	1	6	def	0	1	888	1,2,3,4
+G	hugepower	-	1	6	def	1	0	222	1,2,3,4
+G	hugepower	-	1	6	def	1	1	222	1,2,3,4
+G	hugepower	-	1	6	spa	0	0	1332	1,2,3,4
+G	hugepower	-	1	6	spa	0	1	1332	1,2,3,4
+G	hugepower	-	1	6	spa	1	0	333	1,2,3,4
+G	hugepower	-	1	6	spa	1	1	333	1,2,3,4
+G	hugepower	-	1	6	spd	0	0	1776	1,2,3,4
+G	hugepower	-	1	6	spd	0	1	1776	1,2,3,4
+G	hugepower	-	1	6	spd	1	0	444	1,2,3,4
+G	hugepower	-	1	6	spd	1	1	444	1,2,3,4
+G	hugepower	-	1	6	spe	0	0	2220	1,2,3,4
+G	hugepower	-	1	6	spe	0	1	2220	1,2,3,4
+G	hugepower	-	1	6	spe	1	0	555	1,2,3,4
+G	hugepower	-	1	6	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	0	-6	atk	0	0	27	1,2,3,4
+G	hugepower	choiceband	0	-6	atk	0	1	27	1,2,3,4
+G	hugepower	choiceband	0	-6	atk	1	0	111	1,2,3,4
+G	hugepower	choiceband	0	-6	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	0	-6	def	0	0	55	1,2,3,4
+G	hugepower	choiceband	0	-6	def	0	1	55	1,2,3,4
+G	hugepower	choiceband	0	-6	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	0	-6	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	0	-6	spa	0	0	83	1,2,3,4
+G	hugepower	choiceband	0	-6	spa	0	1	83	1,2,3,4
+G	hugepower	choiceband	0	-6	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	0	-6	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	0	-6	spd	0	0	111	1,2,3,4
+G	hugepower	choiceband	0	-6	spd	0	1	111	1,2,3,4
+G	hugepower	choiceband	0	-6	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	0	-6	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	0	-6	spe	0	0	138	1,2,3,4
+G	hugepower	choiceband	0	-6	spe	0	1	138	1,2,3,4
+G	hugepower	choiceband	0	-6	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	0	-6	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	0	-1	atk	0	0	74	1,2,3,4
+G	hugepower	choiceband	0	-1	atk	0	1	74	1,2,3,4
+G	hugepower	choiceband	0	-1	atk	1	0	111	1,2,3,4
+G	hugepower	choiceband	0	-1	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	0	-1	def	0	0	148	1,2,3,4
+G	hugepower	choiceband	0	-1	def	0	1	148	1,2,3,4
+G	hugepower	choiceband	0	-1	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	0	-1	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	0	-1	spa	0	0	222	1,2,3,4
+G	hugepower	choiceband	0	-1	spa	0	1	222	1,2,3,4
+G	hugepower	choiceband	0	-1	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	0	-1	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	0	-1	spd	0	0	296	1,2,3,4
+G	hugepower	choiceband	0	-1	spd	0	1	296	1,2,3,4
+G	hugepower	choiceband	0	-1	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	0	-1	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	0	-1	spe	0	0	370	1,2,3,4
+G	hugepower	choiceband	0	-1	spe	0	1	370	1,2,3,4
+G	hugepower	choiceband	0	-1	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	0	-1	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	0	0	atk	0	0	111	1,2,3,4
+G	hugepower	choiceband	0	0	atk	0	1	111	1,2,3,4
+G	hugepower	choiceband	0	0	atk	1	0	111	1,2,3,4
+G	hugepower	choiceband	0	0	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	0	0	def	0	0	222	1,2,3,4
+G	hugepower	choiceband	0	0	def	0	1	222	1,2,3,4
+G	hugepower	choiceband	0	0	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	0	0	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	0	0	spa	0	0	333	1,2,3,4
+G	hugepower	choiceband	0	0	spa	0	1	333	1,2,3,4
+G	hugepower	choiceband	0	0	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	0	0	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	0	0	spd	0	0	444	1,2,3,4
+G	hugepower	choiceband	0	0	spd	0	1	444	1,2,3,4
+G	hugepower	choiceband	0	0	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	0	0	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	0	0	spe	0	0	555	1,2,3,4
+G	hugepower	choiceband	0	0	spe	0	1	555	1,2,3,4
+G	hugepower	choiceband	0	0	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	0	0	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	0	6	atk	0	0	444	1,2,3,4
+G	hugepower	choiceband	0	6	atk	0	1	444	1,2,3,4
+G	hugepower	choiceband	0	6	atk	1	0	111	1,2,3,4
+G	hugepower	choiceband	0	6	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	0	6	def	0	0	888	1,2,3,4
+G	hugepower	choiceband	0	6	def	0	1	888	1,2,3,4
+G	hugepower	choiceband	0	6	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	0	6	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	0	6	spa	0	0	1332	1,2,3,4
+G	hugepower	choiceband	0	6	spa	0	1	1332	1,2,3,4
+G	hugepower	choiceband	0	6	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	0	6	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	0	6	spd	0	0	1776	1,2,3,4
+G	hugepower	choiceband	0	6	spd	0	1	1776	1,2,3,4
+G	hugepower	choiceband	0	6	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	0	6	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	0	6	spe	0	0	2220	1,2,3,4
+G	hugepower	choiceband	0	6	spe	0	1	2220	1,2,3,4
+G	hugepower	choiceband	0	6	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	0	6	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	1	-6	atk	0	0	81	1,2,3,4
+G	hugepower	choiceband	1	-6	atk	0	1	27	1,2,3,4
+G	hugepower	choiceband	1	-6	atk	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	-6	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	1	-6	def	0	0	55	1,2,3,4
+G	hugepower	choiceband	1	-6	def	0	1	55	1,2,3,4
+G	hugepower	choiceband	1	-6	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	1	-6	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	1	-6	spa	0	0	83	1,2,3,4
+G	hugepower	choiceband	1	-6	spa	0	1	83	1,2,3,4
+G	hugepower	choiceband	1	-6	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	-6	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	1	-6	spd	0	0	111	1,2,3,4
+G	hugepower	choiceband	1	-6	spd	0	1	111	1,2,3,4
+G	hugepower	choiceband	1	-6	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	1	-6	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	1	-6	spe	0	0	138	1,2,3,4
+G	hugepower	choiceband	1	-6	spe	0	1	138	1,2,3,4
+G	hugepower	choiceband	1	-6	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	1	-6	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	1	-1	atk	0	0	222	1,2,3,4
+G	hugepower	choiceband	1	-1	atk	0	1	74	1,2,3,4
+G	hugepower	choiceband	1	-1	atk	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	-1	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	1	-1	def	0	0	148	1,2,3,4
+G	hugepower	choiceband	1	-1	def	0	1	148	1,2,3,4
+G	hugepower	choiceband	1	-1	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	1	-1	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	1	-1	spa	0	0	222	1,2,3,4
+G	hugepower	choiceband	1	-1	spa	0	1	222	1,2,3,4
+G	hugepower	choiceband	1	-1	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	-1	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	1	-1	spd	0	0	296	1,2,3,4
+G	hugepower	choiceband	1	-1	spd	0	1	296	1,2,3,4
+G	hugepower	choiceband	1	-1	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	1	-1	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	1	-1	spe	0	0	370	1,2,3,4
+G	hugepower	choiceband	1	-1	spe	0	1	370	1,2,3,4
+G	hugepower	choiceband	1	-1	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	1	-1	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	1	0	atk	0	0	333	1,2,3,4
+G	hugepower	choiceband	1	0	atk	0	1	111	1,2,3,4
+G	hugepower	choiceband	1	0	atk	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	0	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	1	0	def	0	0	222	1,2,3,4
+G	hugepower	choiceband	1	0	def	0	1	222	1,2,3,4
+G	hugepower	choiceband	1	0	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	1	0	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	1	0	spa	0	0	333	1,2,3,4
+G	hugepower	choiceband	1	0	spa	0	1	333	1,2,3,4
+G	hugepower	choiceband	1	0	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	0	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	1	0	spd	0	0	444	1,2,3,4
+G	hugepower	choiceband	1	0	spd	0	1	444	1,2,3,4
+G	hugepower	choiceband	1	0	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	1	0	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	1	0	spe	0	0	555	1,2,3,4
+G	hugepower	choiceband	1	0	spe	0	1	555	1,2,3,4
+G	hugepower	choiceband	1	0	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	1	0	spe	1	1	555	1,2,3,4
+G	hugepower	choiceband	1	6	atk	0	0	1332	1,2,3,4
+G	hugepower	choiceband	1	6	atk	0	1	444	1,2,3,4
+G	hugepower	choiceband	1	6	atk	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	6	atk	1	1	111	1,2,3,4
+G	hugepower	choiceband	1	6	def	0	0	888	1,2,3,4
+G	hugepower	choiceband	1	6	def	0	1	888	1,2,3,4
+G	hugepower	choiceband	1	6	def	1	0	222	1,2,3,4
+G	hugepower	choiceband	1	6	def	1	1	222	1,2,3,4
+G	hugepower	choiceband	1	6	spa	0	0	1332	1,2,3,4
+G	hugepower	choiceband	1	6	spa	0	1	1332	1,2,3,4
+G	hugepower	choiceband	1	6	spa	1	0	333	1,2,3,4
+G	hugepower	choiceband	1	6	spa	1	1	333	1,2,3,4
+G	hugepower	choiceband	1	6	spd	0	0	1776	1,2,3,4
+G	hugepower	choiceband	1	6	spd	0	1	1776	1,2,3,4
+G	hugepower	choiceband	1	6	spd	1	0	444	1,2,3,4
+G	hugepower	choiceband	1	6	spd	1	1	444	1,2,3,4
+G	hugepower	choiceband	1	6	spe	0	0	2220	1,2,3,4
+G	hugepower	choiceband	1	6	spe	0	1	2220	1,2,3,4
+G	hugepower	choiceband	1	6	spe	1	0	555	1,2,3,4
+G	hugepower	choiceband	1	6	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	0	-6	atk	0	0	27	1,2,3,4
+G	hugepower	assaultvest	0	-6	atk	0	1	27	1,2,3,4
+G	hugepower	assaultvest	0	-6	atk	1	0	111	1,2,3,4
+G	hugepower	assaultvest	0	-6	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	0	-6	def	0	0	55	1,2,3,4
+G	hugepower	assaultvest	0	-6	def	0	1	55	1,2,3,4
+G	hugepower	assaultvest	0	-6	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	0	-6	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	0	-6	spa	0	0	83	1,2,3,4
+G	hugepower	assaultvest	0	-6	spa	0	1	83	1,2,3,4
+G	hugepower	assaultvest	0	-6	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	0	-6	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	0	-6	spd	0	0	111	1,2,3,4
+G	hugepower	assaultvest	0	-6	spd	0	1	111	1,2,3,4
+G	hugepower	assaultvest	0	-6	spd	1	0	444	1,2,3,4
+G	hugepower	assaultvest	0	-6	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	0	-6	spe	0	0	138	1,2,3,4
+G	hugepower	assaultvest	0	-6	spe	0	1	138	1,2,3,4
+G	hugepower	assaultvest	0	-6	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	0	-6	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	0	-1	atk	0	0	74	1,2,3,4
+G	hugepower	assaultvest	0	-1	atk	0	1	74	1,2,3,4
+G	hugepower	assaultvest	0	-1	atk	1	0	111	1,2,3,4
+G	hugepower	assaultvest	0	-1	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	0	-1	def	0	0	148	1,2,3,4
+G	hugepower	assaultvest	0	-1	def	0	1	148	1,2,3,4
+G	hugepower	assaultvest	0	-1	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	0	-1	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	0	-1	spa	0	0	222	1,2,3,4
+G	hugepower	assaultvest	0	-1	spa	0	1	222	1,2,3,4
+G	hugepower	assaultvest	0	-1	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	0	-1	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	0	-1	spd	0	0	296	1,2,3,4
+G	hugepower	assaultvest	0	-1	spd	0	1	296	1,2,3,4
+G	hugepower	assaultvest	0	-1	spd	1	0	444	1,2,3,4
+G	hugepower	assaultvest	0	-1	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	0	-1	spe	0	0	370	1,2,3,4
+G	hugepower	assaultvest	0	-1	spe	0	1	370	1,2,3,4
+G	hugepower	assaultvest	0	-1	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	0	-1	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	0	0	atk	0	0	111	1,2,3,4
+G	hugepower	assaultvest	0	0	atk	0	1	111	1,2,3,4
+G	hugepower	assaultvest	0	0	atk	1	0	111	1,2,3,4
+G	hugepower	assaultvest	0	0	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	0	0	def	0	0	222	1,2,3,4
+G	hugepower	assaultvest	0	0	def	0	1	222	1,2,3,4
+G	hugepower	assaultvest	0	0	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	0	0	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	0	0	spa	0	0	333	1,2,3,4
+G	hugepower	assaultvest	0	0	spa	0	1	333	1,2,3,4
+G	hugepower	assaultvest	0	0	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	0	0	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	0	0	spd	0	0	444	1,2,3,4
+G	hugepower	assaultvest	0	0	spd	0	1	444	1,2,3,4
+G	hugepower	assaultvest	0	0	spd	1	0	444	1,2,3,4
+G	hugepower	assaultvest	0	0	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	0	0	spe	0	0	555	1,2,3,4
+G	hugepower	assaultvest	0	0	spe	0	1	555	1,2,3,4
+G	hugepower	assaultvest	0	0	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	0	0	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	0	6	atk	0	0	444	1,2,3,4
+G	hugepower	assaultvest	0	6	atk	0	1	444	1,2,3,4
+G	hugepower	assaultvest	0	6	atk	1	0	111	1,2,3,4
+G	hugepower	assaultvest	0	6	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	0	6	def	0	0	888	1,2,3,4
+G	hugepower	assaultvest	0	6	def	0	1	888	1,2,3,4
+G	hugepower	assaultvest	0	6	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	0	6	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	0	6	spa	0	0	1332	1,2,3,4
+G	hugepower	assaultvest	0	6	spa	0	1	1332	1,2,3,4
+G	hugepower	assaultvest	0	6	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	0	6	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	0	6	spd	0	0	1776	1,2,3,4
+G	hugepower	assaultvest	0	6	spd	0	1	1776	1,2,3,4
+G	hugepower	assaultvest	0	6	spd	1	0	444	1,2,3,4
+G	hugepower	assaultvest	0	6	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	0	6	spe	0	0	2220	1,2,3,4
+G	hugepower	assaultvest	0	6	spe	0	1	2220	1,2,3,4
+G	hugepower	assaultvest	0	6	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	0	6	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	1	-6	atk	0	0	54	1,2,3,4
+G	hugepower	assaultvest	1	-6	atk	0	1	27	1,2,3,4
+G	hugepower	assaultvest	1	-6	atk	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	-6	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	1	-6	def	0	0	55	1,2,3,4
+G	hugepower	assaultvest	1	-6	def	0	1	55	1,2,3,4
+G	hugepower	assaultvest	1	-6	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	-6	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	1	-6	spa	0	0	83	1,2,3,4
+G	hugepower	assaultvest	1	-6	spa	0	1	83	1,2,3,4
+G	hugepower	assaultvest	1	-6	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	1	-6	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	1	-6	spd	0	0	166	1,2,3,4
+G	hugepower	assaultvest	1	-6	spd	0	1	111	1,2,3,4
+G	hugepower	assaultvest	1	-6	spd	1	0	666	1,2,3,4
+G	hugepower	assaultvest	1	-6	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	1	-6	spe	0	0	138	1,2,3,4
+G	hugepower	assaultvest	1	-6	spe	0	1	138	1,2,3,4
+G	hugepower	assaultvest	1	-6	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	1	-6	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	1	-1	atk	0	0	148	1,2,3,4
+G	hugepower	assaultvest	1	-1	atk	0	1	74	1,2,3,4
+G	hugepower	assaultvest	1	-1	atk	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	-1	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	1	-1	def	0	0	148	1,2,3,4
+G	hugepower	assaultvest	1	-1	def	0	1	148	1,2,3,4
+G	hugepower	assaultvest	1	-1	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	-1	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	1	-1	spa	0	0	222	1,2,3,4
+G	hugepower	assaultvest	1	-1	spa	0	1	222	1,2,3,4
+G	hugepower	assaultvest	1	-1	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	1	-1	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	1	-1	spd	0	0	444	1,2,3,4
+G	hugepower	assaultvest	1	-1	spd	0	1	296	1,2,3,4
+G	hugepower	assaultvest	1	-1	spd	1	0	666	1,2,3,4
+G	hugepower	assaultvest	1	-1	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	1	-1	spe	0	0	370	1,2,3,4
+G	hugepower	assaultvest	1	-1	spe	0	1	370	1,2,3,4
+G	hugepower	assaultvest	1	-1	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	1	-1	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	1	0	atk	0	0	222	1,2,3,4
+G	hugepower	assaultvest	1	0	atk	0	1	111	1,2,3,4
+G	hugepower	assaultvest	1	0	atk	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	0	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	1	0	def	0	0	222	1,2,3,4
+G	hugepower	assaultvest	1	0	def	0	1	222	1,2,3,4
+G	hugepower	assaultvest	1	0	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	0	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	1	0	spa	0	0	333	1,2,3,4
+G	hugepower	assaultvest	1	0	spa	0	1	333	1,2,3,4
+G	hugepower	assaultvest	1	0	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	1	0	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	1	0	spd	0	0	666	1,2,3,4
+G	hugepower	assaultvest	1	0	spd	0	1	444	1,2,3,4
+G	hugepower	assaultvest	1	0	spd	1	0	666	1,2,3,4
+G	hugepower	assaultvest	1	0	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	1	0	spe	0	0	555	1,2,3,4
+G	hugepower	assaultvest	1	0	spe	0	1	555	1,2,3,4
+G	hugepower	assaultvest	1	0	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	1	0	spe	1	1	555	1,2,3,4
+G	hugepower	assaultvest	1	6	atk	0	0	888	1,2,3,4
+G	hugepower	assaultvest	1	6	atk	0	1	444	1,2,3,4
+G	hugepower	assaultvest	1	6	atk	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	6	atk	1	1	111	1,2,3,4
+G	hugepower	assaultvest	1	6	def	0	0	888	1,2,3,4
+G	hugepower	assaultvest	1	6	def	0	1	888	1,2,3,4
+G	hugepower	assaultvest	1	6	def	1	0	222	1,2,3,4
+G	hugepower	assaultvest	1	6	def	1	1	222	1,2,3,4
+G	hugepower	assaultvest	1	6	spa	0	0	1332	1,2,3,4
+G	hugepower	assaultvest	1	6	spa	0	1	1332	1,2,3,4
+G	hugepower	assaultvest	1	6	spa	1	0	333	1,2,3,4
+G	hugepower	assaultvest	1	6	spa	1	1	333	1,2,3,4
+G	hugepower	assaultvest	1	6	spd	0	0	2664	1,2,3,4
+G	hugepower	assaultvest	1	6	spd	0	1	1776	1,2,3,4
+G	hugepower	assaultvest	1	6	spd	1	0	666	1,2,3,4
+G	hugepower	assaultvest	1	6	spd	1	1	444	1,2,3,4
+G	hugepower	assaultvest	1	6	spe	0	0	2220	1,2,3,4
+G	hugepower	assaultvest	1	6	spe	0	1	2220	1,2,3,4
+G	hugepower	assaultvest	1	6	spe	1	0	555	1,2,3,4
+G	hugepower	assaultvest	1	6	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	0	-6	atk	0	0	27	1,2,3,4
+G	hugepower	choicescarf	0	-6	atk	0	1	27	1,2,3,4
+G	hugepower	choicescarf	0	-6	atk	1	0	111	1,2,3,4
+G	hugepower	choicescarf	0	-6	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	0	-6	def	0	0	55	1,2,3,4
+G	hugepower	choicescarf	0	-6	def	0	1	55	1,2,3,4
+G	hugepower	choicescarf	0	-6	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	0	-6	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	0	-6	spa	0	0	83	1,2,3,4
+G	hugepower	choicescarf	0	-6	spa	0	1	83	1,2,3,4
+G	hugepower	choicescarf	0	-6	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	0	-6	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	0	-6	spd	0	0	111	1,2,3,4
+G	hugepower	choicescarf	0	-6	spd	0	1	111	1,2,3,4
+G	hugepower	choicescarf	0	-6	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	0	-6	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	0	-6	spe	0	0	138	1,2,3,4
+G	hugepower	choicescarf	0	-6	spe	0	1	138	1,2,3,4
+G	hugepower	choicescarf	0	-6	spe	1	0	555	1,2,3,4
+G	hugepower	choicescarf	0	-6	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	0	-1	atk	0	0	74	1,2,3,4
+G	hugepower	choicescarf	0	-1	atk	0	1	74	1,2,3,4
+G	hugepower	choicescarf	0	-1	atk	1	0	111	1,2,3,4
+G	hugepower	choicescarf	0	-1	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	0	-1	def	0	0	148	1,2,3,4
+G	hugepower	choicescarf	0	-1	def	0	1	148	1,2,3,4
+G	hugepower	choicescarf	0	-1	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	0	-1	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	0	-1	spa	0	0	222	1,2,3,4
+G	hugepower	choicescarf	0	-1	spa	0	1	222	1,2,3,4
+G	hugepower	choicescarf	0	-1	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	0	-1	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	0	-1	spd	0	0	296	1,2,3,4
+G	hugepower	choicescarf	0	-1	spd	0	1	296	1,2,3,4
+G	hugepower	choicescarf	0	-1	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	0	-1	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	0	-1	spe	0	0	370	1,2,3,4
+G	hugepower	choicescarf	0	-1	spe	0	1	370	1,2,3,4
+G	hugepower	choicescarf	0	-1	spe	1	0	555	1,2,3,4
+G	hugepower	choicescarf	0	-1	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	0	0	atk	0	0	111	1,2,3,4
+G	hugepower	choicescarf	0	0	atk	0	1	111	1,2,3,4
+G	hugepower	choicescarf	0	0	atk	1	0	111	1,2,3,4
+G	hugepower	choicescarf	0	0	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	0	0	def	0	0	222	1,2,3,4
+G	hugepower	choicescarf	0	0	def	0	1	222	1,2,3,4
+G	hugepower	choicescarf	0	0	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	0	0	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	0	0	spa	0	0	333	1,2,3,4
+G	hugepower	choicescarf	0	0	spa	0	1	333	1,2,3,4
+G	hugepower	choicescarf	0	0	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	0	0	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	0	0	spd	0	0	444	1,2,3,4
+G	hugepower	choicescarf	0	0	spd	0	1	444	1,2,3,4
+G	hugepower	choicescarf	0	0	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	0	0	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	0	0	spe	0	0	555	1,2,3,4
+G	hugepower	choicescarf	0	0	spe	0	1	555	1,2,3,4
+G	hugepower	choicescarf	0	0	spe	1	0	555	1,2,3,4
+G	hugepower	choicescarf	0	0	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	0	6	atk	0	0	444	1,2,3,4
+G	hugepower	choicescarf	0	6	atk	0	1	444	1,2,3,4
+G	hugepower	choicescarf	0	6	atk	1	0	111	1,2,3,4
+G	hugepower	choicescarf	0	6	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	0	6	def	0	0	888	1,2,3,4
+G	hugepower	choicescarf	0	6	def	0	1	888	1,2,3,4
+G	hugepower	choicescarf	0	6	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	0	6	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	0	6	spa	0	0	1332	1,2,3,4
+G	hugepower	choicescarf	0	6	spa	0	1	1332	1,2,3,4
+G	hugepower	choicescarf	0	6	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	0	6	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	0	6	spd	0	0	1776	1,2,3,4
+G	hugepower	choicescarf	0	6	spd	0	1	1776	1,2,3,4
+G	hugepower	choicescarf	0	6	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	0	6	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	0	6	spe	0	0	2220	1,2,3,4
+G	hugepower	choicescarf	0	6	spe	0	1	2220	1,2,3,4
+G	hugepower	choicescarf	0	6	spe	1	0	555	1,2,3,4
+G	hugepower	choicescarf	0	6	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	1	-6	atk	0	0	54	1,2,3,4
+G	hugepower	choicescarf	1	-6	atk	0	1	27	1,2,3,4
+G	hugepower	choicescarf	1	-6	atk	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	-6	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	1	-6	def	0	0	55	1,2,3,4
+G	hugepower	choicescarf	1	-6	def	0	1	55	1,2,3,4
+G	hugepower	choicescarf	1	-6	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	-6	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	1	-6	spa	0	0	83	1,2,3,4
+G	hugepower	choicescarf	1	-6	spa	0	1	83	1,2,3,4
+G	hugepower	choicescarf	1	-6	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	1	-6	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	1	-6	spd	0	0	111	1,2,3,4
+G	hugepower	choicescarf	1	-6	spd	0	1	111	1,2,3,4
+G	hugepower	choicescarf	1	-6	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	1	-6	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	1	-6	spe	0	0	207	1,2,3,4
+G	hugepower	choicescarf	1	-6	spe	0	1	138	1,2,3,4
+G	hugepower	choicescarf	1	-6	spe	1	0	832	1,2,3,4
+G	hugepower	choicescarf	1	-6	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	1	-1	atk	0	0	148	1,2,3,4
+G	hugepower	choicescarf	1	-1	atk	0	1	74	1,2,3,4
+G	hugepower	choicescarf	1	-1	atk	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	-1	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	1	-1	def	0	0	148	1,2,3,4
+G	hugepower	choicescarf	1	-1	def	0	1	148	1,2,3,4
+G	hugepower	choicescarf	1	-1	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	-1	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	1	-1	spa	0	0	222	1,2,3,4
+G	hugepower	choicescarf	1	-1	spa	0	1	222	1,2,3,4
+G	hugepower	choicescarf	1	-1	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	1	-1	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	1	-1	spd	0	0	296	1,2,3,4
+G	hugepower	choicescarf	1	-1	spd	0	1	296	1,2,3,4
+G	hugepower	choicescarf	1	-1	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	1	-1	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	1	-1	spe	0	0	555	1,2,3,4
+G	hugepower	choicescarf	1	-1	spe	0	1	370	1,2,3,4
+G	hugepower	choicescarf	1	-1	spe	1	0	832	1,2,3,4
+G	hugepower	choicescarf	1	-1	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	1	0	atk	0	0	222	1,2,3,4
+G	hugepower	choicescarf	1	0	atk	0	1	111	1,2,3,4
+G	hugepower	choicescarf	1	0	atk	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	0	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	1	0	def	0	0	222	1,2,3,4
+G	hugepower	choicescarf	1	0	def	0	1	222	1,2,3,4
+G	hugepower	choicescarf	1	0	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	0	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	1	0	spa	0	0	333	1,2,3,4
+G	hugepower	choicescarf	1	0	spa	0	1	333	1,2,3,4
+G	hugepower	choicescarf	1	0	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	1	0	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	1	0	spd	0	0	444	1,2,3,4
+G	hugepower	choicescarf	1	0	spd	0	1	444	1,2,3,4
+G	hugepower	choicescarf	1	0	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	1	0	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	1	0	spe	0	0	832	1,2,3,4
+G	hugepower	choicescarf	1	0	spe	0	1	555	1,2,3,4
+G	hugepower	choicescarf	1	0	spe	1	0	832	1,2,3,4
+G	hugepower	choicescarf	1	0	spe	1	1	555	1,2,3,4
+G	hugepower	choicescarf	1	6	atk	0	0	888	1,2,3,4
+G	hugepower	choicescarf	1	6	atk	0	1	444	1,2,3,4
+G	hugepower	choicescarf	1	6	atk	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	6	atk	1	1	111	1,2,3,4
+G	hugepower	choicescarf	1	6	def	0	0	888	1,2,3,4
+G	hugepower	choicescarf	1	6	def	0	1	888	1,2,3,4
+G	hugepower	choicescarf	1	6	def	1	0	222	1,2,3,4
+G	hugepower	choicescarf	1	6	def	1	1	222	1,2,3,4
+G	hugepower	choicescarf	1	6	spa	0	0	1332	1,2,3,4
+G	hugepower	choicescarf	1	6	spa	0	1	1332	1,2,3,4
+G	hugepower	choicescarf	1	6	spa	1	0	333	1,2,3,4
+G	hugepower	choicescarf	1	6	spa	1	1	333	1,2,3,4
+G	hugepower	choicescarf	1	6	spd	0	0	1776	1,2,3,4
+G	hugepower	choicescarf	1	6	spd	0	1	1776	1,2,3,4
+G	hugepower	choicescarf	1	6	spd	1	0	444	1,2,3,4
+G	hugepower	choicescarf	1	6	spd	1	1	444	1,2,3,4
+G	hugepower	choicescarf	1	6	spe	0	0	3330	1,2,3,4
+G	hugepower	choicescarf	1	6	spe	0	1	2220	1,2,3,4
+G	hugepower	choicescarf	1	6	spe	1	0	832	1,2,3,4
+G	hugepower	choicescarf	1	6	spe	1	1	555	1,2,3,4
+S	0	-6	0	0	0	0	0	1,2,3,4
+S	0	-6	0	1	0	1808	1808	1,2,3,4
+S	0	-6	1	0	0	0	0	1,2,3,4
+S	0	-6	1	1	0	1808	1808	1,2,3,4
+S	0	0	0	0	0	0	0	1,2,3,4
+S	0	0	0	1	0	1808	1808	1,2,3,4
+S	0	0	1	0	0	0	0	1,2,3,4
+S	0	0	1	1	0	1808	1808	1,2,3,4
+S	0	6	0	0	0	0	0	1,2,3,4
+S	0	6	0	1	0	1808	1808	1,2,3,4
+S	0	6	1	0	0	0	0	1,2,3,4
+S	0	6	1	1	0	1808	1808	1,2,3,4
+S	1	-6	0	0	0	0	0	1,2,3,4
+S	1	-6	0	1	0	1808	1808	1,2,3,4
+S	1	-6	1	0	0	0	0	1,2,3,4
+S	1	-6	1	1	0	1808	1808	1,2,3,4
+S	1	0	0	0	1	1	1	1,2,3,4
+S	1	0	0	1	1	1807	1807	1,2,3,4
+S	1	0	1	0	1	1	1	1,2,3,4
+S	1	0	1	1	1	1807	1807	1,2,3,4
+S	1	6	0	0	4	4	4	1,2,3,4
+S	1	6	0	1	4	1804	1804	1,2,3,4
+S	1	6	1	0	6	6	6	1,2,3,4
+S	1	6	1	1	6	1802	1802	1,2,3,4
+S	4095	-6	0	0	1023	1023	1023	1,2,3,4
+S	4095	-6	0	1	1023	785	785	1,2,3,4
+S	4095	-6	1	0	1534	1534	1534	1,2,3,4
+S	4095	-6	1	1	1534	274	274	1,2,3,4
+S	4095	0	0	0	4095	4095	4095	1,2,3,4
+S	4095	0	0	1	4095	5905	5905	1,2,3,4
+S	4095	0	1	0	6142	6142	6142	1,2,3,4
+S	4095	0	1	1	6142	3858	3858	1,2,3,4
+S	4095	6	0	0	10000	1808	1808	1,2,3,4
+S	4095	6	0	1	10000	0	0	1,2,3,4
+S	4095	6	1	0	10000	1808	1808	1,2,3,4
+S	4095	6	1	1	10000	0	0	1,2,3,4
+S	8191	-6	0	0	2047	2047	2047	1,2,3,4
+S	8191	-6	0	1	2047	7953	7953	1,2,3,4
+S	8191	-6	1	0	3070	3070	3070	1,2,3,4
+S	8191	-6	1	1	3070	6930	6930	1,2,3,4
+S	8191	0	0	0	8191	8191	8191	1,2,3,4
+S	8191	0	0	1	8191	1809	1809	1,2,3,4
+S	8191	0	1	0	10000	1808	1808	1,2,3,4
+S	8191	0	1	1	10000	0	0	1,2,3,4
+S	8191	6	0	0	10000	1808	1808	1,2,3,4
+S	8191	6	0	1	10000	0	0	1,2,3,4
+S	8191	6	1	0	10000	1808	1808	1,2,3,4
+S	8191	6	1	1	10000	0	0	1,2,3,4
+S	8192	-6	0	0	2048	2048	2048	1,2,3,4
+S	8192	-6	0	1	2048	7952	7952	1,2,3,4
+S	8192	-6	1	0	3072	3072	3072	1,2,3,4
+S	8192	-6	1	1	3072	6928	6928	1,2,3,4
+S	8192	0	0	0	8192	0	0	1,2,3,4
+S	8192	0	0	1	8192	1808	1808	1,2,3,4
+S	8192	0	1	0	10000	1808	1808	1,2,3,4
+S	8192	0	1	1	10000	0	0	1,2,3,4
+S	8192	6	0	0	10000	1808	1808	1,2,3,4
+S	8192	6	0	1	10000	0	0	1,2,3,4
+S	8192	6	1	0	10000	1808	1808	1,2,3,4
+S	8192	6	1	1	10000	0	0	1,2,3,4
+S	9999	-6	0	0	2499	2499	2499	1,2,3,4
+S	9999	-6	0	1	2499	7501	7501	1,2,3,4
+S	9999	-6	1	0	3748	3748	3748	1,2,3,4
+S	9999	-6	1	1	3748	6252	6252	1,2,3,4
+S	9999	0	0	0	9999	1807	1807	1,2,3,4
+S	9999	0	0	1	9999	1	1	1,2,3,4
+S	9999	0	1	0	10000	1808	1808	1,2,3,4
+S	9999	0	1	1	10000	0	0	1,2,3,4
+S	9999	6	0	0	10000	1808	1808	1,2,3,4
+S	9999	6	0	1	10000	0	0	1,2,3,4
+S	9999	6	1	0	10000	1808	1808	1,2,3,4
+S	9999	6	1	1	10000	0	0	1,2,3,4
+S	10000	-6	0	0	2500	2500	2500	1,2,3,4
+S	10000	-6	0	1	2500	7500	7500	1,2,3,4
+S	10000	-6	1	0	3750	3750	3750	1,2,3,4
+S	10000	-6	1	1	3750	6250	6250	1,2,3,4
+S	10000	0	0	0	10000	1808	1808	1,2,3,4
+S	10000	0	0	1	10000	0	0	1,2,3,4
+S	10000	0	1	0	10000	1808	1808	1,2,3,4
+S	10000	0	1	1	10000	0	0	1,2,3,4
+S	10000	6	0	0	10000	1808	1808	1,2,3,4
+S	10000	6	0	1	10000	0	0	1,2,3,4
+S	10000	6	1	0	10000	1808	1808	1,2,3,4
+S	10000	6	1	1	10000	0	0	1,2,3,4
+S	10001	-6	0	0	2500	2500	2500	1,2,3,4
+S	10001	-6	0	1	2500	7500	7500	1,2,3,4
+S	10001	-6	1	0	3750	3750	3750	1,2,3,4
+S	10001	-6	1	1	3750	6250	6250	1,2,3,4
+S	10001	0	0	0	10000	1808	1808	1,2,3,4
+S	10001	0	0	1	10000	0	0	1,2,3,4
+S	10001	0	1	0	10000	1808	1808	1,2,3,4
+S	10001	0	1	1	10000	0	0	1,2,3,4
+S	10001	6	0	0	10000	1808	1808	1,2,3,4
+S	10001	6	0	1	10000	0	0	1,2,3,4
+S	10001	6	1	0	10000	1808	1808	1,2,3,4
+S	10001	6	1	1	10000	0	0	1,2,3,4
+S	65535	-6	0	0	10000	1808	1808	1,2,3,4
+S	65535	-6	0	1	10000	0	0	1,2,3,4
+S	65535	-6	1	0	10000	1808	1808	1,2,3,4
+S	65535	-6	1	1	10000	0	0	1,2,3,4
+S	65535	0	0	0	10000	1808	1808	1,2,3,4
+S	65535	0	0	1	10000	0	0	1,2,3,4
+S	65535	0	1	0	10000	1808	1808	1,2,3,4
+S	65535	0	1	1	10000	0	0	1,2,3,4
+S	65535	6	0	0	10000	1808	1808	1,2,3,4
+S	65535	6	0	1	10000	0	0	1,2,3,4
+S	65535	6	1	0	10000	1808	1808	1,2,3,4
+S	65535	6	1	1	10000	0	0	1,2,3,4
+B	0,0,0,0,0	0	0	0	atk	1,2,3,4
+B	0,0,0,0,0	0	0	1	atk	1,2,3,4
+B	0,0,0,0,0	0	1	0	atk	1,2,3,4
+B	0,0,0,0,0	0	1	1	atk	1,2,3,4
+B	0,0,0,0,0	1	0	0	atk	1,2,3,4
+B	0,0,0,0,0	1	0	1	atk	1,2,3,4
+B	0,0,0,0,0	1	1	0	atk	1,2,3,4
+B	0,0,0,0,0	1	1	1	atk	1,2,3,4
+B	100,100,100,100,100	0	0	0	atk	1,2,3,4
+B	100,100,100,100,100	0	0	1	atk	1,2,3,4
+B	100,100,100,100,100	0	1	0	atk	1,2,3,4
+B	100,100,100,100,100	0	1	1	atk	1,2,3,4
+B	100,100,100,100,100	1	0	0	atk	1,2,3,4
+B	100,100,100,100,100	1	0	1	atk	1,2,3,4
+B	100,100,100,100,100	1	1	0	atk	1,2,3,4
+B	100,100,100,100,100	1	1	1	atk	1,2,3,4
+B	100,200,300,400,500	0	0	0	spe	1,2,3,4
+B	100,200,300,400,500	0	0	1	spe	1,2,3,4
+B	100,200,300,400,500	0	1	0	spe	1,2,3,4
+B	100,200,300,400,500	0	1	1	spe	1,2,3,4
+B	100,200,300,400,500	1	0	0	spe	1,2,3,4
+B	100,200,300,400,500	1	0	1	spe	1,2,3,4
+B	100,200,300,400,500	1	1	0	spe	1,2,3,4
+B	100,200,300,400,500	1	1	1	spe	1,2,3,4
+B	500,400,300,200,100	0	0	0	atk	1,2,3,4
+B	500,400,300,200,100	0	0	1	atk	1,2,3,4
+B	500,400,300,200,100	0	1	0	atk	1,2,3,4
+B	500,400,300,200,100	0	1	1	atk	1,2,3,4
+B	500,400,300,200,100	1	0	0	atk	1,2,3,4
+B	500,400,300,200,100	1	0	1	atk	1,2,3,4
+B	500,400,300,200,100	1	1	0	atk	1,2,3,4
+B	500,400,300,200,100	1	1	1	atk	1,2,3,4
+W	0	0	0	1	1,2,3,4
+W	0	0	1	1	1,2,3,4
+W	0	1	0	1	1,2,3,4
+W	0	1	1	1	1,2,3,4
+W	1	0	0	1	1,2,3,4
+W	1	0	1	1	1,2,3,4
+W	1	1	0	1	1,2,3,4
+W	1	1	1	2	1,2,3,4
+W	55	0	0	55	1,2,3,4
+W	55	0	1	55	1,2,3,4
+W	55	1	0	55	1,2,3,4
+W	55	1	1	110	1,2,3,4
+W	65535	0	0	65535	1,2,3,4
+W	65535	0	1	65535	1,2,3,4
+W	65535	1	0	65535	1,2,3,4
+W	65535	1	1	131070	1,2,3,4
+H	1	1	0	0	1	-2	1	0	0	0	p1a,p1b,p2a	1,2,3,4
