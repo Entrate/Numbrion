@@ -1,0 +1,559 @@
+# id	hook	variant	return	logs	boosts
+aromaveil	onAllyTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+aromaveil	onAllyTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+aromaveil	onAllyTryAddVolatile	3	null	-block:0:ability: Aroma Veil:[of] 0	spe:-1,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	4	null	-block:0:ability: Aroma Veil:[of] 0	spe:0,atk:1,accuracy:-1
+aromaveil	onAllyTryAddVolatile	5	null	-block:0:ability: Aroma Veil:[of] 0	spe:1,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+aromaveil	onAllyTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+aromaveil	onAllyTryAddVolatile	9	null	-block:0:ability: Aroma Veil:[of] 0	spe:-1,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	10	null	-block:0:ability: Aroma Veil:[of] 0	spe:0,atk:1,accuracy:0
+aromaveil	onAllyTryAddVolatile	11	null	-block:0:ability: Aroma Veil:[of] 0	spe:1,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+aromaveil	onAllyTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+aromaveil	onAllyTryAddVolatile	15	null	-block:0:ability: Aroma Veil:[of] 0	spe:-1,atk:-1,accuracy:0
+aromaveil	onAllyTryAddVolatile	16	null	-block:0:ability: Aroma Veil:[of] 0	spe:0,atk:1,accuracy:-1
+aromaveil	onAllyTryAddVolatile	17	null	-block:0:ability: Aroma Veil:[of] 0	spe:1,atk:-1,accuracy:0
+bulletproof	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+bulletproof	onTryHit	1	null	-immune:0:[from] ability: Bulletproof	spe:0,atk:-1,accuracy:0
+bulletproof	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+bulletproof	onTryHit	3	null	-immune:0:[from] ability: Bulletproof	spe:-1,atk:-1,accuracy:0
+bulletproof	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+bulletproof	onTryHit	5	null	-immune:0:[from] ability: Bulletproof	spe:1,atk:-1,accuracy:0
+bulletproof	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+bulletproof	onTryHit	7	null	-immune:0:[from] ability: Bulletproof	spe:0,atk:-1,accuracy:0
+bulletproof	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+bulletproof	onTryHit	9	null	-immune:0:[from] ability: Bulletproof	spe:-1,atk:-1,accuracy:0
+bulletproof	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+bulletproof	onTryHit	11	null	-immune:0:[from] ability: Bulletproof	spe:1,atk:-1,accuracy:0
+bulletproof	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+bulletproof	onTryHit	13	null	-immune:0:[from] ability: Bulletproof	spe:0,atk:-1,accuracy:0
+bulletproof	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+bulletproof	onTryHit	15	null	-immune:0:[from] ability: Bulletproof	spe:-1,atk:-1,accuracy:0
+bulletproof	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+bulletproof	onTryHit	17	null	-immune:0:[from] ability: Bulletproof	spe:1,atk:-1,accuracy:0
+clearbody	onTryBoost	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+clearbody	onTryBoost	1	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:0,accuracy:0
+clearbody	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+clearbody	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+clearbody	onTryBoost	4	undefined	<empty>	spe:0,atk:1
+clearbody	onTryBoost	5	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:1,accuracy:0
+clearbody	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+clearbody	onTryBoost	7	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:0,accuracy:0
+clearbody	onTryBoost	8	undefined	<empty>	spe:1,atk:1
+clearbody	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+clearbody	onTryBoost	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+clearbody	onTryBoost	11	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:1,accuracy:0
+clearbody	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+clearbody	onTryBoost	13	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:0,accuracy:0
+clearbody	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+clearbody	onTryBoost	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+clearbody	onTryBoost	16	undefined	<empty>	spe:0,atk:1
+clearbody	onTryBoost	17	undefined	-fail:0:unboost:[from] ability: Clear Body:[of] 0	spe:1,accuracy:0
+comatose	onSetStatus	0	false	<empty>	spe:-1,atk:1,accuracy:-1
+comatose	onSetStatus	1	false	-immune:0:[from] ability: Comatose	spe:0,atk:-1,accuracy:0
+comatose	onSetStatus	2	false	<empty>	spe:1,atk:1,accuracy:0
+comatose	onSetStatus	3	false	-immune:0:[from] ability: Comatose	spe:-1,atk:-1,accuracy:0
+comatose	onSetStatus	4	false	<empty>	spe:0,atk:1,accuracy:-1
+comatose	onSetStatus	5	false	<empty>	spe:1,atk:-1,accuracy:0
+comatose	onSetStatus	6	false	<empty>	spe:-1,atk:1,accuracy:0
+comatose	onSetStatus	7	false	-immune:0:[from] ability: Comatose	spe:0,atk:-1,accuracy:0
+comatose	onSetStatus	8	false	<empty>	spe:1,atk:1,accuracy:-1
+comatose	onSetStatus	9	false	-immune:0:[from] ability: Comatose	spe:-1,atk:-1,accuracy:0
+comatose	onSetStatus	10	false	<empty>	spe:0,atk:1,accuracy:0
+comatose	onSetStatus	11	false	-immune:0:[from] ability: Comatose	spe:1,atk:-1,accuracy:0
+comatose	onSetStatus	12	false	<empty>	spe:-1,atk:1,accuracy:-1
+comatose	onSetStatus	13	false	-immune:0:[from] ability: Comatose	spe:0,atk:-1,accuracy:0
+comatose	onSetStatus	14	false	<empty>	spe:1,atk:1,accuracy:0
+comatose	onSetStatus	15	false	<empty>	spe:-1,atk:-1,accuracy:0
+comatose	onSetStatus	16	false	<empty>	spe:0,atk:1,accuracy:-1
+comatose	onSetStatus	17	false	-immune:0:[from] ability: Comatose	spe:1,atk:-1,accuracy:0
+contrary	onChangeBoost	0	undefined	<empty>	spe:1,atk:-1,accuracy:1
+contrary	onChangeBoost	1	undefined	<empty>	spe:0,atk:1,accuracy:0
+contrary	onChangeBoost	2	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+contrary	onChangeBoost	3	undefined	<empty>	spe:1,atk:1,accuracy:0
+contrary	onChangeBoost	4	undefined	<empty>	spe:0,atk:-1,accuracy:1
+contrary	onChangeBoost	5	undefined	<empty>	spe:-1,atk:1,accuracy:0
+contrary	onChangeBoost	6	undefined	<empty>	spe:1,atk:-1,accuracy:0
+contrary	onChangeBoost	7	undefined	<empty>	spe:0,atk:1,accuracy:0
+contrary	onChangeBoost	8	undefined	<empty>	spe:-1,atk:-1,accuracy:1
+contrary	onChangeBoost	9	undefined	<empty>	spe:1,atk:1,accuracy:0
+contrary	onChangeBoost	10	undefined	<empty>	spe:0,atk:-1,accuracy:0
+contrary	onChangeBoost	11	undefined	<empty>	spe:-1,atk:1,accuracy:0
+contrary	onChangeBoost	12	undefined	<empty>	spe:1,atk:-1,accuracy:1
+contrary	onChangeBoost	13	undefined	<empty>	spe:0,atk:1,accuracy:0
+contrary	onChangeBoost	14	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+contrary	onChangeBoost	15	undefined	<empty>	spe:1,atk:1,accuracy:0
+contrary	onChangeBoost	16	undefined	<empty>	spe:0,atk:-1,accuracy:1
+contrary	onChangeBoost	17	undefined	<empty>	spe:-1,atk:1,accuracy:0
+flowerveil	onAllyTryBoost	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllyTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+flowerveil	onAllyTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+flowerveil	onAllyTryBoost	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+flowerveil	onAllyTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+flowerveil	onAllyTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+flowerveil	onAllyTryBoost	11	undefined	-block:0:ability: Flower Veil:[of] 0	spe:1,accuracy:0
+flowerveil	onAllyTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllyTryBoost	13	undefined	-block:0:ability: Flower Veil:[of] 0	spe:0,accuracy:0
+flowerveil	onAllyTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+flowerveil	onAllyTryBoost	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryBoost	16	undefined	<empty>	spe:0,atk:1
+flowerveil	onAllyTryBoost	17	undefined	-block:0:ability: Flower Veil:[of] 0	spe:1,accuracy:0
+flowerveil	onAllySetStatus	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllySetStatus	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+flowerveil	onAllySetStatus	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+flowerveil	onAllySetStatus	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+flowerveil	onAllySetStatus	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+flowerveil	onAllySetStatus	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	10	null	<empty>	spe:0,atk:1,accuracy:0
+flowerveil	onAllySetStatus	11	null	-block:0:ability: Flower Veil:[of] 0	spe:1,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllySetStatus	13	null	-block:0:ability: Flower Veil:[of] 0	spe:0,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	14	null	-block:0:ability: Flower Veil:[of] 0	spe:1,atk:1,accuracy:0
+flowerveil	onAllySetStatus	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllySetStatus	16	null	<empty>	spe:0,atk:1,accuracy:-1
+flowerveil	onAllySetStatus	17	null	-block:0:ability: Flower Veil:[of] 0	spe:1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllyTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+flowerveil	onAllyTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+flowerveil	onAllyTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+flowerveil	onAllyTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+flowerveil	onAllyTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+flowerveil	onAllyTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+flowerveil	onAllyTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	14	null	-block:0:ability: Flower Veil:[of] 0	spe:1,atk:1,accuracy:0
+flowerveil	onAllyTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+flowerveil	onAllyTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+flowerveil	onAllyTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+fullmetalbody	onTryBoost	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+fullmetalbody	onTryBoost	1	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:0,accuracy:0
+fullmetalbody	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+fullmetalbody	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+fullmetalbody	onTryBoost	4	undefined	<empty>	spe:0,atk:1
+fullmetalbody	onTryBoost	5	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:1,accuracy:0
+fullmetalbody	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+fullmetalbody	onTryBoost	7	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:0,accuracy:0
+fullmetalbody	onTryBoost	8	undefined	<empty>	spe:1,atk:1
+fullmetalbody	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+fullmetalbody	onTryBoost	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+fullmetalbody	onTryBoost	11	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:1,accuracy:0
+fullmetalbody	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+fullmetalbody	onTryBoost	13	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:0,accuracy:0
+fullmetalbody	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+fullmetalbody	onTryBoost	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+fullmetalbody	onTryBoost	16	undefined	<empty>	spe:0,atk:1
+fullmetalbody	onTryBoost	17	undefined	-fail:0:unboost:[from] ability: Full Metal Body:[of] 0	spe:1,accuracy:0
+goodasgold	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+goodasgold	onTryHit	1	null	-immune:0:[from] ability: Good as Gold	spe:0,atk:-1,accuracy:0
+goodasgold	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+goodasgold	onTryHit	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+goodasgold	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+goodasgold	onTryHit	5	null	-immune:0:[from] ability: Good as Gold	spe:1,atk:-1,accuracy:0
+goodasgold	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+goodasgold	onTryHit	7	null	-immune:0:[from] ability: Good as Gold	spe:0,atk:-1,accuracy:0
+goodasgold	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+goodasgold	onTryHit	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+goodasgold	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+goodasgold	onTryHit	11	null	-immune:0:[from] ability: Good as Gold	spe:1,atk:-1,accuracy:0
+goodasgold	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+goodasgold	onTryHit	13	null	-immune:0:[from] ability: Good as Gold	spe:0,atk:-1,accuracy:0
+goodasgold	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+goodasgold	onTryHit	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+goodasgold	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+goodasgold	onTryHit	17	null	-immune:0:[from] ability: Good as Gold	spe:1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	0	null	<empty>	spe:-1,atk:1,accuracy:-1
+innerfocus	onTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+innerfocus	onTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+innerfocus	onTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	6	null	<empty>	spe:-1,atk:1,accuracy:0
+innerfocus	onTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+innerfocus	onTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+innerfocus	onTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	12	null	<empty>	spe:-1,atk:1,accuracy:-1
+innerfocus	onTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+innerfocus	onTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+innerfocus	onTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+innerfocus	onTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+innerfocus	onTryBoost	0	undefined	-fail:0:unboost:atk:[from] ability: Inner Focus:[of] 0	spe:-1,accuracy:-1
+innerfocus	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+innerfocus	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+innerfocus	onTryBoost	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+innerfocus	onTryBoost	5	undefined	-fail:0:unboost:atk:[from] ability: Inner Focus:[of] 0	spe:1,accuracy:0
+innerfocus	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+innerfocus	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryBoost	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+innerfocus	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+innerfocus	onTryBoost	10	undefined	-fail:0:unboost:atk:[from] ability: Inner Focus:[of] 0	spe:0,accuracy:0
+innerfocus	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+innerfocus	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+innerfocus	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+innerfocus	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+innerfocus	onTryBoost	15	undefined	-fail:0:unboost:atk:[from] ability: Inner Focus:[of] 0	spe:-1,accuracy:0
+innerfocus	onTryBoost	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+innerfocus	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onSetStatus	0	false	<empty>	spe:-1,atk:1,accuracy:-1
+insomnia	onSetStatus	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onSetStatus	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+insomnia	onSetStatus	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onSetStatus	4	false	<empty>	spe:0,atk:1,accuracy:-1
+insomnia	onSetStatus	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onSetStatus	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+insomnia	onSetStatus	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onSetStatus	8	false	<empty>	spe:1,atk:1,accuracy:-1
+insomnia	onSetStatus	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onSetStatus	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+insomnia	onSetStatus	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onSetStatus	12	false	<empty>	spe:-1,atk:1,accuracy:-1
+insomnia	onSetStatus	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onSetStatus	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+insomnia	onSetStatus	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onSetStatus	16	false	<empty>	spe:0,atk:1,accuracy:-1
+insomnia	onSetStatus	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+insomnia	onTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	2	null	-immune:0:[from] ability: Insomnia	spe:1,atk:1,accuracy:0
+insomnia	onTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+insomnia	onTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+insomnia	onTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	8	null	-immune:0:[from] ability: Insomnia	spe:1,atk:1,accuracy:-1
+insomnia	onTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+insomnia	onTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+insomnia	onTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	14	null	-immune:0:[from] ability: Insomnia	spe:1,atk:1,accuracy:0
+insomnia	onTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+insomnia	onTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+insomnia	onTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+keeneye	onTryBoost	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+keeneye	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+keeneye	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+keeneye	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+keeneye	onTryBoost	4	undefined	<empty>	spe:0,atk:1
+keeneye	onTryBoost	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+keeneye	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+keeneye	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+keeneye	onTryBoost	8	undefined	<empty>	spe:1,atk:1
+keeneye	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+keeneye	onTryBoost	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+keeneye	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+keeneye	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+keeneye	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+keeneye	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+keeneye	onTryBoost	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+keeneye	onTryBoost	16	undefined	<empty>	spe:0,atk:1
+keeneye	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+mindseye	onTryBoost	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+mindseye	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+mindseye	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+mindseye	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+mindseye	onTryBoost	4	undefined	<empty>	spe:0,atk:1
+mindseye	onTryBoost	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+mindseye	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+mindseye	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+mindseye	onTryBoost	8	undefined	<empty>	spe:1,atk:1
+mindseye	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+mindseye	onTryBoost	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+mindseye	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+mindseye	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+mindseye	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+mindseye	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+mindseye	onTryBoost	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+mindseye	onTryBoost	16	undefined	<empty>	spe:0,atk:1
+mindseye	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+oblivious	onTryHit	0	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:1,accuracy:-1
+oblivious	onTryHit	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+oblivious	onTryHit	3	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:-1,accuracy:0
+oblivious	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+oblivious	onTryHit	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+oblivious	onTryHit	6	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:1,accuracy:0
+oblivious	onTryHit	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+oblivious	onTryHit	9	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:-1,accuracy:0
+oblivious	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+oblivious	onTryHit	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+oblivious	onTryHit	12	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:1,accuracy:-1
+oblivious	onTryHit	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+oblivious	onTryHit	15	null	-immune:0:[from] ability: Oblivious	spe:-1,atk:-1,accuracy:0
+oblivious	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+oblivious	onTryHit	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+oblivious	onTryBoost	0	undefined	-fail:0:unboost:atk:[from] ability: Oblivious:[of] 0	spe:-1,accuracy:-1
+oblivious	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+oblivious	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+oblivious	onTryBoost	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+oblivious	onTryBoost	5	undefined	-fail:0:unboost:atk:[from] ability: Oblivious:[of] 0	spe:1,accuracy:0
+oblivious	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+oblivious	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryBoost	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+oblivious	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+oblivious	onTryBoost	10	undefined	-fail:0:unboost:atk:[from] ability: Oblivious:[of] 0	spe:0,accuracy:0
+oblivious	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+oblivious	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+oblivious	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+oblivious	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+oblivious	onTryBoost	15	undefined	-fail:0:unboost:atk:[from] ability: Oblivious:[of] 0	spe:-1,accuracy:0
+oblivious	onTryBoost	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+oblivious	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+overcoat	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+overcoat	onTryHit	1	null	-immune:0:[from] ability: Overcoat	spe:0,atk:-1,accuracy:0
+overcoat	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+overcoat	onTryHit	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+overcoat	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+overcoat	onTryHit	5	null	-immune:0:[from] ability: Overcoat	spe:1,atk:-1,accuracy:0
+overcoat	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+overcoat	onTryHit	7	null	-immune:0:[from] ability: Overcoat	spe:0,atk:-1,accuracy:0
+overcoat	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+overcoat	onTryHit	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+overcoat	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+overcoat	onTryHit	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+overcoat	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+overcoat	onTryHit	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+overcoat	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+overcoat	onTryHit	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+overcoat	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+overcoat	onTryHit	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+owntempo	onTryAddVolatile	1	null	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+owntempo	onTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+owntempo	onTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+owntempo	onTryAddVolatile	7	null	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+owntempo	onTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+owntempo	onTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+owntempo	onTryAddVolatile	13	null	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+owntempo	onTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+owntempo	onTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+owntempo	onTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+owntempo	onTryBoost	0	undefined	-fail:0:unboost:atk:[from] ability: Own Tempo:[of] 0	spe:-1,accuracy:-1
+owntempo	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+owntempo	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+owntempo	onTryBoost	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+owntempo	onTryBoost	5	undefined	-fail:0:unboost:atk:[from] ability: Own Tempo:[of] 0	spe:1,accuracy:0
+owntempo	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+owntempo	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryBoost	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+owntempo	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+owntempo	onTryBoost	10	undefined	-fail:0:unboost:atk:[from] ability: Own Tempo:[of] 0	spe:0,accuracy:0
+owntempo	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+owntempo	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+owntempo	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+owntempo	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+owntempo	onTryBoost	15	undefined	-fail:0:unboost:atk:[from] ability: Own Tempo:[of] 0	spe:-1,accuracy:0
+owntempo	onTryBoost	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+owntempo	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	0	false	<empty>	spe:-1,atk:1,accuracy:-1
+purifyingsalt	onSetStatus	1	false	-immune:0:[from] ability: Purifying Salt	spe:0,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	2	false	<empty>	spe:1,atk:1,accuracy:0
+purifyingsalt	onSetStatus	3	false	-immune:0:[from] ability: Purifying Salt	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	4	false	<empty>	spe:0,atk:1,accuracy:-1
+purifyingsalt	onSetStatus	5	false	<empty>	spe:1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	6	false	<empty>	spe:-1,atk:1,accuracy:0
+purifyingsalt	onSetStatus	7	false	-immune:0:[from] ability: Purifying Salt	spe:0,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	8	false	<empty>	spe:1,atk:1,accuracy:-1
+purifyingsalt	onSetStatus	9	false	-immune:0:[from] ability: Purifying Salt	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	10	false	<empty>	spe:0,atk:1,accuracy:0
+purifyingsalt	onSetStatus	11	false	-immune:0:[from] ability: Purifying Salt	spe:1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	12	false	<empty>	spe:-1,atk:1,accuracy:-1
+purifyingsalt	onSetStatus	13	false	-immune:0:[from] ability: Purifying Salt	spe:0,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	14	false	<empty>	spe:1,atk:1,accuracy:0
+purifyingsalt	onSetStatus	15	false	<empty>	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onSetStatus	16	false	<empty>	spe:0,atk:1,accuracy:-1
+purifyingsalt	onSetStatus	17	false	-immune:0:[from] ability: Purifying Salt	spe:1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+purifyingsalt	onTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	2	null	-immune:0:[from] ability: Purifying Salt	spe:1,atk:1,accuracy:0
+purifyingsalt	onTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+purifyingsalt	onTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+purifyingsalt	onTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	8	null	-immune:0:[from] ability: Purifying Salt	spe:1,atk:1,accuracy:-1
+purifyingsalt	onTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+purifyingsalt	onTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+purifyingsalt	onTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	14	null	-immune:0:[from] ability: Purifying Salt	spe:1,atk:1,accuracy:0
+purifyingsalt	onTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+purifyingsalt	onTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+purifyingsalt	onTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+scrappy	onTryBoost	0	undefined	-fail:0:unboost:atk:[from] ability: Scrappy:[of] 0	spe:-1,accuracy:-1
+scrappy	onTryBoost	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+scrappy	onTryBoost	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+scrappy	onTryBoost	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+scrappy	onTryBoost	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+scrappy	onTryBoost	5	undefined	-fail:0:unboost:atk:[from] ability: Scrappy:[of] 0	spe:1,accuracy:0
+scrappy	onTryBoost	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+scrappy	onTryBoost	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+scrappy	onTryBoost	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+scrappy	onTryBoost	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+scrappy	onTryBoost	10	undefined	-fail:0:unboost:atk:[from] ability: Scrappy:[of] 0	spe:0,accuracy:0
+scrappy	onTryBoost	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+scrappy	onTryBoost	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+scrappy	onTryBoost	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+scrappy	onTryBoost	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+scrappy	onTryBoost	15	undefined	-fail:0:unboost:atk:[from] ability: Scrappy:[of] 0	spe:-1,accuracy:0
+scrappy	onTryBoost	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+scrappy	onTryBoost	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+soundproof	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+soundproof	onTryHit	1	null	-immune:0:[from] ability: Soundproof	spe:0,atk:-1,accuracy:0
+soundproof	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+soundproof	onTryHit	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+soundproof	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+soundproof	onTryHit	5	null	-immune:0:[from] ability: Soundproof	spe:1,atk:-1,accuracy:0
+soundproof	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+soundproof	onTryHit	7	null	-immune:0:[from] ability: Soundproof	spe:0,atk:-1,accuracy:0
+soundproof	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+soundproof	onTryHit	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+soundproof	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+soundproof	onTryHit	11	null	-immune:0:[from] ability: Soundproof	spe:1,atk:-1,accuracy:0
+soundproof	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+soundproof	onTryHit	13	null	-immune:0:[from] ability: Soundproof	spe:0,atk:-1,accuracy:0
+soundproof	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+soundproof	onTryHit	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+soundproof	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+soundproof	onTryHit	17	null	-immune:0:[from] ability: Soundproof	spe:1,atk:-1,accuracy:0
+sturdy	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+sturdy	onTryHit	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+sturdy	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+sturdy	onTryHit	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+sturdy	onTryHit	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+sturdy	onTryHit	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+sturdy	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+sturdy	onTryHit	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+sturdy	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+sturdy	onTryHit	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+sturdy	onTryHit	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+sturdy	onTryHit	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+sturdy	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+sturdy	onTryHit	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+sturdy	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+sturdy	onTryHit	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+sturdy	onTryHit	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+sturdy	onTryHit	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+telepathy	onTryHit	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+telepathy	onTryHit	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+telepathy	onTryHit	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+telepathy	onTryHit	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+telepathy	onTryHit	4	null	-activate:0:ability: Telepathy	spe:0,atk:1,accuracy:-1
+telepathy	onTryHit	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+telepathy	onTryHit	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+telepathy	onTryHit	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+telepathy	onTryHit	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+telepathy	onTryHit	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+telepathy	onTryHit	10	null	-activate:0:ability: Telepathy	spe:0,atk:1,accuracy:0
+telepathy	onTryHit	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+telepathy	onTryHit	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+telepathy	onTryHit	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+telepathy	onTryHit	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+telepathy	onTryHit	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+telepathy	onTryHit	16	null	-activate:0:ability: Telepathy	spe:0,atk:1,accuracy:-1
+telepathy	onTryHit	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	0	false	<empty>	spe:-1,atk:1,accuracy:-1
+vitalspirit	onSetStatus	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onSetStatus	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+vitalspirit	onSetStatus	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	4	false	<empty>	spe:0,atk:1,accuracy:-1
+vitalspirit	onSetStatus	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+vitalspirit	onSetStatus	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onSetStatus	8	false	<empty>	spe:1,atk:1,accuracy:-1
+vitalspirit	onSetStatus	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+vitalspirit	onSetStatus	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	12	false	<empty>	spe:-1,atk:1,accuracy:-1
+vitalspirit	onSetStatus	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onSetStatus	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+vitalspirit	onSetStatus	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onSetStatus	16	false	<empty>	spe:0,atk:1,accuracy:-1
+vitalspirit	onSetStatus	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+vitalspirit	onTryAddVolatile	1	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	2	null	-immune:0:[from] ability: Vital Spirit	spe:1,atk:1,accuracy:0
+vitalspirit	onTryAddVolatile	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+vitalspirit	onTryAddVolatile	5	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+vitalspirit	onTryAddVolatile	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	8	null	-immune:0:[from] ability: Vital Spirit	spe:1,atk:1,accuracy:-1
+vitalspirit	onTryAddVolatile	9	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+vitalspirit	onTryAddVolatile	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+vitalspirit	onTryAddVolatile	13	undefined	<empty>	spe:0,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	14	null	-immune:0:[from] ability: Vital Spirit	spe:1,atk:1,accuracy:0
+vitalspirit	onTryAddVolatile	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+vitalspirit	onTryAddVolatile	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+vitalspirit	onTryAddVolatile	17	undefined	<empty>	spe:1,atk:-1,accuracy:0
+waterbubble	onSetStatus	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+waterbubble	onSetStatus	1	false	-immune:0:[from] ability: Water Bubble	spe:0,atk:-1,accuracy:0
+waterbubble	onSetStatus	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+waterbubble	onSetStatus	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+waterbubble	onSetStatus	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+waterbubble	onSetStatus	5	false	<empty>	spe:1,atk:-1,accuracy:0
+waterbubble	onSetStatus	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+waterbubble	onSetStatus	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+waterbubble	onSetStatus	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+waterbubble	onSetStatus	9	false	-immune:0:[from] ability: Water Bubble	spe:-1,atk:-1,accuracy:0
+waterbubble	onSetStatus	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+waterbubble	onSetStatus	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+waterbubble	onSetStatus	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+waterbubble	onSetStatus	13	false	-immune:0:[from] ability: Water Bubble	spe:0,atk:-1,accuracy:0
+waterbubble	onSetStatus	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+waterbubble	onSetStatus	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+waterbubble	onSetStatus	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+waterbubble	onSetStatus	17	false	-immune:0:[from] ability: Water Bubble	spe:1,atk:-1,accuracy:0
+waterveil	onSetStatus	0	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+waterveil	onSetStatus	1	false	-immune:0:[from] ability: Water Veil	spe:0,atk:-1,accuracy:0
+waterveil	onSetStatus	2	undefined	<empty>	spe:1,atk:1,accuracy:0
+waterveil	onSetStatus	3	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+waterveil	onSetStatus	4	undefined	<empty>	spe:0,atk:1,accuracy:-1
+waterveil	onSetStatus	5	false	<empty>	spe:1,atk:-1,accuracy:0
+waterveil	onSetStatus	6	undefined	<empty>	spe:-1,atk:1,accuracy:0
+waterveil	onSetStatus	7	undefined	<empty>	spe:0,atk:-1,accuracy:0
+waterveil	onSetStatus	8	undefined	<empty>	spe:1,atk:1,accuracy:-1
+waterveil	onSetStatus	9	false	-immune:0:[from] ability: Water Veil	spe:-1,atk:-1,accuracy:0
+waterveil	onSetStatus	10	undefined	<empty>	spe:0,atk:1,accuracy:0
+waterveil	onSetStatus	11	undefined	<empty>	spe:1,atk:-1,accuracy:0
+waterveil	onSetStatus	12	undefined	<empty>	spe:-1,atk:1,accuracy:-1
+waterveil	onSetStatus	13	false	-immune:0:[from] ability: Water Veil	spe:0,atk:-1,accuracy:0
+waterveil	onSetStatus	14	undefined	<empty>	spe:1,atk:1,accuracy:0
+waterveil	onSetStatus	15	undefined	<empty>	spe:-1,atk:-1,accuracy:0
+waterveil	onSetStatus	16	undefined	<empty>	spe:0,atk:1,accuracy:-1
+waterveil	onSetStatus	17	false	-immune:0:[from] ability: Water Veil	spe:1,atk:-1,accuracy:0

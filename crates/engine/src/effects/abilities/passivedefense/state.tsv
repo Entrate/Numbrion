@@ -1,0 +1,14 @@
+# action	activeTurns	calledBack	counter	present	logs
+Start	0	false	5	true	-start:0:ability: Slow Start
+Residual	0	false	5	true	<empty>
+Residual	1	false	4	true	<empty>
+End	1	false	4	true	-end:0:Slow Start:[silent]
+Residual	1	true	3	true	<empty>
+Residual	1	true	2	true	<empty>
+Residual	1	true	1	true	<empty>
+Residual	1	true	undefined	false	-end:0:Slow Start
+Residual	1	true	undefined	false	<empty>
+End	1	true	undefined	false	<empty>
+Start	1	false	5	true	-start:0:ability: Slow Start
+End	1	false	5	true	-end:0:Slow Start:[silent]
+End	1	true	5	true	<empty>

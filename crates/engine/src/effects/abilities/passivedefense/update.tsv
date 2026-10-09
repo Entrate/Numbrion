@@ -1,0 +1,73 @@
+# id	variant	trace
+insomnia	0	-activate:0:ability: Insomnia|cure
+insomnia	1	<empty>
+insomnia	2	<empty>
+insomnia	3	<empty>
+insomnia	4	-activate:0:ability: Insomnia|cure
+insomnia	5	<empty>
+insomnia	6	<empty>
+insomnia	7	<empty>
+insomnia	8	-activate:0:ability: Insomnia|cure
+insomnia	9	<empty>
+insomnia	10	<empty>
+insomnia	11	<empty>
+vitalspirit	0	-activate:0:ability: Vital Spirit|cure
+vitalspirit	1	<empty>
+vitalspirit	2	<empty>
+vitalspirit	3	<empty>
+vitalspirit	4	-activate:0:ability: Vital Spirit|cure
+vitalspirit	5	<empty>
+vitalspirit	6	<empty>
+vitalspirit	7	<empty>
+vitalspirit	8	-activate:0:ability: Vital Spirit|cure
+vitalspirit	9	<empty>
+vitalspirit	10	<empty>
+vitalspirit	11	<empty>
+waterveil	0	<empty>
+waterveil	1	-activate:0:ability: Water Veil|cure
+waterveil	2	<empty>
+waterveil	3	<empty>
+waterveil	4	<empty>
+waterveil	5	-activate:0:ability: Water Veil|cure
+waterveil	6	<empty>
+waterveil	7	<empty>
+waterveil	8	<empty>
+waterveil	9	-activate:0:ability: Water Veil|cure
+waterveil	10	<empty>
+waterveil	11	<empty>
+waterbubble	0	<empty>
+waterbubble	1	-activate:0:ability: Water Bubble|cure
+waterbubble	2	<empty>
+waterbubble	3	<empty>
+waterbubble	4	<empty>
+waterbubble	5	-activate:0:ability: Water Bubble|cure
+waterbubble	6	<empty>
+waterbubble	7	<empty>
+waterbubble	8	<empty>
+waterbubble	9	-activate:0:ability: Water Bubble|cure
+waterbubble	10	<empty>
+waterbubble	11	<empty>
+owntempo	0	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	1	<empty>
+owntempo	2	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	3	<empty>
+owntempo	4	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	5	<empty>
+owntempo	6	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	7	<empty>
+owntempo	8	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	9	<empty>
+owntempo	10	-activate:0:ability: Own Tempo|remove:confusion
+owntempo	11	<empty>
+oblivious	0	<empty>
+oblivious	1	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious|-activate:0:ability: Oblivious|remove:taunt
+oblivious	2	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious
+oblivious	3	-activate:0:ability: Oblivious|remove:taunt
+oblivious	4	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious
+oblivious	5	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious|-activate:0:ability: Oblivious|remove:taunt
+oblivious	6	<empty>
+oblivious	7	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious|-activate:0:ability: Oblivious|remove:taunt
+oblivious	8	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious
+oblivious	9	-activate:0:ability: Oblivious|remove:taunt
+oblivious	10	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious
+oblivious	11	-activate:0:ability: Oblivious|remove:attract|-end:0:move: Attract:[from] ability: Oblivious|-activate:0:ability: Oblivious|remove:taunt
