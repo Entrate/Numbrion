@@ -1,0 +1,751 @@
+[
+  {
+    "family": "abilities",
+    "id": "aromaveil",
+    "hooks": [
+      "onAllyTryAddVolatile"
+    ],
+    "line": 234,
+    "hookLines": {
+      "onAllyTryAddVolatile": 235
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "bulletproof",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 480,
+    "hookLines": {
+      "onTryHit": 481
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "clearbody",
+    "hooks": [
+      "onTryBoost"
+    ],
+    "line": 523,
+    "hookLines": {
+      "onTryBoost": 524
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "comatose",
+    "hooks": [
+      "onStart",
+      "onSetStatus"
+    ],
+    "line": 588,
+    "hookLines": {
+      "onStart": 589,
+      "onSetStatus": 592
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "compoundeyes",
+    "hooks": [
+      "onSourceModifyAccuracy"
+    ],
+    "line": 666,
+    "hookLines": {
+      "onSourceModifyAccuracy": 668
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "contrary",
+    "hooks": [
+      "onChangeBoost"
+    ],
+    "line": 678,
+    "hookLines": {
+      "onChangeBoost": 679
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "eartheater",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 1133,
+    "hookLines": {
+      "onTryHit": 1134
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "filter",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 1284,
+    "hookLines": {
+      "onSourceModifyDamage": 1285
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "flashfire",
+    "hooks": [
+      "onTryHit",
+      "onEnd"
+    ],
+    "line": 1342,
+    "hookLines": {
+      "onTryHit": 1343,
+      "onEnd": 1352
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "flowerveil",
+    "hooks": [
+      "onAllyTryBoost",
+      "onAllySetStatus",
+      "onAllyTryAddVolatile"
+    ],
+    "line": 1420,
+    "hookLines": {
+      "onAllyTryBoost": 1421,
+      "onAllySetStatus": 1436,
+      "onAllyTryAddVolatile": 1446
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "fluffy",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 1459,
+    "hookLines": {
+      "onSourceModifyDamage": 1460
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "fullmetalbody",
+    "hooks": [
+      "onTryBoost"
+    ],
+    "line": 1559,
+    "hookLines": {
+      "onTryBoost": 1560
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "furcoat",
+    "hooks": [
+      "onModifyDef"
+    ],
+    "line": 1579,
+    "hookLines": {
+      "onModifyDef": 1581
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "galvanize",
+    "hooks": [
+      "onModifyType",
+      "onBasePower"
+    ],
+    "line": 1598,
+    "hookLines": {
+      "onModifyType": 1600,
+      "onBasePower": 1611
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "goodasgold",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 1631,
+    "hookLines": {
+      "onTryHit": 1632
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "hustle",
+    "hooks": [
+      "onModifyAtk",
+      "onSourceModifyAccuracy"
+    ],
+    "line": 1909,
+    "hookLines": {
+      "onModifyAtk": 1912,
+      "onSourceModifyAccuracy": 1916
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "icescales",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 2027,
+    "hookLines": {
+      "onSourceModifyDamage": 2028
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "innerfocus",
+    "hooks": [
+      "onTryAddVolatile",
+      "onTryBoost"
+    ],
+    "line": 2154,
+    "hookLines": {
+      "onTryAddVolatile": 2155,
+      "onTryBoost": 2158
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "insomnia",
+    "hooks": [
+      "onUpdate",
+      "onSetStatus",
+      "onTryAddVolatile"
+    ],
+    "line": 2169,
+    "hookLines": {
+      "onUpdate": 2170,
+      "onSetStatus": 2176,
+      "onTryAddVolatile": 2183
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "keeneye",
+    "hooks": [
+      "onTryBoost",
+      "onModifyMove"
+    ],
+    "line": 2261,
+    "hookLines": {
+      "onTryBoost": 2262,
+      "onModifyMove": 2271
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "liquidvoice",
+    "hooks": [
+      "onModifyType"
+    ],
+    "line": 2417,
+    "hookLines": {
+      "onModifyType": 2419
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "magicguard",
+    "hooks": [
+      "onDamage"
+    ],
+    "line": 2466,
+    "hookLines": {
+      "onDamage": 2467
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "mindseye",
+    "hooks": [
+      "onTryBoost",
+      "onModifyMove"
+    ],
+    "line": 2620,
+    "hookLines": {
+      "onTryBoost": 2621,
+      "onModifyMove": 2631
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "mirrorarmor",
+    "hooks": [
+      "onTryBoost"
+    ],
+    "line": 2658,
+    "hookLines": {
+      "onTryBoost": 2659
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "moldbreaker",
+    "hooks": [
+      "onStart",
+      "onModifyMove"
+    ],
+    "line": 2690,
+    "hookLines": {
+      "onStart": 2691,
+      "onModifyMove": 2694
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "motordrive",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 2736,
+    "hookLines": {
+      "onTryHit": 2737
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "multiscale",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 2761,
+    "hookLines": {
+      "onSourceModifyDamage": 2762
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "noguard",
+    "hooks": [
+      "onAnyInvulnerability",
+      "onAnyAccuracy"
+    ],
+    "line": 2971,
+    "hookLines": {
+      "onAnyInvulnerability": 2973,
+      "onAnyAccuracy": 2976
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "oblivious",
+    "hooks": [
+      "onUpdate",
+      "onImmunity",
+      "onTryHit",
+      "onTryBoost"
+    ],
+    "line": 3009,
+    "hookLines": {
+      "onUpdate": 3010,
+      "onImmunity": 3022,
+      "onTryHit": 3025,
+      "onTryBoost": 3031
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "overcoat",
+    "hooks": [
+      "onImmunity",
+      "onTryHit"
+    ],
+    "line": 3109,
+    "hookLines": {
+      "onImmunity": 3110,
+      "onTryHit": 3114
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "owntempo",
+    "hooks": [
+      "onUpdate",
+      "onTryAddVolatile",
+      "onHit",
+      "onTryBoost"
+    ],
+    "line": 3145,
+    "hookLines": {
+      "onUpdate": 3146,
+      "onTryAddVolatile": 3152,
+      "onHit": 3155,
+      "onTryBoost": 3160
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "pixilate",
+    "hooks": [
+      "onModifyType",
+      "onBasePower"
+    ],
+    "line": 3297,
+    "hookLines": {
+      "onModifyType": 3299,
+      "onBasePower": 3310
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "pressure",
+    "hooks": [
+      "onStart",
+      "onDeductPP"
+    ],
+    "line": 3438,
+    "hookLines": {
+      "onStart": 3439,
+      "onDeductPP": 3442
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "prismarmor",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 3475,
+    "hookLines": {
+      "onSourceModifyDamage": 3476
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "punkrock",
+    "hooks": [
+      "onBasePower",
+      "onSourceModifyDamage"
+    ],
+    "line": 3590,
+    "hookLines": {
+      "onBasePower": 3592,
+      "onSourceModifyDamage": 3598
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "purifyingsalt",
+    "hooks": [
+      "onSetStatus",
+      "onTryAddVolatile",
+      "onSourceModifyAtk",
+      "onSourceModifySpA"
+    ],
+    "line": 3619,
+    "hookLines": {
+      "onSetStatus": 3620,
+      "onTryAddVolatile": 3626,
+      "onSourceModifyAtk": 3633,
+      "onSourceModifySpA": 3640
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "rockhead",
+    "hooks": [
+      "onDamage"
+    ],
+    "line": 3907,
+    "hookLines": {
+      "onDamage": 3908
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "sapsipper",
+    "hooks": [
+      "onTryHit",
+      "onAllyTryHitSide"
+    ],
+    "line": 4024,
+    "hookLines": {
+      "onTryHit": 4026,
+      "onAllyTryHitSide": 4034
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "scrappy",
+    "hooks": [
+      "onModifyMove",
+      "onTryBoost"
+    ],
+    "line": 4080,
+    "hookLines": {
+      "onModifyMove": 4082,
+      "onTryBoost": 4089
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "shadowshield",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 4145,
+    "hookLines": {
+      "onSourceModifyDamage": 4146
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "shielddust",
+    "hooks": [
+      "onModifySecondaries"
+    ],
+    "line": 4230,
+    "hookLines": {
+      "onModifySecondaries": 4231
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "slowstart",
+    "hooks": [
+      "onStart",
+      "onResidual",
+      "onModifyAtk",
+      "onModifySpe",
+      "onEnd"
+    ],
+    "line": 4312,
+    "hookLines": {
+      "onStart": 4313,
+      "onResidual": 4319,
+      "onModifyAtk": 4329,
+      "onModifySpe": 4334,
+      "onEnd": 4339
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "solidrock",
+    "hooks": [
+      "onSourceModifyDamage"
+    ],
+    "line": 4415,
+    "hookLines": {
+      "onSourceModifyDamage": 4416
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "soundproof",
+    "hooks": [
+      "onTryHit",
+      "onAllyTryHitSide"
+    ],
+    "line": 4437,
+    "hookLines": {
+      "onTryHit": 4438,
+      "onAllyTryHitSide": 4444
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "sturdy",
+    "hooks": [
+      "onTryHit",
+      "onDamage"
+    ],
+    "line": 4674,
+    "hookLines": {
+      "onTryHit": 4675,
+      "onDamage": 4682
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "telepathy",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 4933,
+    "hookLines": {
+      "onTryHit": 4934
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "teravolt",
+    "hooks": [
+      "onStart",
+      "onModifyMove"
+    ],
+    "line": 4980,
+    "hookLines": {
+      "onStart": 4981,
+      "onModifyMove": 4984
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "thickfat",
+    "hooks": [
+      "onSourceModifyAtk",
+      "onSourceModifySpA"
+    ],
+    "line": 5016,
+    "hookLines": {
+      "onSourceModifyAtk": 5018,
+      "onSourceModifySpA": 5025
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "tintedlens",
+    "hooks": [
+      "onModifyDamage"
+    ],
+    "line": 5036,
+    "hookLines": {
+      "onModifyDamage": 5037
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "turboblaze",
+    "hooks": [
+      "onStart",
+      "onModifyMove"
+    ],
+    "line": 5204,
+    "hookLines": {
+      "onStart": 5205,
+      "onModifyMove": 5208
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "unaware",
+    "hooks": [
+      "onAnyModifyBoost"
+    ],
+    "line": 5216,
+    "hookLines": {
+      "onAnyModifyBoost": 5217
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "unburden",
+    "hooks": [
+      "onAfterUseItem",
+      "onTakeItem",
+      "onEnd"
+    ],
+    "line": 5237,
+    "hookLines": {
+      "onAfterUseItem": 5238,
+      "onTakeItem": 5242,
+      "onEnd": 5245
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "vitalspirit",
+    "hooks": [
+      "onUpdate",
+      "onSetStatus",
+      "onTryAddVolatile"
+    ],
+    "line": 5317,
+    "hookLines": {
+      "onUpdate": 5318,
+      "onSetStatus": 5324,
+      "onTryAddVolatile": 5331
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "voltabsorb",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 5342,
+    "hookLines": {
+      "onTryHit": 5343
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "waterabsorb",
+    "hooks": [
+      "onTryHit"
+    ],
+    "line": 5365,
+    "hookLines": {
+      "onTryHit": 5366
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "waterbubble",
+    "hooks": [
+      "onSourceModifyAtk",
+      "onSourceModifySpA",
+      "onModifyAtk",
+      "onModifySpA",
+      "onUpdate",
+      "onSetStatus"
+    ],
+    "line": 5379,
+    "hookLines": {
+      "onSourceModifyAtk": 5381,
+      "onSourceModifySpA": 5387,
+      "onModifyAtk": 5392,
+      "onModifySpA": 5397,
+      "onUpdate": 5402,
+      "onSetStatus": 5408
+    }
+  },
+  {
+    "family": "abilities",
+    "id": "waterveil",
+    "hooks": [
+      "onUpdate",
+      "onSetStatus"
+    ],
+    "line": 5431,
+    "hookLines": {
+      "onUpdate": 5432,
+      "onSetStatus": 5438
+    }
+  },
+  {
+    "family": "conditions",
+    "id": "flashfire",
+    "hooks": [
+      "onStart",
+      "onModifyAtk",
+      "onModifySpA",
+      "onEnd"
+    ],
+    "line": 1342,
+    "hookLines": {
+      "onStart": 1357,
+      "onModifyAtk": 1361,
+      "onModifySpA": 1368,
+      "onEnd": 1374
+    }
+  },
+  {
+    "family": "conditions",
+    "id": "unburden",
+    "hooks": [
+      "onModifySpe"
+    ],
+    "line": 5237,
+    "hookLines": {
+      "onModifySpe": 5249
+    }
+  }
+]
