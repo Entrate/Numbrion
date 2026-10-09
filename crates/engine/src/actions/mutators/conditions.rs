@@ -71,17 +71,46 @@ impl<L: LogSink> Battle<L> {
     /// Weather is absent while weather-suppressing ability is active
     /// Ports `sim/field.ts:101-108`. PRNG: none.
     pub fn field_effective_weather(&mut self) -> EffectId {
-        todo!("stage D: field_effective_weather")
+        if self.suppressing_weather() || self.state.field.weather == CellId::NONE {
+            EffectId::NONE
+        } else {
+            self.state.effects.cells[self.state.field.weather.0 as usize].id
+        }
     }
     /// Living active Air Lock/Cloud Nine check
     /// Ports `sim/field.ts:110-116`. PRNG: none.
     pub fn suppressing_weather(&self) -> bool {
-        todo!("stage D: suppressing_weather")
+        for side in &self.state.sides {
+            for mon in side.active {
+                if mon == MonId::NONE {
+                    continue;
+                }
+                let pokemon = &self.state.pokemon[mon.0 as usize];
+                if pokemon.flags & crate::state::mon_flags::FAINTED != 0
+                    || self.ignoring_ability(mon)
+                {
+                    continue;
+                }
+                if pokemon.ability != EffectId::NONE
+                    && crate::dex::ABILITIES
+                        [(pokemon.ability.0 - crate::dex::ABILITY_START) as usize]
+                        .suppress_weather
+                    && (pokemon.ability_state == CellId::NONE
+                        || self.state.effects.cells[pokemon.ability_state.0 as usize].present
+                            & crate::state::present::ENDING
+                            == 0)
+                {
+                    return true;
+                }
+            }
+        }
+        false
     }
     /// Compare effective weather
     /// Ports `sim/field.ts:118-128`. PRNG: none.
     pub fn is_weather(&mut self, weather: &[EffectId]) -> bool {
-        todo!("stage D: is_weather")
+        let effective = self.field_effective_weather();
+        weather.contains(&effective)
     }
     /// FieldStart then TerrainChange and per-holder updates
     /// Ports `sim/field.ts:130-157`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
