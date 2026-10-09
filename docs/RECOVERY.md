@@ -4,6 +4,53 @@ Pinned Showdown source: `7332b60e22b9e8194bb53549549eba241d73cc9a`.
 Original Claude session: `d59f0cff-39d7-4de0-a0b6-97771e8431b8`.
 Original workflow: `wf_8d2f29e3-954`.
 
+## GitHub recovery update — 2026-10-09
+
+The older research-workflow checklist below describes the first recovery, not the
+current engine milestone. Subsequent work on branch `engine` already committed
+the protocol/log-shape specification, oracle fixtures and replay harness,
+deterministic generated dex and constructor, event/RNG tracing, and the Stage 2A
+compiling API skeleton with the implementation plan and 18 effect batches.
+
+The later module/effect fan-out stopped at the Claude usage limit. All 19 saved
+worktrees are clean at `7ff6af5`; there are no additional commits or worktree code
+changes to merge. Their core implementation and effect-porting assignments remain
+unfinished. Resume from `docs/design/IMPLEMENTATION-PLAN.md` and
+`docs/design/EFFECT-BATCHES.json`, using the current branch's API rather than an old
+worktree or a hard reset from a saved task prompt.
+
+Recovered and completed in this update:
+
+- Directed-corpus generation and callback coverage tools, with usage documented in
+  `docs/design/CORPUS.md`.
+- Fixed default-level validation for packed level-100 teams and explicitly allowed
+  Levitate's grounding/immunity behavior in expanded batch/effect profiles.
+- Validated 16 battles for each of 24 profiles (384 total), including all 18 effect
+  batches, both single-effect examples and the four slices. Every fixture rebuilt,
+  passed profile constraints and replayed directly and through BattleStream.
+  `data/fixtures/directed-smoke.jsonl.gz` preserves this corpus; the report is
+  `docs/design/reports/recovery-validation.json`.
+- Eight driver-equivalence self-tests passed. Instrumented coverage replay passed
+  for the 50 committed random fixtures plus 12 directed fixtures.
+- Preserved the original 2,000-battle coverage results (815/852 function callbacks
+  and all four constants reached, with no replay differences) in
+  `docs/design/reports/oracle-coverage-2000.{json,txt}`.
+- Preserved the self-play training notes in `docs/training/TIPS.md`.
+
+Stage 2B event/registry work is still being written by the existing background
+Codex task. Preserve its checkpoint on `recovery/stage2b-2026-10-09`; this is
+unfinished work, not a claim of event parity or a completed engine. The original
+task brief is saved in `docs/design/recovery/STAGE2B-TASK.md`. Do not run another
+writer against its paths while it remains active. Battle execution still depends
+on the unfinished lifecycle, choices, moves, damage, mutators and log owners.
+
+Local recovery archive:
+`/home/aminaliu/.t3/backups/numbrion-fold-20261009T181007Z/`.
+It contains all Git refs, the uncommitted files, scratch prompts/logs, thread and
+agent histories, the original fuzz corpora and coverage index, and remaining
+temporary research scripts. Private transcripts and large scratch corpora stay in
+this local archive. T3 Code and the laptop's T3 Connect were left running.
+
 ## Completed during recovery
 
 - **spec:state-model** — finished the existing `showdown/04-state-model.md`, reconciled it with the final scope census, corrected EffectState target assumptions and unsafe compact-container suggestions, and added verification notes. `node tools/oracle/check-state-model.mjs /home/aminaliu/src/pokemon-showdown` passes all 25 probes. These are representative oracle checks, not exhaustive validation of the compact Rust layout.

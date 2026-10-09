@@ -6,3 +6,4 @@ node_modules/
 /fuzz-out/
 __pycache__/
 /data/fixtures/*.jsonl
+/.claude/worktrees/
