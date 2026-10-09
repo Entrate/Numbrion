@@ -160,3 +160,49 @@ fn volatile_lookup_is_read_only_and_uses_current_list_identity() {
     assert!(b.get_volatile(m, id).is_none());
     assert_eq!(b.seed(), seed);
 }
+
+#[test]
+fn real_fur_coat_dispatch_obeys_move_suppression_and_self_exception() {
+    let mut b = setup::battle();
+    let holder = Holder::mon(MonId(0));
+    let cell = b
+        .state
+        .effects
+        .alloc(holder, holder, dex::ABILITY_FURCOAT, 0);
+    b.state.pokemon[0].ability = dex::ABILITY_FURCOAT;
+    b.state.pokemon[0].ability_state = cell;
+    b.state.pokemon[0].flags |= mon_flags::ACTIVE;
+    b.state.pokemon[6].flags |= mon_flags::ACTIVE;
+    b.state.sides[0].active = [MonId(0), MonId::NONE];
+    b.state.sides[1].active = [MonId(6), MonId::NONE];
+    // setup's frame is only for direct callback tests; use actual dispatch here.
+    b.scratch.frames[0] = None;
+    b.scratch.current_frame = u8::MAX;
+    let seed = b.seed();
+    for (user, ignore, expected) in [
+        (MonId(6), false, 200.0),
+        (MonId(6), true, 100.0),
+        (MonId(0), true, 200.0),
+    ] {
+        b.set_active_move(Some(MoveHandle(0)), Some(user), Some(MonId(0)));
+        b.active_move_mut(MoveHandle(0)).runtime_flags = if ignore {
+            move_runtime::IGNORE_ABILITY
+        } else {
+            0
+        };
+        assert_eq!(
+            b.run_event(
+                EventId::ModifyDef,
+                EventArg::Holder(holder),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Number(100.0),
+                RunEventOptions::default(),
+            ),
+            Relay::Number(expected),
+        );
+    }
+    assert_eq!(b.seed(), seed);
+    assert_eq!(b.scratch.handler_depth, 0);
+    assert_eq!(b.scratch.event_depth, 0);
+}
