@@ -1,721 +1,1441 @@
-# ability	hook	moveType	flags	hp	activeTurns	basePower	modifier	recoil	crash	forceSTAB	expectedModifier	expectedRelay
-adaptability	onModifySTAB	Normal	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Normal	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Normal	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Fire	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Fire	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Fire	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Grass	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Grass	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Grass	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Bug	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Bug	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Bug	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Water	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Water	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Water	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Dragon	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Dragon	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Dragon	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Rock	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Rock	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Rock	1	40	1	61	6144	1	0	1	6144	2
-adaptability	onModifySTAB	Electric	0	41	1	40	4096	0	0	1	4096	2
-adaptability	onModifySTAB	Electric	1	40	0	40	4096	0	1	1	4096	2
-adaptability	onModifySTAB	Electric	1	40	1	61	6144	1	0	1	6144	2
-blaze	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-blaze	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-blaze	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-blaze	onModifySpA	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-blaze	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-blaze	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-blaze	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-blaze	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-dragonsmaw	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-dragonsmaw	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	6144	undefined
-dragonsmaw	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-dragonsmaw	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-dragonsmaw	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-dragonsmaw	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-dragonsmaw	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-dragonsmaw	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-guts	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Water	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Water	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Water	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-guts	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	6144	undefined
-guts	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-guts	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	9216	undefined
-heavymetal	onModifyWeight	Normal	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Normal	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Normal	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Fire	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Fire	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Fire	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Grass	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Grass	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Grass	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Bug	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Bug	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Bug	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Water	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Water	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Water	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Dragon	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Dragon	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Dragon	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Rock	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Rock	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Rock	1	40	1	61	6144	1	0	1	6144	122
-heavymetal	onModifyWeight	Electric	0	41	1	40	4096	0	0	1	4096	80
-heavymetal	onModifyWeight	Electric	1	40	0	40	4096	0	1	1	4096	80
-heavymetal	onModifyWeight	Electric	1	40	1	61	6144	1	0	1	6144	122
-hugepower	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Water	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Water	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	12288	undefined
-hugepower	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	8192	undefined
-hugepower	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined
-hugepower	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	12288	undefined
-ironfist	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Normal	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Normal	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Fire	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Fire	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Grass	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Grass	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Bug	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Bug	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Water	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Water	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Rock	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Rock	1	40	1	61	6144	1	0	1	7373	undefined
-ironfist	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-ironfist	onBasePower	Electric	1	40	0	40	4096	0	1	1	4915	undefined
-ironfist	onBasePower	Electric	1	40	1	61	6144	1	0	1	7373	undefined
-megalauncher	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-megalauncher	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-megalauncher	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-megalauncher	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined
-overgrow	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-overgrow	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-overgrow	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-overgrow	onModifySpA	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-overgrow	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-overgrow	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-overgrow	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-overgrow	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-purepower	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Water	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Water	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	12288	undefined
-purepower	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	8192	undefined
-purepower	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined
-purepower	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	12288	undefined
-reckless	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Normal	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Normal	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Fire	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Fire	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Grass	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Grass	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Bug	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Bug	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Water	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Water	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Rock	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Rock	1	40	1	61	6144	1	0	1	7373	undefined
-reckless	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-reckless	onBasePower	Electric	1	40	0	40	4096	0	1	1	4915	undefined
-reckless	onBasePower	Electric	1	40	1	61	6144	1	0	1	7373	undefined
-rockypayload	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	6144	undefined
-rockypayload	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-rockypayload	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-rockypayload	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-rockypayload	onModifySpA	Rock	0	41	1	40	4096	0	0	1	6144	undefined
-rockypayload	onModifySpA	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-rockypayload	onModifySpA	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-rockypayload	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-rockypayload	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-rockypayload	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-sharpness	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-sharpness	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-sharpness	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-sharpness	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined
-sheerforce	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Water	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Water	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-sheerforce	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-sheerforce	onBasePower	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-sheerforce	onBasePower	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Normal	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Fire	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Grass	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Bug	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Water	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Rock	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-stakeout	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-stakeout	onModifySpA	Electric	1	40	0	40	4096	0	1	1	8192	undefined
-stakeout	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-strongjaw	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-strongjaw	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-strongjaw	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-strongjaw	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined
-swarm	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-swarm	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-swarm	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-swarm	onModifySpA	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-swarm	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-swarm	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-swarm	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-swarm	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Normal	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Fire	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Grass	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Bug	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Water	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Water	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Dragon	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Rock	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-technician	onBasePower	Electric	0	41	1	40	4096	0	0	1	6144	undefined
-technician	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-technician	onBasePower	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Water	1	40	0	40	4096	0	1	1	6144	undefined
-torrent	onModifyAtk	Water	1	40	1	61	6144	1	0	1	9216	undefined
-torrent	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Water	1	40	0	40	4096	0	1	1	6144	undefined
-torrent	onModifySpA	Water	1	40	1	61	6144	1	0	1	9216	undefined
-torrent	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-torrent	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-torrent	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined
-torrent	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined
-toughclaws	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Normal	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Normal	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Fire	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Fire	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Grass	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Grass	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Bug	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Bug	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Water	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Water	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Dragon	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Rock	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Rock	1	40	1	61	6144	1	0	1	7988	undefined
-toughclaws	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined
-toughclaws	onBasePower	Electric	1	40	0	40	4096	0	1	1	5325	undefined
-toughclaws	onBasePower	Electric	1	40	1	61	6144	1	0	1	7988	undefined
-toxicboost	onBasePower	Normal	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Fire	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Grass	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Bug	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Water	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Dragon	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Rock	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined
-toxicboost	onBasePower	Electric	0	41	1	40	4096	0	0	1	6144	undefined
-toxicboost	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined
-toxicboost	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined
-transistor	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	5325	undefined
-transistor	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	5325	undefined
-transistor	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	7988	undefined
-transistor	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined
-transistor	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined
-transistor	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined
-transistor	onModifySpA	Electric	0	41	1	40	4096	0	0	1	5325	undefined
-transistor	onModifySpA	Electric	1	40	0	40	4096	0	1	1	5325	undefined
-transistor	onModifySpA	Electric	1	40	1	61	6144	1	0	1	7988	undefined
+# ability	hook	moveType	flags	hp	activeTurns	basePower	modifier	recoil	crash	forceSTAB	expectedModifier	expectedRelay	status	category
+adaptability	onModifySTAB	Normal	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Normal	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Normal	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Normal	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Normal	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Normal	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Fire	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Fire	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Fire	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Fire	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Fire	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Fire	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Grass	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Grass	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Grass	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Grass	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Grass	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Grass	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Bug	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Bug	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Bug	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Bug	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Bug	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Bug	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Water	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Water	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Water	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Water	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Water	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Water	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Dragon	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Dragon	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Dragon	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Dragon	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Dragon	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Dragon	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Rock	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Rock	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Rock	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Rock	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Rock	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Rock	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+adaptability	onModifySTAB	Electric	0	41	1	40	4096	0	0	1	4096	2	none	Physical
+adaptability	onModifySTAB	Electric	1	40	0	40	4096	0	1	1	4096	2	psn	Physical
+adaptability	onModifySTAB	Electric	1	40	1	61	6144	1	0	1	6144	2	psn	Physical
+adaptability	onModifySTAB	Electric	1	40	1	40	6144	0	0	1	6144	2	brn	Physical
+adaptability	onModifySTAB	Electric	1	40	1	41	6144	0	0	1	6144	2	tox	Special
+adaptability	onModifySTAB	Electric	1	40	1	2	4096	0	0	1	4096	2.25	psn	Physical
+blaze	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+blaze	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+blaze	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+blaze	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+blaze	onModifySpA	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+blaze	onModifySpA	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+blaze	onModifySpA	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+blaze	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+blaze	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+blaze	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+blaze	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+blaze	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+dragonsmaw	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+dragonsmaw	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+dragonsmaw	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+dragonsmaw	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+dragonsmaw	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+dragonsmaw	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+dragonsmaw	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+dragonsmaw	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+dragonsmaw	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+dragonsmaw	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+dragonsmaw	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+guts	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+guts	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+guts	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+guts	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+guts	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+guts	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+heavymetal	onModifyWeight	Normal	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Normal	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Normal	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Normal	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Normal	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Normal	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Fire	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Fire	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Fire	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Fire	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Fire	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Fire	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Grass	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Grass	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Grass	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Grass	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Grass	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Grass	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Bug	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Bug	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Bug	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Bug	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Bug	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Bug	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Water	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Water	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Water	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Water	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Water	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Water	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Dragon	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Dragon	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Dragon	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Dragon	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Dragon	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Dragon	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Rock	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Rock	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Rock	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Rock	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Rock	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Rock	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+heavymetal	onModifyWeight	Electric	0	41	1	40	4096	0	0	1	4096	80	none	Physical
+heavymetal	onModifyWeight	Electric	1	40	0	40	4096	0	1	1	4096	80	psn	Physical
+heavymetal	onModifyWeight	Electric	1	40	1	61	6144	1	0	1	6144	122	psn	Physical
+heavymetal	onModifyWeight	Electric	1	40	1	40	6144	0	0	1	6144	80	brn	Physical
+heavymetal	onModifyWeight	Electric	1	40	1	41	6144	0	0	1	6144	82	tox	Special
+heavymetal	onModifyWeight	Electric	1	40	1	2	4096	0	0	1	4096	4	psn	Physical
+hugepower	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Water	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Water	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Water	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Water	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Water	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+hugepower	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+hugepower	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+hugepower	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+hugepower	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+hugepower	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+ironfist	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Normal	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Normal	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Normal	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Normal	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Normal	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Fire	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Fire	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Fire	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Fire	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Fire	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Grass	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Grass	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Grass	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Grass	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Grass	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Bug	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Bug	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Bug	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Bug	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Bug	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Water	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Water	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Water	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Water	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Water	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Dragon	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Dragon	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Dragon	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Rock	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Rock	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Rock	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Rock	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Rock	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+ironfist	onBasePower	Electric	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+ironfist	onBasePower	Electric	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+ironfist	onBasePower	Electric	1	40	1	40	6144	0	0	1	7373	undefined	brn	Physical
+ironfist	onBasePower	Electric	1	40	1	41	6144	0	0	1	7373	undefined	tox	Special
+ironfist	onBasePower	Electric	1	40	1	2	4096	0	0	1	4915	undefined	psn	Physical
+megalauncher	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Normal	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Normal	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+megalauncher	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+megalauncher	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+megalauncher	onBasePower	Electric	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+megalauncher	onBasePower	Electric	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+megalauncher	onBasePower	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+overgrow	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+overgrow	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+overgrow	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+overgrow	onModifySpA	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+overgrow	onModifySpA	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+overgrow	onModifySpA	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+overgrow	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+overgrow	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+overgrow	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+overgrow	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+overgrow	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+purepower	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Water	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Water	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Water	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Water	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Water	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	8192	undefined	none	Physical
+purepower	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+purepower	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	12288	undefined	psn	Physical
+purepower	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	12288	undefined	brn	Physical
+purepower	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	12288	undefined	tox	Special
+purepower	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	8192	undefined	psn	Physical
+reckless	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Normal	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Normal	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Fire	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Fire	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Grass	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Grass	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Bug	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Bug	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Water	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Water	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Rock	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Rock	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+reckless	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+reckless	onBasePower	Electric	1	40	0	40	4096	0	1	1	4915	undefined	psn	Physical
+reckless	onBasePower	Electric	1	40	1	61	6144	1	0	1	7373	undefined	psn	Physical
+reckless	onBasePower	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+reckless	onBasePower	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+reckless	onBasePower	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+rockypayload	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+rockypayload	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+rockypayload	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+rockypayload	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Rock	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+rockypayload	onModifySpA	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+rockypayload	onModifySpA	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+rockypayload	onModifySpA	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+rockypayload	onModifySpA	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+rockypayload	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+rockypayload	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+rockypayload	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+rockypayload	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+rockypayload	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sharpness	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Normal	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Normal	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sharpness	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+sharpness	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+sharpness	onBasePower	Electric	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+sharpness	onBasePower	Electric	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+sharpness	onBasePower	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+sheerforce	onBasePower	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+sheerforce	onBasePower	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+sheerforce	onBasePower	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+sheerforce	onBasePower	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+sheerforce	onBasePower	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Water	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Normal	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Fire	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Grass	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Bug	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Water	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Rock	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+stakeout	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+stakeout	onModifySpA	Electric	1	40	0	40	4096	0	1	1	8192	undefined	psn	Physical
+stakeout	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+stakeout	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+stakeout	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+stakeout	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+strongjaw	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Normal	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Normal	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Fire	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Grass	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Dragon	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Rock	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+strongjaw	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+strongjaw	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+strongjaw	onBasePower	Electric	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+strongjaw	onBasePower	Electric	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+strongjaw	onBasePower	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+swarm	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+swarm	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+swarm	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+swarm	onModifySpA	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+swarm	onModifySpA	Bug	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+swarm	onModifySpA	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+swarm	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+swarm	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+swarm	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+swarm	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+swarm	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+technician	onBasePower	Normal	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Normal	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Fire	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Fire	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Grass	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Grass	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Bug	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Bug	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Water	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Dragon	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Dragon	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Rock	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Rock	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Electric	0	41	1	40	4096	0	0	1	6144	undefined	none	Physical
+technician	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+technician	onBasePower	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+technician	onBasePower	Electric	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+technician	onBasePower	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+technician	onBasePower	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+torrent	onModifyAtk	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+torrent	onModifyAtk	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+torrent	onModifyAtk	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+torrent	onModifySpA	Water	1	40	1	40	6144	0	0	1	9216	undefined	brn	Physical
+torrent	onModifySpA	Water	1	40	1	41	6144	0	0	1	9216	undefined	tox	Special
+torrent	onModifySpA	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+torrent	onModifySpA	Electric	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+torrent	onModifySpA	Electric	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+torrent	onModifySpA	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+torrent	onModifySpA	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+torrent	onModifySpA	Electric	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+toughclaws	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Normal	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Normal	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Normal	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Normal	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Normal	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Fire	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Fire	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Fire	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Fire	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Fire	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Grass	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Grass	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Grass	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Grass	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Grass	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Bug	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Bug	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Bug	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Bug	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Bug	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Water	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Water	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Water	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Water	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Water	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Dragon	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Dragon	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Dragon	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Dragon	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Dragon	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Rock	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Rock	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Rock	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Rock	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Rock	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toughclaws	onBasePower	Electric	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+toughclaws	onBasePower	Electric	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+toughclaws	onBasePower	Electric	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+toughclaws	onBasePower	Electric	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+toughclaws	onBasePower	Electric	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+toxicboost	onBasePower	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Normal	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Normal	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Normal	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Fire	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Fire	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Fire	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Grass	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Grass	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Grass	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Bug	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Bug	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Bug	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Water	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Water	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Water	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Dragon	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Dragon	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Dragon	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Rock	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Rock	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Rock	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Electric	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+toxicboost	onBasePower	Electric	1	40	0	40	4096	0	1	1	6144	undefined	psn	Physical
+toxicboost	onBasePower	Electric	1	40	1	61	6144	1	0	1	9216	undefined	psn	Physical
+toxicboost	onBasePower	Electric	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+toxicboost	onBasePower	Electric	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+toxicboost	onBasePower	Electric	1	40	1	2	4096	0	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifyAtk	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifyAtk	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifyAtk	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifyAtk	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifyAtk	Electric	0	41	1	40	4096	0	0	1	5325	undefined	none	Physical
+transistor	onModifyAtk	Electric	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+transistor	onModifyAtk	Electric	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+transistor	onModifyAtk	Electric	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+transistor	onModifyAtk	Electric	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+transistor	onModifyAtk	Electric	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical
+transistor	onModifySpA	Normal	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Normal	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Normal	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Normal	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Normal	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Normal	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Fire	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Fire	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Fire	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Fire	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Fire	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Fire	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Grass	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Grass	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Grass	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Grass	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Grass	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Grass	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Bug	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Bug	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Bug	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Bug	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Bug	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Bug	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Water	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Water	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Water	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Water	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Water	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Water	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Dragon	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Dragon	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Dragon	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Dragon	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Dragon	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Dragon	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Rock	0	41	1	40	4096	0	0	1	4096	undefined	none	Physical
+transistor	onModifySpA	Rock	1	40	0	40	4096	0	1	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Rock	1	40	1	61	6144	1	0	1	6144	undefined	psn	Physical
+transistor	onModifySpA	Rock	1	40	1	40	6144	0	0	1	6144	undefined	brn	Physical
+transistor	onModifySpA	Rock	1	40	1	41	6144	0	0	1	6144	undefined	tox	Special
+transistor	onModifySpA	Rock	1	40	1	2	4096	0	0	1	4096	undefined	psn	Physical
+transistor	onModifySpA	Electric	0	41	1	40	4096	0	0	1	5325	undefined	none	Physical
+transistor	onModifySpA	Electric	1	40	0	40	4096	0	1	1	5325	undefined	psn	Physical
+transistor	onModifySpA	Electric	1	40	1	61	6144	1	0	1	7988	undefined	psn	Physical
+transistor	onModifySpA	Electric	1	40	1	40	6144	0	0	1	7988	undefined	brn	Physical
+transistor	onModifySpA	Electric	1	40	1	41	6144	0	0	1	7988	undefined	tox	Special
+transistor	onModifySpA	Electric	1	40	1	2	4096	0	0	1	5325	undefined	psn	Physical

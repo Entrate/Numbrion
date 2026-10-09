@@ -238,6 +238,8 @@ pub enum EffectType {
     Format,
     Ruleset,
     Terrain,
+    /// Synthetic source object with no effectType property.
+    Undefined,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]

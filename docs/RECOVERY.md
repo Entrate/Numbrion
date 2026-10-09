@@ -82,3 +82,24 @@ Original scratch scripts and census outputs (state model, scope and protocol res
 /home/aminaliu/.t3/backups/numbrion-research-20261009T125429Z/research.tar.gz
 
 T3 Code and T3 Connect were left running throughout recovery.
+
+## Three former effect branches continued (2026-10-09)
+
+The former worktree branches for `passive_offense`, `items_modifiers` and
+`reactive_contact` now contain complete scoped callback bodies, and are folded
+into `engine`. They add 78 effects / 120 function sites. Together with the recovered
+nine effects, registry coverage is 142 implemented function sites; 710 remain
+pending. This is callback implementation coverage, not full battle acceptance.
+
+The combined engine passes 48 all-features tests, including 59,602 pinned callback
+vectors and real adapter checks. See the individual reports for exactly what was
+exercised and the remaining core dependencies:
+
+- [Offensive abilities](design/reports/passive-offense.md)
+- [Item modifiers](design/reports/items-modifiers.md)
+- [Contact/status reactions](design/reports/reactive-contact.md)
+
+GitHub continuation refs are `finish/passive-offense`, `finish/items-modifiers`
+and `finish/reactive-contact`; the original local worktree branches are retained.
+Full engine replay remains blocked by the core modules listed in the Stage 2B
+checkpoint. No laptop T3 Code/Connect process or service was restarted.

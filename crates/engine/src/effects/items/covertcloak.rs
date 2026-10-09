@@ -1,5 +1,5 @@
 //! Ports data/items.ts:1201: complete scoped callbacks; no direct PRNG draws.
-#![allow(unused_imports, unused_variables, unreachable_code)]
+#![allow(unused_imports, unused_variables)]
 use crate::{
     Battle,
     dex::{self, HookId},
@@ -30,9 +30,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                     len += 1;
                 }
             }
-            return Relay::Secondaries(b.stash_secondaries(filtered));
+            Relay::Secondaries(b.stash_secondaries(filtered))
         }
         _ => unreachable!("unexpected covertcloak callback"),
     }
-    Relay::Undefined
 }

@@ -1,5 +1,5 @@
 //! Ports data/items.ts:5416: complete scoped callbacks; no direct PRNG draws.
-#![allow(unused_imports, unused_variables, unreachable_code)]
+#![allow(unused_imports, unused_variables)]
 use crate::{
     Battle,
     dex::{self, HookId},
@@ -19,12 +19,11 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         dex::HOOK_ITEM_RUSTEDSWORD_ONTAKEITEM => {
             let source = Battle::<L>::arg_mon(b.event_arg(cx, 2));
-            return Relay::Bool(
+            Relay::Bool(
                 !source.is_some_and(|m| base_num(b, m) == 888.0)
                     && base_num(b, mon_arg(b, cx, 1)) != 888.0,
-            );
+            )
         }
         _ => unreachable!("unexpected rustedsword callback"),
     }
-    Relay::Undefined
 }

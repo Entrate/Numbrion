@@ -18,9 +18,20 @@ fn numeric_callbacks_match_pinned_oracle_vectors() {
         let id = dex::lookup(EffectKind::Ability, c[0]).unwrap();
         let n = |i: usize| c[i].parse::<u32>().unwrap();
         b.state.pokemon[0].hp = n(4) as u16;
+        b.state.pokemon[0].status = match c[13] {
+            "none" => crate::state::Status::None,
+            "brn" => crate::state::Status::Burn,
+            "tox" => crate::state::Status::Toxic,
+            _ => crate::state::Status::Poison,
+        };
         b.state.pokemon[6].active_turns = n(5);
         b.scratch.frames[0].as_mut().unwrap().modifier = n(7);
         let mv = b.scratch.moves[0].as_mut().unwrap();
+        mv.category = if c[14] == "Special" {
+            dex::Category::Special
+        } else {
+            dex::Category::Physical
+        };
         mv.move_type = dex::type_id(c[2]).unwrap();
         mv.flags = if n(3) == 1 {
             dex::FLAG_PUNCH

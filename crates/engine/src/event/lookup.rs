@@ -15,6 +15,7 @@ impl<L: LogSink> Battle<L> {
             | EffectRef::MoveCondition(id)
             | EffectRef::AbilityCondition(id)
             | EffectRef::ItemCondition(id) => dex::canonical_effect(id),
+            EffectRef::Synchronize(_) => dex::ABILITY_SYNCHRONIZE,
             EffectRef::ActiveMove(i) => self.scratch.moves[i as usize].expect("released move").id,
             _ => EffectId::NONE,
         }
@@ -28,13 +29,22 @@ impl<L: LogSink> Battle<L> {
             EffectRef::Synthetic(SyntheticEffect::Format) => EffectType::Format,
             EffectRef::Synthetic(_) => EffectType::Move,
             EffectRef::ActiveMove(_) => EffectType::Move,
+            EffectRef::Synchronize(_) => EffectType::Undefined,
             _ => MANIFESTS[self.event_effect_id(effect).0 as usize].effect_type,
+        }
+    }
+    /// Status property on Synchronize's synthetic source; future set_status uses
+    /// it for repeated-status failure and immunity messages (pokemon.ts:1705-1729).
+    pub fn synthetic_status(&self, effect: EffectRef) -> Option<EffectId> {
+        match effect {
+            EffectRef::Synchronize(status) => Some(status),
+            _ => None,
         }
     }
     /// Exact key lookup. Absent ordering-only entries may be requested separately by the sorter.
     pub fn event_hook(&self, effect: EffectRef, event: EventId, rel: HookRel) -> Option<HookId> {
         let id = self.event_effect_id(effect);
-        if id == EffectId::NONE {
+        if id == EffectId::NONE || matches!(effect, EffectRef::Synchronize(_)) {
             return None;
         }
         if let EffectRef::SpeciesCondition(species) = effect {

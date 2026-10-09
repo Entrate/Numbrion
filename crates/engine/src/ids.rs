@@ -105,6 +105,7 @@ impl EffectToken {
             AbilityCondition(id) => (3, id.0),
             ItemCondition(id) => (4, id.0),
             Synthetic(s) => (5, s as u16),
+            Synchronize(status) => (6, status.0),
             ActiveMove(_) => panic!("cannot store a live move in a snapshot"),
         };
         assert!(id < 8192, "effect token ID overflow");
@@ -134,6 +135,7 @@ impl EffectToken {
                 5 => SyntheticEffect::MindBlownRecoil,
                 _ => panic!("invalid synthetic effect token"),
             }),
+            6 => Synchronize(id),
             _ => panic!("invalid effect token view"),
         }
     }

@@ -57,6 +57,9 @@ pub enum EffectRef {
     AbilityCondition(EffectId),
     ItemCondition(EffectId),
     Synthetic(SyntheticEffect),
+    /// data/abilities.ts Synchronize passes {id: "synchronize", status: status.id};
+    /// this object has no effectType and must not become the ability itself.
+    Synchronize(EffectId),
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum EventArg {
