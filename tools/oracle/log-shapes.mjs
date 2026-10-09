@@ -139,10 +139,10 @@ const checks = {
 	unsplitHp: new Map(), splitKinds: new Map(), kindsBothWays: new Map(),
 	details: new Map(), identVsSpecies: { same: 0, differ: new Map() },
 	tAdj: { prev: new Map(), next: new Map() }, bigram: new Map(),
-	moveTarget: { blankStill: 0, blankNoStill: [], stillNotBlank: [], withTarget: 0, anim: 0 },
+	moveTarget: { blankStill: 0, blankNoStill: [], stillNotBlank: [], withTarget: 0 },
 	splitOrdinal: new Map(), emptyPublic: new Map(),
 	tagOrder: new Map(),
-	tagKinds: new Map(), hintRepeat: new Map(), turnSeq: { ok: 0, bad: [] }, startOrder: { ok: 0, bad: [] }, hintOnceBattles: 0,
+	obsSigs: new Set(), tagKinds: new Map(), hintRepeat: new Map(), turnSeq: { ok: 0, bad: [] }, startOrder: { ok: 0, bad: [] },
 };
 const BIGRAM_KINDS = new Set(['upkeep', 'turn', 'start', 'win', 'tie', 'teamsize', 'gametype', 'player', 'gen', 'tier', 'rule']);
 
@@ -299,6 +299,7 @@ function handlePlain(line, prevKind, nextKind) {
 function tagStats(kind, args) {
 	if (!args) return;
 	const tags = args.map(a => RX.tag.exec(a)).filter(Boolean).map(m => m[1]);
+	checks.obsSigs.add(`${kind}/${args.length}/${tags.join(',')}`);
 	if (tags.length >= 2) inc(checks.tagOrder, `${kind}: ${tags.join(' ')}`);
 	for (const t of tags) {
 		if (!checks.tagKinds.has(t)) checks.tagKinds.set(t, new Map());
@@ -527,6 +528,41 @@ function renderCrossCheck() {
 		}
 		return acc;
 	};
+	// Static call signatures kind/arity/tags of add()/addMove() calls with a literal kind, via a small balanced-paren scanner.
+	const sigEmitters = new Map();
+	function* callsOf(src) {
+		const re = /\.(?:add|addMove)\(/g;
+		let m;
+		while ((m = re.exec(src))) {
+			let i = re.lastIndex;
+			let depth = 1;
+			const args = [];
+			let cur = '';
+			while (i < src.length && depth > 0) {
+				const ch = src[i];
+				if (ch === "'" || ch === '"' || ch === '`') {
+					let j = i + 1;
+					while (j < src.length && src[j] !== ch) {
+						if (src[j] === '\\') j += 2;
+						else if (ch === '`' && src[j] === '$' && src[j + 1] === '{') {
+							let d = 1;
+							j += 2;
+							while (j < src.length && d > 0) { if (src[j] === '{') d++; else if (src[j] === '}') d--; j++; }
+						} else j++;
+					}
+					cur += src.slice(i, j + 1);
+					i = j + 1;
+					continue;
+				}
+				if ('([{'.includes(ch)) depth++;
+				else if (')]}'.includes(ch)) { depth--; if (depth === 0) break; }
+				if (ch === ',' && depth === 1) { args.push(cur.trim()); cur = ''; } else cur += ch;
+				i++;
+			}
+			if (cur.trim()) args.push(cur.trim());
+			yield args;
+		}
+	}
 	const emitters = new Map(); // kind -> Set(effect)
 	const tagEmitters = new Map(); // bracket tag -> Set(effect or sim file:line)
 	const tagRx = /['"`]\[([A-Za-z0-9]+)\]/g;
@@ -535,6 +571,14 @@ function renderCrossCheck() {
 	const scanFns = (label, id, name, table) => {
 		const src = srcOf(table[id]).join('\n');
 		for (const m of src.matchAll(rx)) note(m[2], `${label}:${name}`);
+		for (const args of callsOf(src)) {
+			const k = /^['"`]([^'"`$]*)['"`]$/.exec(args[0] || '');
+			if (!k || k[1] === '' || k[1] === 'move') continue;
+			const tags = args.slice(1).map(a => /^['"`]\[([A-Za-z0-9]+)\]/.exec(a)?.[1]).filter(Boolean);
+			const sig = `${k[1]}/${args.length - 1}/${tags.join(',')}`;
+			if (!sigEmitters.has(sig)) sigEmitters.set(sig, new Set());
+			sigEmitters.get(sig).add(`${label}:${name}`);
+		}
 		for (const m of src.matchAll(tagRx)) {
 			if (!tagEmitters.has(m[1])) tagEmitters.set(m[1], new Set());
 			tagEmitters.get(m[1]).add(`${label}:${name}`);
@@ -555,6 +599,9 @@ function renderCrossCheck() {
 	out.push('  (kinds produced through a variable, e.g. add(msg, ...) in Battle.boost, are not visible to this scan)');
 	const unseenTags = [...tagEmitters.keys()].filter(t => !checks.tagKinds.has(t)).sort();
 	out.push(`  bracket-tag literals in those sources: ${tagEmitters.size} distinct; not seen in the fixtures: ${unseenTags.map(t => `[${t}] (${[...tagEmitters.get(t)].slice(0, 6).join(', ')})`).join('; ') || 'none'}`);
+	const unseenSigs = [...sigEmitters.keys()].filter(sg => !checks.obsSigs.has(sg)).sort();
+	out.push(`  static call signatures kind/arity/tags (arity = argument count after the kind): ${sigEmitters.size} in the sources, ${unseenSigs.length} never observed:`);
+	for (const sg of unseenSigs) out.push(`    UNOBSERVED ${sg}  emitted by ${[...sigEmitters.get(sg)].slice(0, 6).join(', ')}`);
 	out.push('');
 	out.push('Engine (sim/*.ts) literal kinds not seen in the fixtures (file:line):');
 	const engine = new Map();

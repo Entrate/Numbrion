@@ -1629,6 +1629,20 @@ In-scope effect handlers (data/scope.json: 359 moves, 207 abilities, 61 items, 7
   NOT SEEN |-ohko|  emitted by move:Substitute
   (kinds produced through a variable, e.g. add(msg, ...) in Battle.boost, are not visible to this scan)
   bracket-tag literals in those sources: 18 distinct; not seen in the fixtures: [fatigue] (condition:confusion); [forme] (move:Hyperspace Fury); [persistent] (move:Tailwind, move:Trick Room); [zeffect] (move:Follow Me)
+  static call signatures kind/arity/tags (arity = argument count after the kind): 80 in the sources, 13 never observed:
+    UNOBSERVED -activate/3/move  emitted by move:Tailwind, move:Trick Room
+    UNOBSERVED -block/2/  emitted by ability:Trace
+    UNOBSERVED -end/3/from  emitted by ability:Oblivious
+    UNOBSERVED -end/4/from,of  emitted by move:Mortal Spin, move:Rapid Spin
+    UNOBSERVED -fail/3/forme  emitted by move:Hyperspace Fury
+    UNOBSERVED -fail/3/from  emitted by move:Grass Knot
+    UNOBSERVED -fail/3/from,of  emitted by move:Rest
+    UNOBSERVED -fieldstart/3/of,persistent  emitted by move:Trick Room
+    UNOBSERVED -immune/3/from  emitted by ability:Own Tempo
+    UNOBSERVED -ohko/0/  emitted by move:Substitute
+    UNOBSERVED -sidestart/3/persistent  emitted by move:Tailwind
+    UNOBSERVED -singleturn/3/zeffect  emitted by move:Follow Me
+    UNOBSERVED -start/3/fatigue  emitted by condition:confusion
 
 Engine (sim/*.ts) literal kinds not seen in the fixtures (file:line):
   |bigerror|  sim/battle.ts:1855, sim/battle.ts:2019
