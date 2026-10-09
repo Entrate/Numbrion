@@ -1,0 +1,37 @@
+# id	result	trace	accuracy	return
+eartheater	false	heal:30|-immune:0:[from] ability: Earth Eater	82	null
+eartheater	true	heal:30	82	null
+eartheater	0	heal:30|-immune:0:[from] ability: Earth Eater	82	null
+eartheater	12	heal:30	82	null
+eartheater	null	heal:30|-immune:0:[from] ability: Earth Eater	82	null
+eartheater	undefined	heal:30|-immune:0:[from] ability: Earth Eater	82	null
+voltabsorb	false	heal:30|-immune:0:[from] ability: Volt Absorb	82	null
+voltabsorb	true	heal:30	82	null
+voltabsorb	0	heal:30|-immune:0:[from] ability: Volt Absorb	82	null
+voltabsorb	12	heal:30	82	null
+voltabsorb	null	heal:30|-immune:0:[from] ability: Volt Absorb	82	null
+voltabsorb	undefined	heal:30|-immune:0:[from] ability: Volt Absorb	82	null
+waterabsorb	false	heal:30|-immune:0:[from] ability: Water Absorb	82	null
+waterabsorb	true	heal:30	82	null
+waterabsorb	0	heal:30|-immune:0:[from] ability: Water Absorb	82	null
+waterabsorb	12	heal:30	82	null
+waterabsorb	null	heal:30|-immune:0:[from] ability: Water Absorb	82	null
+waterabsorb	undefined	heal:30|-immune:0:[from] ability: Water Absorb	82	null
+motordrive	false	boost:spe:1|-immune:0:[from] ability: Motor Drive	82	null
+motordrive	true	boost:spe:1	82	null
+motordrive	0	boost:spe:1|-immune:0:[from] ability: Motor Drive	82	null
+motordrive	12	boost:spe:1	82	null
+motordrive	null	boost:spe:1|-immune:0:[from] ability: Motor Drive	82	null
+motordrive	undefined	boost:spe:1|-immune:0:[from] ability: Motor Drive	82	null
+sapsipper	false	boost:atk:1|-immune:0:[from] ability: Sap Sipper	82	null
+sapsipper	true	boost:atk:1	82	null
+sapsipper	0	boost:atk:1|-immune:0:[from] ability: Sap Sipper	82	null
+sapsipper	12	boost:atk:1	82	null
+sapsipper	null	boost:atk:1|-immune:0:[from] ability: Sap Sipper	82	null
+sapsipper	undefined	boost:atk:1|-immune:0:[from] ability: Sap Sipper	82	null
+flashfire	false	volatile:0:flashfire|-immune:0:[from] ability: Flash Fire	true	null
+flashfire	true	volatile:0:flashfire	true	null
+flashfire	0	volatile:0:flashfire|-immune:0:[from] ability: Flash Fire	true	null
+flashfire	12	volatile:0:flashfire	true	null
+flashfire	null	volatile:0:flashfire|-immune:0:[from] ability: Flash Fire	true	null
+flashfire	undefined	volatile:0:flashfire|-immune:0:[from] ability: Flash Fire	true	null
