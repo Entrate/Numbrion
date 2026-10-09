@@ -1,0 +1,375 @@
+{
+  "oracle": "7332b60e22b9e8194bb53549549eba241d73cc9a",
+  "battlesPerProfile": 16,
+  "battles": 384,
+  "profiles": [
+    {
+      "profile": "slice0",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "slice1",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "slice1x",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "slice2+tera",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:rules_status",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": [
+        "conditions:confusion",
+        "conditions:sleepclausemod"
+      ]
+    },
+    {
+      "profile": "batch:weather_terrain",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:protect_redirection",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:disable_lock_trap",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": [
+        "conditions:choicelock",
+        "conditions:encore",
+        "conditions:healblock",
+        "conditions:imprison",
+        "conditions:partiallytrapped",
+        "conditions:taunt"
+      ]
+    },
+    {
+      "profile": "batch:charge_priority_multihit",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:myceliummight": 1
+      },
+      "unreachable": [
+        "conditions:charge",
+        "conditions:lockedmove",
+        "conditions:mustrecharge"
+      ]
+    },
+    {
+      "profile": "batch:hazards_screens",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": [
+        "conditions:lightscreen",
+        "conditions:reflect",
+        "conditions:stickyweb",
+        "conditions:tailwind",
+        "conditions:toxicspikes",
+        "conditions:trickroom"
+      ]
+    },
+    {
+      "profile": "batch:passive_offense",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:passive_defense",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:reactive_stats",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:intrepidsword": 4,
+        "abilities:dauntlessshield": 4
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:reactive_contact",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:poisonpuppeteer": 1
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:healing_residual",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": [
+        "conditions:saltcure",
+        "conditions:syrupbomb",
+        "conditions:wish"
+      ]
+    },
+    {
+      "profile": "batch:items_modifiers",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "items:fistplate": 2,
+        "items:lustrousorb": 2,
+        "items:rustedshield": 3,
+        "items:adamantcrystal": 2,
+        "items:ironplate": 3,
+        "items:stoneplate": 2,
+        "items:icicleplate": 3,
+        "items:lightball": 2,
+        "items:pixieplate": 2,
+        "items:zapplate": 2,
+        "items:dracoplate": 2,
+        "items:toxicplate": 2,
+        "items:cornerstonemask": 2,
+        "items:flameplate": 2,
+        "items:dreadplate": 3,
+        "items:skyplate": 2,
+        "items:wellspringmask": 2,
+        "items:earthplate": 2,
+        "items:rustedsword": 2,
+        "items:hearthflamemask": 2,
+        "items:spookyplate": 3,
+        "items:meadowplate": 3,
+        "items:lustrousglobe": 2,
+        "items:insectplate": 3,
+        "items:splashplate": 2,
+        "items:mindplate": 2
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:consumables",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:item_exchange",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:magician": 1
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:formes_tera",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:embodyaspectcornerstone": 2,
+        "abilities:embodyaspectwellspring": 2,
+        "species:arceusghost": 2,
+        "abilities:teraformzero": 2,
+        "species:arceusice": 2,
+        "species:zamazenta": 2,
+        "species:zamazentacrowned": 2,
+        "abilities:embodyaspectteal": 2,
+        "species:arceuswater": 2,
+        "species:zacian": 2,
+        "species:arceusfire": 2,
+        "species:arceusdark": 2,
+        "abilities:terashift": 2,
+        "species:arceuspsychic": 1,
+        "species:arceusrock": 2,
+        "species:arceusbug": 2,
+        "species:arceuselectric": 2,
+        "abilities:embodyaspecthearthflame": 2,
+        "species:arceusfighting": 2,
+        "species:arceusfairy": 2,
+        "species:arceusgrass": 2,
+        "species:zaciancrowned": 2,
+        "species:arceuspoison": 2,
+        "species:arceusdragon": 2,
+        "species:arceusground": 1,
+        "species:arceussteel": 2,
+        "species:arceusflying": 2
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:identity_abilities",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:asonespectrier": 3,
+        "abilities:imposter": 3,
+        "abilities:asoneglastrier": 2
+      },
+      "unreachable": []
+    },
+    {
+      "profile": "batch:recursive_switch",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "batch:move_callbacks",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": [
+        "conditions:glaiverush",
+        "conditions:roost"
+      ]
+    },
+    {
+      "profile": "effect:abilities:intimidate",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {},
+      "unreachable": []
+    },
+    {
+      "profile": "effect:conditions:slp",
+      "exitCode": 0,
+      "crashes": 0,
+      "verification": {
+        "checked": 16,
+        "failed": 0
+      },
+      "focusSkipped": {
+        "abilities:earlybird": 32
+      },
+      "unreachable": []
+    }
+  ],
+  "selftestBattles": 8,
+  "coverageReplay": {
+    "randomBattles": 50,
+    "directedBattles": 12,
+    "failures": 0
+  }
+}

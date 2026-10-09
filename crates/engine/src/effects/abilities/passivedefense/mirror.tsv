@@ -1,0 +1,13 @@
+# variant	trace	boosts
+0	<empty>	spe:-1
+1	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true	atk:-2,accuracy:1
+2	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true|-ability:0:Mirror Armor|boost:atk:-2:6:0:null:true|-ability:0:Mirror Armor|boost:accuracy:-1:6:0:null:true	<empty>
+3	-ability:0:Mirror Armor|boost:atk:-2:6:0:null:true	spe:-1,accuracy:1
+4	<empty>	atk:-2
+5	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true	accuracy:1
+6	-ability:0:Mirror Armor|boost:atk:-2:6:0:null:true|-ability:0:Mirror Armor|boost:accuracy:-1:6:0:null:true	spe:-1
+7	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true	atk:-2,accuracy:1
+8	<empty>	<empty>
+9	-ability:0:Mirror Armor|boost:atk:-2:6:0:null:true	spe:-1,accuracy:1
+10	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true|-ability:0:Mirror Armor|boost:accuracy:-1:6:0:null:true	atk:-2
+11	-ability:0:Mirror Armor|boost:spe:-1:6:0:null:true|-ability:0:Mirror Armor|boost:atk:-2:6:0:null:true	accuracy:1

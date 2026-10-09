@@ -1,0 +1,38 @@
+  211 battles, 5 s
+  455 battles, 10 s
+  699 battles, 15 s
+  945 battles, 20 s
+  1194 battles, 25 s
+  1446 battles, 30 s
+  1672 battles, 35 s
+  1927 battles, 40 s
+coverage: 2000 battles from fuzz-out/fuzz-2000.jsonl (2000)  41.8s with 3 thread(s)
+replay check: all battles identical to their fixture
+function handlers invoked: 815/852   constant hooks collected: 4/4   effects with callbacks invoked: 462/470
+declarative moves (no callbacks) used in a battle: 240/241
+
+batch                      handlers  invoked  missing  consts  never-invoked effects
+rules_status                     42       39        3  0/0         2
+weather_terrain                  88       84        4  0/0         2
+protect_redirection              50       49        1  0/0         0
+disable_lock_trap                58       55        3  0/0         1
+charge_priority_multihit         41       35        6  3/3         1
+hazards_screens                  47       42        5  0/0         0
+passive_offense                  34       31        3  0/0         0
+passive_defense                 109      109        0  1/1         0
+reactive_stats                   39       39        0  0/0         0
+reactive_contact                 13       13        0  0/0         0
+healing_residual                 32       31        1  0/0         0
+items_modifiers                  73       68        5  0/0         0
+consumables                      42       40        2  0/0         0
+item_exchange                    13       13        0  0/0         0
+formes_tera                      85       82        3  0/0         2
+identity_abilities               16       16        0  0/0         0
+recursive_switch                 15       15        0  0/0         0
+move_callbacks                   55       54        1  0/0         0
+
+effects never invoked (8):
+  species: zaciancrowned zamazentacrowned
+  abilities: sandforce solarpower
+  conditions: curse lockedmove
+  rules: obtainable obtainablemisc

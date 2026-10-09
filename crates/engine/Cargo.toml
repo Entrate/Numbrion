@@ -1,0 +1,12 @@
+[package]
+name = "engine"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+
+[features]
+trace-hooks = []
+event-probes = []
+event-trace = ["trace-hooks"]

@@ -1,0 +1,7029 @@
+{
+ "tool": "tools/oracle/coverage.mjs",
+ "oracle": "7332b60e22b9e8194bb53549549eba241d73cc9a",
+ "inputs": [
+  {
+   "file": "fuzz-out/fuzz-2000.jsonl",
+   "battles": 2000
+  }
+ ],
+ "battles": 2000,
+ "wallSeconds": 41.8,
+ "replayFailures": [],
+ "universe": {
+  "functionHooks": 852,
+  "constantHooks": 4,
+  "orderingOnly": 23,
+  "uninstrumented": []
+ },
+ "invokedHandlers": 819,
+ "handlers": {
+  "species:arceus onType": {
+   "kind": "fn",
+   "calls": 70,
+   "battles": 3
+  },
+  "species:arceusbug onType": {
+   "kind": "fn",
+   "calls": 859,
+   "battles": 13
+  },
+  "species:arceusdark onType": {
+   "kind": "fn",
+   "calls": 356,
+   "battles": 7
+  },
+  "species:arceusdragon onType": {
+   "kind": "fn",
+   "calls": 907,
+   "battles": 13
+  },
+  "species:arceuselectric onType": {
+   "kind": "fn",
+   "calls": 650,
+   "battles": 9
+  },
+  "species:arceusfairy onType": {
+   "kind": "fn",
+   "calls": 700,
+   "battles": 12
+  },
+  "species:arceusfighting onType": {
+   "kind": "fn",
+   "calls": 424,
+   "battles": 10
+  },
+  "species:arceusfire onType": {
+   "kind": "fn",
+   "calls": 260,
+   "battles": 8
+  },
+  "species:arceusflying onType": {
+   "kind": "fn",
+   "calls": 356,
+   "battles": 10
+  },
+  "species:arceusghost onType": {
+   "kind": "fn",
+   "calls": 838,
+   "battles": 15
+  },
+  "species:arceusgrass onType": {
+   "kind": "fn",
+   "calls": 259,
+   "battles": 7
+  },
+  "species:arceusground onType": {
+   "kind": "fn",
+   "calls": 442,
+   "battles": 13
+  },
+  "species:arceusice onType": {
+   "kind": "fn",
+   "calls": 403,
+   "battles": 9
+  },
+  "species:arceuspoison onType": {
+   "kind": "fn",
+   "calls": 244,
+   "battles": 5
+  },
+  "species:arceuspsychic onType": {
+   "kind": "fn",
+   "calls": 248,
+   "battles": 6
+  },
+  "species:arceusrock onType": {
+   "kind": "fn",
+   "calls": 319,
+   "battles": 7
+  },
+  "species:arceussteel onType": {
+   "kind": "fn",
+   "calls": 662,
+   "battles": 10
+  },
+  "species:arceuswater onType": {
+   "kind": "fn",
+   "calls": 636,
+   "battles": 8
+  },
+  "species:zacian onBattleStart": {
+   "kind": "fn",
+   "calls": 65,
+   "battles": 65
+  },
+  "species:zamazenta onBattleStart": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 56
+  },
+  "moves:acrobatics basePowerCallback": {
+   "kind": "fn",
+   "calls": 131,
+   "battles": 66
+  },
+  "moves:alluringvoice secondary.onHit": {
+   "kind": "fn",
+   "calls": 119,
+   "battles": 72
+  },
+  "moves:alluringvoice secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 119,
+   "battles": 72
+  },
+  "moves:aurawheel onTry": {
+   "kind": "fn",
+   "calls": 43,
+   "battles": 33
+  },
+  "moves:aurawheel onModifyType": {
+   "kind": "fn",
+   "calls": 44,
+   "battles": 33
+  },
+  "moves:auroraveil onTry": {
+   "kind": "fn",
+   "calls": 94,
+   "battles": 51
+  },
+  "moves:avalanche basePowerCallback": {
+   "kind": "fn",
+   "calls": 70,
+   "battles": 42
+  },
+  "moves:banefulbunker onPrepareHit": {
+   "kind": "fn",
+   "calls": 206,
+   "battles": 56
+  },
+  "moves:banefulbunker onHit": {
+   "kind": "fn",
+   "calls": 175,
+   "battles": 55
+  },
+  "moves:batonpass onHit": {
+   "kind": "fn",
+   "calls": 195,
+   "battles": 102
+  },
+  "moves:batonpass self.onHit": {
+   "kind": "fn",
+   "calls": 120,
+   "battles": 84
+  },
+  "moves:bellydrum onHit": {
+   "kind": "fn",
+   "calls": 86,
+   "battles": 40
+  },
+  "moves:bleakwindstorm onModifyMove": {
+   "kind": "fn",
+   "calls": 86,
+   "battles": 34
+  },
+  "moves:blizzard onModifyMove": {
+   "kind": "fn",
+   "calls": 221,
+   "battles": 120
+  },
+  "moves:brickbreak onTryHit": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 5
+  },
+  "moves:bugbite onHit": {
+   "kind": "fn",
+   "calls": 117,
+   "battles": 66
+  },
+  "moves:burningbulwark onPrepareHit": {
+   "kind": "fn",
+   "calls": 94,
+   "battles": 38
+  },
+  "moves:burningbulwark onHit": {
+   "kind": "fn",
+   "calls": 82,
+   "battles": 38
+  },
+  "moves:burningjealousy secondary.onHit": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 12
+  },
+  "moves:burningjealousy secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 12
+  },
+  "moves:ceaselessedge onAfterHit": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 9
+  },
+  "moves:clangoroussoul onTry": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 27
+  },
+  "moves:clangoroussoul onTryHit": {
+   "kind": "fn",
+   "calls": 39,
+   "battles": 23
+  },
+  "moves:clangoroussoul onHit": {
+   "kind": "fn",
+   "calls": 39,
+   "battles": 23
+  },
+  "moves:clearsmog onHit": {
+   "kind": "fn",
+   "calls": 24,
+   "battles": 16
+  },
+  "moves:collisioncourse onBasePower": {
+   "kind": "fn",
+   "calls": 34,
+   "battles": 12
+  },
+  "moves:courtchange onHitField": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 3
+  },
+  "moves:curse onModifyMove": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 26
+  },
+  "moves:curse onTryHit": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 26
+  },
+  "moves:direclaw secondary.onHit": {
+   "kind": "fn",
+   "calls": 22,
+   "battles": 18
+  },
+  "moves:direclaw secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 22,
+   "battles": 18
+  },
+  "moves:disable onTryHit": {
+   "kind": "fn",
+   "calls": 93,
+   "battles": 45
+  },
+  "moves:doubleshock onTryMove": {
+   "kind": "fn",
+   "calls": 54,
+   "battles": 26
+  },
+  "moves:doubleshock self.onHit": {
+   "kind": "fn",
+   "calls": 32,
+   "battles": 25
+  },
+  "moves:dragonenergy basePowerCallback": {
+   "kind": "fn",
+   "calls": 48,
+   "battles": 15
+  },
+  "moves:electrodrift onBasePower": {
+   "kind": "fn",
+   "calls": 24,
+   "battles": 18
+  },
+  "moves:electroshot onTryMove": {
+   "kind": "fn",
+   "calls": 20,
+   "battles": 9
+  },
+  "moves:endeavor damageCallback": {
+   "kind": "fn",
+   "calls": 36,
+   "battles": 23
+  },
+  "moves:endeavor onTryImmunity": {
+   "kind": "fn",
+   "calls": 62,
+   "battles": 35
+  },
+  "moves:eruption basePowerCallback": {
+   "kind": "fn",
+   "calls": 76,
+   "battles": 13
+  },
+  "moves:expandingforce onBasePower": {
+   "kind": "fn",
+   "calls": 23,
+   "battles": 9
+  },
+  "moves:expandingforce onModifyMove": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 9
+  },
+  "moves:facade onBasePower": {
+   "kind": "fn",
+   "calls": 178,
+   "battles": 113
+  },
+  "moves:fakeout onTry": {
+   "kind": "fn",
+   "calls": 1428,
+   "battles": 631
+  },
+  "moves:ficklebeam onBasePower": {
+   "kind": "fn",
+   "calls": 45,
+   "battles": 22
+  },
+  "moves:finalgambit damageCallback": {
+   "kind": "fn",
+   "calls": 21,
+   "battles": 21
+  },
+  "moves:firstimpression onTry": {
+   "kind": "fn",
+   "calls": 127,
+   "battles": 74
+  },
+  "moves:floralhealing onHit": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 36
+  },
+  "moves:followme onTry": {
+   "kind": "fn",
+   "calls": 461,
+   "battles": 247
+  },
+  "moves:freezedry onEffectiveness": {
+   "kind": "fn",
+   "calls": 445,
+   "battles": 160
+  },
+  "moves:fusionbolt onBasePower": {
+   "kind": "fn",
+   "calls": 25,
+   "battles": 14
+  },
+  "moves:fusionflare onBasePower": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 10
+  },
+  "moves:grassknot basePowerCallback": {
+   "kind": "fn",
+   "calls": 132,
+   "battles": 76
+  },
+  "moves:grassknot onTryHit": {
+   "kind": "fn",
+   "calls": 132,
+   "battles": 76
+  },
+  "moves:grassyglide onModifyPriority": {
+   "kind": "fn",
+   "calls": 155,
+   "battles": 35
+  },
+  "moves:gravapple onBasePower": {
+   "kind": "fn",
+   "calls": 61,
+   "battles": 34
+  },
+  "moves:haze onHitField": {
+   "kind": "fn",
+   "calls": 71,
+   "battles": 26
+  },
+  "moves:healpulse onHit": {
+   "kind": "fn",
+   "calls": 244,
+   "battles": 110
+  },
+  "moves:heatcrash basePowerCallback": {
+   "kind": "fn",
+   "calls": 204,
+   "battles": 109
+  },
+  "moves:heatcrash onTryHit": {
+   "kind": "fn",
+   "calls": 204,
+   "battles": 109
+  },
+  "moves:heavyslam basePowerCallback": {
+   "kind": "fn",
+   "calls": 505,
+   "battles": 231
+  },
+  "moves:heavyslam onTryHit": {
+   "kind": "fn",
+   "calls": 505,
+   "battles": 231
+  },
+  "moves:helpinghand onTryHit": {
+   "kind": "fn",
+   "calls": 2032,
+   "battles": 754
+  },
+  "moves:highjumpkick onMoveFail": {
+   "kind": "fn",
+   "calls": 29,
+   "battles": 25
+  },
+  "moves:hurricane onModifyMove": {
+   "kind": "fn",
+   "calls": 893,
+   "battles": 398
+  },
+  "moves:hyperspacefury onTry": {
+   "kind": "fn",
+   "calls": 26,
+   "battles": 13
+  },
+  "moves:icespinner onAfterHit": {
+   "kind": "fn",
+   "calls": 164,
+   "battles": 85
+  },
+  "moves:incinerate onHit": {
+   "kind": "fn",
+   "calls": 49,
+   "battles": 16
+  },
+  "moves:instruct onHit": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 42
+  },
+  "moves:ivycudgel onPrepareHit": {
+   "kind": "fn",
+   "calls": 103,
+   "battles": 56
+  },
+  "moves:ivycudgel onModifyType": {
+   "kind": "fn",
+   "calls": 106,
+   "battles": 57
+  },
+  "moves:judgment onModifyType": {
+   "kind": "fn",
+   "calls": 191,
+   "battles": 79
+  },
+  "moves:junglehealing onHit": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 15
+  },
+  "moves:knockoff onBasePower": {
+   "kind": "fn",
+   "calls": 3571,
+   "battles": 1303
+  },
+  "moves:knockoff onAfterHit": {
+   "kind": "fn",
+   "calls": 3556,
+   "battles": 1302
+  },
+  "moves:lashout onBasePower": {
+   "kind": "fn",
+   "calls": 52,
+   "battles": 20
+  },
+  "moves:lastrespects basePowerCallback": {
+   "kind": "fn",
+   "calls": 97,
+   "battles": 40
+  },
+  "moves:leechseed onTryImmunity": {
+   "kind": "fn",
+   "calls": 292,
+   "battles": 126
+  },
+  "moves:lowkick basePowerCallback": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 8
+  },
+  "moves:lowkick onTryHit": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 8
+  },
+  "moves:lunarblessing onHit": {
+   "kind": "fn",
+   "calls": 243,
+   "battles": 47
+  },
+  "moves:meteorbeam onTryMove": {
+   "kind": "fn",
+   "calls": 212,
+   "battles": 85
+  },
+  "moves:moonlight onHit": {
+   "kind": "fn",
+   "calls": 126,
+   "battles": 43
+  },
+  "moves:morningsun onHit": {
+   "kind": "fn",
+   "calls": 19,
+   "battles": 11
+  },
+  "moves:mortalspin onAfterHit": {
+   "kind": "fn",
+   "calls": 31,
+   "battles": 13
+  },
+  "moves:noretreat onTry": {
+   "kind": "fn",
+   "calls": 106,
+   "battles": 55
+  },
+  "moves:partingshot onHit": {
+   "kind": "fn",
+   "calls": 165,
+   "battles": 94
+  },
+  "moves:phantomforce onTryMove": {
+   "kind": "fn",
+   "calls": 27,
+   "battles": 5
+  },
+  "moves:photongeyser onModifyMove": {
+   "kind": "fn",
+   "calls": 59,
+   "battles": 32
+  },
+  "moves:pollenpuff onTryHit": {
+   "kind": "fn",
+   "calls": 513,
+   "battles": 248
+  },
+  "moves:pollenpuff onTryMove": {
+   "kind": "fn",
+   "calls": 599,
+   "battles": 264
+  },
+  "moves:pollenpuff onHit": {
+   "kind": "fn",
+   "calls": 510,
+   "battles": 248
+  },
+  "moves:poltergeist onTry": {
+   "kind": "fn",
+   "calls": 502,
+   "battles": 249
+  },
+  "moves:poltergeist onTryHit": {
+   "kind": "fn",
+   "calls": 306,
+   "battles": 197
+  },
+  "moves:protect onPrepareHit": {
+   "kind": "fn",
+   "calls": 14609,
+   "battles": 1948
+  },
+  "moves:protect onHit": {
+   "kind": "fn",
+   "calls": 12515,
+   "battles": 1948
+  },
+  "moves:psyblade onBasePower": {
+   "kind": "fn",
+   "calls": 48,
+   "battles": 17
+  },
+  "moves:psychicfangs onTryHit": {
+   "kind": "fn",
+   "calls": 180,
+   "battles": 89
+  },
+  "moves:quash onHit": {
+   "kind": "fn",
+   "calls": 20,
+   "battles": 9
+  },
+  "moves:ragefist basePowerCallback": {
+   "kind": "fn",
+   "calls": 82,
+   "battles": 29
+  },
+  "moves:ragepowder onTry": {
+   "kind": "fn",
+   "calls": 380,
+   "battles": 205
+  },
+  "moves:ragingbull onTryHit": {
+   "kind": "fn",
+   "calls": 33,
+   "battles": 17
+  },
+  "moves:ragingbull onModifyType": {
+   "kind": "fn",
+   "calls": 36,
+   "battles": 17
+  },
+  "moves:rapidspin onAfterHit": {
+   "kind": "fn",
+   "calls": 230,
+   "battles": 113
+  },
+  "moves:recycle onHit": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 2
+  },
+  "moves:relicsong onAfterMoveSecondarySelf": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 14
+  },
+  "moves:rest onTry": {
+   "kind": "fn",
+   "calls": 354,
+   "battles": 145
+  },
+  "moves:rest onHit": {
+   "kind": "fn",
+   "calls": 241,
+   "battles": 119
+  },
+  "moves:revelationdance onModifyType": {
+   "kind": "fn",
+   "calls": 143,
+   "battles": 67
+  },
+  "moves:revivalblessing onTryHit": {
+   "kind": "fn",
+   "calls": 55,
+   "battles": 55
+  },
+  "moves:ruination damageCallback": {
+   "kind": "fn",
+   "calls": 56,
+   "battles": 36
+  },
+  "moves:sandsearstorm onModifyMove": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 5
+  },
+  "moves:shadowforce onTryMove": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 14
+  },
+  "moves:shedtail onTryHit": {
+   "kind": "fn",
+   "calls": 95,
+   "battles": 63
+  },
+  "moves:shedtail onHit": {
+   "kind": "fn",
+   "calls": 50,
+   "battles": 44
+  },
+  "moves:shedtail self.onHit": {
+   "kind": "fn",
+   "calls": 50,
+   "battles": 44
+  },
+  "moves:shellsidearm onPrepareHit": {
+   "kind": "fn",
+   "calls": 23,
+   "battles": 14
+  },
+  "moves:shellsidearm onModifyMove": {
+   "kind": "fn",
+   "calls": 24,
+   "battles": 14
+  },
+  "moves:shellsidearm onHit": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 11
+  },
+  "moves:shoreup onHit": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 26
+  },
+  "moves:solarbeam onTryMove": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 30
+  },
+  "moves:solarbeam onBasePower": {
+   "kind": "fn",
+   "calls": 41,
+   "battles": 26
+  },
+  "moves:spikyshield onPrepareHit": {
+   "kind": "fn",
+   "calls": 346,
+   "battles": 166
+  },
+  "moves:spikyshield onHit": {
+   "kind": "fn",
+   "calls": 297,
+   "battles": 165
+  },
+  "moves:spiritshackle secondary.onHit": {
+   "kind": "fn",
+   "calls": 37,
+   "battles": 18
+  },
+  "moves:spiritshackle secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 37,
+   "battles": 18
+  },
+  "moves:stompingtantrum basePowerCallback": {
+   "kind": "fn",
+   "calls": 358,
+   "battles": 179
+  },
+  "moves:stoneaxe onAfterHit": {
+   "kind": "fn",
+   "calls": 44,
+   "battles": 33
+  },
+  "moves:strengthsap onHit": {
+   "kind": "fn",
+   "calls": 279,
+   "battles": 117
+  },
+  "moves:struggle onModifyMove": {
+   "kind": "fn",
+   "calls": 97,
+   "battles": 53
+  },
+  "moves:substitute onTryHit": {
+   "kind": "fn",
+   "calls": 205,
+   "battles": 60
+  },
+  "moves:substitute onHit": {
+   "kind": "fn",
+   "calls": 101,
+   "battles": 58
+  },
+  "moves:suckerpunch onTry": {
+   "kind": "fn",
+   "calls": 752,
+   "battles": 364
+  },
+  "moves:superfang damageCallback": {
+   "kind": "fn",
+   "calls": 167,
+   "battles": 102
+  },
+  "moves:synthesis onHit": {
+   "kind": "fn",
+   "calls": 192,
+   "battles": 65
+  },
+  "moves:takeheart onHit": {
+   "kind": "fn",
+   "calls": 118,
+   "battles": 38
+  },
+  "moves:terablast basePowerCallback": {
+   "kind": "fn",
+   "calls": 517,
+   "battles": 310
+  },
+  "moves:terablast onPrepareHit": {
+   "kind": "fn",
+   "calls": 621,
+   "battles": 346
+  },
+  "moves:terablast onModifyType": {
+   "kind": "fn",
+   "calls": 645,
+   "battles": 351
+  },
+  "moves:terablast onModifyMove": {
+   "kind": "fn",
+   "calls": 645,
+   "battles": 351
+  },
+  "moves:terastarstorm onModifyType": {
+   "kind": "fn",
+   "calls": 51,
+   "battles": 23
+  },
+  "moves:terastarstorm onModifyMove": {
+   "kind": "fn",
+   "calls": 51,
+   "battles": 23
+  },
+  "moves:throatchop secondary.onHit": {
+   "kind": "fn",
+   "calls": 332,
+   "battles": 153
+  },
+  "moves:throatchop secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 332,
+   "battles": 153
+  },
+  "moves:thunder onModifyMove": {
+   "kind": "fn",
+   "calls": 109,
+   "battles": 52
+  },
+  "moves:thunderclap onTry": {
+   "kind": "fn",
+   "calls": 84,
+   "battles": 38
+  },
+  "moves:tidyup onHit": {
+   "kind": "fn",
+   "calls": 89,
+   "battles": 42
+  },
+  "moves:transform onHit": {
+   "kind": "fn",
+   "calls": 23,
+   "battles": 21
+  },
+  "moves:triattack secondary.onHit": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 10
+  },
+  "moves:triattack secondaries.0.onHit": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 10
+  },
+  "moves:trick onTryImmunity": {
+   "kind": "fn",
+   "calls": 128,
+   "battles": 76
+  },
+  "moves:trick onHit": {
+   "kind": "fn",
+   "calls": 128,
+   "battles": 76
+  },
+  "moves:tripleaxel basePowerCallback": {
+   "kind": "fn",
+   "calls": 714,
+   "battles": 151
+  },
+  "moves:waterspout basePowerCallback": {
+   "kind": "fn",
+   "calls": 112,
+   "battles": 21
+  },
+  "moves:weatherball onModifyType": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 28
+  },
+  "moves:weatherball onModifyMove": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 28
+  },
+  "moves:wideguard onTry": {
+   "kind": "fn",
+   "calls": 375,
+   "battles": 144
+  },
+  "moves:wideguard onHitSide": {
+   "kind": "fn",
+   "calls": 365,
+   "battles": 142
+  },
+  "moves:wildboltstorm onModifyMove": {
+   "kind": "fn",
+   "calls": 58,
+   "battles": 24
+  },
+  "moves:yawn onTryHit": {
+   "kind": "fn",
+   "calls": 257,
+   "battles": 115
+  },
+  "abilities:adaptability onModifySTAB": {
+   "kind": "fn",
+   "calls": 899,
+   "battles": 289
+  },
+  "abilities:aftermath onDamagingHit": {
+   "kind": "fn",
+   "calls": 197,
+   "battles": 75
+  },
+  "abilities:airlock onSwitchIn": {
+   "kind": "fn",
+   "calls": 67,
+   "battles": 48
+  },
+  "abilities:airlock onStart": {
+   "kind": "fn",
+   "calls": 67,
+   "battles": 48
+  },
+  "abilities:airlock onEnd": {
+   "kind": "fn",
+   "calls": 58,
+   "battles": 42
+  },
+  "abilities:arenatrap onFoeTrapPokemon": {
+   "kind": "fn",
+   "calls": 214,
+   "battles": 25
+  },
+  "abilities:arenatrap onFoeMaybeTrapPokemon": {
+   "kind": "fn",
+   "calls": 398,
+   "battles": 25
+  },
+  "abilities:armortail onFoeTryMove": {
+   "kind": "fn",
+   "calls": 706,
+   "battles": 73
+  },
+  "abilities:aromaveil onAllyTryAddVolatile": {
+   "kind": "fn",
+   "calls": 433,
+   "battles": 61
+  },
+  "abilities:asoneglastrier onStart": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 13
+  },
+  "abilities:asoneglastrier onEnd": {
+   "kind": "fn",
+   "calls": 14,
+   "battles": 10
+  },
+  "abilities:asoneglastrier onFoeTryEatItem": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 2
+  },
+  "abilities:asoneglastrier onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 5
+  },
+  "abilities:asonespectrier onStart": {
+   "kind": "fn",
+   "calls": 35,
+   "battles": 24
+  },
+  "abilities:asonespectrier onEnd": {
+   "kind": "fn",
+   "calls": 29,
+   "battles": 22
+  },
+  "abilities:asonespectrier onFoeTryEatItem": {
+   "kind": "fn",
+   "calls": 103,
+   "battles": 8
+  },
+  "abilities:asonespectrier onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 8
+  },
+  "abilities:baddreams onResidual": {
+   "kind": "fn",
+   "calls": 202,
+   "battles": 41
+  },
+  "abilities:battlebond onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 51,
+   "battles": 32
+  },
+  "abilities:battlebond onModifyMove": {
+   "kind": "fn",
+   "calls": 272,
+   "battles": 59
+  },
+  "abilities:beadsofruin onStart": {
+   "kind": "fn",
+   "calls": 84,
+   "battles": 65
+  },
+  "abilities:beadsofruin onAnyModifySpD": {
+   "kind": "fn",
+   "calls": 325,
+   "battles": 60
+  },
+  "abilities:berserk onDamage": {
+   "kind": "fn",
+   "calls": 104,
+   "battles": 29
+  },
+  "abilities:berserk onTryEatItem": {
+   "kind": "fn",
+   "calls": 48,
+   "battles": 18
+  },
+  "abilities:berserk onAfterMoveSecondary": {
+   "kind": "fn",
+   "calls": 135,
+   "battles": 31
+  },
+  "abilities:blaze onModifyAtk": {
+   "kind": "fn",
+   "calls": 175,
+   "battles": 78
+  },
+  "abilities:blaze onModifySpA": {
+   "kind": "fn",
+   "calls": 349,
+   "battles": 119
+  },
+  "abilities:bulletproof onTryHit": {
+   "kind": "fn",
+   "calls": 472,
+   "battles": 80
+  },
+  "abilities:cheekpouch onEatItem": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 78
+  },
+  "abilities:chillingneigh onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 77,
+   "battles": 36
+  },
+  "abilities:chlorophyll onModifySpe": {
+   "kind": "fn",
+   "calls": 10531,
+   "battles": 233
+  },
+  "abilities:clearbody onTryBoost": {
+   "kind": "fn",
+   "calls": 698,
+   "battles": 254
+  },
+  "abilities:cloudnine onSwitchIn": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 54
+  },
+  "abilities:cloudnine onStart": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 54
+  },
+  "abilities:cloudnine onEnd": {
+   "kind": "fn",
+   "calls": 74,
+   "battles": 50
+  },
+  "abilities:comatose onStart": {
+   "kind": "fn",
+   "calls": 84,
+   "battles": 60
+  },
+  "abilities:comatose onSetStatus": {
+   "kind": "fn",
+   "calls": 13,
+   "battles": 10
+  },
+  "abilities:competitive onAfterEachBoost": {
+   "kind": "fn",
+   "calls": 319,
+   "battles": 98
+  },
+  "abilities:compoundeyes onSourceModifyAccuracy": {
+   "kind": "fn",
+   "calls": 343,
+   "battles": 94
+  },
+  "abilities:contrary onChangeBoost": {
+   "kind": "fn",
+   "calls": 302,
+   "battles": 139
+  },
+  "abilities:cursedbody onDamagingHit": {
+   "kind": "fn",
+   "calls": 361,
+   "battles": 148
+  },
+  "abilities:dauntlessshield onStart": {
+   "kind": "fn",
+   "calls": 69,
+   "battles": 53
+  },
+  "abilities:defiant onAfterEachBoost": {
+   "kind": "fn",
+   "calls": 890,
+   "battles": 189
+  },
+  "abilities:disguise onDamage": {
+   "kind": "fn",
+   "calls": 335,
+   "battles": 53
+  },
+  "abilities:disguise onCriticalHit": {
+   "kind": "fn",
+   "calls": 5,
+   "battles": 5
+  },
+  "abilities:disguise onEffectiveness": {
+   "kind": "fn",
+   "calls": 233,
+   "battles": 49
+  },
+  "abilities:disguise onUpdate": {
+   "kind": "fn",
+   "calls": 3997,
+   "battles": 55
+  },
+  "abilities:download onStart": {
+   "kind": "fn",
+   "calls": 72,
+   "battles": 42
+  },
+  "abilities:dragonsmaw onModifyAtk": {
+   "kind": "fn",
+   "calls": 62,
+   "battles": 23
+  },
+  "abilities:dragonsmaw onModifySpA": {
+   "kind": "fn",
+   "calls": 147,
+   "battles": 43
+  },
+  "abilities:drizzle onStart": {
+   "kind": "fn",
+   "calls": 256,
+   "battles": 164
+  },
+  "abilities:drought onStart": {
+   "kind": "fn",
+   "calls": 173,
+   "battles": 125
+  },
+  "abilities:dryskin onTryHit": {
+   "kind": "fn",
+   "calls": 159,
+   "battles": 43
+  },
+  "abilities:dryskin onSourceBasePower": {
+   "kind": "fn",
+   "calls": 92,
+   "battles": 41
+  },
+  "abilities:dryskin onWeather": {
+   "kind": "fn",
+   "calls": 11,
+   "battles": 3
+  },
+  "abilities:eartheater onTryHit": {
+   "kind": "fn",
+   "calls": 387,
+   "battles": 46
+  },
+  "abilities:effectspore onDamagingHit": {
+   "kind": "fn",
+   "calls": 172,
+   "battles": 41
+  },
+  "abilities:electricsurge onStart": {
+   "kind": "fn",
+   "calls": 90,
+   "battles": 58
+  },
+  "abilities:electromorphosis onDamagingHit": {
+   "kind": "fn",
+   "calls": 189,
+   "battles": 49
+  },
+  "abilities:embodyaspectcornerstone onStart": {
+   "kind": "fn",
+   "calls": 1,
+   "battles": 1
+  },
+  "abilities:embodyaspecthearthflame onStart": {
+   "kind": "fn",
+   "calls": 1,
+   "battles": 1
+  },
+  "abilities:embodyaspectteal onStart": {
+   "kind": "fn",
+   "calls": 10,
+   "battles": 5
+  },
+  "abilities:embodyaspectwellspring onStart": {
+   "kind": "fn",
+   "calls": 10,
+   "battles": 9
+  },
+  "abilities:filter onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 106,
+   "battles": 42
+  },
+  "abilities:flamebody onDamagingHit": {
+   "kind": "fn",
+   "calls": 693,
+   "battles": 202
+  },
+  "abilities:flashfire onTryHit": {
+   "kind": "fn",
+   "calls": 815,
+   "battles": 198
+  },
+  "abilities:flashfire onEnd": {
+   "kind": "fn",
+   "calls": 265,
+   "battles": 188
+  },
+  "abilities:flowerveil onAllyTryBoost": {
+   "kind": "fn",
+   "calls": 251,
+   "battles": 52
+  },
+  "abilities:flowerveil onAllySetStatus": {
+   "kind": "fn",
+   "calls": 25,
+   "battles": 24
+  },
+  "abilities:flowerveil onAllyTryAddVolatile": {
+   "kind": "fn",
+   "calls": 366,
+   "battles": 51
+  },
+  "abilities:fluffy onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 164,
+   "battles": 56
+  },
+  "abilities:friendguard onAnyModifyDamage": {
+   "kind": "fn",
+   "calls": 679,
+   "battles": 61
+  },
+  "abilities:frisk onStart": {
+   "kind": "fn",
+   "calls": 375,
+   "battles": 232
+  },
+  "abilities:fullmetalbody onTryBoost": {
+   "kind": "fn",
+   "calls": 97,
+   "battles": 38
+  },
+  "abilities:furcoat onModifyDef": {
+   "kind": "fn",
+   "calls": 47,
+   "battles": 17
+  },
+  "abilities:galewings onModifyPriority": {
+   "kind": "fn",
+   "calls": 692,
+   "battles": 48
+  },
+  "abilities:galvanize onModifyType": {
+   "kind": "fn",
+   "calls": 147,
+   "battles": 33
+  },
+  "abilities:galvanize onBasePower": {
+   "kind": "fn",
+   "calls": 99,
+   "battles": 31
+  },
+  "abilities:gluttony onStart": {
+   "kind": "fn",
+   "calls": 111,
+   "battles": 71
+  },
+  "abilities:gluttony onDamage": {
+   "kind": "fn",
+   "calls": 357,
+   "battles": 69
+  },
+  "abilities:goodasgold onTryHit": {
+   "kind": "fn",
+   "calls": 240,
+   "battles": 58
+  },
+  "abilities:gooey onDamagingHit": {
+   "kind": "fn",
+   "calls": 137,
+   "battles": 61
+  },
+  "abilities:grassysurge onStart": {
+   "kind": "fn",
+   "calls": 90,
+   "battles": 51
+  },
+  "abilities:grimneigh onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 39
+  },
+  "abilities:gulpmissile onDamagingHit": {
+   "kind": "fn",
+   "calls": 136,
+   "battles": 41
+  },
+  "abilities:gulpmissile onSourceTryPrimaryHit": {
+   "kind": "fn",
+   "calls": 261,
+   "battles": 43
+  },
+  "abilities:guts onModifyAtk": {
+   "kind": "fn",
+   "calls": 347,
+   "battles": 128
+  },
+  "abilities:hadronengine onStart": {
+   "kind": "fn",
+   "calls": 74,
+   "battles": 44
+  },
+  "abilities:hadronengine onModifySpA": {
+   "kind": "fn",
+   "calls": 117,
+   "battles": 39
+  },
+  "abilities:harvest onResidual": {
+   "kind": "fn",
+   "calls": 1028,
+   "battles": 144
+  },
+  "abilities:healer onResidual": {
+   "kind": "fn",
+   "calls": 922,
+   "battles": 103
+  },
+  "abilities:heavymetal onModifyWeight": {
+   "kind": "fn",
+   "calls": 50,
+   "battles": 19
+  },
+  "abilities:hospitality onStart": {
+   "kind": "fn",
+   "calls": 90,
+   "battles": 62
+  },
+  "abilities:hugepower onModifyAtk": {
+   "kind": "fn",
+   "calls": 137,
+   "battles": 34
+  },
+  "abilities:hungerswitch onResidual": {
+   "kind": "fn",
+   "calls": 185,
+   "battles": 45
+  },
+  "abilities:hustle onModifyAtk": {
+   "kind": "fn",
+   "calls": 148,
+   "battles": 63
+  },
+  "abilities:hustle onSourceModifyAccuracy": {
+   "kind": "fn",
+   "calls": 313,
+   "battles": 74
+  },
+  "abilities:hydration onResidual": {
+   "kind": "fn",
+   "calls": 1042,
+   "battles": 151
+  },
+  "abilities:icebody onWeather": {
+   "kind": "fn",
+   "calls": 28,
+   "battles": 11
+  },
+  "abilities:icebody onImmunity": {
+   "kind": "fn",
+   "calls": 117,
+   "battles": 36
+  },
+  "abilities:iceface onStart": {
+   "kind": "fn",
+   "calls": 77,
+   "battles": 55
+  },
+  "abilities:iceface onDamage": {
+   "kind": "fn",
+   "calls": 186,
+   "battles": 51
+  },
+  "abilities:iceface onCriticalHit": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 9
+  },
+  "abilities:iceface onEffectiveness": {
+   "kind": "fn",
+   "calls": 139,
+   "battles": 50
+  },
+  "abilities:iceface onUpdate": {
+   "kind": "fn",
+   "calls": 3798,
+   "battles": 55
+  },
+  "abilities:iceface onWeatherChange": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 13
+  },
+  "abilities:icescales onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 138,
+   "battles": 51
+  },
+  "abilities:illusion onBeforeSwitchIn": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 59
+  },
+  "abilities:illusion onDamagingHit": {
+   "kind": "fn",
+   "calls": 102,
+   "battles": 56
+  },
+  "abilities:illusion onEnd": {
+   "kind": "fn",
+   "calls": 137,
+   "battles": 59
+  },
+  "abilities:illusion onFaint": {
+   "kind": "fn",
+   "calls": 51,
+   "battles": 51
+  },
+  "abilities:imposter onSwitchIn": {
+   "kind": "fn",
+   "calls": 94,
+   "battles": 68
+  },
+  "abilities:infiltrator onModifyMove": {
+   "kind": "fn",
+   "calls": 560,
+   "battles": 91
+  },
+  "abilities:innerfocus onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 750,
+   "battles": 297
+  },
+  "abilities:innerfocus onTryBoost": {
+   "kind": "fn",
+   "calls": 515,
+   "battles": 248
+  },
+  "abilities:insomnia onUpdate": {
+   "kind": "fn",
+   "calls": 2794,
+   "battles": 45
+  },
+  "abilities:insomnia onSetStatus": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 9
+  },
+  "abilities:insomnia onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 98,
+   "battles": 33
+  },
+  "abilities:intimidate onStart": {
+   "kind": "fn",
+   "calls": 1644,
+   "battles": 893
+  },
+  "abilities:intrepidsword onStart": {
+   "kind": "fn",
+   "calls": 81,
+   "battles": 63
+  },
+  "abilities:ironfist onBasePower": {
+   "kind": "fn",
+   "calls": 300,
+   "battles": 75
+  },
+  "abilities:justified onDamagingHit": {
+   "kind": "fn",
+   "calls": 646,
+   "battles": 202
+  },
+  "abilities:keeneye onTryBoost": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 9
+  },
+  "abilities:keeneye onModifyMove": {
+   "kind": "fn",
+   "calls": 144,
+   "battles": 27
+  },
+  "abilities:leafguard onSetStatus": {
+   "kind": "fn",
+   "calls": 7,
+   "battles": 6
+  },
+  "abilities:leafguard onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 103,
+   "battles": 28
+  },
+  "abilities:libero onPrepareHit": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 17
+  },
+  "abilities:lightningrod onTryHit": {
+   "kind": "fn",
+   "calls": 735,
+   "battles": 184
+  },
+  "abilities:lightningrod onAnyRedirectTarget": {
+   "kind": "fn",
+   "calls": 2680,
+   "battles": 189
+  },
+  "abilities:liquidvoice onModifyType": {
+   "kind": "fn",
+   "calls": 292,
+   "battles": 58
+  },
+  "abilities:magicbounce onTryHit": {
+   "kind": "fn",
+   "calls": 364,
+   "battles": 115
+  },
+  "abilities:magicbounce onAllyTryHitSide": {
+   "kind": "fn",
+   "calls": 26,
+   "battles": 15
+  },
+  "abilities:magicguard onDamage": {
+   "kind": "fn",
+   "calls": 542,
+   "battles": 93
+  },
+  "abilities:magician onAfterMoveSecondarySelf": {
+   "kind": "fn",
+   "calls": 179,
+   "battles": 45
+  },
+  "abilities:magnetpull onFoeTrapPokemon": {
+   "kind": "fn",
+   "calls": 1511,
+   "battles": 104
+  },
+  "abilities:magnetpull onFoeMaybeTrapPokemon": {
+   "kind": "fn",
+   "calls": 3192,
+   "battles": 142
+  },
+  "abilities:megalauncher onBasePower": {
+   "kind": "fn",
+   "calls": 189,
+   "battles": 52
+  },
+  "abilities:mindseye onTryBoost": {
+   "kind": "fn",
+   "calls": 10,
+   "battles": 9
+  },
+  "abilities:mindseye onModifyMove": {
+   "kind": "fn",
+   "calls": 159,
+   "battles": 29
+  },
+  "abilities:mirrorarmor onTryBoost": {
+   "kind": "fn",
+   "calls": 41,
+   "battles": 16
+  },
+  "abilities:moldbreaker onStart": {
+   "kind": "fn",
+   "calls": 149,
+   "battles": 93
+  },
+  "abilities:moldbreaker onModifyMove": {
+   "kind": "fn",
+   "calls": 455,
+   "battles": 89
+  },
+  "abilities:motordrive onTryHit": {
+   "kind": "fn",
+   "calls": 171,
+   "battles": 55
+  },
+  "abilities:moxie onSourceAfterFaint": {
+   "kind": "fn",
+   "calls": 105,
+   "battles": 69
+  },
+  "abilities:multiscale onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 295,
+   "battles": 52
+  },
+  "abilities:myceliummight onFractionalPriority": {
+   "kind": "fn",
+   "calls": 226,
+   "battles": 50
+  },
+  "abilities:myceliummight onModifyMove": {
+   "kind": "fn",
+   "calls": 206,
+   "battles": 48
+  },
+  "abilities:naturalcure onCheckShow": {
+   "kind": "fn",
+   "calls": 1010,
+   "battles": 633
+  },
+  "abilities:naturalcure onSwitchOut": {
+   "kind": "fn",
+   "calls": 54,
+   "battles": 41
+  },
+  "abilities:noguard onAnyInvulnerability": {
+   "kind": "fn",
+   "calls": 1466,
+   "battles": 88
+  },
+  "abilities:noguard onAnyAccuracy": {
+   "kind": "fn",
+   "calls": 986,
+   "battles": 88
+  },
+  "abilities:oblivious onUpdate": {
+   "kind": "fn",
+   "calls": 5718,
+   "battles": 65
+  },
+  "abilities:oblivious onImmunity": {
+   "kind": "fn",
+   "calls": 189,
+   "battles": 45
+  },
+  "abilities:oblivious onTryHit": {
+   "kind": "fn",
+   "calls": 360,
+   "battles": 62
+  },
+  "abilities:oblivious onTryBoost": {
+   "kind": "fn",
+   "calls": 44,
+   "battles": 24
+  },
+  "abilities:orichalcumpulse onStart": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 58
+  },
+  "abilities:orichalcumpulse onModifyAtk": {
+   "kind": "fn",
+   "calls": 162,
+   "battles": 53
+  },
+  "abilities:overcoat onImmunity": {
+   "kind": "fn",
+   "calls": 98,
+   "battles": 44
+  },
+  "abilities:overcoat onTryHit": {
+   "kind": "fn",
+   "calls": 400,
+   "battles": 71
+  },
+  "abilities:overgrow onModifyAtk": {
+   "kind": "fn",
+   "calls": 266,
+   "battles": 127
+  },
+  "abilities:overgrow onModifySpA": {
+   "kind": "fn",
+   "calls": 249,
+   "battles": 116
+  },
+  "abilities:owntempo onUpdate": {
+   "kind": "fn",
+   "calls": 1513,
+   "battles": 20
+  },
+  "abilities:owntempo onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 4
+  },
+  "abilities:owntempo onHit": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 20
+  },
+  "abilities:owntempo onTryBoost": {
+   "kind": "fn",
+   "calls": 10,
+   "battles": 7
+  },
+  "abilities:pickpocket onAfterMoveSecondary": {
+   "kind": "fn",
+   "calls": 115,
+   "battles": 47
+  },
+  "abilities:pixilate onModifyType": {
+   "kind": "fn",
+   "calls": 442,
+   "battles": 56
+  },
+  "abilities:pixilate onBasePower": {
+   "kind": "fn",
+   "calls": 253,
+   "battles": 52
+  },
+  "abilities:poisonheal onDamage": {
+   "kind": "fn",
+   "calls": 529,
+   "battles": 47
+  },
+  "abilities:poisonpuppeteer onAnyAfterSetStatus": {
+   "kind": "fn",
+   "calls": 81,
+   "battles": 35
+  },
+  "abilities:poisontouch onSourceDamagingHit": {
+   "kind": "fn",
+   "calls": 368,
+   "battles": 116
+  },
+  "abilities:powerspot onAllyBasePower": {
+   "kind": "fn",
+   "calls": 279,
+   "battles": 58
+  },
+  "abilities:prankster onModifyPriority": {
+   "kind": "fn",
+   "calls": 6899,
+   "battles": 424
+  },
+  "abilities:pressure onStart": {
+   "kind": "fn",
+   "calls": 371,
+   "battles": 232
+  },
+  "abilities:pressure onDeductPP": {
+   "kind": "fn",
+   "calls": 1535,
+   "battles": 226
+  },
+  "abilities:prismarmor onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 185,
+   "battles": 58
+  },
+  "abilities:propellertail onModifyMove": {
+   "kind": "fn",
+   "calls": 195,
+   "battles": 62
+  },
+  "abilities:protean onPrepareHit": {
+   "kind": "fn",
+   "calls": 96,
+   "battles": 26
+  },
+  "abilities:protosynthesis onStart": {
+   "kind": "fn",
+   "calls": 892,
+   "battles": 510
+  },
+  "abilities:protosynthesis onWeatherChange": {
+   "kind": "fn",
+   "calls": 1010,
+   "battles": 510
+  },
+  "abilities:protosynthesis onEnd": {
+   "kind": "fn",
+   "calls": 816,
+   "battles": 476
+  },
+  "abilities:psychicsurge onStart": {
+   "kind": "fn",
+   "calls": 64,
+   "battles": 46
+  },
+  "abilities:punkrock onBasePower": {
+   "kind": "fn",
+   "calls": 185,
+   "battles": 41
+  },
+  "abilities:punkrock onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 125,
+   "battles": 44
+  },
+  "abilities:purepower onModifyAtk": {
+   "kind": "fn",
+   "calls": 114,
+   "battles": 48
+  },
+  "abilities:purifyingsalt onSetStatus": {
+   "kind": "fn",
+   "calls": 14,
+   "battles": 13
+  },
+  "abilities:purifyingsalt onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 233,
+   "battles": 46
+  },
+  "abilities:purifyingsalt onSourceModifyAtk": {
+   "kind": "fn",
+   "calls": 123,
+   "battles": 50
+  },
+  "abilities:purifyingsalt onSourceModifySpA": {
+   "kind": "fn",
+   "calls": 85,
+   "battles": 41
+  },
+  "abilities:quarkdrive onStart": {
+   "kind": "fn",
+   "calls": 713,
+   "battles": 455
+  },
+  "abilities:quarkdrive onTerrainChange": {
+   "kind": "fn",
+   "calls": 751,
+   "battles": 455
+  },
+  "abilities:quarkdrive onEnd": {
+   "kind": "fn",
+   "calls": 651,
+   "battles": 425
+  },
+  "abilities:queenlymajesty onFoeTryMove": {
+   "kind": "fn",
+   "calls": 356,
+   "battles": 39
+  },
+  "abilities:rattled onDamagingHit": {
+   "kind": "fn",
+   "calls": 193,
+   "battles": 58
+  },
+  "abilities:rattled onAfterBoost": {
+   "kind": "fn",
+   "calls": 64,
+   "battles": 29
+  },
+  "abilities:reckless onBasePower": {
+   "kind": "fn",
+   "calls": 147,
+   "battles": 53
+  },
+  "abilities:regenerator onSwitchOut": {
+   "kind": "fn",
+   "calls": 376,
+   "battles": 253
+  },
+  "abilities:ripen onTryHeal": {
+   "kind": "fn",
+   "calls": 160,
+   "battles": 42
+  },
+  "abilities:ripen onChangeBoost": {
+   "kind": "fn",
+   "calls": 68,
+   "battles": 29
+  },
+  "abilities:ripen onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 218,
+   "battles": 57
+  },
+  "abilities:ripen onTryEatItem": {
+   "kind": "fn",
+   "calls": 38,
+   "battles": 38
+  },
+  "abilities:ripen onEatItem": {
+   "kind": "fn",
+   "calls": 38,
+   "battles": 38
+  },
+  "abilities:rockhead onDamage": {
+   "kind": "fn",
+   "calls": 311,
+   "battles": 43
+  },
+  "abilities:rockypayload onModifyAtk": {
+   "kind": "fn",
+   "calls": 174,
+   "battles": 53
+  },
+  "abilities:roughskin onDamagingHit": {
+   "kind": "fn",
+   "calls": 125,
+   "battles": 53
+  },
+  "abilities:sandrush onModifySpe": {
+   "kind": "fn",
+   "calls": 1584,
+   "battles": 36
+  },
+  "abilities:sandrush onImmunity": {
+   "kind": "fn",
+   "calls": 67,
+   "battles": 19
+  },
+  "abilities:sandstream onStart": {
+   "kind": "fn",
+   "calls": 170,
+   "battles": 116
+  },
+  "abilities:sapsipper onTryHit": {
+   "kind": "fn",
+   "calls": 710,
+   "battles": 156
+  },
+  "abilities:sapsipper onAllyTryHitSide": {
+   "kind": "fn",
+   "calls": 19,
+   "battles": 15
+  },
+  "abilities:scrappy onModifyMove": {
+   "kind": "fn",
+   "calls": 389,
+   "battles": 93
+  },
+  "abilities:scrappy onTryBoost": {
+   "kind": "fn",
+   "calls": 112,
+   "battles": 48
+  },
+  "abilities:seedsower onDamagingHit": {
+   "kind": "fn",
+   "calls": 185,
+   "battles": 61
+  },
+  "abilities:serenegrace onModifyMove": {
+   "kind": "fn",
+   "calls": 635,
+   "battles": 116
+  },
+  "abilities:shadowshield onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 226,
+   "battles": 65
+  },
+  "abilities:shadowtag onFoeTrapPokemon": {
+   "kind": "fn",
+   "calls": 772,
+   "battles": 63
+  },
+  "abilities:shadowtag onFoeMaybeTrapPokemon": {
+   "kind": "fn",
+   "calls": 1442,
+   "battles": 63
+  },
+  "abilities:sharpness onBasePower": {
+   "kind": "fn",
+   "calls": 487,
+   "battles": 162
+  },
+  "abilities:shedskin onResidual": {
+   "kind": "fn",
+   "calls": 741,
+   "battles": 115
+  },
+  "abilities:sheerforce onModifyMove": {
+   "kind": "fn",
+   "calls": 977,
+   "battles": 213
+  },
+  "abilities:sheerforce onBasePower": {
+   "kind": "fn",
+   "calls": 649,
+   "battles": 192
+  },
+  "abilities:shielddust onModifySecondaries": {
+   "kind": "fn",
+   "calls": 58,
+   "battles": 32
+  },
+  "abilities:shieldsdown onStart": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 45
+  },
+  "abilities:shieldsdown onResidual": {
+   "kind": "fn",
+   "calls": 215,
+   "battles": 44
+  },
+  "abilities:shieldsdown onSetStatus": {
+   "kind": "fn",
+   "calls": 10,
+   "battles": 8
+  },
+  "abilities:shieldsdown onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 131,
+   "battles": 36
+  },
+  "abilities:skilllink onModifyMove": {
+   "kind": "fn",
+   "calls": 227,
+   "battles": 55
+  },
+  "abilities:slowstart onStart": {
+   "kind": "fn",
+   "calls": 95,
+   "battles": 59
+  },
+  "abilities:slowstart onResidual": {
+   "kind": "fn",
+   "calls": 597,
+   "battles": 57
+  },
+  "abilities:slowstart onModifyAtk": {
+   "kind": "fn",
+   "calls": 226,
+   "battles": 54
+  },
+  "abilities:slowstart onModifySpe": {
+   "kind": "fn",
+   "calls": 5696,
+   "battles": 59
+  },
+  "abilities:slowstart onEnd": {
+   "kind": "fn",
+   "calls": 78,
+   "battles": 52
+  },
+  "abilities:slushrush onModifySpe": {
+   "kind": "fn",
+   "calls": 2315,
+   "battles": 44
+  },
+  "abilities:snowwarning onStart": {
+   "kind": "fn",
+   "calls": 121,
+   "battles": 84
+  },
+  "abilities:solidrock onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 348,
+   "battles": 108
+  },
+  "abilities:soulheart onAnyFaint": {
+   "kind": "fn",
+   "calls": 151,
+   "battles": 50
+  },
+  "abilities:soundproof onTryHit": {
+   "kind": "fn",
+   "calls": 150,
+   "battles": 37
+  },
+  "abilities:soundproof onAllyTryHitSide": {
+   "kind": "fn",
+   "calls": 6,
+   "battles": 5
+  },
+  "abilities:speedboost onResidual": {
+   "kind": "fn",
+   "calls": 486,
+   "battles": 132
+  },
+  "abilities:stakeout onModifyAtk": {
+   "kind": "fn",
+   "calls": 198,
+   "battles": 56
+  },
+  "abilities:stalwart onModifyMove": {
+   "kind": "fn",
+   "calls": 360,
+   "battles": 51
+  },
+  "abilities:stamina onDamagingHit": {
+   "kind": "fn",
+   "calls": 362,
+   "battles": 98
+  },
+  "abilities:static onDamagingHit": {
+   "kind": "fn",
+   "calls": 546,
+   "battles": 164
+  },
+  "abilities:steelyspirit onAllyBasePower": {
+   "kind": "fn",
+   "calls": 140,
+   "battles": 27
+  },
+  "abilities:stickyhold onTakeItem": {
+   "kind": "fn",
+   "calls": 11,
+   "battles": 8
+  },
+  "abilities:stormdrain onTryHit": {
+   "kind": "fn",
+   "calls": 857,
+   "battles": 156
+  },
+  "abilities:stormdrain onAnyRedirectTarget": {
+   "kind": "fn",
+   "calls": 2609,
+   "battles": 158
+  },
+  "abilities:strongjaw onBasePower": {
+   "kind": "fn",
+   "calls": 200,
+   "battles": 67
+  },
+  "abilities:sturdy onTryHit": {
+   "kind": "fn",
+   "calls": 2248,
+   "battles": 285
+  },
+  "abilities:sturdy onDamage": {
+   "kind": "fn",
+   "calls": 1577,
+   "battles": 285
+  },
+  "abilities:surgesurfer onModifySpe": {
+   "kind": "fn",
+   "calls": 789,
+   "battles": 21
+  },
+  "abilities:swarm onModifyAtk": {
+   "kind": "fn",
+   "calls": 121,
+   "battles": 56
+  },
+  "abilities:swarm onModifySpA": {
+   "kind": "fn",
+   "calls": 20,
+   "battles": 14
+  },
+  "abilities:swiftswim onModifySpe": {
+   "kind": "fn",
+   "calls": 9949,
+   "battles": 200
+  },
+  "abilities:swordofruin onStart": {
+   "kind": "fn",
+   "calls": 70,
+   "battles": 53
+  },
+  "abilities:swordofruin onAnyModifyDef": {
+   "kind": "fn",
+   "calls": 203,
+   "battles": 46
+  },
+  "abilities:synchronize onAfterSetStatus": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 16
+  },
+  "abilities:tabletsofruin onStart": {
+   "kind": "fn",
+   "calls": 75,
+   "battles": 47
+  },
+  "abilities:tabletsofruin onAnyModifyAtk": {
+   "kind": "fn",
+   "calls": 373,
+   "battles": 46
+  },
+  "abilities:tanglinghair onDamagingHit": {
+   "kind": "fn",
+   "calls": 30,
+   "battles": 20
+  },
+  "abilities:technician onBasePower": {
+   "kind": "fn",
+   "calls": 1790,
+   "battles": 329
+  },
+  "abilities:telepathy onTryHit": {
+   "kind": "fn",
+   "calls": 586,
+   "battles": 105
+  },
+  "abilities:teraformzero onAfterTerastallization": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 12
+  },
+  "abilities:terashift onSwitchIn": {
+   "kind": "fn",
+   "calls": 47,
+   "battles": 47
+  },
+  "abilities:teravolt onStart": {
+   "kind": "fn",
+   "calls": 115,
+   "battles": 80
+  },
+  "abilities:teravolt onModifyMove": {
+   "kind": "fn",
+   "calls": 406,
+   "battles": 74
+  },
+  "abilities:thermalexchange onDamagingHit": {
+   "kind": "fn",
+   "calls": 128,
+   "battles": 49
+  },
+  "abilities:thermalexchange onUpdate": {
+   "kind": "fn",
+   "calls": 3438,
+   "battles": 52
+  },
+  "abilities:thermalexchange onSetStatus": {
+   "kind": "fn",
+   "calls": 5,
+   "battles": 5
+  },
+  "abilities:thickfat onSourceModifyAtk": {
+   "kind": "fn",
+   "calls": 454,
+   "battles": 224
+  },
+  "abilities:thickfat onSourceModifySpA": {
+   "kind": "fn",
+   "calls": 507,
+   "battles": 214
+  },
+  "abilities:tintedlens onModifyDamage": {
+   "kind": "fn",
+   "calls": 428,
+   "battles": 162
+  },
+  "abilities:torrent onModifyAtk": {
+   "kind": "fn",
+   "calls": 175,
+   "battles": 78
+  },
+  "abilities:torrent onModifySpA": {
+   "kind": "fn",
+   "calls": 507,
+   "battles": 139
+  },
+  "abilities:toughclaws onBasePower": {
+   "kind": "fn",
+   "calls": 171,
+   "battles": 46
+  },
+  "abilities:toxicboost onBasePower": {
+   "kind": "fn",
+   "calls": 174,
+   "battles": 73
+  },
+  "abilities:toxicchain onSourceDamagingHit": {
+   "kind": "fn",
+   "calls": 651,
+   "battles": 134
+  },
+  "abilities:toxicdebris onDamagingHit": {
+   "kind": "fn",
+   "calls": 119,
+   "battles": 45
+  },
+  "abilities:trace onStart": {
+   "kind": "fn",
+   "calls": 68,
+   "battles": 52
+  },
+  "abilities:trace onUpdate": {
+   "kind": "fn",
+   "calls": 119,
+   "battles": 52
+  },
+  "abilities:transistor onModifySpA": {
+   "kind": "fn",
+   "calls": 175,
+   "battles": 45
+  },
+  "abilities:triage onModifyPriority": {
+   "kind": "fn",
+   "calls": 904,
+   "battles": 58
+  },
+  "abilities:truant onStart": {
+   "kind": "fn",
+   "calls": 97,
+   "battles": 69
+  },
+  "abilities:truant onBeforeMove": {
+   "kind": "fn",
+   "calls": 362,
+   "battles": 69
+  },
+  "abilities:turboblaze onStart": {
+   "kind": "fn",
+   "calls": 107,
+   "battles": 80
+  },
+  "abilities:turboblaze onModifyMove": {
+   "kind": "fn",
+   "calls": 270,
+   "battles": 67
+  },
+  "abilities:unaware onAnyModifyBoost": {
+   "kind": "fn",
+   "calls": 56119,
+   "battles": 175
+  },
+  "abilities:unburden onAfterUseItem": {
+   "kind": "fn",
+   "calls": 158,
+   "battles": 152
+  },
+  "abilities:unburden onTakeItem": {
+   "kind": "fn",
+   "calls": 18,
+   "battles": 18
+  },
+  "abilities:unburden onEnd": {
+   "kind": "fn",
+   "calls": 329,
+   "battles": 222
+  },
+  "abilities:unnerve onStart": {
+   "kind": "fn",
+   "calls": 346,
+   "battles": 238
+  },
+  "abilities:unnerve onEnd": {
+   "kind": "fn",
+   "calls": 308,
+   "battles": 224
+  },
+  "abilities:unnerve onFoeTryEatItem": {
+   "kind": "fn",
+   "calls": 1540,
+   "battles": 74
+  },
+  "abilities:unseenfist onModifyMove": {
+   "kind": "fn",
+   "calls": 186,
+   "battles": 55
+  },
+  "abilities:vesselofruin onStart": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 50
+  },
+  "abilities:vesselofruin onAnyModifySpA": {
+   "kind": "fn",
+   "calls": 232,
+   "battles": 48
+  },
+  "abilities:vitalspirit onUpdate": {
+   "kind": "fn",
+   "calls": 4952,
+   "battles": 55
+  },
+  "abilities:vitalspirit onSetStatus": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 12
+  },
+  "abilities:vitalspirit onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 14
+  },
+  "abilities:voltabsorb onTryHit": {
+   "kind": "fn",
+   "calls": 1233,
+   "battles": 263
+  },
+  "abilities:waterabsorb onTryHit": {
+   "kind": "fn",
+   "calls": 1852,
+   "battles": 327
+  },
+  "abilities:waterbubble onSourceModifyAtk": {
+   "kind": "fn",
+   "calls": 88,
+   "battles": 41
+  },
+  "abilities:waterbubble onSourceModifySpA": {
+   "kind": "fn",
+   "calls": 96,
+   "battles": 43
+  },
+  "abilities:waterbubble onModifyAtk": {
+   "kind": "fn",
+   "calls": 125,
+   "battles": 44
+  },
+  "abilities:waterbubble onModifySpA": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 13
+  },
+  "abilities:waterbubble onUpdate": {
+   "kind": "fn",
+   "calls": 4679,
+   "battles": 57
+  },
+  "abilities:waterbubble onSetStatus": {
+   "kind": "fn",
+   "calls": 18,
+   "battles": 15
+  },
+  "abilities:watercompaction onDamagingHit": {
+   "kind": "fn",
+   "calls": 182,
+   "battles": 57
+  },
+  "abilities:waterveil onUpdate": {
+   "kind": "fn",
+   "calls": 2407,
+   "battles": 49
+  },
+  "abilities:waterveil onSetStatus": {
+   "kind": "fn",
+   "calls": 11,
+   "battles": 10
+  },
+  "abilities:weakarmor onDamagingHit": {
+   "kind": "fn",
+   "calls": 311,
+   "battles": 119
+  },
+  "abilities:wellbakedbody onTryHit": {
+   "kind": "fn",
+   "calls": 303,
+   "battles": 63
+  },
+  "abilities:windrider onStart": {
+   "kind": "fn",
+   "calls": 129,
+   "battles": 96
+  },
+  "abilities:windrider onTryHit": {
+   "kind": "fn",
+   "calls": 337,
+   "battles": 94
+  },
+  "abilities:windrider onSideConditionStart": {
+   "kind": "fn",
+   "calls": 42,
+   "battles": 34
+  },
+  "abilities:zerotohero onSwitchOut": {
+   "kind": "fn",
+   "calls": 44,
+   "battles": 30
+  },
+  "abilities:zerotohero onSwitchIn": {
+   "kind": "fn",
+   "calls": 100,
+   "battles": 58
+  },
+  "items:adamantcrystal onBasePower": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 23
+  },
+  "items:adamantcrystal onTakeItem": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 3
+  },
+  "items:aguavberry onUpdate": {
+   "kind": "fn",
+   "calls": 414,
+   "battles": 9
+  },
+  "items:aguavberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 7,
+   "battles": 7
+  },
+  "items:aguavberry onEat": {
+   "kind": "fn",
+   "calls": 7,
+   "battles": 7
+  },
+  "items:assaultvest onModifySpD": {
+   "kind": "fn",
+   "calls": 2328,
+   "battles": 890
+  },
+  "items:assaultvest onDisableMove": {
+   "kind": "fn",
+   "calls": 9001,
+   "battles": 1153
+  },
+  "items:boosterenergy onStart": {
+   "kind": "fn",
+   "calls": 195,
+   "battles": 190
+  },
+  "items:boosterenergy onUpdate": {
+   "kind": "fn",
+   "calls": 523,
+   "battles": 190
+  },
+  "items:chestoberry onUpdate": {
+   "kind": "fn",
+   "calls": 7220,
+   "battles": 150
+  },
+  "items:chestoberry onEat": {
+   "kind": "fn",
+   "calls": 82,
+   "battles": 79
+  },
+  "items:choiceband onStart": {
+   "kind": "fn",
+   "calls": 1919,
+   "battles": 1014
+  },
+  "items:choiceband onModifyMove": {
+   "kind": "fn",
+   "calls": 4496,
+   "battles": 952
+  },
+  "items:choiceband onModifyAtk": {
+   "kind": "fn",
+   "calls": 3806,
+   "battles": 920
+  },
+  "items:choicescarf onStart": {
+   "kind": "fn",
+   "calls": 1252,
+   "battles": 694
+  },
+  "items:choicescarf onModifyMove": {
+   "kind": "fn",
+   "calls": 3056,
+   "battles": 648
+  },
+  "items:choicescarf onModifySpe": {
+   "kind": "fn",
+   "calls": 31504,
+   "battles": 694
+  },
+  "items:choicespecs onStart": {
+   "kind": "fn",
+   "calls": 1106,
+   "battles": 640
+  },
+  "items:choicespecs onModifyMove": {
+   "kind": "fn",
+   "calls": 2814,
+   "battles": 597
+  },
+  "items:choicespecs onModifySpA": {
+   "kind": "fn",
+   "calls": 2375,
+   "battles": 556
+  },
+  "items:clearamulet onTryBoost": {
+   "kind": "fn",
+   "calls": 509,
+   "battles": 215
+  },
+  "items:cornerstonemask onBasePower": {
+   "kind": "fn",
+   "calls": 21,
+   "battles": 12
+  },
+  "items:cornerstonemask onTakeItem": {
+   "kind": "fn",
+   "calls": 6,
+   "battles": 3
+  },
+  "items:covertcloak onModifySecondaries": {
+   "kind": "fn",
+   "calls": 70,
+   "battles": 38
+  },
+  "items:dracoplate onBasePower": {
+   "kind": "fn",
+   "calls": 46,
+   "battles": 12
+  },
+  "items:dracoplate onTakeItem": {
+   "kind": "fn",
+   "calls": 6,
+   "battles": 3
+  },
+  "items:dreadplate onBasePower": {
+   "kind": "fn",
+   "calls": 13,
+   "battles": 5
+  },
+  "items:earthplate onBasePower": {
+   "kind": "fn",
+   "calls": 32,
+   "battles": 11
+  },
+  "items:earthplate onTakeItem": {
+   "kind": "fn",
+   "calls": 1,
+   "battles": 1
+  },
+  "items:eviolite onModifyDef": {
+   "kind": "fn",
+   "calls": 945,
+   "battles": 375
+  },
+  "items:eviolite onModifySpD": {
+   "kind": "fn",
+   "calls": 809,
+   "battles": 339
+  },
+  "items:figyberry onUpdate": {
+   "kind": "fn",
+   "calls": 817,
+   "battles": 17
+  },
+  "items:figyberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 14
+  },
+  "items:figyberry onEat": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 14
+  },
+  "items:fistplate onBasePower": {
+   "kind": "fn",
+   "calls": 35,
+   "battles": 9
+  },
+  "items:fistplate onTakeItem": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 2
+  },
+  "items:flameorb onResidual": {
+   "kind": "fn",
+   "calls": 320,
+   "battles": 93
+  },
+  "items:flameplate onBasePower": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 7
+  },
+  "items:focussash onDamage": {
+   "kind": "fn",
+   "calls": 1181,
+   "battles": 442
+  },
+  "items:griseouscore onBasePower": {
+   "kind": "fn",
+   "calls": 76,
+   "battles": 24
+  },
+  "items:griseouscore onTakeItem": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 4
+  },
+  "items:hearthflamemask onBasePower": {
+   "kind": "fn",
+   "calls": 29,
+   "battles": 13
+  },
+  "items:hearthflamemask onTakeItem": {
+   "kind": "fn",
+   "calls": 2,
+   "battles": 1
+  },
+  "items:iapapaberry onUpdate": {
+   "kind": "fn",
+   "calls": 730,
+   "battles": 16
+  },
+  "items:iapapaberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 15
+  },
+  "items:iapapaberry onEat": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 15
+  },
+  "items:icicleplate onBasePower": {
+   "kind": "fn",
+   "calls": 17,
+   "battles": 7
+  },
+  "items:icicleplate onTakeItem": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 2
+  },
+  "items:insectplate onBasePower": {
+   "kind": "fn",
+   "calls": 57,
+   "battles": 12
+  },
+  "items:ironplate onBasePower": {
+   "kind": "fn",
+   "calls": 62,
+   "battles": 8
+  },
+  "items:leftovers onResidual": {
+   "kind": "fn",
+   "calls": 12119,
+   "battles": 1087
+  },
+  "items:lifeorb onModifyDamage": {
+   "kind": "fn",
+   "calls": 12866,
+   "battles": 1882
+  },
+  "items:lifeorb onAfterMoveSecondarySelf": {
+   "kind": "fn",
+   "calls": 18286,
+   "battles": 1909
+  },
+  "items:lightball onModifyAtk": {
+   "kind": "fn",
+   "calls": 57,
+   "battles": 34
+  },
+  "items:lightball onModifySpA": {
+   "kind": "fn",
+   "calls": 23,
+   "battles": 19
+  },
+  "items:loadeddice onModifyMove": {
+   "kind": "fn",
+   "calls": 1154,
+   "battles": 234
+  },
+  "items:lustrousglobe onBasePower": {
+   "kind": "fn",
+   "calls": 79,
+   "battles": 20
+  },
+  "items:lustrousglobe onTakeItem": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 2
+  },
+  "items:lustrousorb onBasePower": {
+   "kind": "fn",
+   "calls": 40,
+   "battles": 15
+  },
+  "items:magnet onBasePower": {
+   "kind": "fn",
+   "calls": 166,
+   "battles": 45
+  },
+  "items:magoberry onUpdate": {
+   "kind": "fn",
+   "calls": 807,
+   "battles": 17
+  },
+  "items:magoberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 13,
+   "battles": 13
+  },
+  "items:magoberry onEat": {
+   "kind": "fn",
+   "calls": 13,
+   "battles": 13
+  },
+  "items:meadowplate onBasePower": {
+   "kind": "fn",
+   "calls": 16,
+   "battles": 6
+  },
+  "items:meadowplate onTakeItem": {
+   "kind": "fn",
+   "calls": 2,
+   "battles": 1
+  },
+  "items:mindplate onBasePower": {
+   "kind": "fn",
+   "calls": 14,
+   "battles": 4
+  },
+  "items:mindplate onTakeItem": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 2
+  },
+  "items:mysticwater onBasePower": {
+   "kind": "fn",
+   "calls": 163,
+   "battles": 55
+  },
+  "items:pixieplate onBasePower": {
+   "kind": "fn",
+   "calls": 60,
+   "battles": 12
+  },
+  "items:pixieplate onTakeItem": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 3
+  },
+  "items:powerherb onChargeMove": {
+   "kind": "fn",
+   "calls": 95,
+   "battles": 89
+  },
+  "items:rockyhelmet onDamagingHit": {
+   "kind": "fn",
+   "calls": 659,
+   "battles": 206
+  },
+  "items:rustedshield onTakeItem": {
+   "kind": "fn",
+   "calls": 13,
+   "battles": 4
+  },
+  "items:rustedsword onTakeItem": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 5
+  },
+  "items:silkscarf onBasePower": {
+   "kind": "fn",
+   "calls": 248,
+   "battles": 91
+  },
+  "items:sitrusberry onUpdate": {
+   "kind": "fn",
+   "calls": 271340,
+   "battles": 1950
+  },
+  "items:sitrusberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 4869,
+   "battles": 1773
+  },
+  "items:sitrusberry onEat": {
+   "kind": "fn",
+   "calls": 4239,
+   "battles": 1771
+  },
+  "items:skyplate onBasePower": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 5
+  },
+  "items:skyplate onTakeItem": {
+   "kind": "fn",
+   "calls": 2,
+   "battles": 1
+  },
+  "items:souldew onBasePower": {
+   "kind": "fn",
+   "calls": 258,
+   "battles": 86
+  },
+  "items:splashplate onBasePower": {
+   "kind": "fn",
+   "calls": 46,
+   "battles": 6
+  },
+  "items:splashplate onTakeItem": {
+   "kind": "fn",
+   "calls": 6,
+   "battles": 3
+  },
+  "items:spookyplate onBasePower": {
+   "kind": "fn",
+   "calls": 35,
+   "battles": 13
+  },
+  "items:spookyplate onTakeItem": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 5
+  },
+  "items:stoneplate onBasePower": {
+   "kind": "fn",
+   "calls": 14,
+   "battles": 7
+  },
+  "items:stoneplate onTakeItem": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 2
+  },
+  "items:throatspray onAfterMoveSecondarySelf": {
+   "kind": "fn",
+   "calls": 190,
+   "battles": 89
+  },
+  "items:toxicorb onResidual": {
+   "kind": "fn",
+   "calls": 657,
+   "battles": 152
+  },
+  "items:toxicplate onBasePower": {
+   "kind": "fn",
+   "calls": 11,
+   "battles": 5
+  },
+  "items:weaknesspolicy onDamagingHit": {
+   "kind": "fn",
+   "calls": 271,
+   "battles": 122
+  },
+  "items:wellspringmask onBasePower": {
+   "kind": "fn",
+   "calls": 82,
+   "battles": 33
+  },
+  "items:wellspringmask onTakeItem": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 4
+  },
+  "items:whiteherb onStart": {
+   "kind": "fn",
+   "calls": 5032,
+   "battles": 399
+  },
+  "items:whiteherb onAnySwitchIn": {
+   "kind": "fn",
+   "calls": 1062,
+   "battles": 399
+  },
+  "items:whiteherb onAnyAfterMove": {
+   "kind": "fn",
+   "calls": 3220,
+   "battles": 368
+  },
+  "items:whiteherb onResidual": {
+   "kind": "fn",
+   "calls": 747,
+   "battles": 276
+  },
+  "items:whiteherb onUse": {
+   "kind": "fn",
+   "calls": 291,
+   "battles": 278
+  },
+  "items:widelens onSourceModifyAccuracy": {
+   "kind": "fn",
+   "calls": 1254,
+   "battles": 140
+  },
+  "items:wikiberry onUpdate": {
+   "kind": "fn",
+   "calls": 513,
+   "battles": 13
+  },
+  "items:wikiberry onTryEatItem": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 9
+  },
+  "items:wikiberry onEat": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 9
+  },
+  "items:zapplate onBasePower": {
+   "kind": "fn",
+   "calls": 31,
+   "battles": 9
+  },
+  "items:zapplate onTakeItem": {
+   "kind": "fn",
+   "calls": 5,
+   "battles": 3
+  },
+  "conditions:auroraveil durationCallback": {
+   "kind": "fn",
+   "calls": 47,
+   "battles": 46
+  },
+  "conditions:auroraveil onAnyModifyDamage": {
+   "kind": "fn",
+   "calls": 566,
+   "battles": 46
+  },
+  "conditions:auroraveil onSideStart": {
+   "kind": "fn",
+   "calls": 47,
+   "battles": 46
+  },
+  "conditions:auroraveil onSideEnd": {
+   "kind": "fn",
+   "calls": 37,
+   "battles": 37
+  },
+  "conditions:banefulbunker onStart": {
+   "kind": "fn",
+   "calls": 175,
+   "battles": 55
+  },
+  "conditions:banefulbunker onTryHit": {
+   "kind": "fn",
+   "calls": 113,
+   "battles": 39
+  },
+  "conditions:banefulbunker onHit": {
+   "kind": "fn",
+   "calls": 177,
+   "battles": 55
+  },
+  "conditions:brn onStart": {
+   "kind": "fn",
+   "calls": 1099,
+   "battles": 690
+  },
+  "conditions:brn onResidual": {
+   "kind": "fn",
+   "calls": 3911,
+   "battles": 650
+  },
+  "conditions:burningbulwark onStart": {
+   "kind": "fn",
+   "calls": 82,
+   "battles": 38
+  },
+  "conditions:burningbulwark onTryHit": {
+   "kind": "fn",
+   "calls": 55,
+   "battles": 30
+  },
+  "conditions:burningbulwark onHit": {
+   "kind": "fn",
+   "calls": 85,
+   "battles": 38
+  },
+  "conditions:charge onStart": {
+   "kind": "fn",
+   "calls": 98,
+   "battles": 45
+  },
+  "conditions:charge onRestart": {
+   "kind": "fn",
+   "calls": 57,
+   "battles": 24
+  },
+  "conditions:charge onBasePower": {
+   "kind": "fn",
+   "calls": 96,
+   "battles": 32
+  },
+  "conditions:charge onMoveAborted": {
+   "kind": "fn",
+   "calls": 7,
+   "battles": 6
+  },
+  "conditions:charge onAfterMove": {
+   "kind": "fn",
+   "calls": 132,
+   "battles": 41
+  },
+  "conditions:charge onEnd": {
+   "kind": "fn",
+   "calls": 75,
+   "battles": 40
+  },
+  "conditions:choicelock onStart": {
+   "kind": "fn",
+   "calls": 3509,
+   "battles": 1529
+  },
+  "conditions:choicelock onBeforeMove": {
+   "kind": "fn",
+   "calls": 6914,
+   "battles": 1385
+  },
+  "conditions:choicelock onDisableMove": {
+   "kind": "fn",
+   "calls": 8818,
+   "battles": 1462
+  },
+  "conditions:confusion onStart": {
+   "kind": "fn",
+   "calls": 187,
+   "battles": 140
+  },
+  "conditions:confusion onEnd": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 60
+  },
+  "conditions:confusion onBeforeMove": {
+   "kind": "fn",
+   "calls": 365,
+   "battles": 122
+  },
+  "conditions:disable onStart": {
+   "kind": "fn",
+   "calls": 170,
+   "battles": 118
+  },
+  "conditions:disable onEnd": {
+   "kind": "fn",
+   "calls": 52,
+   "battles": 44
+  },
+  "conditions:disable onBeforeMove": {
+   "kind": "fn",
+   "calls": 306,
+   "battles": 95
+  },
+  "conditions:disable onDisableMove": {
+   "kind": "fn",
+   "calls": 337,
+   "battles": 106
+  },
+  "conditions:electricterrain durationCallback": {
+   "kind": "fn",
+   "calls": 139,
+   "battles": 98
+  },
+  "conditions:electricterrain onSetStatus": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 46
+  },
+  "conditions:electricterrain onTryAddVolatile": {
+   "kind": "fn",
+   "calls": 634,
+   "battles": 95
+  },
+  "conditions:electricterrain onBasePower": {
+   "kind": "fn",
+   "calls": 1315,
+   "battles": 98
+  },
+  "conditions:electricterrain onFieldStart": {
+   "kind": "fn",
+   "calls": 139,
+   "battles": 98
+  },
+  "conditions:electricterrain onFieldEnd": {
+   "kind": "fn",
+   "calls": 118,
+   "battles": 92
+  },
+  "conditions:encore onStart": {
+   "kind": "fn",
+   "calls": 962,
+   "battles": 522
+  },
+  "conditions:encore onOverrideAction": {
+   "kind": "fn",
+   "calls": 1574,
+   "battles": 439
+  },
+  "conditions:encore onResidual": {
+   "kind": "fn",
+   "calls": 1341,
+   "battles": 435
+  },
+  "conditions:encore onEnd": {
+   "kind": "fn",
+   "calls": 346,
+   "battles": 266
+  },
+  "conditions:encore onDisableMove": {
+   "kind": "fn",
+   "calls": 1337,
+   "battles": 434
+  },
+  "conditions:flashfire onStart": {
+   "kind": "fn",
+   "calls": 37,
+   "battles": 35
+  },
+  "conditions:flashfire onModifyAtk": {
+   "kind": "fn",
+   "calls": 5,
+   "battles": 1
+  },
+  "conditions:flashfire onModifySpA": {
+   "kind": "fn",
+   "calls": 100,
+   "battles": 28
+  },
+  "conditions:flashfire onEnd": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 8
+  },
+  "conditions:flinch onBeforeMove": {
+   "kind": "fn",
+   "calls": 564,
+   "battles": 448
+  },
+  "conditions:followme onStart": {
+   "kind": "fn",
+   "calls": 460,
+   "battles": 247
+  },
+  "conditions:followme onFoeRedirectTarget": {
+   "kind": "fn",
+   "calls": 475,
+   "battles": 220
+  },
+  "conditions:frz onStart": {
+   "kind": "fn",
+   "calls": 87,
+   "battles": 87
+  },
+  "conditions:frz onBeforeMove": {
+   "kind": "fn",
+   "calls": 185,
+   "battles": 77
+  },
+  "conditions:frz onModifyMove": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 4
+  },
+  "conditions:frz onAfterMoveSecondary": {
+   "kind": "fn",
+   "calls": 196,
+   "battles": 87
+  },
+  "conditions:frz onDamagingHit": {
+   "kind": "fn",
+   "calls": 193,
+   "battles": 87
+  },
+  "conditions:glaiverush onStart": {
+   "kind": "fn",
+   "calls": 11,
+   "battles": 5
+  },
+  "conditions:glaiverush onAccuracy": {
+   "kind": "fn",
+   "calls": 3,
+   "battles": 2
+  },
+  "conditions:glaiverush onSourceModifyDamage": {
+   "kind": "fn",
+   "calls": 3,
+   "battles": 2
+  },
+  "conditions:glaiverush onBeforeMove": {
+   "kind": "fn",
+   "calls": 7,
+   "battles": 4
+  },
+  "conditions:grassyterrain durationCallback": {
+   "kind": "fn",
+   "calls": 164,
+   "battles": 112
+  },
+  "conditions:grassyterrain onBasePower": {
+   "kind": "fn",
+   "calls": 1433,
+   "battles": 112
+  },
+  "conditions:grassyterrain onFieldStart": {
+   "kind": "fn",
+   "calls": 164,
+   "battles": 112
+  },
+  "conditions:grassyterrain onResidual": {
+   "kind": "fn",
+   "calls": 2435,
+   "battles": 111
+  },
+  "conditions:grassyterrain onFieldEnd": {
+   "kind": "fn",
+   "calls": 136,
+   "battles": 98
+  },
+  "conditions:healblock durationCallback": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 35
+  },
+  "conditions:healblock onStart": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 35
+  },
+  "conditions:healblock onDisableMove": {
+   "kind": "fn",
+   "calls": 58,
+   "battles": 33
+  },
+  "conditions:healblock onBeforeMove": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 32
+  },
+  "conditions:healblock onModifyMove": {
+   "kind": "fn",
+   "calls": 61,
+   "battles": 32
+  },
+  "conditions:healblock onEnd": {
+   "kind": "fn",
+   "calls": 39,
+   "battles": 29
+  },
+  "conditions:healblock onTryHeal": {
+   "kind": "fn",
+   "calls": 80,
+   "battles": 14
+  },
+  "conditions:healblock onRestart": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 4
+  },
+  "conditions:helpinghand onStart": {
+   "kind": "fn",
+   "calls": 2008,
+   "battles": 754
+  },
+  "conditions:helpinghand onBasePower": {
+   "kind": "fn",
+   "calls": 1030,
+   "battles": 531
+  },
+  "conditions:imprison onStart": {
+   "kind": "fn",
+   "calls": 9,
+   "battles": 9
+  },
+  "conditions:imprison onFoeDisableMove": {
+   "kind": "fn",
+   "calls": 81,
+   "battles": 9
+  },
+  "conditions:imprison onFoeBeforeMove": {
+   "kind": "fn",
+   "calls": 77,
+   "battles": 8
+  },
+  "conditions:leechseed onStart": {
+   "kind": "fn",
+   "calls": 200,
+   "battles": 112
+  },
+  "conditions:leechseed onResidual": {
+   "kind": "fn",
+   "calls": 604,
+   "battles": 110
+  },
+  "conditions:lightscreen durationCallback": {
+   "kind": "fn",
+   "calls": 107,
+   "battles": 89
+  },
+  "conditions:lightscreen onAnyModifyDamage": {
+   "kind": "fn",
+   "calls": 1182,
+   "battles": 89
+  },
+  "conditions:lightscreen onSideStart": {
+   "kind": "fn",
+   "calls": 107,
+   "battles": 89
+  },
+  "conditions:lightscreen onSideEnd": {
+   "kind": "fn",
+   "calls": 78,
+   "battles": 67
+  },
+  "conditions:mustrecharge onBeforeMove": {
+   "kind": "fn",
+   "calls": 21,
+   "battles": 12
+  },
+  "conditions:mustrecharge onStart": {
+   "kind": "fn",
+   "calls": 24,
+   "battles": 13
+  },
+  "conditions:noretreat onStart": {
+   "kind": "fn",
+   "calls": 63,
+   "battles": 55
+  },
+  "conditions:noretreat onTrapPokemon": {
+   "kind": "fn",
+   "calls": 258,
+   "battles": 48
+  },
+  "conditions:par onStart": {
+   "kind": "fn",
+   "calls": 1314,
+   "battles": 775
+  },
+  "conditions:par onModifySpe": {
+   "kind": "fn",
+   "calls": 62685,
+   "battles": 769
+  },
+  "conditions:par onBeforeMove": {
+   "kind": "fn",
+   "calls": 6258,
+   "battles": 705
+  },
+  "conditions:partiallytrapped durationCallback": {
+   "kind": "fn",
+   "calls": 121,
+   "battles": 50
+  },
+  "conditions:partiallytrapped onStart": {
+   "kind": "fn",
+   "calls": 121,
+   "battles": 50
+  },
+  "conditions:partiallytrapped onResidual": {
+   "kind": "fn",
+   "calls": 355,
+   "battles": 49
+  },
+  "conditions:partiallytrapped onEnd": {
+   "kind": "fn",
+   "calls": 30,
+   "battles": 17
+  },
+  "conditions:partiallytrapped onTrapPokemon": {
+   "kind": "fn",
+   "calls": 303,
+   "battles": 47
+  },
+  "conditions:protect onStart": {
+   "kind": "fn",
+   "calls": 12515,
+   "battles": 1948
+  },
+  "conditions:protect onTryHit": {
+   "kind": "fn",
+   "calls": 8286,
+   "battles": 1842
+  },
+  "conditions:protosynthesis onStart": {
+   "kind": "fn",
+   "calls": 87,
+   "battles": 80
+  },
+  "conditions:protosynthesis onModifyAtk": {
+   "kind": "fn",
+   "calls": 76,
+   "battles": 29
+  },
+  "conditions:protosynthesis onModifyDef": {
+   "kind": "fn",
+   "calls": 60,
+   "battles": 44
+  },
+  "conditions:protosynthesis onModifySpA": {
+   "kind": "fn",
+   "calls": 66,
+   "battles": 30
+  },
+  "conditions:protosynthesis onModifySpD": {
+   "kind": "fn",
+   "calls": 64,
+   "battles": 44
+  },
+  "conditions:protosynthesis onModifySpe": {
+   "kind": "fn",
+   "calls": 2109,
+   "battles": 80
+  },
+  "conditions:protosynthesis onEnd": {
+   "kind": "fn",
+   "calls": 12,
+   "battles": 12
+  },
+  "conditions:psn onStart": {
+   "kind": "fn",
+   "calls": 585,
+   "battles": 368
+  },
+  "conditions:psn onResidual": {
+   "kind": "fn",
+   "calls": 1592,
+   "battles": 343
+  },
+  "conditions:psychicterrain durationCallback": {
+   "kind": "fn",
+   "calls": 57,
+   "battles": 46
+  },
+  "conditions:psychicterrain onTryHit": {
+   "kind": "fn",
+   "calls": 854,
+   "battles": 45
+  },
+  "conditions:psychicterrain onBasePower": {
+   "kind": "fn",
+   "calls": 470,
+   "battles": 45
+  },
+  "conditions:psychicterrain onFieldStart": {
+   "kind": "fn",
+   "calls": 57,
+   "battles": 46
+  },
+  "conditions:psychicterrain onFieldEnd": {
+   "kind": "fn",
+   "calls": 50,
+   "battles": 42
+  },
+  "conditions:quarkdrive onStart": {
+   "kind": "fn",
+   "calls": 148,
+   "battles": 139
+  },
+  "conditions:quarkdrive onModifyAtk": {
+   "kind": "fn",
+   "calls": 97,
+   "battles": 41
+  },
+  "conditions:quarkdrive onModifyDef": {
+   "kind": "fn",
+   "calls": 137,
+   "battles": 83
+  },
+  "conditions:quarkdrive onModifySpA": {
+   "kind": "fn",
+   "calls": 200,
+   "battles": 62
+  },
+  "conditions:quarkdrive onModifySpD": {
+   "kind": "fn",
+   "calls": 138,
+   "battles": 77
+  },
+  "conditions:quarkdrive onModifySpe": {
+   "kind": "fn",
+   "calls": 4411,
+   "battles": 139
+  },
+  "conditions:quarkdrive onEnd": {
+   "kind": "fn",
+   "calls": 8,
+   "battles": 8
+  },
+  "conditions:ragepowder onStart": {
+   "kind": "fn",
+   "calls": 380,
+   "battles": 205
+  },
+  "conditions:ragepowder onFoeRedirectTarget": {
+   "kind": "fn",
+   "calls": 392,
+   "battles": 192
+  },
+  "conditions:raindance durationCallback": {
+   "kind": "fn",
+   "calls": 278,
+   "battles": 215
+  },
+  "conditions:raindance onWeatherModifyDamage": {
+   "kind": "fn",
+   "calls": 2384,
+   "battles": 213
+  },
+  "conditions:raindance onFieldStart": {
+   "kind": "fn",
+   "calls": 278,
+   "battles": 215
+  },
+  "conditions:raindance onFieldResidual": {
+   "kind": "fn",
+   "calls": 1014,
+   "battles": 214
+  },
+  "conditions:raindance onFieldEnd": {
+   "kind": "fn",
+   "calls": 219,
+   "battles": 185
+  },
+  "conditions:reflect durationCallback": {
+   "kind": "fn",
+   "calls": 104,
+   "battles": 85
+  },
+  "conditions:reflect onAnyModifyDamage": {
+   "kind": "fn",
+   "calls": 1065,
+   "battles": 85
+  },
+  "conditions:reflect onSideStart": {
+   "kind": "fn",
+   "calls": 104,
+   "battles": 85
+  },
+  "conditions:reflect onSideEnd": {
+   "kind": "fn",
+   "calls": 69,
+   "battles": 58
+  },
+  "conditions:roost onStart": {
+   "kind": "fn",
+   "calls": 296,
+   "battles": 128
+  },
+  "conditions:roost onType": {
+   "kind": "fn",
+   "calls": 224,
+   "battles": 55
+  },
+  "conditions:saltcure onStart": {
+   "kind": "fn",
+   "calls": 68,
+   "battles": 36
+  },
+  "conditions:saltcure onResidual": {
+   "kind": "fn",
+   "calls": 215,
+   "battles": 35
+  },
+  "conditions:sandstorm durationCallback": {
+   "kind": "fn",
+   "calls": 160,
+   "battles": 116
+  },
+  "conditions:sandstorm onModifySpD": {
+   "kind": "fn",
+   "calls": 600,
+   "battles": 104
+  },
+  "conditions:sandstorm onFieldStart": {
+   "kind": "fn",
+   "calls": 160,
+   "battles": 116
+  },
+  "conditions:sandstorm onFieldResidual": {
+   "kind": "fn",
+   "calls": 597,
+   "battles": 113
+  },
+  "conditions:sandstorm onWeather": {
+   "kind": "fn",
+   "calls": 2061,
+   "battles": 113
+  },
+  "conditions:sandstorm onFieldEnd": {
+   "kind": "fn",
+   "calls": 129,
+   "battles": 105
+  },
+  "conditions:sleepclausemod onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "conditions:sleepclausemod onSetStatus": {
+   "kind": "fn",
+   "calls": 4164,
+   "battles": 1586
+  },
+  "conditions:slp onStart": {
+   "kind": "fn",
+   "calls": 601,
+   "battles": 336
+  },
+  "conditions:slp onBeforeMove": {
+   "kind": "fn",
+   "calls": 1185,
+   "battles": 288
+  },
+  "conditions:snowscape durationCallback": {
+   "kind": "fn",
+   "calls": 115,
+   "battles": 84
+  },
+  "conditions:snowscape onModifyDef": {
+   "kind": "fn",
+   "calls": 515,
+   "battles": 78
+  },
+  "conditions:snowscape onFieldStart": {
+   "kind": "fn",
+   "calls": 115,
+   "battles": 84
+  },
+  "conditions:snowscape onFieldResidual": {
+   "kind": "fn",
+   "calls": 422,
+   "battles": 82
+  },
+  "conditions:snowscape onFieldEnd": {
+   "kind": "fn",
+   "calls": 94,
+   "battles": 75
+  },
+  "conditions:spikes onSideStart": {
+   "kind": "fn",
+   "calls": 23,
+   "battles": 22
+  },
+  "conditions:spikes onSideRestart": {
+   "kind": "fn",
+   "calls": 15,
+   "battles": 10
+  },
+  "conditions:spikes onSwitchIn": {
+   "kind": "fn",
+   "calls": 78,
+   "battles": 18
+  },
+  "conditions:spikyshield onStart": {
+   "kind": "fn",
+   "calls": 297,
+   "battles": 165
+  },
+  "conditions:spikyshield onTryHit": {
+   "kind": "fn",
+   "calls": 187,
+   "battles": 114
+  },
+  "conditions:spikyshield onHit": {
+   "kind": "fn",
+   "calls": 300,
+   "battles": 165
+  },
+  "conditions:stall onStart": {
+   "kind": "fn",
+   "calls": 12398,
+   "battles": 1956
+  },
+  "conditions:stall onStallMove": {
+   "kind": "fn",
+   "calls": 2972,
+   "battles": 1359
+  },
+  "conditions:stall onRestart": {
+   "kind": "fn",
+   "calls": 1036,
+   "battles": 737
+  },
+  "conditions:stealthrock onSideStart": {
+   "kind": "fn",
+   "calls": 303,
+   "battles": 279
+  },
+  "conditions:stealthrock onSwitchIn": {
+   "kind": "fn",
+   "calls": 1063,
+   "battles": 227
+  },
+  "conditions:stickyweb onSideStart": {
+   "kind": "fn",
+   "calls": 249,
+   "battles": 236
+  },
+  "conditions:stickyweb onSwitchIn": {
+   "kind": "fn",
+   "calls": 909,
+   "battles": 193
+  },
+  "conditions:substitute onStart": {
+   "kind": "fn",
+   "calls": 151,
+   "battles": 102
+  },
+  "conditions:substitute onTryPrimaryHit": {
+   "kind": "fn",
+   "calls": 299,
+   "battles": 86
+  },
+  "conditions:substitute onEnd": {
+   "kind": "fn",
+   "calls": 91,
+   "battles": 70
+  },
+  "conditions:sunnyday durationCallback": {
+   "kind": "fn",
+   "calls": 229,
+   "battles": 182
+  },
+  "conditions:sunnyday onWeatherModifyDamage": {
+   "kind": "fn",
+   "calls": 2094,
+   "battles": 179
+  },
+  "conditions:sunnyday onFieldStart": {
+   "kind": "fn",
+   "calls": 229,
+   "battles": 182
+  },
+  "conditions:sunnyday onImmunity": {
+   "kind": "fn",
+   "calls": 1296,
+   "battles": 175
+  },
+  "conditions:sunnyday onFieldResidual": {
+   "kind": "fn",
+   "calls": 855,
+   "battles": 179
+  },
+  "conditions:sunnyday onFieldEnd": {
+   "kind": "fn",
+   "calls": 193,
+   "battles": 160
+  },
+  "conditions:syrupbomb onStart": {
+   "kind": "fn",
+   "calls": 38,
+   "battles": 25
+  },
+  "conditions:syrupbomb onUpdate": {
+   "kind": "fn",
+   "calls": 744,
+   "battles": 25
+  },
+  "conditions:syrupbomb onResidual": {
+   "kind": "fn",
+   "calls": 67,
+   "battles": 25
+  },
+  "conditions:syrupbomb onEnd": {
+   "kind": "fn",
+   "calls": 18,
+   "battles": 14
+  },
+  "conditions:tailwind durationCallback": {
+   "kind": "fn",
+   "calls": 1728,
+   "battles": 967
+  },
+  "conditions:tailwind onSideStart": {
+   "kind": "fn",
+   "calls": 1728,
+   "battles": 967
+  },
+  "conditions:tailwind onModifySpe": {
+   "kind": "fn",
+   "calls": 86943,
+   "battles": 967
+  },
+  "conditions:tailwind onSideEnd": {
+   "kind": "fn",
+   "calls": 1467,
+   "battles": 888
+  },
+  "conditions:taunt onStart": {
+   "kind": "fn",
+   "calls": 339,
+   "battles": 208
+  },
+  "conditions:taunt onEnd": {
+   "kind": "fn",
+   "calls": 155,
+   "battles": 119
+  },
+  "conditions:taunt onDisableMove": {
+   "kind": "fn",
+   "calls": 589,
+   "battles": 198
+  },
+  "conditions:taunt onBeforeMove": {
+   "kind": "fn",
+   "calls": 696,
+   "battles": 192
+  },
+  "conditions:throatchop onStart": {
+   "kind": "fn",
+   "calls": 247,
+   "battles": 142
+  },
+  "conditions:throatchop onDisableMove": {
+   "kind": "fn",
+   "calls": 229,
+   "battles": 138
+  },
+  "conditions:throatchop onBeforeMove": {
+   "kind": "fn",
+   "calls": 286,
+   "battles": 135
+  },
+  "conditions:throatchop onModifyMove": {
+   "kind": "fn",
+   "calls": 283,
+   "battles": 135
+  },
+  "conditions:throatchop onEnd": {
+   "kind": "fn",
+   "calls": 166,
+   "battles": 115
+  },
+  "conditions:tox onStart": {
+   "kind": "fn",
+   "calls": 459,
+   "battles": 311
+  },
+  "conditions:tox onSwitchIn": {
+   "kind": "fn",
+   "calls": 107,
+   "battles": 82
+  },
+  "conditions:tox onResidual": {
+   "kind": "fn",
+   "calls": 1399,
+   "battles": 282
+  },
+  "conditions:toxicspikes onSideStart": {
+   "kind": "fn",
+   "calls": 184,
+   "battles": 167
+  },
+  "conditions:toxicspikes onSideRestart": {
+   "kind": "fn",
+   "calls": 150,
+   "battles": 82
+  },
+  "conditions:toxicspikes onSwitchIn": {
+   "kind": "fn",
+   "calls": 553,
+   "battles": 144
+  },
+  "conditions:trapped onTrapPokemon": {
+   "kind": "fn",
+   "calls": 49,
+   "battles": 12
+  },
+  "conditions:trapped onStart": {
+   "kind": "fn",
+   "calls": 22,
+   "battles": 14
+  },
+  "conditions:trickroom durationCallback": {
+   "kind": "fn",
+   "calls": 853,
+   "battles": 546
+  },
+  "conditions:trickroom onFieldStart": {
+   "kind": "fn",
+   "calls": 853,
+   "battles": 546
+  },
+  "conditions:trickroom onFieldRestart": {
+   "kind": "fn",
+   "calls": 373,
+   "battles": 282
+  },
+  "conditions:trickroom onFieldEnd": {
+   "kind": "fn",
+   "calls": 748,
+   "battles": 498
+  },
+  "conditions:twoturnmove onStart": {
+   "kind": "fn",
+   "calls": 139,
+   "battles": 84
+  },
+  "conditions:twoturnmove onEnd": {
+   "kind": "fn",
+   "calls": 98,
+   "battles": 66
+  },
+  "conditions:twoturnmove onLockMove": {
+   "kind": "fn",
+   "calls": 488,
+   "battles": 78
+  },
+  "conditions:twoturnmove onMoveAborted": {
+   "kind": "fn",
+   "calls": 4,
+   "battles": 3
+  },
+  "conditions:unburden onModifySpe": {
+   "kind": "fn",
+   "calls": 4713,
+   "battles": 162
+  },
+  "conditions:wideguard onSideStart": {
+   "kind": "fn",
+   "calls": 365,
+   "battles": 142
+  },
+  "conditions:wideguard onTryHit": {
+   "kind": "fn",
+   "calls": 406,
+   "battles": 126
+  },
+  "conditions:wish onStart": {
+   "kind": "fn",
+   "calls": 22,
+   "battles": 9
+  },
+  "conditions:wish onResidual": {
+   "kind": "fn",
+   "calls": 40,
+   "battles": 7
+  },
+  "conditions:wish onEnd": {
+   "kind": "fn",
+   "calls": 20,
+   "battles": 7
+  },
+  "conditions:yawn onStart": {
+   "kind": "fn",
+   "calls": 197,
+   "battles": 107
+  },
+  "conditions:yawn onEnd": {
+   "kind": "fn",
+   "calls": 149,
+   "battles": 89
+  },
+  "rules:cancelmod onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "rules:hppercentagemod onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "rules:illusionlevelmod onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "rules:potd onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "rules:sleepclausemod onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "rules:sleepclausemod onSetStatus": {
+   "kind": "fn",
+   "calls": 4164,
+   "battles": 1586
+  },
+  "rules:speciesclause onBegin": {
+   "kind": "fn",
+   "calls": 2000,
+   "battles": 2000
+  },
+  "abilities:shellarmor onCriticalHit": {
+   "kind": "const",
+   "calls": 4,
+   "battles": 4
+  },
+  "conditions:mustrecharge onLockMove": {
+   "kind": "const",
+   "calls": 63,
+   "battles": 12
+  },
+  "conditions:phantomforce onInvulnerability": {
+   "kind": "const",
+   "calls": 8,
+   "battles": 4
+  },
+  "conditions:shadowforce onInvulnerability": {
+   "kind": "const",
+   "calls": 16,
+   "battles": 9
+  }
+ },
+ "neverInvokedHandlers": [
+  "species:zaciancrowned onBattleStart",
+  "species:zamazentacrowned onBattleStart",
+  "moves:ceaselessedge onAfterSubDamage",
+  "moves:curse onHit",
+  "moves:icespinner onAfterSubDamage",
+  "moves:mortalspin onAfterSubDamage",
+  "moves:rapidspin onAfterSubDamage",
+  "moves:shellsidearm onAfterSubDamage",
+  "moves:stoneaxe onAfterSubDamage",
+  "abilities:rockypayload onModifySpA",
+  "abilities:sandforce onBasePower",
+  "abilities:sandforce onImmunity",
+  "abilities:solarpower onModifySpA",
+  "abilities:solarpower onWeather",
+  "abilities:stakeout onModifySpA",
+  "abilities:transistor onModifyAtk",
+  "items:boosterenergy onTakeItem",
+  "items:dreadplate onTakeItem",
+  "items:flameplate onTakeItem",
+  "items:insectplate onTakeItem",
+  "items:ironplate onTakeItem",
+  "items:toxicplate onTakeItem",
+  "items:whiteherb fling.effect",
+  "items:whiteherb onAnyAfterMega",
+  "conditions:curse onStart",
+  "conditions:curse onResidual",
+  "conditions:helpinghand onRestart",
+  "conditions:lockedmove onResidual",
+  "conditions:lockedmove onStart",
+  "conditions:lockedmove onRestart",
+  "conditions:lockedmove onAfterMove",
+  "conditions:lockedmove onEnd",
+  "conditions:lockedmove onLockMove",
+  "conditions:saltcure onEnd",
+  "rules:obtainable onValidateTeam",
+  "rules:obtainablemisc onChangeSet",
+  "rules:speciesclause onValidateTeam"
+ ],
+ "effects": {
+  "species:arceus": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 70
+  },
+  "species:arceusbug": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 859
+  },
+  "species:arceusdark": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 356
+  },
+  "species:arceusdragon": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 907
+  },
+  "species:arceuselectric": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 650
+  },
+  "species:arceusfairy": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 700
+  },
+  "species:arceusfighting": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 424
+  },
+  "species:arceusfire": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 260
+  },
+  "species:arceusflying": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 356
+  },
+  "species:arceusghost": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 838
+  },
+  "species:arceusgrass": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 259
+  },
+  "species:arceusground": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 442
+  },
+  "species:arceusice": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 403
+  },
+  "species:arceuspoison": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 244
+  },
+  "species:arceuspsychic": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 248
+  },
+  "species:arceusrock": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 319
+  },
+  "species:arceussteel": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 662
+  },
+  "species:arceuswater": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 636
+  },
+  "species:zacian": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 65
+  },
+  "species:zaciancrowned": {
+   "hooks": 1,
+   "invoked": 0,
+   "calls": 0
+  },
+  "species:zamazenta": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 56
+  },
+  "species:zamazentacrowned": {
+   "hooks": 1,
+   "invoked": 0,
+   "calls": 0
+  },
+  "moves:acrobatics": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 131
+  },
+  "moves:alluringvoice": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 238
+  },
+  "moves:aurawheel": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 87
+  },
+  "moves:auroraveil": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 94
+  },
+  "moves:avalanche": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 70
+  },
+  "moves:banefulbunker": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 381
+  },
+  "moves:batonpass": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 315
+  },
+  "moves:bellydrum": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 86
+  },
+  "moves:bleakwindstorm": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 86
+  },
+  "moves:blizzard": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 221
+  },
+  "moves:brickbreak": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 8
+  },
+  "moves:bugbite": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 117
+  },
+  "moves:burningbulwark": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 176
+  },
+  "moves:burningjealousy": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 112
+  },
+  "moves:ceaselessedge": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 16
+  },
+  "moves:clangoroussoul": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 134
+  },
+  "moves:clearsmog": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 24
+  },
+  "moves:collisioncourse": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 34
+  },
+  "moves:courtchange": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 9
+  },
+  "moves:curse": {
+   "hooks": 3,
+   "invoked": 2,
+   "calls": 126
+  },
+  "moves:direclaw": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 44
+  },
+  "moves:disable": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 93
+  },
+  "moves:doubleshock": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 86
+  },
+  "moves:dragonenergy": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 48
+  },
+  "moves:electrodrift": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 24
+  },
+  "moves:electroshot": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 20
+  },
+  "moves:endeavor": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 98
+  },
+  "moves:eruption": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 76
+  },
+  "moves:expandingforce": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 39
+  },
+  "moves:facade": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 178
+  },
+  "moves:fakeout": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1428
+  },
+  "moves:ficklebeam": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 45
+  },
+  "moves:finalgambit": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 21
+  },
+  "moves:firstimpression": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 127
+  },
+  "moves:floralhealing": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 80
+  },
+  "moves:followme": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 461
+  },
+  "moves:freezedry": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 445
+  },
+  "moves:fusionbolt": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 25
+  },
+  "moves:fusionflare": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 15
+  },
+  "moves:grassknot": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 264
+  },
+  "moves:grassyglide": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 155
+  },
+  "moves:gravapple": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 61
+  },
+  "moves:haze": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 71
+  },
+  "moves:healpulse": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 244
+  },
+  "moves:heatcrash": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 408
+  },
+  "moves:heavyslam": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1010
+  },
+  "moves:helpinghand": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2032
+  },
+  "moves:highjumpkick": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 29
+  },
+  "moves:hurricane": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 893
+  },
+  "moves:hyperspacefury": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 26
+  },
+  "moves:icespinner": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 164
+  },
+  "moves:incinerate": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 49
+  },
+  "moves:instruct": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 79
+  },
+  "moves:ivycudgel": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 209
+  },
+  "moves:judgment": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 191
+  },
+  "moves:junglehealing": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 56
+  },
+  "moves:knockoff": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 7127
+  },
+  "moves:lashout": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 52
+  },
+  "moves:lastrespects": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 97
+  },
+  "moves:leechseed": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 292
+  },
+  "moves:lowkick": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 24
+  },
+  "moves:lunarblessing": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 243
+  },
+  "moves:meteorbeam": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 212
+  },
+  "moves:moonlight": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 126
+  },
+  "moves:morningsun": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 19
+  },
+  "moves:mortalspin": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 31
+  },
+  "moves:noretreat": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 106
+  },
+  "moves:partingshot": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 165
+  },
+  "moves:phantomforce": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 27
+  },
+  "moves:photongeyser": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 59
+  },
+  "moves:pollenpuff": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 1622
+  },
+  "moves:poltergeist": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 808
+  },
+  "moves:protect": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 27124
+  },
+  "moves:psyblade": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 48
+  },
+  "moves:psychicfangs": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 180
+  },
+  "moves:quash": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 20
+  },
+  "moves:ragefist": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 82
+  },
+  "moves:ragepowder": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 380
+  },
+  "moves:ragingbull": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 69
+  },
+  "moves:rapidspin": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 230
+  },
+  "moves:recycle": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 4
+  },
+  "moves:relicsong": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 17
+  },
+  "moves:rest": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 595
+  },
+  "moves:revelationdance": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 143
+  },
+  "moves:revivalblessing": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 55
+  },
+  "moves:ruination": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 56
+  },
+  "moves:sandsearstorm": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 16
+  },
+  "moves:shadowforce": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 63
+  },
+  "moves:shedtail": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 195
+  },
+  "moves:shellsidearm": {
+   "hooks": 4,
+   "invoked": 3,
+   "calls": 64
+  },
+  "moves:shoreup": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 80
+  },
+  "moves:solarbeam": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 104
+  },
+  "moves:spikyshield": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 643
+  },
+  "moves:spiritshackle": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 74
+  },
+  "moves:stompingtantrum": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 358
+  },
+  "moves:stoneaxe": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 44
+  },
+  "moves:strengthsap": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 279
+  },
+  "moves:struggle": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 97
+  },
+  "moves:substitute": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 306
+  },
+  "moves:suckerpunch": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 752
+  },
+  "moves:superfang": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 167
+  },
+  "moves:synthesis": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 192
+  },
+  "moves:takeheart": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 118
+  },
+  "moves:terablast": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 2428
+  },
+  "moves:terastarstorm": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 102
+  },
+  "moves:throatchop": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 664
+  },
+  "moves:thunder": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 109
+  },
+  "moves:thunderclap": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 84
+  },
+  "moves:tidyup": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 89
+  },
+  "moves:transform": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 23
+  },
+  "moves:triattack": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 24
+  },
+  "moves:trick": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 256
+  },
+  "moves:tripleaxel": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 714
+  },
+  "moves:waterspout": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 112
+  },
+  "moves:weatherball": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 132
+  },
+  "moves:wideguard": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 740
+  },
+  "moves:wildboltstorm": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 58
+  },
+  "moves:yawn": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 257
+  },
+  "abilities:adaptability": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 899
+  },
+  "abilities:aftermath": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 197
+  },
+  "abilities:airlock": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 192
+  },
+  "abilities:arenatrap": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 612
+  },
+  "abilities:armortail": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 706
+  },
+  "abilities:aromaveil": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 433
+  },
+  "abilities:asoneglastrier": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 60
+  },
+  "abilities:asonespectrier": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 184
+  },
+  "abilities:baddreams": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 202
+  },
+  "abilities:battlebond": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 323
+  },
+  "abilities:beadsofruin": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 409
+  },
+  "abilities:berserk": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 287
+  },
+  "abilities:blaze": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 524
+  },
+  "abilities:bulletproof": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 472
+  },
+  "abilities:cheekpouch": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 79
+  },
+  "abilities:chillingneigh": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 77
+  },
+  "abilities:chlorophyll": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 10531
+  },
+  "abilities:clearbody": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 698
+  },
+  "abilities:cloudnine": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 233
+  },
+  "abilities:comatose": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 97
+  },
+  "abilities:competitive": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 319
+  },
+  "abilities:compoundeyes": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 343
+  },
+  "abilities:contrary": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 302
+  },
+  "abilities:cursedbody": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 361
+  },
+  "abilities:dauntlessshield": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 69
+  },
+  "abilities:defiant": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 890
+  },
+  "abilities:disguise": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 4570
+  },
+  "abilities:download": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 72
+  },
+  "abilities:dragonsmaw": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 209
+  },
+  "abilities:drizzle": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 256
+  },
+  "abilities:drought": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 173
+  },
+  "abilities:dryskin": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 262
+  },
+  "abilities:eartheater": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 387
+  },
+  "abilities:effectspore": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 172
+  },
+  "abilities:electricsurge": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 90
+  },
+  "abilities:electromorphosis": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 189
+  },
+  "abilities:embodyaspectcornerstone": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1
+  },
+  "abilities:embodyaspecthearthflame": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1
+  },
+  "abilities:embodyaspectteal": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 10
+  },
+  "abilities:embodyaspectwellspring": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 10
+  },
+  "abilities:filter": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 106
+  },
+  "abilities:flamebody": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 693
+  },
+  "abilities:flashfire": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1080
+  },
+  "abilities:flowerveil": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 642
+  },
+  "abilities:fluffy": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 164
+  },
+  "abilities:friendguard": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 679
+  },
+  "abilities:frisk": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 375
+  },
+  "abilities:fullmetalbody": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 97
+  },
+  "abilities:furcoat": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 47
+  },
+  "abilities:galewings": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 692
+  },
+  "abilities:galvanize": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 246
+  },
+  "abilities:gluttony": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 468
+  },
+  "abilities:goodasgold": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 240
+  },
+  "abilities:gooey": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 137
+  },
+  "abilities:grassysurge": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 90
+  },
+  "abilities:grimneigh": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 79
+  },
+  "abilities:gulpmissile": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 397
+  },
+  "abilities:guts": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 347
+  },
+  "abilities:hadronengine": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 191
+  },
+  "abilities:harvest": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1028
+  },
+  "abilities:healer": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 922
+  },
+  "abilities:heavymetal": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 50
+  },
+  "abilities:hospitality": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 90
+  },
+  "abilities:hugepower": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 137
+  },
+  "abilities:hungerswitch": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 185
+  },
+  "abilities:hustle": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 461
+  },
+  "abilities:hydration": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1042
+  },
+  "abilities:icebody": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 145
+  },
+  "abilities:iceface": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 4226
+  },
+  "abilities:icescales": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 138
+  },
+  "abilities:illusion": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 370
+  },
+  "abilities:imposter": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 94
+  },
+  "abilities:infiltrator": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 560
+  },
+  "abilities:innerfocus": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1265
+  },
+  "abilities:insomnia": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 2901
+  },
+  "abilities:intimidate": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1644
+  },
+  "abilities:intrepidsword": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 81
+  },
+  "abilities:ironfist": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 300
+  },
+  "abilities:justified": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 646
+  },
+  "abilities:keeneye": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 159
+  },
+  "abilities:leafguard": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 110
+  },
+  "abilities:libero": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 63
+  },
+  "abilities:lightningrod": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 3415
+  },
+  "abilities:liquidvoice": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 292
+  },
+  "abilities:magicbounce": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 390
+  },
+  "abilities:magicguard": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 542
+  },
+  "abilities:magician": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 179
+  },
+  "abilities:magnetpull": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 4703
+  },
+  "abilities:megalauncher": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 189
+  },
+  "abilities:mindseye": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 169
+  },
+  "abilities:mirrorarmor": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 41
+  },
+  "abilities:moldbreaker": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 604
+  },
+  "abilities:motordrive": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 171
+  },
+  "abilities:moxie": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 105
+  },
+  "abilities:multiscale": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 295
+  },
+  "abilities:myceliummight": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 432
+  },
+  "abilities:naturalcure": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1064
+  },
+  "abilities:noguard": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 2452
+  },
+  "abilities:oblivious": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 6311
+  },
+  "abilities:orichalcumpulse": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 242
+  },
+  "abilities:overcoat": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 498
+  },
+  "abilities:overgrow": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 515
+  },
+  "abilities:owntempo": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 1606
+  },
+  "abilities:pickpocket": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 115
+  },
+  "abilities:pixilate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 695
+  },
+  "abilities:poisonheal": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 529
+  },
+  "abilities:poisonpuppeteer": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 81
+  },
+  "abilities:poisontouch": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 368
+  },
+  "abilities:powerspot": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 279
+  },
+  "abilities:prankster": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 6899
+  },
+  "abilities:pressure": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1906
+  },
+  "abilities:prismarmor": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 185
+  },
+  "abilities:propellertail": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 195
+  },
+  "abilities:protean": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 96
+  },
+  "abilities:protosynthesis": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 2718
+  },
+  "abilities:psychicsurge": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 64
+  },
+  "abilities:punkrock": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 310
+  },
+  "abilities:purepower": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 114
+  },
+  "abilities:purifyingsalt": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 455
+  },
+  "abilities:quarkdrive": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 2115
+  },
+  "abilities:queenlymajesty": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 356
+  },
+  "abilities:rattled": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 257
+  },
+  "abilities:reckless": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 147
+  },
+  "abilities:regenerator": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 376
+  },
+  "abilities:ripen": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 522
+  },
+  "abilities:rockhead": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 311
+  },
+  "abilities:rockypayload": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 174
+  },
+  "abilities:roughskin": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 125
+  },
+  "abilities:sandforce": {
+   "hooks": 2,
+   "invoked": 0,
+   "calls": 0
+  },
+  "abilities:sandrush": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1651
+  },
+  "abilities:sandstream": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 170
+  },
+  "abilities:sapsipper": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 729
+  },
+  "abilities:scrappy": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 501
+  },
+  "abilities:seedsower": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 185
+  },
+  "abilities:serenegrace": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 635
+  },
+  "abilities:shadowshield": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 226
+  },
+  "abilities:shadowtag": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 2214
+  },
+  "abilities:sharpness": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 487
+  },
+  "abilities:shedskin": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 741
+  },
+  "abilities:sheerforce": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1626
+  },
+  "abilities:shellarmor": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 4
+  },
+  "abilities:shielddust": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 58
+  },
+  "abilities:shieldsdown": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 422
+  },
+  "abilities:skilllink": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 227
+  },
+  "abilities:slowstart": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 6692
+  },
+  "abilities:slushrush": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2315
+  },
+  "abilities:snowwarning": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 121
+  },
+  "abilities:solarpower": {
+   "hooks": 2,
+   "invoked": 0,
+   "calls": 0
+  },
+  "abilities:solidrock": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 348
+  },
+  "abilities:soulheart": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 151
+  },
+  "abilities:soundproof": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 156
+  },
+  "abilities:speedboost": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 486
+  },
+  "abilities:stakeout": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 198
+  },
+  "abilities:stalwart": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 360
+  },
+  "abilities:stamina": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 362
+  },
+  "abilities:static": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 546
+  },
+  "abilities:steelyspirit": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 140
+  },
+  "abilities:stickyhold": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 11
+  },
+  "abilities:stormdrain": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 3466
+  },
+  "abilities:strongjaw": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 200
+  },
+  "abilities:sturdy": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 3825
+  },
+  "abilities:surgesurfer": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 789
+  },
+  "abilities:swarm": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 141
+  },
+  "abilities:swiftswim": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 9949
+  },
+  "abilities:swordofruin": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 273
+  },
+  "abilities:synchronize": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 17
+  },
+  "abilities:tabletsofruin": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 448
+  },
+  "abilities:tanglinghair": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 30
+  },
+  "abilities:technician": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1790
+  },
+  "abilities:telepathy": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 586
+  },
+  "abilities:teraformzero": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 12
+  },
+  "abilities:terashift": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 47
+  },
+  "abilities:teravolt": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 521
+  },
+  "abilities:thermalexchange": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 3571
+  },
+  "abilities:thickfat": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 961
+  },
+  "abilities:tintedlens": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 428
+  },
+  "abilities:torrent": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 682
+  },
+  "abilities:toughclaws": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 171
+  },
+  "abilities:toxicboost": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 174
+  },
+  "abilities:toxicchain": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 651
+  },
+  "abilities:toxicdebris": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 119
+  },
+  "abilities:trace": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 187
+  },
+  "abilities:transistor": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 175
+  },
+  "abilities:triage": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 904
+  },
+  "abilities:truant": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 459
+  },
+  "abilities:turboblaze": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 377
+  },
+  "abilities:unaware": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 56119
+  },
+  "abilities:unburden": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 505
+  },
+  "abilities:unnerve": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 2194
+  },
+  "abilities:unseenfist": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 186
+  },
+  "abilities:vesselofruin": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 311
+  },
+  "abilities:vitalspirit": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 4981
+  },
+  "abilities:voltabsorb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1233
+  },
+  "abilities:waterabsorb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1852
+  },
+  "abilities:waterbubble": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 5021
+  },
+  "abilities:watercompaction": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 182
+  },
+  "abilities:waterveil": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 2418
+  },
+  "abilities:weakarmor": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 311
+  },
+  "abilities:wellbakedbody": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 303
+  },
+  "abilities:windrider": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 508
+  },
+  "abilities:zerotohero": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 144
+  },
+  "items:adamantcrystal": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 88
+  },
+  "items:aguavberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 428
+  },
+  "items:assaultvest": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 11329
+  },
+  "items:boosterenergy": {
+   "hooks": 3,
+   "invoked": 2,
+   "calls": 718
+  },
+  "items:chestoberry": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 7302
+  },
+  "items:choiceband": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 10221
+  },
+  "items:choicescarf": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 35812
+  },
+  "items:choicespecs": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 6295
+  },
+  "items:clearamulet": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 509
+  },
+  "items:cornerstonemask": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 27
+  },
+  "items:covertcloak": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 70
+  },
+  "items:dracoplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 52
+  },
+  "items:dreadplate": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 13
+  },
+  "items:earthplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 33
+  },
+  "items:eviolite": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1754
+  },
+  "items:figyberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 849
+  },
+  "items:fistplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 43
+  },
+  "items:flameorb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 320
+  },
+  "items:flameplate": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 16
+  },
+  "items:focussash": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1181
+  },
+  "items:griseouscore": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 84
+  },
+  "items:hearthflamemask": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 31
+  },
+  "items:iapapaberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 760
+  },
+  "items:icicleplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 21
+  },
+  "items:insectplate": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 57
+  },
+  "items:ironplate": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 62
+  },
+  "items:leftovers": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 12119
+  },
+  "items:lifeorb": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 31152
+  },
+  "items:lightball": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 80
+  },
+  "items:loadeddice": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1154
+  },
+  "items:lustrousglobe": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 83
+  },
+  "items:lustrousorb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 40
+  },
+  "items:magnet": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 166
+  },
+  "items:magoberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 833
+  },
+  "items:meadowplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 18
+  },
+  "items:mindplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 18
+  },
+  "items:mysticwater": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 163
+  },
+  "items:pixieplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 68
+  },
+  "items:powerherb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 95
+  },
+  "items:rockyhelmet": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 659
+  },
+  "items:rustedshield": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 13
+  },
+  "items:rustedsword": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 9
+  },
+  "items:silkscarf": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 248
+  },
+  "items:sitrusberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 280448
+  },
+  "items:skyplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 11
+  },
+  "items:souldew": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 258
+  },
+  "items:splashplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 52
+  },
+  "items:spookyplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 47
+  },
+  "items:stoneplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 18
+  },
+  "items:throatspray": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 190
+  },
+  "items:toxicorb": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 657
+  },
+  "items:toxicplate": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 11
+  },
+  "items:weaknesspolicy": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 271
+  },
+  "items:wellspringmask": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 91
+  },
+  "items:whiteherb": {
+   "hooks": 7,
+   "invoked": 5,
+   "calls": 10352
+  },
+  "items:widelens": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 1254
+  },
+  "items:wikiberry": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 531
+  },
+  "items:zapplate": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 36
+  },
+  "conditions:auroraveil": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 697
+  },
+  "conditions:banefulbunker": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 465
+  },
+  "conditions:brn": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 5010
+  },
+  "conditions:burningbulwark": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 222
+  },
+  "conditions:charge": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 465
+  },
+  "conditions:choicelock": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 19241
+  },
+  "conditions:confusion": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 618
+  },
+  "conditions:curse": {
+   "hooks": 2,
+   "invoked": 0,
+   "calls": 0
+  },
+  "conditions:disable": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 865
+  },
+  "conditions:electricterrain": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 2411
+  },
+  "conditions:encore": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 5560
+  },
+  "conditions:flashfire": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 150
+  },
+  "conditions:flinch": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 564
+  },
+  "conditions:followme": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 935
+  },
+  "conditions:frz": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 665
+  },
+  "conditions:glaiverush": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 24
+  },
+  "conditions:grassyterrain": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 4332
+  },
+  "conditions:healblock": {
+   "hooks": 8,
+   "invoked": 8,
+   "calls": 437
+  },
+  "conditions:helpinghand": {
+   "hooks": 3,
+   "invoked": 2,
+   "calls": 3038
+  },
+  "conditions:imprison": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 167
+  },
+  "conditions:leechseed": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 804
+  },
+  "conditions:lightscreen": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 1474
+  },
+  "conditions:lockedmove": {
+   "hooks": 6,
+   "invoked": 0,
+   "calls": 0
+  },
+  "conditions:mustrecharge": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 108
+  },
+  "conditions:noretreat": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 321
+  },
+  "conditions:par": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 70257
+  },
+  "conditions:partiallytrapped": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 930
+  },
+  "conditions:phantomforce": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 8
+  },
+  "conditions:protect": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 20801
+  },
+  "conditions:protosynthesis": {
+   "hooks": 7,
+   "invoked": 7,
+   "calls": 2474
+  },
+  "conditions:psn": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 2177
+  },
+  "conditions:psychicterrain": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 1488
+  },
+  "conditions:quarkdrive": {
+   "hooks": 7,
+   "invoked": 7,
+   "calls": 5139
+  },
+  "conditions:ragepowder": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 772
+  },
+  "conditions:raindance": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 4173
+  },
+  "conditions:reflect": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 1342
+  },
+  "conditions:roost": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 520
+  },
+  "conditions:saltcure": {
+   "hooks": 3,
+   "invoked": 2,
+   "calls": 283
+  },
+  "conditions:sandstorm": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 3707
+  },
+  "conditions:shadowforce": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 16
+  },
+  "conditions:sleepclausemod": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 6164
+  },
+  "conditions:slp": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1786
+  },
+  "conditions:snowscape": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 1261
+  },
+  "conditions:spikes": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 116
+  },
+  "conditions:spikyshield": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 784
+  },
+  "conditions:stall": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 16406
+  },
+  "conditions:stealthrock": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1366
+  },
+  "conditions:stickyweb": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 1158
+  },
+  "conditions:substitute": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 541
+  },
+  "conditions:sunnyday": {
+   "hooks": 6,
+   "invoked": 6,
+   "calls": 4896
+  },
+  "conditions:syrupbomb": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 867
+  },
+  "conditions:tailwind": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 91866
+  },
+  "conditions:taunt": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 1779
+  },
+  "conditions:throatchop": {
+   "hooks": 5,
+   "invoked": 5,
+   "calls": 1211
+  },
+  "conditions:tox": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 1965
+  },
+  "conditions:toxicspikes": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 887
+  },
+  "conditions:trapped": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 71
+  },
+  "conditions:trickroom": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 2827
+  },
+  "conditions:twoturnmove": {
+   "hooks": 4,
+   "invoked": 4,
+   "calls": 729
+  },
+  "conditions:unburden": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 4713
+  },
+  "conditions:wideguard": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 771
+  },
+  "conditions:wish": {
+   "hooks": 3,
+   "invoked": 3,
+   "calls": 82
+  },
+  "conditions:yawn": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 346
+  },
+  "rules:cancelmod": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2000
+  },
+  "rules:hppercentagemod": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2000
+  },
+  "rules:illusionlevelmod": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2000
+  },
+  "rules:obtainable": {
+   "hooks": 1,
+   "invoked": 0,
+   "calls": 0
+  },
+  "rules:obtainablemisc": {
+   "hooks": 1,
+   "invoked": 0,
+   "calls": 0
+  },
+  "rules:potd": {
+   "hooks": 1,
+   "invoked": 1,
+   "calls": 2000
+  },
+  "rules:sleepclausemod": {
+   "hooks": 2,
+   "invoked": 2,
+   "calls": 6164
+  },
+  "rules:speciesclause": {
+   "hooks": 2,
+   "invoked": 1,
+   "calls": 2000
+  }
+ },
+ "neverInvokedEffects": [
+  "species:zaciancrowned",
+  "species:zamazentacrowned",
+  "abilities:sandforce",
+  "abilities:solarpower",
+  "conditions:curse",
+  "conditions:lockedmove",
+  "rules:obtainable",
+  "rules:obtainablemisc"
+ ],
+ "batches": [
+  {
+   "batch": "rules_status",
+   "effects": 22,
+   "handlers": 42,
+   "invoked": 39,
+   "missing": [
+    "rules:obtainable onValidateTeam",
+    "rules:obtainablemisc onChangeSet",
+    "rules:speciesclause onValidateTeam"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": [
+    "rules:obtainable",
+    "rules:obtainablemisc"
+   ]
+  },
+  {
+   "batch": "weather_terrain",
+   "effects": 44,
+   "handlers": 88,
+   "invoked": 84,
+   "missing": [
+    "abilities:sandforce onBasePower",
+    "abilities:sandforce onImmunity",
+    "abilities:solarpower onModifySpA",
+    "abilities:solarpower onWeather"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": [
+    "abilities:sandforce",
+    "abilities:solarpower"
+   ]
+  },
+  {
+   "batch": "protect_redirection",
+   "effects": 27,
+   "handlers": 50,
+   "invoked": 49,
+   "missing": [
+    "conditions:helpinghand onRestart"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "disable_lock_trap",
+   "effects": 19,
+   "handlers": 58,
+   "invoked": 55,
+   "missing": [
+    "moves:curse onHit",
+    "conditions:curse onStart",
+    "conditions:curse onResidual"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": [
+    "conditions:curse"
+   ]
+  },
+  {
+   "batch": "charge_priority_multihit",
+   "effects": 26,
+   "handlers": 41,
+   "invoked": 35,
+   "missing": [
+    "conditions:lockedmove onResidual",
+    "conditions:lockedmove onStart",
+    "conditions:lockedmove onRestart",
+    "conditions:lockedmove onAfterMove",
+    "conditions:lockedmove onEnd",
+    "conditions:lockedmove onLockMove"
+   ],
+   "constants": 3,
+   "constantsInvoked": 3,
+   "missingConstants": [],
+   "effectsNeverInvoked": [
+    "conditions:lockedmove"
+   ]
+  },
+  {
+   "batch": "hazards_screens",
+   "effects": 20,
+   "handlers": 47,
+   "invoked": 42,
+   "missing": [
+    "moves:ceaselessedge onAfterSubDamage",
+    "moves:icespinner onAfterSubDamage",
+    "moves:mortalspin onAfterSubDamage",
+    "moves:rapidspin onAfterSubDamage",
+    "moves:stoneaxe onAfterSubDamage"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "passive_offense",
+   "effects": 25,
+   "handlers": 34,
+   "invoked": 31,
+   "missing": [
+    "abilities:rockypayload onModifySpA",
+    "abilities:stakeout onModifySpA",
+    "abilities:transistor onModifyAtk"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "passive_defense",
+   "effects": 60,
+   "handlers": 109,
+   "invoked": 109,
+   "missing": [],
+   "constants": 1,
+   "constantsInvoked": 1,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "reactive_stats",
+   "effects": 27,
+   "handlers": 39,
+   "invoked": 39,
+   "missing": [],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "reactive_contact",
+   "effects": 13,
+   "handlers": 13,
+   "invoked": 13,
+   "missing": [],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "healing_residual",
+   "effects": 21,
+   "handlers": 32,
+   "invoked": 31,
+   "missing": [
+    "conditions:saltcure onEnd"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "items_modifiers",
+   "effects": 40,
+   "handlers": 73,
+   "invoked": 68,
+   "missing": [
+    "items:dreadplate onTakeItem",
+    "items:flameplate onTakeItem",
+    "items:insectplate onTakeItem",
+    "items:ironplate onTakeItem",
+    "items:toxicplate onTakeItem"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "consumables",
+   "effects": 16,
+   "handlers": 42,
+   "invoked": 40,
+   "missing": [
+    "items:whiteherb fling.effect",
+    "items:whiteherb onAnyAfterMega"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "item_exchange",
+   "effects": 10,
+   "handlers": 13,
+   "invoked": 13,
+   "missing": [],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "formes_tera",
+   "effects": 48,
+   "handlers": 85,
+   "invoked": 82,
+   "missing": [
+    "species:zaciancrowned onBattleStart",
+    "species:zamazentacrowned onBattleStart",
+    "items:boosterenergy onTakeItem"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": [
+    "species:zaciancrowned",
+    "species:zamazentacrowned"
+   ]
+  },
+  {
+   "batch": "identity_abilities",
+   "effects": 6,
+   "handlers": 16,
+   "invoked": 16,
+   "missing": [],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "recursive_switch",
+   "effects": 8,
+   "handlers": 15,
+   "invoked": 15,
+   "missing": [],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  },
+  {
+   "batch": "move_callbacks",
+   "effects": 38,
+   "handlers": 55,
+   "invoked": 54,
+   "missing": [
+    "moves:shellsidearm onAfterSubDamage"
+   ],
+   "constants": 0,
+   "constantsInvoked": 0,
+   "missingConstants": [],
+   "effectsNeverInvoked": []
+  }
+ ],
+ "declarativeMoves": {
+  "total": 241,
+  "used": 240,
+  "usage": {
+   "accelerock": 5,
+   "acidarmor": 20,
+   "acidspray": 17,
+   "aeroblast": 143,
+   "agility": 38,
+   "airslash": 188,
+   "appleacid": 91,
+   "aquacutter": 42,
+   "aquajet": 528,
+   "aquastep": 40,
+   "armorcannon": 12,
+   "astralbarrage": 21,
+   "aurasphere": 327,
+   "behemothblade": 49,
+   "bitterblade": 66,
+   "bittermalice": 22,
+   "bloodmoon": 35,
+   "blueflare": 35,
+   "bodypress": 1794,
+   "bodyslam": 304,
+   "boltstrike": 69,
+   "boomburst": 28,
+   "bravebird": 1212,
+   "breakingswipe": 165,
+   "bugbuzz": 400,
+   "bulkup": 178,
+   "bulletpunch": 110,
+   "bulletseed": 96,
+   "calmmind": 884,
+   "charm": 74,
+   "circlethrow": 45,
+   "clangingscales": 42,
+   "closecombat": 2648,
+   "coaching": 173,
+   "coil": 65,
+   "cosmicpower": 53,
+   "crabhammer": 86,
+   "crunch": 300,
+   "darkpulse": 591,
+   "dazzlinggleam": 1038,
+   "decorate": 93,
+   "diamondstorm": 78,
+   "doubleedge": 878,
+   "dracometeor": 1248,
+   "dragonascent": 55,
+   "dragonclaw": 396,
+   "dragondance": 492,
+   "dragondarts": 68,
+   "dragonpulse": 392,
+   "dragonrush": 42,
+   "dragontail": 116,
+   "drainingkiss": 135,
+   "drainpunch": 364,
+   "drillrun": 81,
+   "dualwingbeat": 142,
+   "dynamaxcannon": 82,
+   "dynamicpunch": 86,
+   "earthpower": 1537,
+   "earthquake": 193,
+   "electroweb": 632,
+   "encore": 1237,
+   "energyball": 574,
+   "esperwing": 16,
+   "explosion": 13,
+   "extremespeed": 241,
+   "feint": 55,
+   "fierydance": 16,
+   "fierywrath": 47,
+   "fireblast": 972,
+   "firefang": 45,
+   "firepunch": 54,
+   "flamecharge": 35,
+   "flamethrower": 347,
+   "flareblitz": 386,
+   "flashcannon": 665,
+   "fleurcannon": 57,
+   "flipturn": 353,
+   "flowertrick": 49,
+   "focusblast": 551,
+   "foulplay": 480,
+   "freezingglare": 17,
+   "gigadrain": 309,
+   "gigaimpact": 33,
+   "gigatonhammer": 57,
+   "glaciallance": 20,
+   "glaciate": 14,
+   "glaiverush": 17,
+   "glare": 171,
+   "gunkshot": 1161,
+   "hammerarm": 22,
+   "headlongrush": 149,
+   "headsmash": 106,
+   "heatwave": 1185,
+   "highhorsepower": 2040,
+   "hornleech": 187,
+   "howl": 140,
+   "hydropump": 1200,
+   "hyperdrill": 38,
+   "hyperspacehole": 32,
+   "hypervoice": 841,
+   "hypnosis": 21,
+   "icebeam": 785,
+   "icefang": 12,
+   "icehammer": 48,
+   "icepunch": 253,
+   "iceshard": 357,
+   "iciclecrash": 315,
+   "iciclespear": 110,
+   "icywind": 2175,
+   "imprison": 13,
+   "infestation": 193,
+   "irondefense": 1190,
+   "ironhead": 921,
+   "jetpunch": 99,
+   "kowtowcleave": 56,
+   "leafblade": 323,
+   "leafstorm": 636,
+   "leechlife": 133,
+   "lifedew": 316,
+   "lightscreen": 184,
+   "liquidation": 684,
+   "lowsweep": 69,
+   "luminacrash": 60,
+   "lunge": 269,
+   "lusterpurge": 76,
+   "machpunch": 157,
+   "makeitrain": 71,
+   "malignantchain": 81,
+   "matchagotcha": 90,
+   "megahorn": 125,
+   "meteormash": 17,
+   "mightycleave": 50,
+   "mistball": 96,
+   "moonblast": 834,
+   "moongeistbeam": 151,
+   "muddywater": 834,
+   "mudshot": 88,
+   "mysticalfire": 149,
+   "mysticalpower": 93,
+   "nastyplot": 700,
+   "nightshade": 60,
+   "nightslash": 101,
+   "nuzzle": 230,
+   "originpulse": 62,
+   "overdrive": 59,
+   "overheat": 316,
+   "playrough": 643,
+   "poisongas": 139,
+   "poisonjab": 213,
+   "populationbomb": 113,
+   "powergem": 106,
+   "powerwhip": 255,
+   "precipiceblades": 69,
+   "psychic": 1758,
+   "psychicnoise": 131,
+   "psychoboost": 52,
+   "psychocut": 180,
+   "psyshock": 5,
+   "psystrike": 67,
+   "pyroball": 57,
+   "quickattack": 155,
+   "quiverdance": 419,
+   "raindance": 92,
+   "razorshell": 16,
+   "recover": 1364,
+   "reflect": 180,
+   "rockblast": 40,
+   "rockpolish": 82,
+   "rockslide": 1070,
+   "rocktomb": 7,
+   "roost": 418,
+   "sacredfire": 173,
+   "sacredsword": 123,
+   "saltcure": 100,
+   "scald": 866,
+   "scaleshot": 210,
+   "scorchingsands": 83,
+   "secretsword": 64,
+   "seedbomb": 77,
+   "seedflare": 64,
+   "shadowball": 1376,
+   "shadowclaw": 45,
+   "shadowsneak": 327,
+   "shellsmash": 323,
+   "shiftgear": 11,
+   "slackoff": 304,
+   "sleeppowder": 125,
+   "sludgebomb": 924,
+   "sludgewave": 28,
+   "snarl": 586,
+   "softboiled": 34,
+   "spacialrend": 87,
+   "spikes": 24,
+   "spiritbreak": 65,
+   "spore": 231,
+   "springtidestorm": 45,
+   "stealthrock": 569,
+   "steameruption": 79,
+   "stickyweb": 479,
+   "stoneedge": 972,
+   "strangesteam": 20,
+   "stringshot": 46,
+   "strugglebug": 115,
+   "stunspore": 42,
+   "sunsteelstrike": 99,
+   "superpower": 277,
+   "surf": 59,
+   "surgingstrikes": 31,
+   "swift": 13,
+   "swordsdance": 1089,
+   "syrupbomb": 70,
+   "tachyoncutter": 53,
+   "tailglow": 74,
+   "tailslap": 76,
+   "tailwind": 2672,
+   "taunt": 442,
+   "thunderbolt": 1935,
+   "thunderouskick": 7,
+   "thunderpunch": 45,
+   "thunderwave": 1742,
+   "torchsong": 119,
+   "toxic": 225,
+   "toxicspikes": 280,
+   "trickroom": 1226,
+   "triplearrows": 30,
+   "uturn": 673,
+   "vacuumwave": 85,
+   "victorydance": 33,
+   "voltswitch": 374,
+   "volttackle": 35,
+   "waterfall": 132,
+   "wavecrash": 401,
+   "whirlwind": 105,
+   "wickedblow": 18,
+   "wildcharge": 365,
+   "willowisp": 957,
+   "wish": 27,
+   "woodhammer": 362,
+   "xscissor": 75,
+   "zenheadbutt": 84
+  },
+  "neverUsed": [
+   "behemothbash"
+  ]
+ }
+}
