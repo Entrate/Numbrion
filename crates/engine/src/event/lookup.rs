@@ -27,6 +27,7 @@ impl<L: LogSink> Battle<L> {
                 .find(|v| v.species == id)
                 .map_or(EffectType::Condition, |v| v.effect_type),
             EffectRef::Synthetic(SyntheticEffect::Format) => EffectType::Format,
+            EffectRef::Synthetic(SyntheticEffect::Recoil) => EffectType::Condition,
             EffectRef::Synthetic(_) => EffectType::Move,
             EffectRef::ActiveMove(_) => EffectType::Move,
             EffectRef::Synchronize(_) => EffectType::Undefined,

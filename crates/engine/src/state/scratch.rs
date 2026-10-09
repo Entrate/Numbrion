@@ -45,6 +45,8 @@ pub enum SyntheticEffect {
     Recharge,
     Fainted,
     MindBlownRecoil,
+    /// dex.conditions.get("recoil"), battle.ts:2111.
+    Recoil,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EffectRef {

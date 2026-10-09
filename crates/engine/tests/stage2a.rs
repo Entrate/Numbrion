@@ -40,6 +40,7 @@ fn faint_attribution_keeps_views_and_synthetic_effects() {
         SyntheticEffect::Recharge,
         SyntheticEffect::Fainted,
         SyntheticEffect::MindBlownRecoil,
+        SyntheticEffect::Recoil,
     ] {
         assert_eq!(
             EffectToken::from_ref(EffectRef::Synthetic(s)).resolve(),
