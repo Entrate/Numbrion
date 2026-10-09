@@ -14,3 +14,5 @@ pub use crate::state::scratch::{
 pub use order::{SortOrder, SpeedSortable, compare_priority, speed_sort};
 pub use scratch::Scratch;
 pub use types::*;
+
+mod lookup;

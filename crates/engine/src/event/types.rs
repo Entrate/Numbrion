@@ -36,6 +36,8 @@ pub struct Priority {
 #[derive(Clone, Copy, Debug)]
 pub struct Listener {
     pub effect: EffectRef,
+    /// Requested callback key; SwitchIn fallback dispatch still uses SwitchIn ordering.
+    pub selector: HookSelector,
     pub hook: Option<HookId>,
     pub state: Option<CellRef>,
     pub holder: Holder,
@@ -47,6 +49,8 @@ pub struct Listener {
 pub enum EndHandler {
     None,
     Status(MonId),
+    Ability(MonId),
+    Item(MonId),
     Volatile(MonId, EffectId),
     Side(SideId, EffectId),
     Slot(SlotId, EffectId),

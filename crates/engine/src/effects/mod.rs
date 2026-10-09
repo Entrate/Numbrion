@@ -2,5 +2,10 @@
 //! Manifest metadata/constants are authoritative; only functions enter effect files.
 pub mod contract;
 pub mod registry;
+pub mod support;
 pub use contract::*;
-pub use registry::{IMPLEMENTATIONS, dispatch_hook};
+pub use registry::{
+    HOOK_TRACING_ENABLED, IMPLEMENTATIONS, INCOMPLETE_PORT_WAIVER, audit_registry,
+    clear_reached_hooks, dispatch_hook, hook_coverage, pending_hooks, reached_hooks,
+    require_complete_registry,
+};

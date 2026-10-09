@@ -37,12 +37,15 @@ Recovered and completed in this update:
   `docs/design/reports/oracle-coverage-2000.{json,txt}`.
 - Preserved the self-play training notes in `docs/training/TIPS.md`.
 
-Stage 2B event/registry work is still being written by the existing background
-Codex task. Preserve its checkpoint on `recovery/stage2b-2026-10-09`; this is
+The background Stage 2B task subsequently stopped at its Codex usage limit. Its
+event/registry work and nine initial effect files were recovered, had their build
+errors corrected, and were folded into `engine` as a compiling partial milestone.
+The same checkpoint is preserved on `recovery/stage2b-2026-10-09`. This is
 unfinished work, not a claim of event parity or a completed engine. The original
-task brief is saved in `docs/design/recovery/STAGE2B-TASK.md`. Do not run another
-writer against its paths while it remains active. Battle execution still depends
-on the unfinished lifecycle, choices, moves, damage, mutators and log owners.
+task brief is saved in `docs/design/recovery/STAGE2B-TASK.md`; the exact remaining
+work and shared changes are listed in `docs/design/reports/lead-2b.md`. Battle
+execution still depends on unfinished event suppression, lifecycle, choices,
+moves, damage, mutators and log owners.
 
 Local recovery archive:
 `/home/aminaliu/.t3/backups/numbrion-fold-20261009T181007Z/`.
