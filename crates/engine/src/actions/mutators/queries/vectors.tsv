@@ -1,0 +1,1197 @@
+# Real Showdown 7332b60e22b9e8194bb53549549eba241d73cc9a; source Pokemon/Battle methods; no mechanics substituted
+Q	adaptability	lightball	0	0	1	1	0	0
+Q	adaptability	lightball	0	1	1	1	0	0
+Q	adaptability	lightball	1	0	0	0	1	1
+Q	adaptability	lightball	1	1	0	0	1	1
+Q	aftermath	lightball	0	0	1	1	0	0
+Q	aftermath	lightball	0	1	1	1	0	0
+Q	aftermath	lightball	1	0	0	0	1	1
+Q	aftermath	lightball	1	1	0	0	1	1
+Q	airlock	lightball	0	0	1	1	0	0
+Q	airlock	lightball	0	1	1	1	0	0
+Q	airlock	lightball	1	0	0	0	1	1
+Q	airlock	lightball	1	1	0	0	1	1
+Q	arenatrap	lightball	0	0	1	1	0	0
+Q	arenatrap	lightball	0	1	1	1	0	0
+Q	arenatrap	lightball	1	0	0	0	1	1
+Q	arenatrap	lightball	1	1	0	0	1	1
+Q	armortail	lightball	0	0	1	1	0	0
+Q	armortail	lightball	0	1	1	1	0	0
+Q	armortail	lightball	1	0	0	0	1	1
+Q	armortail	lightball	1	1	0	0	1	1
+Q	aromaveil	lightball	0	0	1	1	0	0
+Q	aromaveil	lightball	0	1	1	1	0	0
+Q	aromaveil	lightball	1	0	0	0	1	1
+Q	aromaveil	lightball	1	1	0	0	1	1
+Q	asoneglastrier	lightball	0	0	1	1	0	0
+Q	asoneglastrier	lightball	0	1	1	1	0	0
+Q	asoneglastrier	lightball	1	0	0	0	1	1
+Q	asoneglastrier	lightball	1	1	0	0	1	1
+Q	asonespectrier	lightball	0	0	1	1	0	0
+Q	asonespectrier	lightball	0	1	1	1	0	0
+Q	asonespectrier	lightball	1	0	0	0	1	1
+Q	asonespectrier	lightball	1	1	0	0	1	1
+Q	baddreams	lightball	0	0	1	1	0	0
+Q	baddreams	lightball	0	1	1	1	0	0
+Q	baddreams	lightball	1	0	0	0	1	1
+Q	baddreams	lightball	1	1	0	0	1	1
+Q	battlebond	lightball	0	0	1	1	0	0
+Q	battlebond	lightball	0	1	1	1	0	0
+Q	battlebond	lightball	1	0	0	0	1	1
+Q	battlebond	lightball	1	1	0	0	1	1
+Q	beadsofruin	lightball	0	0	1	1	0	0
+Q	beadsofruin	lightball	0	1	1	1	0	0
+Q	beadsofruin	lightball	1	0	0	0	1	1
+Q	beadsofruin	lightball	1	1	0	0	1	1
+Q	berserk	lightball	0	0	1	1	0	0
+Q	berserk	lightball	0	1	1	1	0	0
+Q	berserk	lightball	1	0	0	0	1	1
+Q	berserk	lightball	1	1	0	0	1	1
+Q	blaze	lightball	0	0	1	1	0	0
+Q	blaze	lightball	0	1	1	1	0	0
+Q	blaze	lightball	1	0	0	0	1	1
+Q	blaze	lightball	1	1	0	0	1	1
+Q	bulletproof	lightball	0	0	1	1	0	0
+Q	bulletproof	lightball	0	1	1	1	0	0
+Q	bulletproof	lightball	1	0	0	0	1	1
+Q	bulletproof	lightball	1	1	0	0	1	1
+Q	cheekpouch	lightball	0	0	1	1	0	0
+Q	cheekpouch	lightball	0	1	1	1	0	0
+Q	cheekpouch	lightball	1	0	0	0	1	1
+Q	cheekpouch	lightball	1	1	0	0	1	1
+Q	chillingneigh	lightball	0	0	1	1	0	0
+Q	chillingneigh	lightball	0	1	1	1	0	0
+Q	chillingneigh	lightball	1	0	0	0	1	1
+Q	chillingneigh	lightball	1	1	0	0	1	1
+Q	chlorophyll	lightball	0	0	1	1	0	0
+Q	chlorophyll	lightball	0	1	1	1	0	0
+Q	chlorophyll	lightball	1	0	0	0	1	1
+Q	chlorophyll	lightball	1	1	0	0	1	1
+Q	clearbody	lightball	0	0	1	1	0	0
+Q	clearbody	lightball	0	1	1	1	0	0
+Q	clearbody	lightball	1	0	0	0	1	1
+Q	clearbody	lightball	1	1	0	0	1	1
+Q	cloudnine	lightball	0	0	1	1	0	0
+Q	cloudnine	lightball	0	1	1	1	0	0
+Q	cloudnine	lightball	1	0	0	0	1	1
+Q	cloudnine	lightball	1	1	0	0	1	1
+Q	comatose	lightball	0	0	1	1	0	0
+Q	comatose	lightball	0	1	1	1	0	0
+Q	comatose	lightball	1	0	0	0	1	1
+Q	comatose	lightball	1	1	0	0	1	1
+Q	competitive	lightball	0	0	1	1	0	0
+Q	competitive	lightball	0	1	1	1	0	0
+Q	competitive	lightball	1	0	0	0	1	1
+Q	competitive	lightball	1	1	0	0	1	1
+Q	compoundeyes	lightball	0	0	1	1	0	0
+Q	compoundeyes	lightball	0	1	1	1	0	0
+Q	compoundeyes	lightball	1	0	0	0	1	1
+Q	compoundeyes	lightball	1	1	0	0	1	1
+Q	contrary	lightball	0	0	1	1	0	0
+Q	contrary	lightball	0	1	1	1	0	0
+Q	contrary	lightball	1	0	0	0	1	1
+Q	contrary	lightball	1	1	0	0	1	1
+Q	corrosion	lightball	0	0	1	1	0	0
+Q	corrosion	lightball	0	1	1	1	0	0
+Q	corrosion	lightball	1	0	0	0	1	1
+Q	corrosion	lightball	1	1	0	0	1	1
+Q	cursedbody	lightball	0	0	1	1	0	0
+Q	cursedbody	lightball	0	1	1	1	0	0
+Q	cursedbody	lightball	1	0	0	0	1	1
+Q	cursedbody	lightball	1	1	0	0	1	1
+Q	dancer	lightball	0	0	1	1	0	0
+Q	dancer	lightball	0	1	1	1	0	0
+Q	dancer	lightball	1	0	0	0	1	1
+Q	dancer	lightball	1	1	0	0	1	1
+Q	dauntlessshield	lightball	0	0	1	1	0	0
+Q	dauntlessshield	lightball	0	1	1	1	0	0
+Q	dauntlessshield	lightball	1	0	0	0	1	1
+Q	dauntlessshield	lightball	1	1	0	0	1	1
+Q	defiant	lightball	0	0	1	1	0	0
+Q	defiant	lightball	0	1	1	1	0	0
+Q	defiant	lightball	1	0	0	0	1	1
+Q	defiant	lightball	1	1	0	0	1	1
+Q	disguise	lightball	0	0	1	1	0	0
+Q	disguise	lightball	0	1	1	1	0	0
+Q	disguise	lightball	1	0	0	0	1	1
+Q	disguise	lightball	1	1	1	0	0	1
+Q	download	lightball	0	0	1	1	0	0
+Q	download	lightball	0	1	1	1	0	0
+Q	download	lightball	1	0	0	0	1	1
+Q	download	lightball	1	1	0	0	1	1
+Q	dragonsmaw	lightball	0	0	1	1	0	0
+Q	dragonsmaw	lightball	0	1	1	1	0	0
+Q	dragonsmaw	lightball	1	0	0	0	1	1
+Q	dragonsmaw	lightball	1	1	0	0	1	1
+Q	drizzle	lightball	0	0	1	1	0	0
+Q	drizzle	lightball	0	1	1	1	0	0
+Q	drizzle	lightball	1	0	0	0	1	1
+Q	drizzle	lightball	1	1	0	0	1	1
+Q	drought	lightball	0	0	1	1	0	0
+Q	drought	lightball	0	1	1	1	0	0
+Q	drought	lightball	1	0	0	0	1	1
+Q	drought	lightball	1	1	0	0	1	1
+Q	dryskin	lightball	0	0	1	1	0	0
+Q	dryskin	lightball	0	1	1	1	0	0
+Q	dryskin	lightball	1	0	0	0	1	1
+Q	dryskin	lightball	1	1	0	0	1	1
+Q	earlybird	lightball	0	0	1	1	0	0
+Q	earlybird	lightball	0	1	1	1	0	0
+Q	earlybird	lightball	1	0	0	0	1	1
+Q	earlybird	lightball	1	1	0	0	1	1
+Q	eartheater	lightball	0	0	1	1	0	0
+Q	eartheater	lightball	0	1	1	1	0	0
+Q	eartheater	lightball	1	0	0	0	1	1
+Q	eartheater	lightball	1	1	0	0	1	1
+Q	effectspore	lightball	0	0	1	1	0	0
+Q	effectspore	lightball	0	1	1	1	0	0
+Q	effectspore	lightball	1	0	0	0	1	1
+Q	effectspore	lightball	1	1	0	0	1	1
+Q	electricsurge	lightball	0	0	1	1	0	0
+Q	electricsurge	lightball	0	1	1	1	0	0
+Q	electricsurge	lightball	1	0	0	0	1	1
+Q	electricsurge	lightball	1	1	0	0	1	1
+Q	electromorphosis	lightball	0	0	1	1	0	0
+Q	electromorphosis	lightball	0	1	1	1	0	0
+Q	electromorphosis	lightball	1	0	0	0	1	1
+Q	electromorphosis	lightball	1	1	0	0	1	1
+Q	embodyaspectcornerstone	lightball	0	0	1	1	0	0
+Q	embodyaspectcornerstone	lightball	0	1	1	1	0	0
+Q	embodyaspectcornerstone	lightball	1	0	0	0	1	1
+Q	embodyaspectcornerstone	lightball	1	1	1	0	0	1
+Q	embodyaspecthearthflame	lightball	0	0	1	1	0	0
+Q	embodyaspecthearthflame	lightball	0	1	1	1	0	0
+Q	embodyaspecthearthflame	lightball	1	0	0	0	1	1
+Q	embodyaspecthearthflame	lightball	1	1	1	0	0	1
+Q	embodyaspectteal	lightball	0	0	1	1	0	0
+Q	embodyaspectteal	lightball	0	1	1	1	0	0
+Q	embodyaspectteal	lightball	1	0	0	0	1	1
+Q	embodyaspectteal	lightball	1	1	1	0	0	1
+Q	embodyaspectwellspring	lightball	0	0	1	1	0	0
+Q	embodyaspectwellspring	lightball	0	1	1	1	0	0
+Q	embodyaspectwellspring	lightball	1	0	0	0	1	1
+Q	embodyaspectwellspring	lightball	1	1	1	0	0	1
+Q	filter	lightball	0	0	1	1	0	0
+Q	filter	lightball	0	1	1	1	0	0
+Q	filter	lightball	1	0	0	0	1	1
+Q	filter	lightball	1	1	0	0	1	1
+Q	flamebody	lightball	0	0	1	1	0	0
+Q	flamebody	lightball	0	1	1	1	0	0
+Q	flamebody	lightball	1	0	0	0	1	1
+Q	flamebody	lightball	1	1	0	0	1	1
+Q	flashfire	lightball	0	0	1	1	0	0
+Q	flashfire	lightball	0	1	1	1	0	0
+Q	flashfire	lightball	1	0	0	0	1	1
+Q	flashfire	lightball	1	1	0	0	1	1
+Q	flowerveil	lightball	0	0	1	1	0	0
+Q	flowerveil	lightball	0	1	1	1	0	0
+Q	flowerveil	lightball	1	0	0	0	1	1
+Q	flowerveil	lightball	1	1	0	0	1	1
+Q	fluffy	lightball	0	0	1	1	0	0
+Q	fluffy	lightball	0	1	1	1	0	0
+Q	fluffy	lightball	1	0	0	0	1	1
+Q	fluffy	lightball	1	1	0	0	1	1
+Q	friendguard	lightball	0	0	1	1	0	0
+Q	friendguard	lightball	0	1	1	1	0	0
+Q	friendguard	lightball	1	0	0	0	1	1
+Q	friendguard	lightball	1	1	0	0	1	1
+Q	frisk	lightball	0	0	1	1	0	0
+Q	frisk	lightball	0	1	1	1	0	0
+Q	frisk	lightball	1	0	0	0	1	1
+Q	frisk	lightball	1	1	0	0	1	1
+Q	fullmetalbody	lightball	0	0	1	1	0	0
+Q	fullmetalbody	lightball	0	1	1	1	0	0
+Q	fullmetalbody	lightball	1	0	0	0	1	1
+Q	fullmetalbody	lightball	1	1	0	0	1	1
+Q	furcoat	lightball	0	0	1	1	0	0
+Q	furcoat	lightball	0	1	1	1	0	0
+Q	furcoat	lightball	1	0	0	0	1	1
+Q	furcoat	lightball	1	1	0	0	1	1
+Q	galewings	lightball	0	0	1	1	0	0
+Q	galewings	lightball	0	1	1	1	0	0
+Q	galewings	lightball	1	0	0	0	1	1
+Q	galewings	lightball	1	1	0	0	1	1
+Q	galvanize	lightball	0	0	1	1	0	0
+Q	galvanize	lightball	0	1	1	1	0	0
+Q	galvanize	lightball	1	0	0	0	1	1
+Q	galvanize	lightball	1	1	0	0	1	1
+Q	gluttony	lightball	0	0	1	1	0	0
+Q	gluttony	lightball	0	1	1	1	0	0
+Q	gluttony	lightball	1	0	0	0	1	1
+Q	gluttony	lightball	1	1	0	0	1	1
+Q	goodasgold	lightball	0	0	1	1	0	0
+Q	goodasgold	lightball	0	1	1	1	0	0
+Q	goodasgold	lightball	1	0	0	0	1	1
+Q	goodasgold	lightball	1	1	0	0	1	1
+Q	gooey	lightball	0	0	1	1	0	0
+Q	gooey	lightball	0	1	1	1	0	0
+Q	gooey	lightball	1	0	0	0	1	1
+Q	gooey	lightball	1	1	0	0	1	1
+Q	grassysurge	lightball	0	0	1	1	0	0
+Q	grassysurge	lightball	0	1	1	1	0	0
+Q	grassysurge	lightball	1	0	0	0	1	1
+Q	grassysurge	lightball	1	1	0	0	1	1
+Q	grimneigh	lightball	0	0	1	1	0	0
+Q	grimneigh	lightball	0	1	1	1	0	0
+Q	grimneigh	lightball	1	0	0	0	1	1
+Q	grimneigh	lightball	1	1	0	0	1	1
+Q	gulpmissile	lightball	0	0	1	1	0	0
+Q	gulpmissile	lightball	0	1	1	1	0	0
+Q	gulpmissile	lightball	1	0	0	0	1	1
+Q	gulpmissile	lightball	1	1	1	0	0	1
+Q	guts	lightball	0	0	1	1	0	0
+Q	guts	lightball	0	1	1	1	0	0
+Q	guts	lightball	1	0	0	0	1	1
+Q	guts	lightball	1	1	0	0	1	1
+Q	hadronengine	lightball	0	0	1	1	0	0
+Q	hadronengine	lightball	0	1	1	1	0	0
+Q	hadronengine	lightball	1	0	0	0	1	1
+Q	hadronengine	lightball	1	1	0	0	1	1
+Q	harvest	lightball	0	0	1	1	0	0
+Q	harvest	lightball	0	1	1	1	0	0
+Q	harvest	lightball	1	0	0	0	1	1
+Q	harvest	lightball	1	1	0	0	1	1
+Q	healer	lightball	0	0	1	1	0	0
+Q	healer	lightball	0	1	1	1	0	0
+Q	healer	lightball	1	0	0	0	1	1
+Q	healer	lightball	1	1	0	0	1	1
+Q	heavymetal	lightball	0	0	1	1	0	0
+Q	heavymetal	lightball	0	1	1	1	0	0
+Q	heavymetal	lightball	1	0	0	0	1	1
+Q	heavymetal	lightball	1	1	0	0	1	1
+Q	hospitality	lightball	0	0	1	1	0	0
+Q	hospitality	lightball	0	1	1	1	0	0
+Q	hospitality	lightball	1	0	0	0	1	1
+Q	hospitality	lightball	1	1	0	0	1	1
+Q	hugepower	lightball	0	0	1	1	0	0
+Q	hugepower	lightball	0	1	1	1	0	0
+Q	hugepower	lightball	1	0	0	0	1	1
+Q	hugepower	lightball	1	1	0	0	1	1
+Q	hungerswitch	lightball	0	0	1	1	0	0
+Q	hungerswitch	lightball	0	1	1	1	0	0
+Q	hungerswitch	lightball	1	0	0	0	1	1
+Q	hungerswitch	lightball	1	1	1	0	0	1
+Q	hustle	lightball	0	0	1	1	0	0
+Q	hustle	lightball	0	1	1	1	0	0
+Q	hustle	lightball	1	0	0	0	1	1
+Q	hustle	lightball	1	1	0	0	1	1
+Q	hydration	lightball	0	0	1	1	0	0
+Q	hydration	lightball	0	1	1	1	0	0
+Q	hydration	lightball	1	0	0	0	1	1
+Q	hydration	lightball	1	1	0	0	1	1
+Q	icebody	lightball	0	0	1	1	0	0
+Q	icebody	lightball	0	1	1	1	0	0
+Q	icebody	lightball	1	0	0	0	1	1
+Q	icebody	lightball	1	1	0	0	1	1
+Q	iceface	lightball	0	0	1	1	0	0
+Q	iceface	lightball	0	1	1	1	0	0
+Q	iceface	lightball	1	0	0	0	1	1
+Q	iceface	lightball	1	1	1	0	0	1
+Q	icescales	lightball	0	0	1	1	0	0
+Q	icescales	lightball	0	1	1	1	0	0
+Q	icescales	lightball	1	0	0	0	1	1
+Q	icescales	lightball	1	1	0	0	1	1
+Q	illusion	lightball	0	0	1	1	0	0
+Q	illusion	lightball	0	1	1	1	0	0
+Q	illusion	lightball	1	0	0	0	1	1
+Q	illusion	lightball	1	1	0	0	1	1
+Q	imposter	lightball	0	0	1	1	0	0
+Q	imposter	lightball	0	1	1	1	0	0
+Q	imposter	lightball	1	0	0	0	1	1
+Q	imposter	lightball	1	1	0	0	1	1
+Q	infiltrator	lightball	0	0	1	1	0	0
+Q	infiltrator	lightball	0	1	1	1	0	0
+Q	infiltrator	lightball	1	0	0	0	1	1
+Q	infiltrator	lightball	1	1	0	0	1	1
+Q	innerfocus	lightball	0	0	1	1	0	0
+Q	innerfocus	lightball	0	1	1	1	0	0
+Q	innerfocus	lightball	1	0	0	0	1	1
+Q	innerfocus	lightball	1	1	0	0	1	1
+Q	insomnia	lightball	0	0	1	1	0	0
+Q	insomnia	lightball	0	1	1	1	0	0
+Q	insomnia	lightball	1	0	0	0	1	1
+Q	insomnia	lightball	1	1	0	0	1	1
+Q	intimidate	lightball	0	0	1	1	0	0
+Q	intimidate	lightball	0	1	1	1	0	0
+Q	intimidate	lightball	1	0	0	0	1	1
+Q	intimidate	lightball	1	1	0	0	1	1
+Q	intrepidsword	lightball	0	0	1	1	0	0
+Q	intrepidsword	lightball	0	1	1	1	0	0
+Q	intrepidsword	lightball	1	0	0	0	1	1
+Q	intrepidsword	lightball	1	1	0	0	1	1
+Q	ironfist	lightball	0	0	1	1	0	0
+Q	ironfist	lightball	0	1	1	1	0	0
+Q	ironfist	lightball	1	0	0	0	1	1
+Q	ironfist	lightball	1	1	0	0	1	1
+Q	justified	lightball	0	0	1	1	0	0
+Q	justified	lightball	0	1	1	1	0	0
+Q	justified	lightball	1	0	0	0	1	1
+Q	justified	lightball	1	1	0	0	1	1
+Q	keeneye	lightball	0	0	1	1	0	0
+Q	keeneye	lightball	0	1	1	1	0	0
+Q	keeneye	lightball	1	0	0	0	1	1
+Q	keeneye	lightball	1	1	0	0	1	1
+Q	leafguard	lightball	0	0	1	1	0	0
+Q	leafguard	lightball	0	1	1	1	0	0
+Q	leafguard	lightball	1	0	0	0	1	1
+Q	leafguard	lightball	1	1	0	0	1	1
+Q	levitate	lightball	0	0	1	1	0	0
+Q	levitate	lightball	0	1	1	1	0	0
+Q	levitate	lightball	1	0	0	0	1	1
+Q	levitate	lightball	1	1	0	0	1	1
+Q	libero	lightball	0	0	1	1	0	0
+Q	libero	lightball	0	1	1	1	0	0
+Q	libero	lightball	1	0	0	0	1	1
+Q	libero	lightball	1	1	0	0	1	1
+Q	lightningrod	lightball	0	0	1	1	0	0
+Q	lightningrod	lightball	0	1	1	1	0	0
+Q	lightningrod	lightball	1	0	0	0	1	1
+Q	lightningrod	lightball	1	1	0	0	1	1
+Q	liquidvoice	lightball	0	0	1	1	0	0
+Q	liquidvoice	lightball	0	1	1	1	0	0
+Q	liquidvoice	lightball	1	0	0	0	1	1
+Q	liquidvoice	lightball	1	1	0	0	1	1
+Q	magicbounce	lightball	0	0	1	1	0	0
+Q	magicbounce	lightball	0	1	1	1	0	0
+Q	magicbounce	lightball	1	0	0	0	1	1
+Q	magicbounce	lightball	1	1	0	0	1	1
+Q	magicguard	lightball	0	0	1	1	0	0
+Q	magicguard	lightball	0	1	1	1	0	0
+Q	magicguard	lightball	1	0	0	0	1	1
+Q	magicguard	lightball	1	1	0	0	1	1
+Q	magician	lightball	0	0	1	1	0	0
+Q	magician	lightball	0	1	1	1	0	0
+Q	magician	lightball	1	0	0	0	1	1
+Q	magician	lightball	1	1	0	0	1	1
+Q	magnetpull	lightball	0	0	1	1	0	0
+Q	magnetpull	lightball	0	1	1	1	0	0
+Q	magnetpull	lightball	1	0	0	0	1	1
+Q	magnetpull	lightball	1	1	0	0	1	1
+Q	megalauncher	lightball	0	0	1	1	0	0
+Q	megalauncher	lightball	0	1	1	1	0	0
+Q	megalauncher	lightball	1	0	0	0	1	1
+Q	megalauncher	lightball	1	1	0	0	1	1
+Q	mindseye	lightball	0	0	1	1	0	0
+Q	mindseye	lightball	0	1	1	1	0	0
+Q	mindseye	lightball	1	0	0	0	1	1
+Q	mindseye	lightball	1	1	0	0	1	1
+Q	mirrorarmor	lightball	0	0	1	1	0	0
+Q	mirrorarmor	lightball	0	1	1	1	0	0
+Q	mirrorarmor	lightball	1	0	0	0	1	1
+Q	mirrorarmor	lightball	1	1	0	0	1	1
+Q	moldbreaker	lightball	0	0	1	1	0	0
+Q	moldbreaker	lightball	0	1	1	1	0	0
+Q	moldbreaker	lightball	1	0	0	0	1	1
+Q	moldbreaker	lightball	1	1	0	0	1	1
+Q	motordrive	lightball	0	0	1	1	0	0
+Q	motordrive	lightball	0	1	1	1	0	0
+Q	motordrive	lightball	1	0	0	0	1	1
+Q	motordrive	lightball	1	1	0	0	1	1
+Q	moxie	lightball	0	0	1	1	0	0
+Q	moxie	lightball	0	1	1	1	0	0
+Q	moxie	lightball	1	0	0	0	1	1
+Q	moxie	lightball	1	1	0	0	1	1
+Q	multiscale	lightball	0	0	1	1	0	0
+Q	multiscale	lightball	0	1	1	1	0	0
+Q	multiscale	lightball	1	0	0	0	1	1
+Q	multiscale	lightball	1	1	0	0	1	1
+Q	multitype	lightball	0	0	1	1	0	0
+Q	multitype	lightball	0	1	1	1	0	0
+Q	multitype	lightball	1	0	0	0	1	1
+Q	multitype	lightball	1	1	0	0	1	1
+Q	myceliummight	lightball	0	0	1	1	0	0
+Q	myceliummight	lightball	0	1	1	1	0	0
+Q	myceliummight	lightball	1	0	0	0	1	1
+Q	myceliummight	lightball	1	1	0	0	1	1
+Q	naturalcure	lightball	0	0	1	1	0	0
+Q	naturalcure	lightball	0	1	1	1	0	0
+Q	naturalcure	lightball	1	0	0	0	1	1
+Q	naturalcure	lightball	1	1	0	0	1	1
+Q	noguard	lightball	0	0	1	1	0	0
+Q	noguard	lightball	0	1	1	1	0	0
+Q	noguard	lightball	1	0	0	0	1	1
+Q	noguard	lightball	1	1	0	0	1	1
+Q	oblivious	lightball	0	0	1	1	0	0
+Q	oblivious	lightball	0	1	1	1	0	0
+Q	oblivious	lightball	1	0	0	0	1	1
+Q	oblivious	lightball	1	1	0	0	1	1
+Q	orichalcumpulse	lightball	0	0	1	1	0	0
+Q	orichalcumpulse	lightball	0	1	1	1	0	0
+Q	orichalcumpulse	lightball	1	0	0	0	1	1
+Q	orichalcumpulse	lightball	1	1	0	0	1	1
+Q	overcoat	lightball	0	0	1	1	0	0
+Q	overcoat	lightball	0	1	1	1	0	0
+Q	overcoat	lightball	1	0	0	0	1	1
+Q	overcoat	lightball	1	1	0	0	1	1
+Q	overgrow	lightball	0	0	1	1	0	0
+Q	overgrow	lightball	0	1	1	1	0	0
+Q	overgrow	lightball	1	0	0	0	1	1
+Q	overgrow	lightball	1	1	0	0	1	1
+Q	owntempo	lightball	0	0	1	1	0	0
+Q	owntempo	lightball	0	1	1	1	0	0
+Q	owntempo	lightball	1	0	0	0	1	1
+Q	owntempo	lightball	1	1	0	0	1	1
+Q	pickpocket	lightball	0	0	1	1	0	0
+Q	pickpocket	lightball	0	1	1	1	0	0
+Q	pickpocket	lightball	1	0	0	0	1	1
+Q	pickpocket	lightball	1	1	0	0	1	1
+Q	pixilate	lightball	0	0	1	1	0	0
+Q	pixilate	lightball	0	1	1	1	0	0
+Q	pixilate	lightball	1	0	0	0	1	1
+Q	pixilate	lightball	1	1	0	0	1	1
+Q	poisonheal	lightball	0	0	1	1	0	0
+Q	poisonheal	lightball	0	1	1	1	0	0
+Q	poisonheal	lightball	1	0	0	0	1	1
+Q	poisonheal	lightball	1	1	0	0	1	1
+Q	poisonpuppeteer	lightball	0	0	1	1	0	0
+Q	poisonpuppeteer	lightball	0	1	1	1	0	0
+Q	poisonpuppeteer	lightball	1	0	0	0	1	1
+Q	poisonpuppeteer	lightball	1	1	0	0	1	1
+Q	poisontouch	lightball	0	0	1	1	0	0
+Q	poisontouch	lightball	0	1	1	1	0	0
+Q	poisontouch	lightball	1	0	0	0	1	1
+Q	poisontouch	lightball	1	1	0	0	1	1
+Q	powerspot	lightball	0	0	1	1	0	0
+Q	powerspot	lightball	0	1	1	1	0	0
+Q	powerspot	lightball	1	0	0	0	1	1
+Q	powerspot	lightball	1	1	0	0	1	1
+Q	prankster	lightball	0	0	1	1	0	0
+Q	prankster	lightball	0	1	1	1	0	0
+Q	prankster	lightball	1	0	0	0	1	1
+Q	prankster	lightball	1	1	0	0	1	1
+Q	pressure	lightball	0	0	1	1	0	0
+Q	pressure	lightball	0	1	1	1	0	0
+Q	pressure	lightball	1	0	0	0	1	1
+Q	pressure	lightball	1	1	0	0	1	1
+Q	prismarmor	lightball	0	0	1	1	0	0
+Q	prismarmor	lightball	0	1	1	1	0	0
+Q	prismarmor	lightball	1	0	0	0	1	1
+Q	prismarmor	lightball	1	1	0	0	1	1
+Q	propellertail	lightball	0	0	1	1	0	0
+Q	propellertail	lightball	0	1	1	1	0	0
+Q	propellertail	lightball	1	0	0	0	1	1
+Q	propellertail	lightball	1	1	0	0	1	1
+Q	protean	lightball	0	0	1	1	0	0
+Q	protean	lightball	0	1	1	1	0	0
+Q	protean	lightball	1	0	0	0	1	1
+Q	protean	lightball	1	1	0	0	1	1
+Q	protosynthesis	lightball	0	0	1	1	0	0
+Q	protosynthesis	lightball	0	1	1	1	0	0
+Q	protosynthesis	lightball	1	0	0	0	1	1
+Q	protosynthesis	lightball	1	1	1	0	0	1
+Q	psychicsurge	lightball	0	0	1	1	0	0
+Q	psychicsurge	lightball	0	1	1	1	0	0
+Q	psychicsurge	lightball	1	0	0	0	1	1
+Q	psychicsurge	lightball	1	1	0	0	1	1
+Q	punkrock	lightball	0	0	1	1	0	0
+Q	punkrock	lightball	0	1	1	1	0	0
+Q	punkrock	lightball	1	0	0	0	1	1
+Q	punkrock	lightball	1	1	0	0	1	1
+Q	purepower	lightball	0	0	1	1	0	0
+Q	purepower	lightball	0	1	1	1	0	0
+Q	purepower	lightball	1	0	0	0	1	1
+Q	purepower	lightball	1	1	0	0	1	1
+Q	purifyingsalt	lightball	0	0	1	1	0	0
+Q	purifyingsalt	lightball	0	1	1	1	0	0
+Q	purifyingsalt	lightball	1	0	0	0	1	1
+Q	purifyingsalt	lightball	1	1	0	0	1	1
+Q	quarkdrive	lightball	0	0	1	1	0	0
+Q	quarkdrive	lightball	0	1	1	1	0	0
+Q	quarkdrive	lightball	1	0	0	0	1	1
+Q	quarkdrive	lightball	1	1	1	0	0	1
+Q	queenlymajesty	lightball	0	0	1	1	0	0
+Q	queenlymajesty	lightball	0	1	1	1	0	0
+Q	queenlymajesty	lightball	1	0	0	0	1	1
+Q	queenlymajesty	lightball	1	1	0	0	1	1
+Q	rattled	lightball	0	0	1	1	0	0
+Q	rattled	lightball	0	1	1	1	0	0
+Q	rattled	lightball	1	0	0	0	1	1
+Q	rattled	lightball	1	1	0	0	1	1
+Q	reckless	lightball	0	0	1	1	0	0
+Q	reckless	lightball	0	1	1	1	0	0
+Q	reckless	lightball	1	0	0	0	1	1
+Q	reckless	lightball	1	1	0	0	1	1
+Q	regenerator	lightball	0	0	1	1	0	0
+Q	regenerator	lightball	0	1	1	1	0	0
+Q	regenerator	lightball	1	0	0	0	1	1
+Q	regenerator	lightball	1	1	0	0	1	1
+Q	ripen	lightball	0	0	1	1	0	0
+Q	ripen	lightball	0	1	1	1	0	0
+Q	ripen	lightball	1	0	0	0	1	1
+Q	ripen	lightball	1	1	0	0	1	1
+Q	rockhead	lightball	0	0	1	1	0	0
+Q	rockhead	lightball	0	1	1	1	0	0
+Q	rockhead	lightball	1	0	0	0	1	1
+Q	rockhead	lightball	1	1	0	0	1	1
+Q	rockypayload	lightball	0	0	1	1	0	0
+Q	rockypayload	lightball	0	1	1	1	0	0
+Q	rockypayload	lightball	1	0	0	0	1	1
+Q	rockypayload	lightball	1	1	0	0	1	1
+Q	roughskin	lightball	0	0	1	1	0	0
+Q	roughskin	lightball	0	1	1	1	0	0
+Q	roughskin	lightball	1	0	0	0	1	1
+Q	roughskin	lightball	1	1	0	0	1	1
+Q	sandforce	lightball	0	0	1	1	0	0
+Q	sandforce	lightball	0	1	1	1	0	0
+Q	sandforce	lightball	1	0	0	0	1	1
+Q	sandforce	lightball	1	1	0	0	1	1
+Q	sandrush	lightball	0	0	1	1	0	0
+Q	sandrush	lightball	0	1	1	1	0	0
+Q	sandrush	lightball	1	0	0	0	1	1
+Q	sandrush	lightball	1	1	0	0	1	1
+Q	sandstream	lightball	0	0	1	1	0	0
+Q	sandstream	lightball	0	1	1	1	0	0
+Q	sandstream	lightball	1	0	0	0	1	1
+Q	sandstream	lightball	1	1	0	0	1	1
+Q	sapsipper	lightball	0	0	1	1	0	0
+Q	sapsipper	lightball	0	1	1	1	0	0
+Q	sapsipper	lightball	1	0	0	0	1	1
+Q	sapsipper	lightball	1	1	0	0	1	1
+Q	scrappy	lightball	0	0	1	1	0	0
+Q	scrappy	lightball	0	1	1	1	0	0
+Q	scrappy	lightball	1	0	0	0	1	1
+Q	scrappy	lightball	1	1	0	0	1	1
+Q	seedsower	lightball	0	0	1	1	0	0
+Q	seedsower	lightball	0	1	1	1	0	0
+Q	seedsower	lightball	1	0	0	0	1	1
+Q	seedsower	lightball	1	1	0	0	1	1
+Q	serenegrace	lightball	0	0	1	1	0	0
+Q	serenegrace	lightball	0	1	1	1	0	0
+Q	serenegrace	lightball	1	0	0	0	1	1
+Q	serenegrace	lightball	1	1	0	0	1	1
+Q	shadowshield	lightball	0	0	1	1	0	0
+Q	shadowshield	lightball	0	1	1	1	0	0
+Q	shadowshield	lightball	1	0	0	0	1	1
+Q	shadowshield	lightball	1	1	0	0	1	1
+Q	shadowtag	lightball	0	0	1	1	0	0
+Q	shadowtag	lightball	0	1	1	1	0	0
+Q	shadowtag	lightball	1	0	0	0	1	1
+Q	shadowtag	lightball	1	1	0	0	1	1
+Q	sharpness	lightball	0	0	1	1	0	0
+Q	sharpness	lightball	0	1	1	1	0	0
+Q	sharpness	lightball	1	0	0	0	1	1
+Q	sharpness	lightball	1	1	0	0	1	1
+Q	shedskin	lightball	0	0	1	1	0	0
+Q	shedskin	lightball	0	1	1	1	0	0
+Q	shedskin	lightball	1	0	0	0	1	1
+Q	shedskin	lightball	1	1	0	0	1	1
+Q	sheerforce	lightball	0	0	1	1	0	0
+Q	sheerforce	lightball	0	1	1	1	0	0
+Q	sheerforce	lightball	1	0	0	0	1	1
+Q	sheerforce	lightball	1	1	0	0	1	1
+Q	shellarmor	lightball	0	0	1	1	0	0
+Q	shellarmor	lightball	0	1	1	1	0	0
+Q	shellarmor	lightball	1	0	0	0	1	1
+Q	shellarmor	lightball	1	1	0	0	1	1
+Q	shielddust	lightball	0	0	1	1	0	0
+Q	shielddust	lightball	0	1	1	1	0	0
+Q	shielddust	lightball	1	0	0	0	1	1
+Q	shielddust	lightball	1	1	0	0	1	1
+Q	shieldsdown	lightball	0	0	1	1	0	0
+Q	shieldsdown	lightball	0	1	1	1	0	0
+Q	shieldsdown	lightball	1	0	0	0	1	1
+Q	shieldsdown	lightball	1	1	0	0	1	1
+Q	skilllink	lightball	0	0	1	1	0	0
+Q	skilllink	lightball	0	1	1	1	0	0
+Q	skilllink	lightball	1	0	0	0	1	1
+Q	skilllink	lightball	1	1	0	0	1	1
+Q	slowstart	lightball	0	0	1	1	0	0
+Q	slowstart	lightball	0	1	1	1	0	0
+Q	slowstart	lightball	1	0	0	0	1	1
+Q	slowstart	lightball	1	1	0	0	1	1
+Q	slushrush	lightball	0	0	1	1	0	0
+Q	slushrush	lightball	0	1	1	1	0	0
+Q	slushrush	lightball	1	0	0	0	1	1
+Q	slushrush	lightball	1	1	0	0	1	1
+Q	snowwarning	lightball	0	0	1	1	0	0
+Q	snowwarning	lightball	0	1	1	1	0	0
+Q	snowwarning	lightball	1	0	0	0	1	1
+Q	snowwarning	lightball	1	1	0	0	1	1
+Q	solarpower	lightball	0	0	1	1	0	0
+Q	solarpower	lightball	0	1	1	1	0	0
+Q	solarpower	lightball	1	0	0	0	1	1
+Q	solarpower	lightball	1	1	0	0	1	1
+Q	solidrock	lightball	0	0	1	1	0	0
+Q	solidrock	lightball	0	1	1	1	0	0
+Q	solidrock	lightball	1	0	0	0	1	1
+Q	solidrock	lightball	1	1	0	0	1	1
+Q	soulheart	lightball	0	0	1	1	0	0
+Q	soulheart	lightball	0	1	1	1	0	0
+Q	soulheart	lightball	1	0	0	0	1	1
+Q	soulheart	lightball	1	1	0	0	1	1
+Q	soundproof	lightball	0	0	1	1	0	0
+Q	soundproof	lightball	0	1	1	1	0	0
+Q	soundproof	lightball	1	0	0	0	1	1
+Q	soundproof	lightball	1	1	0	0	1	1
+Q	speedboost	lightball	0	0	1	1	0	0
+Q	speedboost	lightball	0	1	1	1	0	0
+Q	speedboost	lightball	1	0	0	0	1	1
+Q	speedboost	lightball	1	1	0	0	1	1
+Q	stakeout	lightball	0	0	1	1	0	0
+Q	stakeout	lightball	0	1	1	1	0	0
+Q	stakeout	lightball	1	0	0	0	1	1
+Q	stakeout	lightball	1	1	0	0	1	1
+Q	stalwart	lightball	0	0	1	1	0	0
+Q	stalwart	lightball	0	1	1	1	0	0
+Q	stalwart	lightball	1	0	0	0	1	1
+Q	stalwart	lightball	1	1	0	0	1	1
+Q	stamina	lightball	0	0	1	1	0	0
+Q	stamina	lightball	0	1	1	1	0	0
+Q	stamina	lightball	1	0	0	0	1	1
+Q	stamina	lightball	1	1	0	0	1	1
+Q	static	lightball	0	0	1	1	0	0
+Q	static	lightball	0	1	1	1	0	0
+Q	static	lightball	1	0	0	0	1	1
+Q	static	lightball	1	1	0	0	1	1
+Q	steelyspirit	lightball	0	0	1	1	0	0
+Q	steelyspirit	lightball	0	1	1	1	0	0
+Q	steelyspirit	lightball	1	0	0	0	1	1
+Q	steelyspirit	lightball	1	1	0	0	1	1
+Q	stickyhold	lightball	0	0	1	1	0	0
+Q	stickyhold	lightball	0	1	1	1	0	0
+Q	stickyhold	lightball	1	0	0	0	1	1
+Q	stickyhold	lightball	1	1	0	0	1	1
+Q	stormdrain	lightball	0	0	1	1	0	0
+Q	stormdrain	lightball	0	1	1	1	0	0
+Q	stormdrain	lightball	1	0	0	0	1	1
+Q	stormdrain	lightball	1	1	0	0	1	1
+Q	strongjaw	lightball	0	0	1	1	0	0
+Q	strongjaw	lightball	0	1	1	1	0	0
+Q	strongjaw	lightball	1	0	0	0	1	1
+Q	strongjaw	lightball	1	1	0	0	1	1
+Q	sturdy	lightball	0	0	1	1	0	0
+Q	sturdy	lightball	0	1	1	1	0	0
+Q	sturdy	lightball	1	0	0	0	1	1
+Q	sturdy	lightball	1	1	0	0	1	1
+Q	surgesurfer	lightball	0	0	1	1	0	0
+Q	surgesurfer	lightball	0	1	1	1	0	0
+Q	surgesurfer	lightball	1	0	0	0	1	1
+Q	surgesurfer	lightball	1	1	0	0	1	1
+Q	swarm	lightball	0	0	1	1	0	0
+Q	swarm	lightball	0	1	1	1	0	0
+Q	swarm	lightball	1	0	0	0	1	1
+Q	swarm	lightball	1	1	0	0	1	1
+Q	swiftswim	lightball	0	0	1	1	0	0
+Q	swiftswim	lightball	0	1	1	1	0	0
+Q	swiftswim	lightball	1	0	0	0	1	1
+Q	swiftswim	lightball	1	1	0	0	1	1
+Q	swordofruin	lightball	0	0	1	1	0	0
+Q	swordofruin	lightball	0	1	1	1	0	0
+Q	swordofruin	lightball	1	0	0	0	1	1
+Q	swordofruin	lightball	1	1	0	0	1	1
+Q	synchronize	lightball	0	0	1	1	0	0
+Q	synchronize	lightball	0	1	1	1	0	0
+Q	synchronize	lightball	1	0	0	0	1	1
+Q	synchronize	lightball	1	1	0	0	1	1
+Q	tabletsofruin	lightball	0	0	1	1	0	0
+Q	tabletsofruin	lightball	0	1	1	1	0	0
+Q	tabletsofruin	lightball	1	0	0	0	1	1
+Q	tabletsofruin	lightball	1	1	0	0	1	1
+Q	tanglinghair	lightball	0	0	1	1	0	0
+Q	tanglinghair	lightball	0	1	1	1	0	0
+Q	tanglinghair	lightball	1	0	0	0	1	1
+Q	tanglinghair	lightball	1	1	0	0	1	1
+Q	technician	lightball	0	0	1	1	0	0
+Q	technician	lightball	0	1	1	1	0	0
+Q	technician	lightball	1	0	0	0	1	1
+Q	technician	lightball	1	1	0	0	1	1
+Q	telepathy	lightball	0	0	1	1	0	0
+Q	telepathy	lightball	0	1	1	1	0	0
+Q	telepathy	lightball	1	0	0	0	1	1
+Q	telepathy	lightball	1	1	0	0	1	1
+Q	teraformzero	lightball	0	0	1	1	0	0
+Q	teraformzero	lightball	0	1	1	1	0	0
+Q	teraformzero	lightball	1	0	0	0	1	1
+Q	teraformzero	lightball	1	1	0	0	1	1
+Q	terashell	lightball	0	0	1	1	0	0
+Q	terashell	lightball	0	1	1	1	0	0
+Q	terashell	lightball	1	0	0	0	1	1
+Q	terashell	lightball	1	1	0	0	1	1
+Q	terashift	lightball	0	0	1	1	0	0
+Q	terashift	lightball	0	1	1	1	0	0
+Q	terashift	lightball	1	0	0	0	1	1
+Q	terashift	lightball	1	1	1	0	0	1
+Q	teravolt	lightball	0	0	1	1	0	0
+Q	teravolt	lightball	0	1	1	1	0	0
+Q	teravolt	lightball	1	0	0	0	1	1
+Q	teravolt	lightball	1	1	0	0	1	1
+Q	thermalexchange	lightball	0	0	1	1	0	0
+Q	thermalexchange	lightball	0	1	1	1	0	0
+Q	thermalexchange	lightball	1	0	0	0	1	1
+Q	thermalexchange	lightball	1	1	0	0	1	1
+Q	thickfat	lightball	0	0	1	1	0	0
+Q	thickfat	lightball	0	1	1	1	0	0
+Q	thickfat	lightball	1	0	0	0	1	1
+Q	thickfat	lightball	1	1	0	0	1	1
+Q	tintedlens	lightball	0	0	1	1	0	0
+Q	tintedlens	lightball	0	1	1	1	0	0
+Q	tintedlens	lightball	1	0	0	0	1	1
+Q	tintedlens	lightball	1	1	0	0	1	1
+Q	torrent	lightball	0	0	1	1	0	0
+Q	torrent	lightball	0	1	1	1	0	0
+Q	torrent	lightball	1	0	0	0	1	1
+Q	torrent	lightball	1	1	0	0	1	1
+Q	toughclaws	lightball	0	0	1	1	0	0
+Q	toughclaws	lightball	0	1	1	1	0	0
+Q	toughclaws	lightball	1	0	0	0	1	1
+Q	toughclaws	lightball	1	1	0	0	1	1
+Q	toxicboost	lightball	0	0	1	1	0	0
+Q	toxicboost	lightball	0	1	1	1	0	0
+Q	toxicboost	lightball	1	0	0	0	1	1
+Q	toxicboost	lightball	1	1	0	0	1	1
+Q	toxicchain	lightball	0	0	1	1	0	0
+Q	toxicchain	lightball	0	1	1	1	0	0
+Q	toxicchain	lightball	1	0	0	0	1	1
+Q	toxicchain	lightball	1	1	0	0	1	1
+Q	toxicdebris	lightball	0	0	1	1	0	0
+Q	toxicdebris	lightball	0	1	1	1	0	0
+Q	toxicdebris	lightball	1	0	0	0	1	1
+Q	toxicdebris	lightball	1	1	0	0	1	1
+Q	trace	lightball	0	0	1	1	0	0
+Q	trace	lightball	0	1	1	1	0	0
+Q	trace	lightball	1	0	0	0	1	1
+Q	trace	lightball	1	1	0	0	1	1
+Q	transistor	lightball	0	0	1	1	0	0
+Q	transistor	lightball	0	1	1	1	0	0
+Q	transistor	lightball	1	0	0	0	1	1
+Q	transistor	lightball	1	1	0	0	1	1
+Q	triage	lightball	0	0	1	1	0	0
+Q	triage	lightball	0	1	1	1	0	0
+Q	triage	lightball	1	0	0	0	1	1
+Q	triage	lightball	1	1	0	0	1	1
+Q	truant	lightball	0	0	1	1	0	0
+Q	truant	lightball	0	1	1	1	0	0
+Q	truant	lightball	1	0	0	0	1	1
+Q	truant	lightball	1	1	0	0	1	1
+Q	turboblaze	lightball	0	0	1	1	0	0
+Q	turboblaze	lightball	0	1	1	1	0	0
+Q	turboblaze	lightball	1	0	0	0	1	1
+Q	turboblaze	lightball	1	1	0	0	1	1
+Q	unaware	lightball	0	0	1	1	0	0
+Q	unaware	lightball	0	1	1	1	0	0
+Q	unaware	lightball	1	0	0	0	1	1
+Q	unaware	lightball	1	1	0	0	1	1
+Q	unburden	lightball	0	0	1	1	0	0
+Q	unburden	lightball	0	1	1	1	0	0
+Q	unburden	lightball	1	0	0	0	1	1
+Q	unburden	lightball	1	1	0	0	1	1
+Q	unnerve	lightball	0	0	1	1	0	0
+Q	unnerve	lightball	0	1	1	1	0	0
+Q	unnerve	lightball	1	0	0	0	1	1
+Q	unnerve	lightball	1	1	0	0	1	1
+Q	unseenfist	lightball	0	0	1	1	0	0
+Q	unseenfist	lightball	0	1	1	1	0	0
+Q	unseenfist	lightball	1	0	0	0	1	1
+Q	unseenfist	lightball	1	1	0	0	1	1
+Q	vesselofruin	lightball	0	0	1	1	0	0
+Q	vesselofruin	lightball	0	1	1	1	0	0
+Q	vesselofruin	lightball	1	0	0	0	1	1
+Q	vesselofruin	lightball	1	1	0	0	1	1
+Q	vitalspirit	lightball	0	0	1	1	0	0
+Q	vitalspirit	lightball	0	1	1	1	0	0
+Q	vitalspirit	lightball	1	0	0	0	1	1
+Q	vitalspirit	lightball	1	1	0	0	1	1
+Q	voltabsorb	lightball	0	0	1	1	0	0
+Q	voltabsorb	lightball	0	1	1	1	0	0
+Q	voltabsorb	lightball	1	0	0	0	1	1
+Q	voltabsorb	lightball	1	1	0	0	1	1
+Q	waterabsorb	lightball	0	0	1	1	0	0
+Q	waterabsorb	lightball	0	1	1	1	0	0
+Q	waterabsorb	lightball	1	0	0	0	1	1
+Q	waterabsorb	lightball	1	1	0	0	1	1
+Q	waterbubble	lightball	0	0	1	1	0	0
+Q	waterbubble	lightball	0	1	1	1	0	0
+Q	waterbubble	lightball	1	0	0	0	1	1
+Q	waterbubble	lightball	1	1	0	0	1	1
+Q	watercompaction	lightball	0	0	1	1	0	0
+Q	watercompaction	lightball	0	1	1	1	0	0
+Q	watercompaction	lightball	1	0	0	0	1	1
+Q	watercompaction	lightball	1	1	0	0	1	1
+Q	waterveil	lightball	0	0	1	1	0	0
+Q	waterveil	lightball	0	1	1	1	0	0
+Q	waterveil	lightball	1	0	0	0	1	1
+Q	waterveil	lightball	1	1	0	0	1	1
+Q	weakarmor	lightball	0	0	1	1	0	0
+Q	weakarmor	lightball	0	1	1	1	0	0
+Q	weakarmor	lightball	1	0	0	0	1	1
+Q	weakarmor	lightball	1	1	0	0	1	1
+Q	wellbakedbody	lightball	0	0	1	1	0	0
+Q	wellbakedbody	lightball	0	1	1	1	0	0
+Q	wellbakedbody	lightball	1	0	0	0	1	1
+Q	wellbakedbody	lightball	1	1	0	0	1	1
+Q	windrider	lightball	0	0	1	1	0	0
+Q	windrider	lightball	0	1	1	1	0	0
+Q	windrider	lightball	1	0	0	0	1	1
+Q	windrider	lightball	1	1	0	0	1	1
+Q	zerotohero	lightball	0	0	1	1	0	0
+Q	zerotohero	lightball	0	1	1	1	0	0
+Q	zerotohero	lightball	1	0	0	0	1	1
+Q	zerotohero	lightball	1	1	1	0	0	1
+Q	-	lightball	0	0	1	1	0	0
+Q	-	lightball	0	1	1	1	0	0
+Q	-	lightball	1	0	0	0	1	1
+Q	-	lightball	1	1	0	0	1	1
+Q	static	adamantcrystal	0	0	1	1	0	0
+Q	static	adamantcrystal	1	0	0	0	1	1
+Q	static	aguavberry	0	0	1	1	0	0
+Q	static	aguavberry	1	0	0	0	1	1
+Q	static	assaultvest	0	0	1	1	0	0
+Q	static	assaultvest	1	0	0	0	1	1
+Q	static	blunderpolicy	0	0	1	1	0	0
+Q	static	blunderpolicy	1	0	0	0	1	1
+Q	static	boosterenergy	0	0	1	1	0	0
+Q	static	boosterenergy	1	0	0	0	1	1
+Q	static	chestoberry	0	0	1	1	0	0
+Q	static	chestoberry	1	0	0	0	1	1
+Q	static	choiceband	0	0	1	1	0	0
+Q	static	choiceband	1	0	0	0	1	1
+Q	static	choicescarf	0	0	1	1	0	0
+Q	static	choicescarf	1	0	0	0	1	1
+Q	static	choicespecs	0	0	1	1	0	0
+Q	static	choicespecs	1	0	0	0	1	1
+Q	static	clearamulet	0	0	1	1	0	0
+Q	static	clearamulet	1	0	0	0	1	1
+Q	static	cornerstonemask	0	0	1	1	0	0
+Q	static	cornerstonemask	1	0	0	0	1	1
+Q	static	covertcloak	0	0	1	1	0	0
+Q	static	covertcloak	1	0	0	0	1	1
+Q	static	dracoplate	0	0	1	1	0	0
+Q	static	dracoplate	1	0	0	0	1	1
+Q	static	dreadplate	0	0	1	1	0	0
+Q	static	dreadplate	1	0	0	0	1	1
+Q	static	earthplate	0	0	1	1	0	0
+Q	static	earthplate	1	0	0	0	1	1
+Q	static	eviolite	0	0	1	1	0	0
+Q	static	eviolite	1	0	0	0	1	1
+Q	static	figyberry	0	0	1	1	0	0
+Q	static	figyberry	1	0	0	0	1	1
+Q	static	fistplate	0	0	1	1	0	0
+Q	static	fistplate	1	0	0	0	1	1
+Q	static	flameorb	0	0	1	1	0	0
+Q	static	flameorb	1	0	0	0	1	1
+Q	static	flameplate	0	0	1	1	0	0
+Q	static	flameplate	1	0	0	0	1	1
+Q	static	focussash	0	0	1	1	0	0
+Q	static	focussash	1	0	0	0	1	1
+Q	static	griseouscore	0	0	1	1	0	0
+Q	static	griseouscore	1	0	0	0	1	1
+Q	static	hearthflamemask	0	0	1	1	0	0
+Q	static	hearthflamemask	1	0	0	0	1	1
+Q	static	heavydutyboots	0	0	1	1	0	0
+Q	static	heavydutyboots	1	0	0	0	1	1
+Q	static	iapapaberry	0	0	1	1	0	0
+Q	static	iapapaberry	1	0	0	0	1	1
+Q	static	icicleplate	0	0	1	1	0	0
+Q	static	icicleplate	1	0	0	0	1	1
+Q	static	insectplate	0	0	1	1	0	0
+Q	static	insectplate	1	0	0	0	1	1
+Q	static	ironplate	0	0	1	1	0	0
+Q	static	ironplate	1	0	0	0	1	1
+Q	static	leftovers	0	0	1	1	0	0
+Q	static	leftovers	1	0	0	0	1	1
+Q	static	lifeorb	0	0	1	1	0	0
+Q	static	lifeorb	1	0	0	0	1	1
+Q	static	lightball	0	0	1	1	0	0
+Q	static	lightball	1	0	0	0	1	1
+Q	static	lightclay	0	0	1	1	0	0
+Q	static	lightclay	1	0	0	0	1	1
+Q	static	loadeddice	0	0	1	1	0	0
+Q	static	loadeddice	1	0	0	0	1	1
+Q	static	lustrousglobe	0	0	1	1	0	0
+Q	static	lustrousglobe	1	0	0	0	1	1
+Q	static	lustrousorb	0	0	1	1	0	0
+Q	static	lustrousorb	1	0	0	0	1	1
+Q	static	magnet	0	0	1	1	0	0
+Q	static	magnet	1	0	0	0	1	1
+Q	static	magoberry	0	0	1	1	0	0
+Q	static	magoberry	1	0	0	0	1	1
+Q	static	meadowplate	0	0	1	1	0	0
+Q	static	meadowplate	1	0	0	0	1	1
+Q	static	mindplate	0	0	1	1	0	0
+Q	static	mindplate	1	0	0	0	1	1
+Q	static	mysticwater	0	0	1	1	0	0
+Q	static	mysticwater	1	0	0	0	1	1
+Q	static	pixieplate	0	0	1	1	0	0
+Q	static	pixieplate	1	0	0	0	1	1
+Q	static	powerherb	0	0	1	1	0	0
+Q	static	powerherb	1	0	0	0	1	1
+Q	static	rockyhelmet	0	0	1	1	0	0
+Q	static	rockyhelmet	1	0	0	0	1	1
+Q	static	rustedshield	0	0	1	1	0	0
+Q	static	rustedshield	1	0	0	0	1	1
+Q	static	rustedsword	0	0	1	1	0	0
+Q	static	rustedsword	1	0	0	0	1	1
+Q	static	silkscarf	0	0	1	1	0	0
+Q	static	silkscarf	1	0	0	0	1	1
+Q	static	sitrusberry	0	0	1	1	0	0
+Q	static	sitrusberry	1	0	0	0	1	1
+Q	static	skyplate	0	0	1	1	0	0
+Q	static	skyplate	1	0	0	0	1	1
+Q	static	souldew	0	0	1	1	0	0
+Q	static	souldew	1	0	0	0	1	1
+Q	static	splashplate	0	0	1	1	0	0
+Q	static	splashplate	1	0	0	0	1	1
+Q	static	spookyplate	0	0	1	1	0	0
+Q	static	spookyplate	1	0	0	0	1	1
+Q	static	stoneplate	0	0	1	1	0	0
+Q	static	stoneplate	1	0	0	0	1	1
+Q	static	throatspray	0	0	1	1	0	0
+Q	static	throatspray	1	0	0	0	1	1
+Q	static	toxicorb	0	0	1	1	0	0
+Q	static	toxicorb	1	0	0	0	1	1
+Q	static	toxicplate	0	0	1	1	0	0
+Q	static	toxicplate	1	0	0	0	1	1
+Q	static	weaknesspolicy	0	0	1	1	0	0
+Q	static	weaknesspolicy	1	0	0	0	1	1
+Q	static	wellspringmask	0	0	1	1	0	0
+Q	static	wellspringmask	1	0	0	0	1	1
+Q	static	whiteherb	0	0	1	1	0	0
+Q	static	whiteherb	1	0	0	0	1	1
+Q	static	widelens	0	0	1	1	0	0
+Q	static	widelens	1	0	0	0	1	1
+Q	static	wikiberry	0	0	1	1	0	0
+Q	static	wikiberry	1	0	0	0	1	1
+Q	static	zapplate	0	0	1	1	0	0
+Q	static	zapplate	1	0	0	0	1	1
+Q	static	-	0	0	1	1	0	0
+Q	static	-	1	0	0	0	1	1
+T	-	-	-	0	0	Normal	Normal
+T	-	-	-	0	1	Normal	Normal
+T	-	-	-	1	0	Normal	Normal
+T	-	-	-	1	1	Normal	Normal
+T	-	-	Water	0	0	Water	-
+T	-	-	Water	0	1	Normal	Normal
+T	-	-	Water	1	0	Water	-
+T	-	-	Water	1	1	Normal	Normal
+T	-	-	Stellar	0	0	Normal	Normal
+T	-	-	Stellar	0	1	Normal	Normal
+T	-	-	Stellar	1	0	Normal	Normal
+T	-	-	Stellar	1	1	Normal	Normal
+T	-	Grass	-	0	0	Normal,Grass	Normal
+T	-	Grass	-	0	1	Normal,Grass	Normal
+T	-	Grass	-	1	0	Normal	Normal
+T	-	Grass	-	1	1	Normal	Normal
+T	-	Grass	Water	0	0	Water	-
+T	-	Grass	Water	0	1	Normal,Grass	Normal
+T	-	Grass	Water	1	0	Water	-
+T	-	Grass	Water	1	1	Normal	Normal
+T	-	Grass	Stellar	0	0	Normal,Grass	Normal
+T	-	Grass	Stellar	0	1	Normal,Grass	Normal
+T	-	Grass	Stellar	1	0	Normal	Normal
+T	-	Grass	Stellar	1	1	Normal	Normal
+T	Electric	-	-	0	0	Electric	Electric
+T	Electric	-	-	0	1	Electric	Electric
+T	Electric	-	-	1	0	Electric	Electric
+T	Electric	-	-	1	1	Electric	Electric
+T	Electric	-	Water	0	0	Water	Electric
+T	Electric	-	Water	0	1	Electric	Electric
+T	Electric	-	Water	1	0	Water	Electric
+T	Electric	-	Water	1	1	Electric	Electric
+T	Electric	-	Stellar	0	0	Electric	Electric
+T	Electric	-	Stellar	0	1	Electric	Electric
+T	Electric	-	Stellar	1	0	Electric	Electric
+T	Electric	-	Stellar	1	1	Electric	Electric
+T	Electric	Grass	-	0	0	Electric,Grass	Electric
+T	Electric	Grass	-	0	1	Electric,Grass	Electric
+T	Electric	Grass	-	1	0	Electric	Electric
+T	Electric	Grass	-	1	1	Electric	Electric
+T	Electric	Grass	Water	0	0	Water	Electric
+T	Electric	Grass	Water	0	1	Electric,Grass	Electric
+T	Electric	Grass	Water	1	0	Water	Electric
+T	Electric	Grass	Water	1	1	Electric	Electric
+T	Electric	Grass	Stellar	0	0	Electric,Grass	Electric
+T	Electric	Grass	Stellar	0	1	Electric,Grass	Electric
+T	Electric	Grass	Stellar	1	0	Electric	Electric
+T	Electric	Grass	Stellar	1	1	Electric	Electric
+T	Fire,Flying	-	-	0	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	-	0	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	-	1	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	-	1	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Water	0	0	Water	Fire,Flying
+T	Fire,Flying	-	Water	0	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Water	1	0	Water	Fire,Flying
+T	Fire,Flying	-	Water	1	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Stellar	0	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Stellar	0	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Stellar	1	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	-	Stellar	1	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	Grass	-	0	0	Fire,Flying,Grass	Fire,Flying
+T	Fire,Flying	Grass	-	0	1	Fire,Flying,Grass	Fire,Flying
+T	Fire,Flying	Grass	-	1	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	Grass	-	1	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	Grass	Water	0	0	Water	Fire,Flying
+T	Fire,Flying	Grass	Water	0	1	Fire,Flying,Grass	Fire,Flying
+T	Fire,Flying	Grass	Water	1	0	Water	Fire,Flying
+T	Fire,Flying	Grass	Water	1	1	Fire,Flying	Fire,Flying
+T	Fire,Flying	Grass	Stellar	0	0	Fire,Flying,Grass	Fire,Flying
+T	Fire,Flying	Grass	Stellar	0	1	Fire,Flying,Grass	Fire,Flying
+T	Fire,Flying	Grass	Stellar	1	0	Fire,Flying	Fire,Flying
+T	Fire,Flying	Grass	Stellar	1	1	Fire,Flying	Fire,Flying
+C	0	0	Physical	0	0	1	1,2,3,4
+C	0	0	Physical	1	0	1	1,2,3,4
+C	0	0	Status	0	0	1	1,2,3,4
+C	0	0	Status	1	0	1	1,2,3,4
+C	0	1	Physical	0	0	0	1,2,3,4
+C	0	1	Physical	1	0	0	1,2,3,4
+C	0	1	Status	0	0	1	1,2,3,4
+C	0	1	Status	1	0	0	1,2,3,4
+C	1	0	Physical	0	1	1	1,2,3,4
+C	1	0	Physical	1	1	1	1,2,3,4
+C	1	0	Status	0	1	1	1,2,3,4
+C	1	0	Status	1	1	1	1,2,3,4
+C	1	1	Physical	0	1	0	1,2,3,4
+C	1	1	Physical	1	1	0	1,2,3,4
+C	1	1	Status	0	1	1	1,2,3,4
+C	1	1	Status	1	1	0	1,2,3,4
+B	5,-6,0,2,-2,6,-6	atk,evasion,def,accuracy,spa	1,0,0,0,-3	13
+B	-6,6,0,0,0,0,0	atk,evasion,def,accuracy,spa	3,-1,-2,1,-3	6
+H	undefined	50
+H	0	50
+H	NaN	50
+H	-1	-1
+H	23.5	23.5
+H	Infinity	Infinity
+G	static	0	0	0	0	0	1
+G	static	0	0	0	0	1	1
+G	static	0	0	0	1	0	1
+G	static	0	0	0	1	1	1
+G	static	0	0	1	0	0	1
+G	static	0	0	1	0	1	1
+G	static	0	0	1	1	0	1
+G	static	0	0	1	1	1	1
+G	static	0	1	0	0	0	0
+G	static	0	1	0	0	1	1
+G	static	0	1	0	1	0	0
+G	static	0	1	0	1	1	1
+G	static	0	1	1	0	0	0
+G	static	0	1	1	0	1	1
+G	static	0	1	1	1	0	0
+G	static	0	1	1	1	1	1
+G	static	1	0	0	0	0	1
+G	static	1	0	0	0	1	1
+G	static	1	0	0	1	0	1
+G	static	1	0	0	1	1	1
+G	static	1	0	1	0	0	1
+G	static	1	0	1	0	1	1
+G	static	1	0	1	1	0	1
+G	static	1	0	1	1	1	1
+G	static	1	1	0	0	0	0
+G	static	1	1	0	0	1	1
+G	static	1	1	0	1	0	0
+G	static	1	1	0	1	1	1
+G	static	1	1	1	0	0	0
+G	static	1	1	1	0	1	1
+G	static	1	1	1	1	0	0
+G	static	1	1	1	1	1	1
+G	levitate	0	0	0	0	0	1
+G	levitate	0	0	0	0	1	1
+G	levitate	0	0	0	1	0	1
+G	levitate	0	0	0	1	1	1
+G	levitate	0	0	1	0	0	1
+G	levitate	0	0	1	0	1	1
+G	levitate	0	0	1	1	0	1
+G	levitate	0	0	1	1	1	1
+G	levitate	0	1	0	0	0	0
+G	levitate	0	1	0	0	1	1
+G	levitate	0	1	0	1	0	0
+G	levitate	0	1	0	1	1	1
+G	levitate	0	1	1	0	0	0
+G	levitate	0	1	1	0	1	1
+G	levitate	0	1	1	1	0	0
+G	levitate	0	1	1	1	1	1
+G	levitate	1	0	0	0	0	null
+G	levitate	1	0	0	0	1	null
+G	levitate	1	0	0	1	0	null
+G	levitate	1	0	0	1	1	null
+G	levitate	1	0	1	0	0	1
+G	levitate	1	0	1	0	1	1
+G	levitate	1	0	1	1	0	null
+G	levitate	1	0	1	1	1	null
+G	levitate	1	1	0	0	0	0
+G	levitate	1	1	0	0	1	null
+G	levitate	1	1	0	1	0	0
+G	levitate	1	1	0	1	1	null
+G	levitate	1	1	1	0	0	0
+G	levitate	1	1	1	0	1	1
+G	levitate	1	1	1	1	0	0
+G	levitate	1	1	1	1	1	null
+W	-	0	0	0	0	-
+W	-	0	0	0	1	-
+W	-	0	0	1	0	-
+W	-	0	0	1	1	-
+W	-	0	1	0	0	-
+W	-	0	1	0	1	-
+W	-	0	1	1	0	-
+W	-	0	1	1	1	-
+W	-	1	0	0	0	-
+W	-	1	0	0	1	-
+W	-	1	0	1	0	-
+W	-	1	0	1	1	-
+W	-	1	1	0	0	-
+W	-	1	1	0	1	-
+W	-	1	1	1	0	-
+W	-	1	1	1	1	-
+W	sunnyday	0	0	0	0	sunnyday
+W	sunnyday	0	0	0	1	sunnyday
+W	sunnyday	0	0	1	0	sunnyday
+W	sunnyday	0	0	1	1	sunnyday
+W	sunnyday	0	1	0	0	sunnyday
+W	sunnyday	0	1	0	1	sunnyday
+W	sunnyday	0	1	1	0	sunnyday
+W	sunnyday	0	1	1	1	sunnyday
+W	sunnyday	1	0	0	0	sunnyday
+W	sunnyday	1	0	0	1	sunnyday
+W	sunnyday	1	0	1	0	sunnyday
+W	sunnyday	1	0	1	1	sunnyday
+W	sunnyday	1	1	0	0	-
+W	sunnyday	1	1	0	1	sunnyday
+W	sunnyday	1	1	1	0	sunnyday
+W	sunnyday	1	1	1	1	sunnyday
+W	raindance	0	0	0	0	raindance
+W	raindance	0	0	0	1	raindance
+W	raindance	0	0	1	0	raindance
+W	raindance	0	0	1	1	raindance
+W	raindance	0	1	0	0	raindance
+W	raindance	0	1	0	1	raindance
+W	raindance	0	1	1	0	raindance
+W	raindance	0	1	1	1	raindance
+W	raindance	1	0	0	0	raindance
+W	raindance	1	0	0	1	raindance
+W	raindance	1	0	1	0	raindance
+W	raindance	1	0	1	1	raindance
+W	raindance	1	1	0	0	-
+W	raindance	1	1	0	1	raindance
+W	raindance	1	1	1	0	raindance
+W	raindance	1	1	1	1	raindance
+W	sandstorm	0	0	0	0	sandstorm
+W	sandstorm	0	0	0	1	sandstorm
+W	sandstorm	0	0	1	0	sandstorm
+W	sandstorm	0	0	1	1	sandstorm
+W	sandstorm	0	1	0	0	sandstorm
+W	sandstorm	0	1	0	1	sandstorm
+W	sandstorm	0	1	1	0	sandstorm
+W	sandstorm	0	1	1	1	sandstorm
+W	sandstorm	1	0	0	0	sandstorm
+W	sandstorm	1	0	0	1	sandstorm
+W	sandstorm	1	0	1	0	sandstorm
+W	sandstorm	1	0	1	1	sandstorm
+W	sandstorm	1	1	0	0	-
+W	sandstorm	1	1	0	1	sandstorm
+W	sandstorm	1	1	1	0	sandstorm
+W	sandstorm	1	1	1	1	sandstorm
+W	snowscape	0	0	0	0	snowscape
+W	snowscape	0	0	0	1	snowscape
+W	snowscape	0	0	1	0	snowscape
+W	snowscape	0	0	1	1	snowscape
+W	snowscape	0	1	0	0	snowscape
+W	snowscape	0	1	0	1	snowscape
+W	snowscape	0	1	1	0	snowscape
+W	snowscape	0	1	1	1	snowscape
+W	snowscape	1	0	0	0	snowscape
+W	snowscape	1	0	0	1	snowscape
+W	snowscape	1	0	1	0	snowscape
+W	snowscape	1	0	1	1	snowscape
+W	snowscape	1	1	0	0	-
+W	snowscape	1	1	0	1	snowscape
+W	snowscape	1	1	1	0	snowscape
+W	snowscape	1	1	1	1	snowscape
