@@ -32,3 +32,4 @@ slot	confusion	true	pikachu	pikachu	211	211	146,116,136,136,216	146,116,136,136,
 weather	confusion	true	pikachu	pikachu	211	211	146,116,136,136,216	146,116,136,136,216	Electric	Electric	-	1	0	static	static	60	216	0	43514,9542,40559,8561	thunderbolt:24:24:0:false:-,uturn:32:32:0:false:-	24,32	-
 terrain	confusion	true	pikachu	pikachu	211	211	146,116,136,136,216	146,116,136,136,216	Electric	Electric	-	1	0	static	static	60	216	0	43514,9542,40559,8561	thunderbolt:24:24:0:false:-,uturn:32:32:0:false:-	24,32	-
 pseudo	confusion	true	pikachu	pikachu	211	211	146,116,136,136,216	146,116,136,136,216	Electric	Electric	-	1	0	static	static	60	216	0	1,2,3,4	thunderbolt:24:24:0:false:-,uturn:32:32:0:false:-	24,32	-
+skillswap	hugepower	undefined	pikachu	pikachu	211	211	146,116,136,136,216	146,116,136,136,216	Electric	Electric	-	1	0	hugepower	static	60	216	2	1,2,3,4	thunderbolt:24:24:0:false:-,uturn:32:32:0:false:-	24,32	-activate

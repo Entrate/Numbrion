@@ -224,6 +224,10 @@ fn species_transform_slots_and_condition_placement_match_pinned_methods() {
                     },
                 ))
             }
+            "skillswap" => {
+                b.state.pokemon[6].ability = dex::ABILITY_HUGEPOWER;
+                b.skill_swap(p, MonId(6))
+            }
             "species" => b.set_species(p, id(EffectKind::Species, v[1]), EffectRef::None, false),
             "transform" | "transformpp" | "clearvolatile" => {
                 b.set_species(MonId(6), dex::SPECIES_CHARIZARD, EffectRef::None, false);

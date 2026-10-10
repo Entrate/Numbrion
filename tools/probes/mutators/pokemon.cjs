@@ -11,3 +11,5 @@ for(const types of [['Water'],['Fire','Flying']]){const f=fixture();row('type',t
 for(const tera of ['Electric','Stellar']){const f=fixture();f.p.terastallized=tera;row('teratype',tera,f,f.p.setType('Water'));}
 {const f=fixture();f.p.addVolatile('confusion');f.p.boosts.atk=4;const recv=f.b.p1.pokemon[1];recv.copyVolatileFrom(f.p);f.p=recv;row('copy','confusion',f,true);}
 for(const status of ['brn','confusion'])for(const kind of ['side','slot','weather','terrain','pseudo']){const f=fixture();const r=kind==='side'?f.p.side.addSideCondition(status,f.p):kind==='slot'?f.p.side.addSlotCondition(0,status,f.p):kind==='weather'?f.b.field.setWeather(status,f.p):kind==='terrain'?f.b.field.setTerrain(status,f.p):f.b.field.addPseudoWeather(status,f.p);row(kind,status,f,r);}
+
+{const f=fixture();f.t.ability='hugepower';row('skillswap','hugepower',f,f.b.skillSwap(f.p,f.t));}

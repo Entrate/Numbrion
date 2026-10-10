@@ -40,9 +40,17 @@ impl<L: LogSink> Battle<L> {
                     .iter()
                     .position(Option::is_none)
                     .expect("numeric move scratch exhausted") as u8;
+                let parent_depth = self.scratch.move_depth;
+                let reserved_depth = parent_depth.max(i + 1);
+                self.scratch.move_depth = reserved_depth;
                 self.scratch.moves[i as usize] = Some(numeric_move(bp));
                 let r = self.calculate_move_damage(source, target, MoveHandle(i), options);
+                assert_eq!(
+                    self.scratch.move_depth, reserved_depth,
+                    "unbalanced nested numeric damage move"
+                );
                 self.scratch.moves[i as usize] = None;
+                self.scratch.move_depth = parent_depth;
                 r
             }
         }

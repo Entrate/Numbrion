@@ -152,8 +152,9 @@ impl<L: LogSink> Battle<L> {
         let status = self.condition_id(status);
         let effect = self.condition_ref(status);
         if self.state.pokemon[pokemon.0 as usize].hp == 0
-            && dex::effect(status).data.get(dex::FIELD_AFFECTSFAINTED)
-                != Some(dex::DataValue::Bool(true))
+            && (status == EffectId::NONE
+                || dex::effect(status).data.get(dex::FIELD_AFFECTSFAINTED)
+                    != Some(dex::DataValue::Bool(true)))
         {
             return Relay::Bool(false);
         }
@@ -282,6 +283,9 @@ impl<L: LogSink> Battle<L> {
     pub(crate) fn condition_immunity(&mut self, mon: MonId, status: EffectId) -> bool {
         if self.state.pokemon[mon.0 as usize].flags & mon_flags::FAINTED != 0 {
             return false;
+        }
+        if status == EffectId::NONE {
+            return true;
         }
         let key = dex::effect(status).key;
         if let Some(i) = dex::IMMUNITY_NAMES.iter().position(|name| *name == key) {

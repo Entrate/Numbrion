@@ -493,11 +493,11 @@ impl<L: LogSink> Battle<L> {
     }
     /// Exchange abilities while preserving required End/Start order
     /// Ports `sim/battle.ts:1315-1349`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
-    pub fn skill_swap(&mut self, source: MonId, target: MonId) -> bool {
+    pub fn skill_swap(&mut self, source: MonId, target: MonId) -> Relay {
         let p = &self.state.pokemon[source.0 as usize];
         let t = &self.state.pokemon[target.0 as usize];
         if p.flags & mon_flags::FAINTED != 0 || t.flags & mon_flags::FAINTED != 0 {
-            return false;
+            return Relay::Bool(false);
         }
         let source_ability = p.ability;
         let target_ability = t.ability;
@@ -508,28 +508,27 @@ impl<L: LogSink> Battle<L> {
                     != 0
         };
         if fails(source_ability) || fails(target_ability) {
-            return false;
+            return Relay::Bool(false);
         }
         let effect = self.condition_ref(dex::CONDITION_SKILLSWAP);
         let a = Attribution::from_move(source, effect);
-        if !self
-            .mutation_event(
-                EventId::SetAbility,
-                mon_arg(Some(target)),
-                a,
-                Relay::Effect(source_ability),
-            )
-            .truthy()
-            || !self
-                .mutation_event(
-                    EventId::SetAbility,
-                    mon_arg(Some(source)),
-                    a,
-                    Relay::Effect(target_ability),
-                )
-                .truthy()
-        {
-            return false;
+        let can_set = self.mutation_event(
+            EventId::SetAbility,
+            mon_arg(Some(target)),
+            a,
+            Relay::Effect(source_ability),
+        );
+        if !can_set.truthy() {
+            return can_set;
+        }
+        let can_set = self.mutation_event(
+            EventId::SetAbility,
+            mon_arg(Some(source)),
+            a,
+            Relay::Effect(target_ability),
+        );
+        if !can_set.truthy() {
+            return can_set;
         }
         let allies = source.side() == target.side();
         let args = [
@@ -588,7 +587,7 @@ impl<L: LogSink> Battle<L> {
             mon_arg(Some(source)),
             Attribution::DEFAULT,
         );
-        true
+        Relay::Undefined
     }
 }
 impl<L: LogSink> Battle<L> {
