@@ -1,0 +1,2278 @@
+# healing_residual scenarios recorded from the pinned Showdown build by
+# tools/probes/healing_residual/scenarios.mjs. Do not edit by hand.
+# S name | SEED a,b,c,d | T1/T2 packed team | B turn seed (decision boundary) | L raw log line
+# (|t:| normalized) produced to reach that boundary | C side choice | E ended/running
+S orbs_leftovers_poisonheal
+SEED 1,2,3,4
+T1 |Gliscor|Toxic Orb|Poison Heal|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale|Leftovers|Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Kingambit|Flame Orb|Defiant|ironhead,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 1,2,3,4
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Gliscor|Gliscor, M|354/354
+L |switch|p1a: Gliscor|Gliscor, M|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Incineroar|Incineroar, M|394/394
+L |switch|p2a: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2b: Kingambit|Kingambit, M|404/404
+L |switch|p2b: Kingambit|Kingambit, M|100/100
+L |-ability|p2a: Incineroar|Intimidate|boost
+L |-unboost|p1a: Gliscor|atk|1
+L |-unboost|p1b: Mudsdale|atk|1
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 2, move 1 1
+B 2 25495,32001,50713,50540
+L |
+L |t:|
+L |move|p1a: Gliscor|Swords Dance|p1a: Gliscor
+L |-boost|p1a: Gliscor|atk|2
+L |move|p2a: Incineroar|Flamethrower|p1b: Mudsdale
+L |split|p1
+L |-damage|p1b: Mudsdale|319/404
+L |-damage|p1b: Mudsdale|79/100
+L |-ability|p1b: Mudsdale|Stamina|boost
+L |-boost|p1b: Mudsdale|def|1
+L |move|p2b: Kingambit|Iron Head|p1a: Gliscor
+L |split|p1
+L |-damage|p1a: Gliscor|270/354
+L |-damage|p1a: Gliscor|77/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p1
+L |-heal|p1b: Mudsdale|344/404|[from] item: Leftovers
+L |-heal|p1b: Mudsdale|86/100|[from] item: Leftovers
+L |-status|p1a: Gliscor|tox|[from] item: Toxic Orb
+L |-status|p2b: Kingambit|brn|[from] item: Flame Orb
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 1 2, move 1 1
+B 3 56224,59251,18573,26068
+L |
+L |t:|
+L |move|p1a: Gliscor|Swords Dance|p1a: Gliscor
+L |-boost|p1a: Gliscor|atk|2
+L |move|p2a: Incineroar|Flamethrower|p1b: Mudsdale
+L |split|p1
+L |-damage|p1b: Mudsdale|250/404
+L |-damage|p1b: Mudsdale|62/100
+L |-ability|p1b: Mudsdale|Stamina|boost
+L |-boost|p1b: Mudsdale|def|1
+L |move|p2b: Kingambit|Iron Head|p1a: Gliscor
+L |split|p1
+L |-damage|p1a: Gliscor|224/354 tox
+L |-damage|p1a: Gliscor|64/100 tox
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p1
+L |-heal|p1b: Mudsdale|275/404|[from] item: Leftovers
+L |-heal|p1b: Mudsdale|69/100|[from] item: Leftovers
+L |split|p1
+L |-heal|p1a: Gliscor|268/354 tox|[from] ability: Poison Heal
+L |-heal|p1a: Gliscor|76/100 tox|[from] ability: Poison Heal
+L |split|p2
+L |-damage|p2b: Kingambit|379/404 brn|[from] brn
+L |-damage|p2b: Kingambit|94/100 brn|[from] brn
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 3
+B 4 56224,59251,18573,26068
+L |
+L |t:|
+L |move|p1a: Gliscor|Swords Dance|p1a: Gliscor
+L |-boost|p1a: Gliscor|atk|2
+L |move|p2a: Incineroar|Calm Mind|p2a: Incineroar
+L |-boost|p2a: Incineroar|spa|1
+L |-boost|p2a: Incineroar|spd|1
+L |move|p2b: Kingambit|Swords Dance|p2b: Kingambit
+L |-boost|p2b: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p1
+L |-heal|p1b: Mudsdale|300/404|[from] item: Leftovers
+L |-heal|p1b: Mudsdale|75/100|[from] item: Leftovers
+L |split|p1
+L |-heal|p1a: Gliscor|312/354 tox|[from] ability: Poison Heal
+L |-heal|p1a: Gliscor|89/100 tox|[from] ability: Poison Heal
+L |split|p2
+L |-damage|p2b: Kingambit|354/404 brn|[from] brn
+L |-damage|p2b: Kingambit|88/100 brn|[from] brn
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 3
+B 5 56224,59251,18573,26068
+L |
+L |t:|
+L |move|p1a: Gliscor|Swords Dance|p1a: Gliscor
+L |-boost|p1a: Gliscor|atk|1
+L |move|p2a: Incineroar|Calm Mind|p2a: Incineroar
+L |-boost|p2a: Incineroar|spa|1
+L |-boost|p2a: Incineroar|spd|1
+L |move|p2b: Kingambit|Swords Dance|p2b: Kingambit
+L |-boost|p2b: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|1
+L |
+L |split|p1
+L |-heal|p1b: Mudsdale|325/404|[from] item: Leftovers
+L |-heal|p1b: Mudsdale|81/100|[from] item: Leftovers
+L |split|p1
+L |-heal|p1a: Gliscor|354/354 tox|[from] ability: Poison Heal
+L |-heal|p1a: Gliscor|100/100 tox|[from] ability: Poison Heal
+L |split|p2
+L |-damage|p2b: Kingambit|329/404 brn|[from] brn
+L |-damage|p2b: Kingambit|82/100 brn|[from] brn
+L |upkeep
+L |turn|5
+E running
+S leech_seed_drain_and_grass_immune
+SEED 6,6,7,8
+T1 |Rillaboom||Overgrow|leechseed,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|leechseed,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Amoonguss||Regenerator|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,
+B 1 6,6,7,8
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Rillaboom|Rillaboom, M|404/404
+L |switch|p1a: Rillaboom|Rillaboom, M|100/100
+L |split|p1
+L |switch|p1b: Incineroar|Incineroar, M|394/394
+L |switch|p1b: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Amoonguss|Amoonguss, F|432/432
+L |switch|p2b: Amoonguss|Amoonguss, F|100/100
+L |-ability|p1b: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Amoonguss|atk|1
+L |turn|1
+C p1 move 1 1, move 1 2
+C p2 move 2, move 2
+B 2 31509,34750,8741,59883
+L |
+L |t:|
+L |move|p1a: Rillaboom|Leech Seed|p2a: Kingambit
+L |-start|p2a: Kingambit|move: Leech Seed
+L |move|p1b: Incineroar|Leech Seed|p2b: Amoonguss
+L |-immune|p2b: Amoonguss
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|354/404|[from] Leech Seed|[of] p1a: Rillaboom
+L |-damage|p2a: Kingambit|88/100|[from] Leech Seed|[of] p1a: Rillaboom
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 31509,34750,8741,59883
+L |
+L |t:|
+L |move|p1a: Rillaboom|Calm Mind|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|spa|1
+L |-boost|p1a: Rillaboom|spd|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|304/404|[from] Leech Seed|[of] p1a: Rillaboom
+L |-damage|p2a: Kingambit|76/100|[from] Leech Seed|[of] p1a: Rillaboom
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 31509,34750,8741,59883
+L |
+L |t:|
+L |move|p1a: Rillaboom|Calm Mind|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|spa|1
+L |-boost|p1a: Rillaboom|spd|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|1
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|254/404|[from] Leech Seed|[of] p1a: Rillaboom
+L |-damage|p2a: Kingambit|63/100|[from] Leech Seed|[of] p1a: Rillaboom
+L |upkeep
+L |turn|4
+E running
+S leech_seed_slot_after_switch
+SEED 9,10,11,12
+T1 |Rillaboom||Overgrow|leechseed,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|ironhead,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 9,10,11,12
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|3
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Rillaboom|Rillaboom, M|404/404
+L |switch|p1a: Rillaboom|Rillaboom, M|100/100
+L |split|p1
+L |switch|p1b: Incineroar|Incineroar, M|394/394
+L |switch|p1b: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |-ability|p1b: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |turn|1
+C p1 move 1 1, move 2
+C p2 move 3, move 2
+B 2 27226,35589,63448,3967
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Rillaboom|Leech Seed|p2a: Kingambit
+L |-start|p2a: Kingambit|move: Leech Seed
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|354/404|[from] Leech Seed|[of] p1a: Rillaboom
+L |-damage|p2a: Kingambit|88/100|[from] Leech Seed|[of] p1a: Rillaboom
+L |upkeep
+L |turn|2
+C p1 switch 3, move 2
+C p2 move 1 1, move 2
+B 3 16465,62295,52364,53027
+L |
+L |t:|
+L |split|p1
+L |switch|p1a: Mudsdale|Mudsdale, M|404/404
+L |switch|p1a: Mudsdale|Mudsdale, M|100/100
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Mudsdale
+L |split|p1
+L |-damage|p1a: Mudsdale|133/404
+L |-damage|p1a: Mudsdale|33/100
+L |-ability|p1a: Mudsdale|Stamina|boost
+L |-boost|p1a: Mudsdale|def|1
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|304/404|[from] Leech Seed|[of] p1a: Mudsdale
+L |-damage|p2a: Kingambit|76/100|[from] Leech Seed|[of] p1a: Mudsdale
+L |split|p1
+L |-heal|p1a: Mudsdale|183/404|[silent]
+L |-heal|p1a: Mudsdale|46/100|[silent]
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 16465,62295,52364,53027
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1a: Mudsdale|Swords Dance|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|254/404|[from] Leech Seed|[of] p1a: Mudsdale
+L |-damage|p2a: Kingambit|63/100|[from] Leech Seed|[of] p1a: Mudsdale
+L |split|p1
+L |-heal|p1a: Mudsdale|233/404|[silent]
+L |-heal|p1a: Mudsdale|58/100|[silent]
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 16465,62295,52364,53027
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1a: Mudsdale|Swords Dance|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|204/404|[from] Leech Seed|[of] p1a: Mudsdale
+L |-damage|p2a: Kingambit|51/100|[from] Leech Seed|[of] p1a: Mudsdale
+L |split|p1
+L |-heal|p1a: Mudsdale|283/404|[silent]
+L |-heal|p1a: Mudsdale|71/100|[silent]
+L |upkeep
+L |turn|5
+E running
+S wish_heals_replacement
+SEED 13,14,15,16
+T1 Wishy|Blissey||Healer|wish,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|ironhead,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|earthquake,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 13,14,15,16
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|3
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Wishy|Blissey, F|714/714
+L |switch|p1a: Wishy|Blissey, F|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 1, move 2
+B 2 1353,42523,42638,16548
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1a: Wishy|Wish|p1a: Wishy
+L |move|p2a: Kingambit|Iron Head|p1a: Wishy
+L |split|p1
+L |-damage|p1a: Wishy|411/714
+L |-damage|p1a: Wishy|58/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|2
+C p1 switch 3, move 1
+C p2 move 1 1, move 2
+B 3 5669,7092,60164,49144
+L |
+L |t:|
+L |split|p1
+L |switch|p1a: Incineroar|Incineroar, M|394/394
+L |switch|p1a: Incineroar|Incineroar, M|100/100
+L |-ability|p1a: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Incineroar
+L |-resisted|p1a: Incineroar
+L |split|p1
+L |-damage|p1a: Incineroar|313/394
+L |-damage|p1a: Incineroar|80/100
+L |move|p1b: Mudsdale|Calm Mind|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|spa|1
+L |-boost|p1b: Mudsdale|spd|1
+L |
+L |split|p1
+L |-heal|p1a: Incineroar|394/394|[from] move: Wish|[wisher] Wishy
+L |-heal|p1a: Incineroar|100/100|[from] move: Wish|[wisher] Wishy
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 5669,7092,60164,49144
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1a: Incineroar|Calm Mind|p1a: Incineroar
+L |-boost|p1a: Incineroar|spa|1
+L |-boost|p1a: Incineroar|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 1 1, move 3
+B 5 46642,31989,1818,4620
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Incineroar|Calm Mind|p1a: Incineroar
+L |-boost|p1a: Incineroar|spa|1
+L |-boost|p1a: Incineroar|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Incineroar
+L |-resisted|p1a: Incineroar
+L |split|p1
+L |-damage|p1a: Incineroar|303/394
+L |-damage|p1a: Incineroar|77/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 6 46642,31989,1818,4620
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1a: Incineroar|Calm Mind|p1a: Incineroar
+L |-boost|p1a: Incineroar|spa|1
+L |-boost|p1a: Incineroar|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |upkeep
+L |turn|6
+E running
+S wish_in_place_and_repeat
+SEED 17,18,19,20
+T1 |Blissey||Natural Cure|wish,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Clefable||Natural Cure|wish,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Kingambit||Defiant|ironhead,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|earthquake,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 17,18,19,20
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Blissey|Blissey, F|714/714
+L |switch|p1a: Blissey|Blissey, F|100/100
+L |split|p1
+L |switch|p1b: Clefable|Clefable, F|394/394
+L |switch|p1b: Clefable|Clefable, F|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 1, move 2
+B 2 42572,29103,22633,59496
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Clefable|Calm Mind|p1b: Clefable
+L |-boost|p1b: Clefable|spa|1
+L |-boost|p1b: Clefable|spd|1
+L |move|p1a: Blissey|Wish|p1a: Blissey
+L |move|p2a: Kingambit|Iron Head|p1a: Blissey
+L |split|p1
+L |-damage|p1a: Blissey|377/714
+L |-damage|p1a: Blissey|53/100
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 2
+C p2 move 2, move 2
+B 3 42572,29103,22633,59496
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Clefable|Calm Mind|p1b: Clefable
+L |-boost|p1b: Clefable|spa|1
+L |-boost|p1b: Clefable|spd|1
+L |move|p1a: Blissey|Wish||[still]
+L |-fail|p1a: Blissey
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |split|p1
+L |-heal|p1a: Blissey|714/714|[from] move: Wish|[wisher] Blissey
+L |-heal|p1a: Blissey|100/100|[from] move: Wish|[wisher] Blissey
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 1 1, move 2
+B 4 42750,64325,63315,4988
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Clefable|Calm Mind|p1b: Clefable
+L |-boost|p1b: Clefable|spa|1
+L |-boost|p1b: Clefable|spd|1
+L |move|p1a: Blissey|Calm Mind|p1a: Blissey
+L |-boost|p1a: Blissey|spa|1
+L |-boost|p1a: Blissey|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Blissey
+L |split|p1
+L |-damage|p1a: Blissey|387/714
+L |-damage|p1a: Blissey|55/100
+L |
+L |upkeep
+L |turn|4
+C p1 move 1, move 2
+C p2 move 2, move 2
+B 5 42750,64325,63315,4988
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Clefable|Calm Mind|p1b: Clefable
+L |-boost|p1b: Clefable|spa|1
+L |-boost|p1b: Clefable|spd|1
+L |move|p1a: Blissey|Wish|p1a: Blissey
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|5
+E running
+S natural_cure_ambiguous_switch
+SEED 21,22,23,24
+T1 |Altaria||Natural Cure|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Blissey||Serene Grace|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|thunderwave,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|thunderwave,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 21,22,23,24
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|4
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Altaria|Altaria, F|354/354
+L |switch|p1a: Altaria|Altaria, F|100/100
+L |split|p1
+L |switch|p1b: Blissey|Blissey, F|714/714
+L |switch|p1b: Blissey|Blissey, F|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 1, move 1 2
+B 2 46265,15665,7385,18869
+L |
+L |t:|
+L |move|p2b: Garchomp|Thunder Wave|p1b: Blissey
+L |-status|p1b: Blissey|par
+L |move|p1a: Altaria|Swords Dance|p1a: Altaria
+L |-boost|p1a: Altaria|atk|2
+L |move|p2a: Kingambit|Thunder Wave|p1a: Altaria
+L |-status|p1a: Altaria|par
+L |move|p1b: Blissey|Swords Dance|p1b: Blissey
+L |-boost|p1b: Blissey|atk|2
+L |
+L |upkeep
+L |turn|2
+C p1 switch 3, switch 4
+C p2 move 2, move 2
+B 3 46265,15665,7385,18869
+L |
+L |t:|
+L |-message|(1 of Alice's pokemon was cured by Natural Cure.)
+L |split|p1
+L |switch|p1a: Mudsdale|Mudsdale, M|404/404
+L |switch|p1a: Mudsdale|Mudsdale, M|100/100
+L |split|p1
+L |switch|p1b: Incineroar|Incineroar, M|394/394
+L |switch|p1b: Incineroar|Incineroar, M|100/100
+L |-ability|p1b: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 46265,15665,7385,18869
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1a: Mudsdale|Swords Dance|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|4
+E running
+S natural_cure_and_regenerator
+SEED 25,26,27,28
+T1 |Altaria||Natural Cure|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Slowbro||Regenerator|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|thunderwave,ironhead,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|earthquake,thunderwave,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 25,26,27,28
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|4
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Altaria|Altaria, F|354/354
+L |switch|p1a: Altaria|Altaria, F|100/100
+L |split|p1
+L |switch|p1b: Slowbro|Slowbro, M|394/394
+L |switch|p1b: Slowbro|Slowbro, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 1, move 2 2
+B 2 7493,56211,13857,47145
+L |
+L |t:|
+L |move|p2b: Garchomp|Thunder Wave|p1b: Slowbro
+L |-status|p1b: Slowbro|par
+L |move|p1a: Altaria|Swords Dance|p1a: Altaria
+L |-boost|p1a: Altaria|atk|2
+L |move|p2a: Kingambit|Thunder Wave|p1a: Altaria
+L |-status|p1a: Altaria|par
+L |cant|p1b: Slowbro|par
+L |
+L |upkeep
+L |turn|2
+C p1 switch 3, move 2
+C p2 move 3, move 3
+B 3 59474,2262,48161,14320
+L |
+L |t:|
+L |-curestatus|p1a: Altaria|par|[from] ability: Natural Cure|[silent]
+L |split|p1
+L |switch|p1a: Mudsdale|Mudsdale, M|404/404
+L |switch|p1a: Mudsdale|Mudsdale, M|100/100
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Slowbro|Swords Dance|p1b: Slowbro
+L |-boost|p1b: Slowbro|atk|2
+L |
+L |upkeep
+L |turn|3
+C p1 switch 4, move 2
+C p2 move 3, move 3
+B 4 4431,61847,51137,8307
+L |
+L |t:|
+L |split|p1
+L |switch|p1a: Incineroar|Incineroar, M|394/394
+L |switch|p1a: Incineroar|Incineroar, M|100/100
+L |-ability|p1a: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |cant|p1b: Slowbro|par
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 1 1, move 2 2
+B 5 51378,47720,4079,47748
+L |
+L |t:|
+L |move|p2b: Garchomp|Thunder Wave|p1b: Slowbro
+L |-fail|p1b: Slowbro|par
+L |move|p1a: Incineroar|Calm Mind|p1a: Incineroar
+L |-boost|p1a: Incineroar|spa|1
+L |-boost|p1a: Incineroar|spd|1
+L |move|p2a: Kingambit|Thunder Wave|p1a: Incineroar
+L |-status|p1a: Incineroar|par
+L |move|p1b: Slowbro|Swords Dance|p1b: Slowbro
+L |-boost|p1b: Slowbro|atk|2
+L |
+L |upkeep
+L |turn|5
+C p1 switch 3, move 2
+C p2 move 3, move 3
+B 6 22801,4071,24103,55511
+L |
+L |t:|
+L |split|p1
+L |switch|p1a: Altaria|Altaria, F|354/354
+L |switch|p1a: Altaria|Altaria, F|100/100
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Slowbro|Swords Dance|p1b: Slowbro
+L |-boost|p1b: Slowbro|atk|2
+L |
+L |upkeep
+L |turn|6
+E running
+S healer_ally_status
+SEED 29,30,31,32
+T1 |Blissey||Healer|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|thunderwave,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 29,30,31,32
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Blissey|Blissey, F|714/714
+L |switch|p1a: Blissey|Blissey, F|100/100
+L |split|p1
+L |switch|p1b: Incineroar|Incineroar, M|394/394
+L |switch|p1b: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |-ability|p1b: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |turn|1
+C p1 move 2, move 1 1
+C p2 move 1 2, move 2
+B 2 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Incineroar|Flamethrower|p2a: Kingambit
+L |-supereffective|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|230/404
+L |-damage|p2a: Kingambit|57/100
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|2
+L |move|p2a: Kingambit|Thunder Wave|p1b: Incineroar
+L |-status|p1b: Incineroar|par
+L |
+L |-activate|p1a: Blissey|ability: Healer
+L |-curestatus|p1b: Incineroar|par|[msg]
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|2
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|2
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 6 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|6
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 7 4395,14749,54768,61510
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p1a: Blissey|Swords Dance|p1a: Blissey
+L |-boost|p1a: Blissey|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|7
+E running
+S shed_skin_statused
+SEED 33,34,35,36
+T1 |Sandaconda||Shed Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|willowisp,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 33,34,35,36
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Sandaconda|Sandaconda, M|348/348
+L |switch|p1a: Sandaconda|Sandaconda, M|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 1, move 2
+B 2 34361,37233,5070,57142
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|2
+L |move|p2a: Kingambit|Will-O-Wisp|p1a: Sandaconda
+L |-status|p1a: Sandaconda|brn
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p1
+L |-damage|p1a: Sandaconda|327/348 brn|[from] brn
+L |-damage|p1a: Sandaconda|94/100 brn|[from] brn
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 61023,6231,26802,38161
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|2
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p1
+L |-damage|p1a: Sandaconda|306/348 brn|[from] brn
+L |-damage|p1a: Sandaconda|88/100 brn|[from] brn
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 10839,40958,8152,34680
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|2
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |-activate|p1a: Sandaconda|ability: Shed Skin
+L |-curestatus|p1a: Sandaconda|brn|[msg]
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 10839,40958,8152,34680
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 6 10839,40958,8152,34680
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |upkeep
+L |turn|6
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 7 10839,40958,8152,34680
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Sandaconda|Swords Dance|p1a: Sandaconda
+L |-boost|p1a: Sandaconda|atk|0
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S bad_dreams_sleeping_and_comatose
+SEED 37,38,39,40
+T1 |Darkrai||Bad Dreams|spore,calmmind|Serious|252,0,128,0,128,0|N|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Komala||Comatose|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 37,38,39,40
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Darkrai|Darkrai|344/344
+L |switch|p1a: Darkrai|Darkrai|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Komala|Komala, M|334/334
+L |switch|p2b: Komala|Komala, M|100/100
+L |-ability|p2b: Komala|Comatose
+L |turn|1
+C p1 move 1 1, move 2
+C p2 move 2, move 2
+B 2 15036,32066,12351,59034
+L |
+L |t:|
+L |move|p1a: Darkrai|Spore|p2a: Kingambit
+L |-status|p2a: Kingambit|slp|[from] move: Spore
+L |move|p2b: Komala|Swords Dance|p2b: Komala
+L |-boost|p2b: Komala|atk|2
+L |cant|p2a: Kingambit|slp
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|354/404 slp|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |-damage|p2a: Kingambit|88/100 slp|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |split|p2
+L |-damage|p2b: Komala|293/334|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |-damage|p2b: Komala|88/100|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 15036,32066,12351,59034
+L |
+L |t:|
+L |move|p1a: Darkrai|Calm Mind|p1a: Darkrai
+L |-boost|p1a: Darkrai|spa|1
+L |-boost|p1a: Darkrai|spd|1
+L |move|p2b: Komala|Swords Dance|p2b: Komala
+L |-boost|p2b: Komala|atk|2
+L |-curestatus|p2a: Kingambit|slp|[msg]
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p2
+L |-damage|p2b: Komala|252/334|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |-damage|p2b: Komala|76/100|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 15036,32066,12351,59034
+L |
+L |t:|
+L |move|p1a: Darkrai|Calm Mind|p1a: Darkrai
+L |-boost|p1a: Darkrai|spa|1
+L |-boost|p1a: Darkrai|spd|1
+L |move|p2b: Komala|Swords Dance|p2b: Komala
+L |-boost|p2b: Komala|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |split|p2
+L |-damage|p2b: Komala|211/334|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |-damage|p2b: Komala|64/100|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 15036,32066,12351,59034
+L |
+L |t:|
+L |move|p1a: Darkrai|Calm Mind|p1a: Darkrai
+L |-boost|p1a: Darkrai|spa|1
+L |-boost|p1a: Darkrai|spd|1
+L |move|p2b: Komala|Swords Dance|p2b: Komala
+L |-boost|p2b: Komala|atk|0
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |split|p2
+L |-damage|p2b: Komala|170/334|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |-damage|p2b: Komala|51/100|[from] ability: Bad Dreams|[of] p1a: Darkrai
+L |upkeep
+L |turn|5
+E running
+S dry_skin_water_rain_fire
+SEED 41,42,43,44
+T1 |Toxicroak||Dry Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Milotic||Competitive|surf,raindance,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,
+B 1 41,42,43,44
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Toxicroak|Toxicroak, M|370/370
+L |switch|p1a: Toxicroak|Toxicroak, M|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Incineroar|Incineroar, M|394/394
+L |switch|p2a: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2b: Milotic|Milotic, F|394/394
+L |switch|p2b: Milotic|Milotic, F|100/100
+L |-ability|p2a: Incineroar|Intimidate|boost
+L |-unboost|p1a: Toxicroak|atk|1
+L |-unboost|p1b: Mudsdale|atk|1
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 1, move 1
+B 2 65097,50567,12144,33093
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Milotic|Surf|p1b: Mudsdale|[spread] p2a,p1b
+L |-immune|p1a: Toxicroak|[from] ability: Dry Skin
+L |-supereffective|p2a: Incineroar
+L |-supereffective|p1b: Mudsdale
+L |split|p2
+L |-damage|p2a: Incineroar|250/394
+L |-damage|p2a: Incineroar|64/100
+L |split|p1
+L |-damage|p1b: Mudsdale|254/404
+L |-damage|p1b: Mudsdale|63/100
+L |-ability|p1b: Mudsdale|Stamina|boost
+L |-boost|p1b: Mudsdale|def|1
+L |move|p2a: Incineroar|Flamethrower|p1a: Toxicroak
+L |split|p1
+L |-damage|p1a: Toxicroak|240/370
+L |-damage|p1a: Toxicroak|65/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 1 1, move 2
+B 3 58170,48321,35451,8329
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Milotic|Rain Dance|p2b: Milotic
+L |-weather|RainDance
+L |move|p2a: Incineroar|Flamethrower|p1a: Toxicroak
+L |split|p1
+L |-damage|p1a: Toxicroak|173/370
+L |-damage|p1a: Toxicroak|47/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |-weather|RainDance|[upkeep]
+L |split|p1
+L |-heal|p1a: Toxicroak|219/370|[from] ability: Dry Skin
+L |-heal|p1a: Toxicroak|60/100|[from] ability: Dry Skin
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 1 1, move 1
+B 4 25132,26337,8523,8350
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Milotic|Surf|p1a: Toxicroak|[spread] p2a,p1b
+L |split|p1
+L |-heal|p1a: Toxicroak|311/370|[from] ability: Dry Skin|[of] p2b: Milotic
+L |-heal|p1a: Toxicroak|85/100|[from] ability: Dry Skin|[of] p2b: Milotic
+L |-supereffective|p2a: Incineroar
+L |-supereffective|p1b: Mudsdale
+L |split|p2
+L |-damage|p2a: Incineroar|8/394
+L |-damage|p2a: Incineroar|3/100
+L |split|p1
+L |-damage|p1b: Mudsdale|12/404
+L |-damage|p1b: Mudsdale|3/100
+L |-ability|p1b: Mudsdale|Stamina|boost
+L |-boost|p1b: Mudsdale|def|1
+L |move|p2a: Incineroar|Flamethrower|p1a: Toxicroak
+L |split|p1
+L |-damage|p1a: Toxicroak|244/370
+L |-damage|p1a: Toxicroak|66/100
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |-weather|RainDance|[upkeep]
+L |split|p1
+L |-heal|p1a: Toxicroak|290/370|[from] ability: Dry Skin
+L |-heal|p1a: Toxicroak|79/100|[from] ability: Dry Skin
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 3
+B 5 25132,26337,8523,8350
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|1
+L |move|p2b: Milotic|Calm Mind|p2b: Milotic
+L |-boost|p2b: Milotic|spa|1
+L |-boost|p2b: Milotic|spd|1
+L |move|p2a: Incineroar|Calm Mind|p2a: Incineroar
+L |-boost|p2a: Incineroar|spa|1
+L |-boost|p2a: Incineroar|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|1
+L |
+L |-weather|RainDance|[upkeep]
+L |split|p1
+L |-heal|p1a: Toxicroak|336/370|[from] ability: Dry Skin
+L |-heal|p1a: Toxicroak|91/100|[from] ability: Dry Skin
+L |upkeep
+L |turn|5
+E running
+S dry_skin_sun_damage
+SEED 45,46,47,48
+T1 |Toxicroak||Dry Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Torkoal||Drought|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 45,46,47,48
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Toxicroak|Toxicroak, M|370/370
+L |switch|p1a: Toxicroak|Toxicroak, M|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Torkoal|Torkoal, M|344/344
+L |switch|p2a: Torkoal|Torkoal, M|100/100
+L |split|p2
+L |switch|p2b: Kingambit|Kingambit, M|404/404
+L |switch|p2b: Kingambit|Kingambit, M|100/100
+L |-weather|SunnyDay|[from] ability: Drought|[of] p2a: Torkoal
+L |turn|1
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 2 45,46,47,48
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Kingambit|Swords Dance|p2b: Kingambit
+L |-boost|p2b: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1a: Toxicroak|324/370|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |-damage|p1a: Toxicroak|88/100|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 45,46,47,48
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Kingambit|Swords Dance|p2b: Kingambit
+L |-boost|p2b: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1a: Toxicroak|278/370|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |-damage|p1a: Toxicroak|76/100|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 45,46,47,48
+L |
+L |t:|
+L |move|p1a: Toxicroak|Swords Dance|p1a: Toxicroak
+L |-boost|p1a: Toxicroak|atk|2
+L |move|p2b: Kingambit|Swords Dance|p2b: Kingambit
+L |-boost|p2b: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1a: Toxicroak|232/370|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |-damage|p1a: Toxicroak|63/100|[from] ability: Dry Skin|[of] p1a: Toxicroak
+L |upkeep
+L |turn|4
+E running
+S salt_cure_water_steel
+SEED 49,50,51,52
+T1 |Garganacl||Purifying Salt|saltcure,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Milotic||Competitive|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 37009,37343,52692,20193
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|3
+L |teamsize|p2|3
+L |start
+L |split|p1
+L |switch|p1a: Garganacl|Garganacl, M|404/404
+L |switch|p1a: Garganacl|Garganacl, M|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Milotic|Milotic, F|394/394
+L |switch|p2b: Milotic|Milotic, F|100/100
+L |turn|1
+C p1 move 1 1, move 2
+C p2 move 2, move 2
+B 2 33446,13929,23652,2878
+L |
+L |t:|
+L |move|p2b: Milotic|Swords Dance|p2b: Milotic
+L |-boost|p2b: Milotic|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p1a: Garganacl|Salt Cure|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|386/404
+L |-damage|p2a: Kingambit|96/100
+L |-start|p2a: Kingambit|Salt Cure
+L |
+L |split|p2
+L |-damage|p2a: Kingambit|285/404|[from] Salt Cure
+L |-damage|p2a: Kingambit|71/100|[from] Salt Cure
+L |upkeep
+L |turn|2
+C p1 move 1 2, move 2
+C p2 move 2, move 2
+B 3 6014,42100,52668,30839
+L |
+L |t:|
+L |move|p2b: Milotic|Swords Dance|p2b: Milotic
+L |-boost|p2b: Milotic|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p1a: Garganacl|Salt Cure|p2b: Milotic
+L |split|p2
+L |-damage|p2b: Milotic|342/394
+L |-damage|p2b: Milotic|87/100
+L |-start|p2b: Milotic|Salt Cure
+L |
+L |split|p2
+L |-damage|p2b: Milotic|244/394|[from] Salt Cure
+L |-damage|p2b: Milotic|62/100|[from] Salt Cure
+L |split|p2
+L |-damage|p2a: Kingambit|184/404|[from] Salt Cure
+L |-damage|p2a: Kingambit|46/100|[from] Salt Cure
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 switch 3, move 2
+B 4 24402,3486,31286,8648
+L |
+L |t:|
+L |split|p2
+L |switch|p2a: Garchomp|Garchomp, M|420/420
+L |switch|p2a: Garchomp|Garchomp, M|100/100
+L |move|p2b: Milotic|Swords Dance|p2b: Milotic
+L |-boost|p2b: Milotic|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p1a: Garganacl|Calm Mind|p1a: Garganacl
+L |-boost|p1a: Garganacl|spa|1
+L |-boost|p1a: Garganacl|spd|1
+L |
+L |split|p2
+L |-damage|p2b: Milotic|146/394|[from] Salt Cure
+L |-damage|p2b: Milotic|38/100|[from] Salt Cure
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 22812,47729,33982,23985
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p2b: Milotic|Swords Dance|p2b: Milotic
+L |-boost|p2b: Milotic|atk|0
+L |move|p1a: Garganacl|Calm Mind|p1a: Garganacl
+L |-boost|p1a: Garganacl|spa|1
+L |-boost|p1a: Garganacl|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |
+L |split|p2
+L |-damage|p2b: Milotic|48/394|[from] Salt Cure
+L |-damage|p2b: Milotic|13/100|[from] Salt Cure
+L |upkeep
+L |turn|5
+E running
+S syrup_bomb_speed_drops
+SEED 53,54,55,56
+T1 |Dipplin||Sticky Hold|syrupbomb,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 53,54,55,56
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Dipplin|Dipplin, F|364/364
+L |switch|p1a: Dipplin|Dipplin, F|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 1 1, move 2
+C p2 move 2, move 2
+B 2 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1a: Dipplin|Syrup Bomb|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|374/404
+L |-damage|p2a: Kingambit|93/100
+L |-start|p2a: Kingambit|Syrup Bomb
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |-unboost|p2a: Kingambit|spe|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 3 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Dipplin|Calm Mind|p1a: Dipplin
+L |-boost|p1a: Dipplin|spa|1
+L |-boost|p1a: Dipplin|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |
+L |-unboost|p2a: Kingambit|spe|1
+L |-boost|p2a: Kingambit|atk|0
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Dipplin|Calm Mind|p1a: Dipplin
+L |-boost|p1a: Dipplin|spa|1
+L |-boost|p1a: Dipplin|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|0
+L |
+L |-unboost|p2a: Kingambit|spe|1
+L |-boost|p2a: Kingambit|atk|0
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 5 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Dipplin|Calm Mind|p1a: Dipplin
+L |-boost|p1a: Dipplin|spa|1
+L |-boost|p1a: Dipplin|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|0
+L |
+L |-end|p2a: Kingambit|Syrup Bomb|[silent]
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 6 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Dipplin|Calm Mind|p1a: Dipplin
+L |-boost|p1a: Dipplin|spa|1
+L |-boost|p1a: Dipplin|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|0
+L |
+L |upkeep
+L |turn|6
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 7 20325,39392,39202,52812
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|0
+L |move|p1a: Dipplin|Calm Mind|p1a: Dipplin
+L |-boost|p1a: Dipplin|spa|1
+L |-boost|p1a: Dipplin|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|0
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S syrup_bomb_source_leaves
+SEED 57,58,59,60
+T1 |Dipplin||Sticky Hold|syrupbomb,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 57,58,59,60
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|3
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Dipplin|Dipplin, F|364/364
+L |switch|p1a: Dipplin|Dipplin, F|100/100
+L |split|p1
+L |switch|p1b: Mudsdale|Mudsdale, M|404/404
+L |switch|p1b: Mudsdale|Mudsdale, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 1 1, move 2
+C p2 move 2, move 2
+B 2 61544,25972,19198,30224
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|2
+L |move|p1a: Dipplin|Syrup Bomb|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|370/404
+L |-damage|p2a: Kingambit|92/100
+L |-start|p2a: Kingambit|Syrup Bomb
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |
+L |-unboost|p2a: Kingambit|spe|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |upkeep
+L |turn|2
+C p1 switch 3, move 2
+C p2 move 2, move 2
+B 3 61544,25972,19198,30224
+L |
+L |t:|
+L |split|p1
+L |switch|p1a: Incineroar|Incineroar, M|394/394
+L |switch|p1a: Incineroar|Incineroar, M|100/100
+L |-end|p2a: Kingambit|Syrup Bomb|[silent]
+L |-ability|p1a: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 2, move 2
+C p2 move 2, move 2
+B 4 61544,25972,19198,30224
+L |
+L |t:|
+L |move|p2b: Garchomp|Swords Dance|p2b: Garchomp
+L |-boost|p2b: Garchomp|atk|2
+L |move|p1a: Incineroar|Calm Mind|p1a: Incineroar
+L |-boost|p1a: Incineroar|spa|1
+L |-boost|p1a: Incineroar|spd|1
+L |move|p1b: Mudsdale|Swords Dance|p1b: Mudsdale
+L |-boost|p1b: Mudsdale|atk|2
+L |move|p2a: Kingambit|Swords Dance|p2a: Kingambit
+L |-boost|p2a: Kingambit|atk|0
+L |
+L |upkeep
+L |turn|4
+E running
+S heal_pulse_and_jungle_healing
+SEED 61,62,63,64
+T1 |Clawitzer||Mega Launcher|healpulse,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Lilligant||Chlorophyll|junglehealing,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Kingambit||Defiant|ironhead,thunderwave,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|earthquake,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 61,62,63,64
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Clawitzer|Clawitzer, M|346/346
+L |switch|p1a: Clawitzer|Clawitzer, M|100/100
+L |split|p1
+L |switch|p1b: Lilligant|Lilligant, F|344/344
+L |switch|p1b: Lilligant|Lilligant, F|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |turn|1
+C p1 move 1 -2, move 1
+C p2 move 1 2, move 1
+B 2 28207,38227,39941,58038
+L |
+L |t:|
+L |move|p2b: Garchomp|Earthquake|p1a: Clawitzer|[spread] p2a,p1a,p1b
+L |-supereffective|p2a: Kingambit
+L |-resisted|p1b: Lilligant
+L |split|p2
+L |-damage|p2a: Kingambit|242/404
+L |-damage|p2a: Kingambit|60/100
+L |split|p1
+L |-damage|p1a: Clawitzer|237/346
+L |-damage|p1a: Clawitzer|69/100
+L |split|p1
+L |-damage|p1b: Lilligant|289/344
+L |-damage|p1b: Lilligant|85/100
+L |move|p1b: Lilligant|Jungle Healing|p1b: Lilligant|[spread] p1a,p1b
+L |split|p1
+L |-heal|p1a: Clawitzer|323/346
+L |-heal|p1a: Clawitzer|94/100
+L |split|p1
+L |-heal|p1b: Lilligant|344/344
+L |-heal|p1b: Lilligant|100/100
+L |move|p1a: Clawitzer|Heal Pulse|p1b: Lilligant
+L |-fail|p1b: Lilligant|heal
+L |move|p2a: Kingambit|Iron Head|p1b: Lilligant
+L |split|p1
+L |-damage|p1b: Lilligant|202/344
+L |-damage|p1b: Lilligant|59/100
+L |
+L |upkeep
+L |turn|2
+C p1 move 1 -2, move 1
+C p2 move 2 2, move 2
+B 3 14483,916,34293,24844
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Lilligant|Jungle Healing|p1b: Lilligant|[spread] p1a,p1b
+L |split|p1
+L |-heal|p1a: Clawitzer|346/346
+L |-heal|p1a: Clawitzer|100/100
+L |split|p1
+L |-heal|p1b: Lilligant|288/344
+L |-heal|p1b: Lilligant|84/100
+L |move|p1a: Clawitzer|Heal Pulse|p1b: Lilligant
+L |split|p1
+L |-heal|p1b: Lilligant|344/344
+L |-heal|p1b: Lilligant|100/100
+L |move|p2a: Kingambit|Thunder Wave|p1b: Lilligant
+L |-status|p1b: Lilligant|par
+L |
+L |upkeep
+L |turn|3
+C p1 move 1 -2, move 1
+C p2 move 2 1, move 2
+B 4 58867,50705,6839,8583
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1a: Clawitzer|Heal Pulse|p1b: Lilligant
+L |-fail|p1b: Lilligant|heal
+L |move|p2a: Kingambit|Thunder Wave|p1a: Clawitzer
+L |-status|p1a: Clawitzer|par
+L |move|p1b: Lilligant|Jungle Healing|p1b: Lilligant|[spread] p1a,p1b
+L |-curestatus|p1a: Clawitzer|par|[msg]
+L |-curestatus|p1b: Lilligant|par|[msg]
+L |
+L |upkeep
+L |turn|4
+C p1 move 1 1, move 1
+C p2 move 3, move 2
+B 5 8690,35261,27035,46394
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Lilligant|Jungle Healing||[still]|[spread] 
+L |-fail|p1b: Lilligant
+L |move|p1a: Clawitzer|Heal Pulse|p2a: Kingambit
+L |split|p2
+L |-heal|p2a: Kingambit|404/404
+L |-heal|p2a: Kingambit|100/100
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|5
+E running
+S lunar_blessing_take_heart_strength_sap
+SEED 74,66,67,68
+T1 |Cresselia||Levitate|lunarblessing,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Meowscarada||Overgrow|takeheart,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|thunderwave,ironhead,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Amoonguss||Regenerator|strengthsap,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,
+B 1 74,66,67,68
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Cresselia|Cresselia, F|444/444
+L |switch|p1a: Cresselia|Cresselia, F|100/100
+L |split|p1
+L |switch|p1b: Meowscarada|Meowscarada, M|356/356
+L |switch|p1b: Meowscarada|Meowscarada, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Amoonguss|Amoonguss, F|432/432
+L |switch|p2b: Amoonguss|Amoonguss, F|100/100
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1 1, move 1 1
+B 2 61332,59808,38540,59701
+L |
+L |t:|
+L |move|p1b: Meowscarada|Take Heart|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p1a: Cresselia|Lunar Blessing||[still]|[spread] 
+L |-fail|p1a: Cresselia
+L |move|p2a: Kingambit|Thunder Wave|p1a: Cresselia
+L |-status|p1a: Cresselia|par
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 2 1, move 1 1
+B 3 53833,27043,37863,6465
+L |
+L |t:|
+L |move|p1b: Meowscarada|Take Heart|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Cresselia
+L |split|p1
+L |-damage|p1a: Cresselia|339/444 par
+L |-damage|p1a: Cresselia|77/100 par
+L |move|p1a: Cresselia|Lunar Blessing|p1a: Cresselia|[spread] p1a,p1b
+L |split|p1
+L |-heal|p1a: Cresselia|444/444 par
+L |-heal|p1a: Cresselia|100/100 par
+L |-curestatus|p1a: Cresselia|par|[msg]
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 2 1, move 1 1
+B 4 38642,45240,1600,25939
+L |
+L |t:|
+L |move|p1b: Meowscarada|Take Heart|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p1a: Cresselia|Lunar Blessing||[still]|[spread] 
+L |-fail|p1a: Cresselia
+L |move|p2a: Kingambit|Iron Head|p1a: Cresselia
+L |split|p1
+L |-damage|p1a: Cresselia|350/444
+L |-damage|p1a: Cresselia|79/100
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 2
+C p2 move 3, move 1 1
+B 5 20465,38195,46861,898
+L |
+L |t:|
+L |move|p1b: Meowscarada|Calm Mind|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p1a: Cresselia|Calm Mind|p1a: Cresselia
+L |-boost|p1a: Cresselia|spa|1
+L |-boost|p1a: Cresselia|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 3, move 1 1
+B 6 28806,381,8119,37645
+L |
+L |t:|
+L |move|p1b: Meowscarada|Calm Mind|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p1a: Cresselia|Calm Mind|p1a: Cresselia
+L |-boost|p1a: Cresselia|spa|1
+L |-boost|p1a: Cresselia|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|6
+C p1 move 2, move 2
+C p2 move 3, move 1 1
+B 7 25908,61318,17056,38884
+L |
+L |t:|
+L |move|p1b: Meowscarada|Calm Mind|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|1
+L |-boost|p1b: Meowscarada|spd|1
+L |move|p1a: Cresselia|Calm Mind|p1a: Cresselia
+L |-boost|p1a: Cresselia|spa|1
+L |-boost|p1a: Cresselia|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Amoonguss|Strength Sap|p1a: Cresselia
+L |-unboost|p1a: Cresselia|atk|1
+L |
+L |upkeep
+L |turn|7
+C p1 move 2, move 2
+C p2 move 3, move 1 1
+B 8 63757,42252,37383,36791
+L |
+L |t:|
+L |move|p1b: Meowscarada|Calm Mind|p1b: Meowscarada
+L |-boost|p1b: Meowscarada|spa|0
+L |-boost|p1b: Meowscarada|spd|0
+L |move|p1a: Cresselia|Calm Mind|p1a: Cresselia
+L |-boost|p1a: Cresselia|spa|1
+L |-boost|p1a: Cresselia|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Amoonguss|Strength Sap||[still]
+L |-fail|p2b: Amoonguss
+L |
+L |upkeep
+L |turn|8
+E running
+S hospitality_on_entry
+SEED 69,70,71,72
+T1 |Mudsdale||Stamina|calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Incineroar||Intimidate|flamethrower,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Sinistcha||Hospitality|calmmind,swordsdance|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Kingambit||Defiant|ironhead,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Garchomp||Rough Skin|earthquake,calmmind,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 69,70,71,72
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|3
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Mudsdale|Mudsdale, M|404/404
+L |switch|p1a: Mudsdale|Mudsdale, M|100/100
+L |split|p1
+L |switch|p1b: Incineroar|Incineroar, M|394/394
+L |switch|p1b: Incineroar|Incineroar, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, M|420/420
+L |switch|p2b: Garchomp|Garchomp, M|100/100
+L |-ability|p1b: Incineroar|Intimidate|boost
+L |-unboost|p2a: Kingambit|atk|1
+L |-ability|p2a: Kingambit|Defiant|boost
+L |-boost|p2a: Kingambit|atk|2
+L |-unboost|p2b: Garchomp|atk|1
+L |turn|1
+C p1 move 2, move 2
+C p2 move 1 1, move 2
+B 2 54128,51247,24721,27996
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Incineroar|Calm Mind|p1b: Incineroar
+L |-boost|p1b: Incineroar|spa|1
+L |-boost|p1b: Incineroar|spd|1
+L |move|p2a: Kingambit|Iron Head|p1a: Mudsdale
+L |split|p1
+L |-damage|p1a: Mudsdale|245/404
+L |-damage|p1a: Mudsdale|61/100
+L |-ability|p1a: Mudsdale|Stamina|boost
+L |-boost|p1a: Mudsdale|def|1
+L |move|p1a: Mudsdale|Swords Dance|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, switch 3
+C p2 move 2, move 2
+B 3 54128,51247,24721,27996
+L |
+L |t:|
+L |split|p1
+L |switch|p1b: Sinistcha|Sinistcha, F|346/346
+L |switch|p1b: Sinistcha|Sinistcha, F|100/100
+L |split|p1
+L |-heal|p1a: Mudsdale|346/404|[from] ability: Hospitality|[of] p1b: Sinistcha
+L |-heal|p1a: Mudsdale|86/100|[from] ability: Hospitality|[of] p1b: Sinistcha
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1a: Mudsdale|Swords Dance|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|atk|2
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 2, move 2
+B 4 54128,51247,24721,27996
+L |
+L |t:|
+L |move|p2b: Garchomp|Calm Mind|p2b: Garchomp
+L |-boost|p2b: Garchomp|spa|1
+L |-boost|p2b: Garchomp|spd|1
+L |move|p1b: Sinistcha|Calm Mind|p1b: Sinistcha
+L |-boost|p1b: Sinistcha|spa|1
+L |-boost|p1b: Sinistcha|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p1a: Mudsdale|Calm Mind|p1a: Mudsdale
+L |-boost|p1a: Mudsdale|spa|1
+L |-boost|p1a: Mudsdale|spd|1
+L |
+L |upkeep
+L |turn|4
+E running
