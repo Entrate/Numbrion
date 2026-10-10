@@ -3,9 +3,7 @@
 //!
 //! State: stateless (`PAYLOAD_WORDS = 0`); `noCopy: true` and the 100% `secondary.volatileStatus`
 //! are declarative data on the move/condition rows, handled by the generic pipeline.
-use crate::effects::registry::abilities_baddreams::support::{
-    TYPE_STEEL, TYPE_WATER, base_max_hp,
-};
+use crate::effects::registry::abilities_baddreams::support::{TYPE_STEEL, TYPE_WATER, base_max_hp};
 use crate::{
     Battle,
     actions::Attribution,

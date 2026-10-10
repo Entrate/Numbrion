@@ -25,7 +25,11 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 fn on_hit<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let pokemon = mon_arg(b, cx, 0);
     // const success = !!this.heal(this.modify(pokemon.maxhp, 0.25));
-    let amount = b.modify(f64::from(b.state.pokemon[pokemon.0 as usize].max_hp), 0.25, 1.0);
+    let amount = b.modify(
+        f64::from(b.state.pokemon[pokemon.0 as usize].max_hp),
+        0.25,
+        1.0,
+    );
     let success = b.heal(amount, None, None, HealEffect::Context).truthy();
     // return pokemon.cureStatus() || success;   (cureStatus runs first; `||` yields a boolean)
     let cured = b.cure_status(pokemon, false);
