@@ -206,7 +206,11 @@ worker = world.clone()                                # then worker.copy_from(wo
 * `hidden_team_indices(viewer)`: indices into the opponent's *packed team* (construction order, stable for the
   whole battle; not the request's party order) whose set can be swapped now: never switched in (the leads
   are), never chosen or inspected by an Illusion user as its disguise, and unchanged since construction.
-  Only the count is visible to a player, so which index holds which unseen Pokemon carries no information.
+  This is privileged bookkeeping, not a public observation: eligibility depends on hidden facts (an unseen
+  Zacian/Zamazenta-style species is never eligible), so the returned indices and their count can differ from
+  what the viewer can infer, and must not be fed to a policy. The API is a *partial* determinization:
+  ineligible hidden Pokemon keep their true sets in every sampled world, and revealed Pokemon keep their
+  hidden details. A fair-information search must also sample those; that is not supported yet.
 * `replace_hidden_set(viewer, index, packed_set)` gives that Pokemon a new set, raising `ValueError` (battle
   unchanged) for any other Pokemon, after the end, for Zacian/Zamazenta-style species (their `BattleStart`
   forme change already ran at start), and for a random-gender species with an empty gender field when the
@@ -245,7 +249,10 @@ r = env.step(actions)             # int32-compatible [n_envs, 2 sides, 2 slots]
 
 * **Team pools:** `team_pool_paths` are files with one packed team per line (`.txt` or `.txt.gz`; all files are
   merged into one pool, `max_teams_per_file` keeps a prefix; `teams=[...]` adds packed teams directly).
-  `tools/oracle/gen-teams.mjs` makes more; `data/teams/pool-s{1,2,3}-200k.txt.gz` are 200k teams each. At
+  `tools/oracle/gen-teams.mjs` makes more; `data/teams/pool-s{1,2,3}-200k.txt.gz` are 200k teams each. Each
+  team is parsed on first use and kept for the pool's lifetime, so memory grows with the number of distinct
+  teams drawn (estimate: on the order of 1 KB each, i.e. several hundred MB over a long run on the full
+  600k pool); `max_teams_per_file` bounds it. At
   every (auto-)reset both teams are drawn uniformly and independently from the pool, and the battle seed from
   the environment's own RNG.
 * **Randomness / determinism:** each environment owns two SplitMix64 streams derived from `(seed, env index)`;
@@ -433,9 +440,10 @@ masks; "step+log" is "step" with `TextLog` battles.
 So the engine itself sets the ceiling (about 1,000 battles/s per core); the interface costs ~10% on one thread
 and ~27% on six threads with 16 environments per thread (the per-step barrier waits for the slowest
 environment; 64 environments per thread recover it to ~14%), and building masks is ~1.5 us per side-boundary. The network, not the simulator, will be the bottleneck in
-training (docs/training/TIPS.md). Construction of a battle costs ~70 us (`Scratch::default` is ~30 us of it),
-about 7% of a battle; auto-reset now reuses the battle (`reset`, ~7 us) and `Battle.clone()` skips parsing
-(~8 us).
+training (docs/training/TIPS.md). At `df62d35` construction of a battle cost ~70 us (`Scratch::default` was
+~30 us of it), about 7% of a battle. At `a5fee3d` (2026-10-10, noisy shared-CPU runs) construction from packed
+text is ~46-49 us and from pre-parsed teams ~17 us; auto-reset reuses the battle (`reset`, ~7 us) and
+`Battle.clone()` skips parsing (~8 us).
 
 ## Validation
 

@@ -25,7 +25,8 @@ impl Battle<NoLog> {
     }
 }
 impl<L: LogSink> Battle<L> {
-    /// Derived caches must be invalidated after whole-state writes.
+    /// Reserved hook, currently a no-op: no derived cache outlives a discovery pass (per-pass relation
+    /// masks are recomputed). Whole-state writes call it so a future persistent cache only fills it in.
     pub fn invalidate_derived_caches(&mut self) {}
 
     /// Require a flushed decision/end boundary, or an untouched pre-start battle.
@@ -45,24 +46,24 @@ impl<L: LogSink> Battle<L> {
         );
     }
 
+    /// Same resolved and parsed teams and names, so `restore_from` accepts `other`. Workers cloned
+    /// from a root share these Arcs; contents are compared otherwise. Matching packed text and seed
+    /// do not imply this: a determinized world can change the constructor's gender draws.
+    pub fn shares_context(&self, other: &Battle<L>) -> bool {
+        (Arc::ptr_eq(&self.teams, &other.teams) || self.teams == other.teams)
+            && (Arc::ptr_eq(&self.parsed, &other.parsed) || self.parsed == other.parsed)
+            && (Arc::ptr_eq(&self.names, &other.names) || self.names == other.names)
+    }
+
     /// Restore a root into an existing worker with matching resolved teams and names.
     /// Both battles must be at flushed boundaries (including mid-turn replacements).
     /// Retains scratch capacity, clears branch logs, copies the PRNG without draws.
     pub fn restore_from(&mut self, other: &Battle<L>) {
         self.assert_boundary();
         other.assert_boundary();
-        // Workers cloned from the root share these Arcs; compare contents otherwise.
         assert!(
-            Arc::ptr_eq(&self.teams, &other.teams) || self.teams == other.teams,
-            "restore requires matching resolved teams"
-        );
-        assert!(
-            Arc::ptr_eq(&self.parsed, &other.parsed) || self.parsed == other.parsed,
-            "restore requires matching parsed teams"
-        );
-        assert!(
-            Arc::ptr_eq(&self.names, &other.names) || self.names == other.names,
-            "restore requires matching player names"
+            self.shares_context(other),
+            "restore requires matching resolved/parsed teams and player names"
         );
         self.state = other.state;
         self.scratch.reset(self.state.started);
