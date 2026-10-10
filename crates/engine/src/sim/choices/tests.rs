@@ -4,10 +4,9 @@
 //! re-sent requests, partial choices, hidden-information state, and a brute-force
 //! acceptance bit-vector with a hash of the accepted normalized choices.
 //!
-//! Lifecycle's `can_terastallize` is another owner's work; tests use a state-derived
-//! model (`LOCAL_TERA`) and a twin `#[ignore = "needs L"]` test runs the real one.
+//! Tera eligibility uses the real lifecycle implementation. LockMove callbacks
+//! that have not yet landed use an explicit override; requests/validation do not.
 
-use std::cell::Cell;
 use std::collections::BTreeSet;
 
 use super::{
@@ -38,8 +37,6 @@ impl LogSink for ForbiddenLog {
 }
 
 thread_local! {
-    /// When set, tera eligibility comes from side.tera_used / TERA_BLOCKED instead of lifecycle.
-    pub(crate) static LOCAL_TERA: Cell<bool> = const { Cell::new(false) };
     /// Locked moves of the lockedmove/twoturnmove volatiles, whose LockMove callbacks
     /// belong to the effect owners and are not implemented yet. Indexed by MonId.
     static LOCK_OVERRIDE: std::cell::RefCell<[Option<LockedMove>; 12]> =
@@ -330,6 +327,10 @@ fn build_battle(case: &J) -> Option<Battle<ForbiddenLog>> {
             for (k, t) in types.iter().take(2).enumerate() {
                 p.types[k] = dex::type_id(t.str()).expect("type");
             }
+            p.added_type = match pj.get("addedType").str() {
+                "" => TypeId::NONE,
+                t => dex::type_id(t).expect("added type"),
+            };
             let stats = pj.get("stats").arr();
             for k in 0..5 {
                 p.base_stored_stats[k] = stats[k].int() as u16;
@@ -369,11 +370,16 @@ fn build_battle(case: &J) -> Option<Battle<ForbiddenLog>> {
             };
             p.last_move_target_loc = pj.get("lastMoveTargetLoc").int() as i8;
             let slots = pj.get("moveSlots").arr();
-            assert!(!pj.get("transformed").bool());
-            p.move_count = slots.len() as u8;
+            let transformed = pj.get("transformed").bool();
+            if transformed {
+                p.flags |= mon_flags::TRANSFORMED;
+                p.virtual_move_count = slots.len() as u8;
+            } else {
+                p.move_count = slots.len() as u8;
+            }
             for (k, mj) in slots.iter().enumerate() {
                 let id = effect(EffectKind::Move, mj.at(0).str());
-                p.base_move_slots[k] = crate::state::MoveSlot {
+                let slot = crate::state::MoveSlot {
                     id,
                     disabled_source: EffectId::NONE,
                     pp: mj.at(1).int() as u8,
@@ -381,6 +387,11 @@ fn build_battle(case: &J) -> Option<Battle<ForbiddenLog>> {
                     target: dex::move_data(id).target,
                     flags: mj.at(4).int() as u8,
                 };
+                if transformed {
+                    p.virtual_move_slots[k] = slot;
+                } else {
+                    p.base_move_slots[k] = slot;
+                }
             }
             // Volatiles.
             if let J::Obj(vols) = pj.get("volatiles") {
@@ -700,7 +711,15 @@ fn check_case(case: &J, skipped: &mut usize) {
     for (n, op) in case.get("ops").arr().iter().enumerate() {
         let side = SideId(op.get("side").int() as u8);
         let input = op.get("input").str();
-        let res = b.choose_no_commit(side, input);
+        let res = if op.get("method").opt_str() == Some("undo") {
+            let res = b.undo_choice(side);
+            if let Ok(resent) = &res {
+                assert_eq!(resent.as_deref(), op.get("resent").opt_str(), "case {id} undo resend");
+            }
+            res.map(|_| ())
+        } else {
+            b.choose_no_commit(side, input)
+        };
         assert_eq!(b.seed(), frozen_seed, "case {id} op {n}: noncommit advanced PRNG");
         assert_eq!(b.scratch.unsent_lines, frozen_log_count, "case {id} op {n}: noncommit changed log count");
         let what = |t: &str| format!("case {id} op {n} ({} {:?}): {t}", side.0 + 1, input);
@@ -829,15 +848,7 @@ fn run_vectors() {
 }
 
 #[test]
-fn vectors_match_showdown_with_local_tera_model() {
-    LOCAL_TERA.with(|c| c.set(true));
-    run_vectors();
-}
-
-#[test]
-#[ignore = "needs L (Battle::can_terastallize)"]
 fn vectors_match_showdown_with_lifecycle_tera() {
-    LOCAL_TERA.with(|c| c.set(false));
     run_vectors();
 }
 
@@ -847,7 +858,6 @@ fn vectors_match_showdown_with_lifecycle_tera() {
 
 #[test]
 fn target_suffix_trims_before_resolving_legacy_modifier() {
-    LOCAL_TERA.with(|c| c.set(true));
     let case = parse_json(EMBEDDED.lines().next().unwrap());
     let mut b = build_battle(&case).unwrap();
     let seed = b.seed();
@@ -859,7 +869,6 @@ fn target_suffix_trims_before_resolving_legacy_modifier() {
 
 #[test]
 fn locked_undo_excludes_every_legal_resubmission() {
-    LOCAL_TERA.with(|c| c.set(true));
     let case = parse_json(EMBEDDED.lines().next().unwrap());
     let mut b = build_battle(&case).unwrap();
     let mon = b.state.sides[0].active[0];

@@ -39,6 +39,7 @@ const OPS = Number(opt('--ops', 14));
 const BRUTE = !flag('--no-brute');
 const START = Number(opt('--start-index', 0));
 const PARSER_PROBES = flag('--parser-probes');
+const UNDO_PROBES = flag('--undo-probes');
 
 const sim = loadSim(psPath);
 
@@ -142,17 +143,22 @@ const requestText = side => JSON.stringify(side.activeRequest);
 // Running choices without committing (Battle.choose minus allChoicesDone/commitChoices)
 // ---------------------------------------------------------------------------------------
 
-function chooseNoCommit(session, side, input) {
+function chooseNoCommit(session, side, input, method = 'choose') {
 	session.events = [];
 	const battle = session.battle;
 	const seedBefore = battle.prng.getSeed();
 	const logBefore = JSON.stringify(battle.log);
-	let ok = side.choose(input);
-	if (!ok) {
+	let ok = true;
+	if (method === 'undo') {
+		battle.undoChoice(SIDE_IDS[side.n]);
+	} else {
+		ok = side.choose(input);
+	}
+	if (method === 'choose' && !ok) {
 		if (!side.choice.error) {
 			side.emitChoiceError(`Unknown error for choice: ${input}. If you're not using a custom client, please report this as a bug.`);
 		}
-	} else if (!side.isChoiceDone()) {
+	} else if (method === 'choose' && !side.isChoiceDone()) {
 		side.emitChoiceError(`Incomplete choice: ${input} - missing other pokemon`);
 		ok = false;
 	}
@@ -169,7 +175,7 @@ function chooseNoCommit(session, side, input) {
 	if (battle.prng.getSeed() !== seedBefore || JSON.stringify(battle.log) !== logBefore) {
 		throw new Error(`noncommitting choice changed PRNG or battle log: ${JSON.stringify(input)}`);
 	}
-	return { ok, error: errors.length ? errors[errors.length - 1] : null, resent };
+	return { ok: ok && !errors.length, error: errors.length ? errors[errors.length - 1] : null, resent };
 }
 
 // ---------------------------------------------------------------------------------------
@@ -262,11 +268,14 @@ function pickActiveMon(rng, battle, pred = () => true) {
 
 function applyStunt(rng, session) {
 	const battle = session.battle;
-	const kind = rng.sample(['disable', 'disableAll', 'hiddenAll', 'hiddenOne', 'pp0', 'ppAll', 'trap', 'trapHidden', 'recharge', 'tera', 'revival', 'healblock', 'curse', 'curseGhost', 'maybeAll']);
+	const kind = rng.sample(['disable', 'disableAll', 'hiddenAll', 'hiddenOne', 'pp0', 'ppAll', 'trap', 'trapHidden', 'recharge', 'tera', 'revival', 'healblock', 'curse', 'curseGhost', 'maybeAll', 'transform']);
 	let tag = `stunt:${kind}`;
 	const mon = pickActiveMon(rng, battle);
 	if (!mon) return null;
 	switch (kind) {
+	case 'transform':
+		if (!mon.transformInto(rng.sample(mon.side.foe.active.filter(p => p && !p.fainted)), battle.dex.moves.get('transform'))) return null;
+		break;
 	case 'disable': {
 		const slot = rng.sample(mon.moveSlots);
 		mon.disableMove(slot.id, false, battle.dex.moves.get('taunt'));
@@ -388,6 +397,14 @@ function buildCase(session, id, seeds, teams, tags, stuntTag, rng) {
 				choice: side.getChoice(), cantUndo: side.choice.cantUndo,
 				fsl: side.choice.forcedSwitchesLeft, fpl: side.choice.forcedPassesLeft,
 			});
+			if (UNDO_PROBES) {
+				const undo = chooseNoCommit(session, side, '', 'undo');
+				out.ops.push({
+					method: 'undo', side: n, input: '', ...undo,
+					choice: side.getChoice(), cantUndo: side.choice.cantUndo,
+					fsl: side.choice.forcedSwitchesLeft, fpl: side.choice.forcedPassesLeft,
+				});
+			}
 		}
 	});
 	out.afterOps = battle.sides.map(s => ({ request: requestText(s) === out.requests[s.n] ? null : requestText(s), flags: flagString(s) }));
@@ -451,14 +468,13 @@ for (let b = 0; b < BATTLES && emitted < MAX_CASES; b++) {
 			const parsed = battle.sides.map(s => (s.activeRequest ? JSON.parse(requestText(s)) : null));
 			const tags = featureTags(parsed);
 			if (stuntTag) tags.push(stuntTag);
-			const transformed = battle.sides.some(s => s.pokemon.some(p => p.transformed));
-			if (!transformed && wantCase(tags)) {
+			if (wantCase(tags)) {
 				noteTags(tags);
 				const c = buildCase(session, `b${index}s${step}`, seeds, teams, tags, stuntTag, rng);
 				fs.writeSync(out, JSON.stringify(c) + '\n');
 				emitted++;
 				// Continue the game from the (possibly updated) cached requests.
-			} else if (!transformed && !wantCase(tags)) {
+			} else {
 				skipped++;
 			}
 			// Play on: pick with the oracle policy from the current cached requests.
