@@ -1,0 +1,6 @@
+# DirectML's wheel fixes torch to 2.4.1 and torchvision to 0.19.1.
+torch-directml==0.2.5.dev240914
+# Torch 2.4.1's Windows wheels require the NumPy 1.x ABI.
+numpy==1.26.4
+maturin>=1.5,<2
+pytest>=8,<10

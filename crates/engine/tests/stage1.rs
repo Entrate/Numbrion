@@ -226,7 +226,10 @@ fn codegen_is_deterministic_and_checked_in() {
     let oracle = std::env::var_os("NUMBRION_SHOWDOWN")
         .map(PathBuf::from)
         .unwrap_or_else(|| {
-            PathBuf::from(std::env::var_os("HOME").unwrap()).join("src/pokemon-showdown")
+            let home = std::env::var_os("HOME")
+                .or_else(|| std::env::var_os("USERPROFILE"))
+                .expect("Set NUMBRION_SHOWDOWN to the pinned, built Pokemon Showdown checkout");
+            PathBuf::from(home).join("src/pokemon-showdown")
         });
     let out = std::env::temp_dir().join(format!("numbrion-dex-test-{}", std::process::id()));
     fs::create_dir_all(&out).unwrap();

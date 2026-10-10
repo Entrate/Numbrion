@@ -80,7 +80,7 @@ fn lower_t(t: &T) -> LogTag<'_> {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 struct Stats {
     battles: usize,
     entries: usize,
@@ -695,7 +695,7 @@ fn replay_vectors(text: &str) -> Stats {
     let mut stats = Stats::default();
     let mut header: Vec<&str> = Vec::new();
     let mut log: Vec<&str> = Vec::new();
-    for line in text.split('\n') {
+    for line in text.split('\n').map(|line| line.strip_suffix('\r').unwrap_or(line)) {
         if line.starts_with("# ") {
             continue;
         }
@@ -717,6 +717,13 @@ fn replay_vectors(text: &str) -> Stats {
         replay_battle(&header, &log, &mut stats);
     }
     stats
+}
+
+#[test]
+fn real_logs_replay_with_crlf() {
+    let lf = VECTORS.replace("\r\n", "\n");
+    let crlf = lf.replace('\n', "\r\n");
+    assert_eq!(replay_vectors(&lf), replay_vectors(&crlf));
 }
 
 #[test]

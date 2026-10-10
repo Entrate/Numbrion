@@ -29,6 +29,12 @@ cd crates/pyengine
 Windows (PowerShell; nothing in the crate or the Python side is Linux-specific: no fork, shared memory,
 Unix sockets or absolute paths, only `std::thread`/rayon and `pathlib`):
 
+For the AMD RX 5500, use the [verified Windows GPU setup](../training/WINDOWS-GPU.md)
+and `tools/setup-training.ps1` instead of installing CUDA Torch. It builds this API,
+runs its tests, verifies GPU gradients with DirectML, and provides a small PPO
+self-play trainer with checkpoint resume. The GNU/MinGW build has now also been
+built and tested natively on Windows, including the abi3 wheel and the 19 Python tests.
+
 ```powershell
 # prerequisites: rustup with the x86_64-pc-windows-msvc toolchain (MSVC Build Tools, "Desktop development
 # with C++"), Python >= 3.9
@@ -46,8 +52,9 @@ and it needs no `python3.lib` at link time (PyO3 0.29 links the Python DLL throu
 portable by default (`.cargo/config.toml` no longer sets `target-cpu=native`; the throughput below is the
 portable build, the native one measured the same). For a build tuned to the local CPU use
 `RUSTFLAGS="-C target-cpu=native"`. The Windows build was verified with
-`cargo check -p pyengine --features python --target x86_64-pc-windows-msvc` from Linux; it has not been run
-on Windows. Plain `cargo build/test -p pyengine` (no `python` feature) never needs
+`cargo check -p pyengine --features python --target x86_64-pc-windows-msvc` from Linux.
+Native Windows GNU/MinGW validation is documented in the GPU setup guide linked above.
+Plain `cargo build/test -p pyengine` (no `python` feature) never needs
 Python, and `cargo test --release -p pyengine` runs the Rust test-suite.
 
 ## Action space

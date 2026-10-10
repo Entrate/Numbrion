@@ -98,12 +98,18 @@ fn main() {
     let seconds: f64 = get("--seconds").map_or(10.0, |v| v.parse().unwrap());
     let textlog = args.iter().any(|a| a == "--textlog");
     let profile = get("--profile").cloned();
+    #[cfg(not(unix))]
+    if profile.is_some() {
+        eprintln!("--profile requires a Unix platform; benchmark throughput is available without it");
+        std::process::exit(2);
+    }
 
     let battles = load(path);
     // Warm-up and correctness gate (every battle must end with the fixture's turn count).
     for b in &battles {
         run_one::<NoLog>(b);
     }
+    #[cfg(unix)]
     let guard = profile.as_ref().map(|_| {
         pprof::ProfilerGuardBuilder::default().frequency(999).build().expect("profiler")
     });
@@ -112,6 +118,7 @@ fn main() {
     } else {
         bench::<NoLog>(&battles, threads, seconds)
     };
+    #[cfg(unix)]
     if let (Some(guard), Some(path)) = (guard, profile) {
         let report = guard.report().build().expect("report");
         let file = std::fs::File::create(&path).expect("create svg");

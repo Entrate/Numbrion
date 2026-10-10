@@ -7,7 +7,9 @@ engine contract in `docs/design/ARCHITECTURE.md` outranks anything here.
 ## Starting point
 
 - Hardware: Ryzen 5 3600 (6 cores, 12 threads), 16 GB RAM, Radeon RX 5500
-  (Navi 14). ROCm does not officially support this GPU, so plan on CPU-only PyTorch.
+  (Navi 14). Native Windows GPU training is available through PyTorch DirectML,
+  and has been verified on this card. See [Windows GPU setup](WINDOWS-GPU.md).
+  The CPU-only estimates below describe the earlier Linux setup.
 - Showdown baseline: 18.3 battles/core/s, about 3 ms per doubles turn. Engine target
   is at least 915 battles/core/s.
 - On this CPU, the network costs more than the simulator. A rough estimate for a
