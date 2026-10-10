@@ -30,7 +30,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     }
 }
 
-// data/abilities.ts:2813-2873 onCheckShow(pokemon). PRNG: none. Returns undefined on every path.
+// data/abilities.ts:2813-2874 onCheckShow(pokemon). PRNG: none. Returns undefined on every path.
 fn on_check_show<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let pokemon = mon_arg(b, cx, 0);
     // if (pokemon.side.active.length === 1) return;  -- doubles: side.active.length is always 2.
@@ -110,7 +110,7 @@ fn on_check_show<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     Relay::Undefined
 }
 
-// data/abilities.ts:2876-2890 onSwitchOut(pokemon). PRNG: none directly.
+// data/abilities.ts:2876-2889 onSwitchOut(pokemon). PRNG: none directly.
 fn on_switch_out<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let pokemon = mon_arg(b, cx, 0);
     let index = pokemon.0 as usize;

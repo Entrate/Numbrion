@@ -36,7 +36,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     }
 }
 
-// data/abilities.ts:1099-1107 onTryHit(target, source, move). PRNG: none directly.
+// data/abilities.ts:1099-1106 onTryHit(target, source, move). PRNG: none directly.
 fn on_try_hit<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let target = mon_arg(b, cx, 0);
     let source = mon_arg(b, cx, 1);
@@ -68,7 +68,7 @@ fn on_source_base_power<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     Relay::Undefined
 }
 
-// data/abilities.ts:1113-1121 onWeather(target, source, effect). PRNG: none directly.
+// data/abilities.ts:1113-1120 onWeather(target, source, effect). PRNG: none directly.
 fn on_weather<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let target = mon_arg(b, cx, 0);
     let weather = b.event_effect_id(effect_at(b, cx, 2));

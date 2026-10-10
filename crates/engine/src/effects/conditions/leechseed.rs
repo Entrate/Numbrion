@@ -44,7 +44,7 @@ fn on_start<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     Relay::Undefined
 }
 
-// data/moves.ts:10217-10226 onResidual(pokemon). PRNG: none directly (damage/heal events only).
+// data/moves.ts:10217-10227 onResidual(pokemon). PRNG: none directly (damage/heal events only).
 // Residual order 8 is manifest metadata.
 fn on_residual<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let pokemon = mon_arg(b, cx, 0);
