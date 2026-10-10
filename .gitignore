@@ -8,3 +8,4 @@ node_modules/
 __pycache__/
 /data/fixtures/*.jsonl
 /.claude/worktrees/
+/data/teams/

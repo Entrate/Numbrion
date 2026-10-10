@@ -59,16 +59,7 @@ impl<L: LogSink> Battle<L> {
                     })
                 });
         }
-        let manifest = &MANIFESTS[id.0 as usize];
-        if !manifest.has_event(event) {
-            return None;
-        }
-        manifest
-            .hooks()
-            .iter()
-            .enumerate()
-            .find(|(_, h)| h.event == event && h.rel == rel && h.site.is_empty())
-            .map(|(i, _)| HookId(manifest.hooks_start + i as u16))
+        dex::event_hook(id, event, rel)
     }
     pub(crate) fn arg_mon(arg: EventArg) -> Option<MonId> {
         match arg {
