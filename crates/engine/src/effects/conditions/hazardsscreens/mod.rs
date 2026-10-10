@@ -36,7 +36,7 @@ pub const TYPE_FIRE: TypeId = TypeId(10);
 pub const TYPE_WATER: TypeId = TypeId(11);
 
 /// `battle.activePerHalf` (battle.ts:221): gen9randomdoublesbattle is a `doubles` game, so 2.
-/// Screens therefore always use the 2732/4096 branch (data/moves.ts:861,10339,14866).
+/// Screens therefore always use the 2732/4096 branch (data/moves.ts:859-860,10337-10338,14864-14865).
 pub const ACTIVE_PER_HALF: u8 = 2;
 
 /// Spikes / Toxic Spikes `effectState.layers`: payload word 0, custom presence bit 8. This is the
@@ -176,7 +176,7 @@ pub fn screen_any_modify_damage<L: LogSink>(
 
 /// onSideStart(side) / onSideEnd(side) of the screens: a single literal line.
 /// `command` is "-sidestart" or "-sideend"; `text` is the call-site literal (Reflect has no
-/// "move: " prefix: data/moves.ts:14870 vs 862,10343). PRNG: none.
+/// "move: " prefix: data/moves.ts:14870 vs 865,10343). PRNG: none.
 pub fn side_line<L: LogSink>(
     b: &mut Battle<L>,
     cx: HookCtx,
@@ -446,7 +446,7 @@ pub fn court_change_swaps(id: EffectId) -> bool {
         || id == dex::CONDITION_AURORAVEIL
 }
 
-/// The non-free-for-all branch of Court Change (data/moves.ts:3066-3099). Returns `success`.
+/// The non-free-for-all branch of Court Change (data/moves.ts:3066-3091). Returns `success`.
 /// JS objects iterate in insertion order and `delete` keeps the survivors' order, so the allow-listed
 /// cells leave each side's list in order and are appended to the other side's list in that same order.
 /// Each moved state keeps its identity, effectOrder, payload and generation; only `target` (and
@@ -487,7 +487,7 @@ pub fn swap_side_conditions<L: LogSink>(b: &mut Battle<L>, source_side: SideId) 
     success
 }
 
-/// Tidy Up's removeAll list (data/moves.ts:19638); `gmaxsteelsurge` is never present in this scope.
+/// Tidy Up's removeAll list (data/moves.ts:19639); `gmaxsteelsurge` is never present in this scope.
 pub const TIDY_UP_HAZARDS: [EffectId; 4] = [
     dex::CONDITION_SPIKES,
     dex::CONDITION_TOXICSPIKES,

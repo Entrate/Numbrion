@@ -277,7 +277,6 @@ scenario('toxic_spikes_status', [801, 802, 803, 804],
 		['move 3, move 3', 'switch 4, move 3'],
 	]);
 
-export { S, mon, scenario, bulk, hit, repeat, attackers, toID, sim };
 
 // ---------------------------------------------------------------------------------------------
 function forcedChoice(request) {
@@ -295,6 +294,7 @@ function forcedChoice(request) {
 function run() {
 	const out = [];
 	for (const sc of S) {
+		const base = out.length;
 		const session = new Session(sim, { seed: sc.seed, teams: sc.teams });
 		out.push(`scenario ${sc.name}`, `seed ${sc.seed.join(',')}`, `p1 ${sc.teams[0]}`, `p2 ${sc.teams[1]}`);
 		let snap = session.snapshot();
@@ -319,7 +319,7 @@ function run() {
 				play(`forced${++forced}`, f1, f2);
 			}
 		}
-		const kinds = (txt) => out.filter(l => l.startsWith('log ') && l.includes(txt)).length;
+		const kinds = (txt) => out.slice(base).filter(l => l.startsWith('log ') && l.includes(txt)).length;
 		console.log(`${sc.name}: ${n} turns (${forced} forced), faints=${kinds('|faint|')}`);
 		if (session.anomalies.length) throw new Error(`${sc.name}: anomalies ${session.anomalies.join('; ')}`);
 	}

@@ -31,7 +31,7 @@ impl LogSink for Trace {
                 LogArg::Mon(m) => format!("mon{}", m.0),
                 LogArg::Side(s) => format!("side{}", s.0),
                 LogArg::Effect(EffectRef::Dex(id)) => dex::effect(*id).name.into(),
-                _ => panic!("unexpected trace arg {a:?}"),
+                other => format!("{other:?}"),
             }
         }
         let mut parts = vec![e.command.to_owned()];
@@ -40,7 +40,7 @@ impl LogSink for Trace {
             LogTag::From(EffectRef::Dex(id)) => format!("[from] {}", dex::effect(*id).name),
             LogTag::Of(m) => format!("[of] mon{}", m.0),
             LogTag::Bare(s) => format!("[{s}]"),
-            _ => panic!("unexpected trace tag {t:?}"),
+            other => format!("{other:?}"),
         }));
         self.0.push(parts.join("|"));
     }
@@ -764,4 +764,468 @@ fn aurora_veil_try_needs_snow() {
         assert_eq!(try_hook(&mut b), Relay::Bool(expected));
     }
     assert_eq!(b.seed(), [1, 2, 3, 4]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Entry hazards against the real mutators (needs the unfinished core)
+// ---------------------------------------------------------------------------------------------
+
+/// Switch-in order of the hazards on p2's side in scenario `hazards_layers_and_switchins`:
+/// Spikes (3 layers), Toxic Spikes (2), Stealth Rock, Sticky Web. HP checkpoints are the exact values
+/// the pinned Showdown logged for those switch-ins (`|-damage|..|118/157|[from] Spikes` etc.).
+#[test]
+#[ignore = "needs core"]
+fn entry_hazards_hurt_each_switch_in_like_showdown() {
+    use crate::actions::Attribution;
+    let sc = parse_scenarios(include_str!("scenarios.txt"))
+        .into_iter()
+        .find(|s| s.name == "hazards_layers_and_switchins")
+        .unwrap();
+    // (p2 team index, max HP, HP after Spikes, HP after Stealth Rock, Toxic Spikes absorbed,
+    //  Sticky Web applies)
+    let table = [
+        (0usize, 167u16, 167u16, 126u16, false, false), // Pelipper: Flying
+        (1, 167, 126, 106, true, true),                 // Gengar: Poison absorbs Toxic Spikes
+        (2, 0, 0, 0, false, false),                     // Garchomp: Heavy-Duty Boots
+        (3, 157, 118, 99, true, true),                  // Toxapex: Poison absorbs Toxic Spikes
+        (4, 177, 133, 111, false, true),                // Scizor: Steel, Toxic Spikes stay
+        (5, 196, 196, 172, false, false),               // Landorus-Therian: Flying
+    ];
+    for (idx, max_hp, after_spikes, after_rock, absorbs, web) in table {
+        let mut b = Battle::with_log(sc.seed, sc.teams[0], sc.teams[1], Trace::default()).unwrap();
+        let victim = MonId(6 + idx as u8);
+        b.state.sides[0].active = [MonId(0), MonId::NONE];
+        b.state.sides[1].active = [victim, MonId::NONE];
+        for m in [MonId(0), victim] {
+            b.state.pokemon[m.0 as usize].flags |= mon_flags::ACTIVE;
+        }
+        let attribution = Attribution {
+            source: mon(0),
+            effect: EffectRef::None,
+        };
+        for (id, times) in [
+            (dex::CONDITION_SPIKES, 3),
+            (dex::CONDITION_TOXICSPIKES, 2),
+            (dex::CONDITION_STEALTHROCK, 1),
+            (dex::CONDITION_STICKYWEB, 1),
+        ] {
+            for _ in 0..times {
+                b.add_side_condition(SideId(1), id, attribution);
+            }
+        }
+        // Fourth Spikes layer / third Toxic Spikes layer are refused.
+        assert_eq!(
+            b.add_side_condition(SideId(1), dex::CONDITION_SPIKES, attribution),
+            Relay::Bool(false)
+        );
+        let hp = |b: &Battle<Trace>| b.state.pokemon[victim.0 as usize].hp;
+        let max = hp(&b);
+        if max_hp != 0 {
+            assert_eq!(max, max_hp, "fixture HP for team slot {idx}");
+        } else {
+            b.state.pokemon[victim.0 as usize].item = dex::ITEM_HEAVYDUTYBOOTS;
+        }
+        let switch_in = |b: &mut Battle<Trace>, id: EffectId| {
+            let cell = b.get_side_condition_data(SideId(1), id);
+            let state = cell.map(|c| b.state.effects.capture(c));
+            b.single_event(
+                EventId::SwitchIn,
+                EffectRef::Dex(id),
+                state,
+                EventArg::Holder(Holder::mon(victim)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Undefined,
+                None,
+            );
+        };
+        switch_in(&mut b, dex::CONDITION_SPIKES);
+        assert_eq!(hp(&b), if max_hp == 0 { max } else { after_spikes }, "Spikes");
+        switch_in(&mut b, dex::CONDITION_TOXICSPIKES);
+        assert_eq!(
+            b.get_side_condition(SideId(1), dex::CONDITION_TOXICSPIKES)
+                .is_none(),
+            absorbs
+        );
+        assert_eq!(
+            b.state.pokemon[victim.0 as usize].status,
+            crate::state::Status::None
+        );
+        switch_in(&mut b, dex::CONDITION_STEALTHROCK);
+        assert_eq!(hp(&b), if max_hp == 0 { max } else { after_rock }, "Stealth Rock");
+        switch_in(&mut b, dex::CONDITION_STICKYWEB);
+        assert_eq!(
+            b.state.pokemon[victim.0 as usize].boosts[4],
+            if web { -1 } else { 0 },
+            "Sticky Web"
+        );
+        assert_eq!(b.seed(), sc.seed);
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Dispatcher wiring: the same entry points Showdown uses (singleEvent/runEvent, addSideCondition,
+// addPseudoWeather) with the TS argument order, against the real mutators (needs the unfinished core)
+// ---------------------------------------------------------------------------------------------
+
+fn move_frame(b: &mut Battle<Trace>, id: EffectId) -> u8 {
+    let h = b.get_active_move(MoveInput::Dex(id));
+    b.set_active_move(Some(h), Some(MonId(0)), Some(MonId(6)));
+    h.0
+}
+/// singleEvent(event, move, {}, target, source, move[, relay]) as battle-actions.ts calls it.
+fn single(b: &mut Battle<Trace>, event: EventId, h: u8, target: u8, source: u8, relay: Relay) -> Relay {
+    b.single_event(
+        event,
+        EffectRef::ActiveMove(h),
+        None,
+        mon(target),
+        mon(source),
+        EffectRef::ActiveMove(h),
+        relay,
+        None,
+    )
+}
+fn add_side(b: &mut Battle<Trace>, side: u8, id: EffectId) -> Relay {
+    b.add_side_condition(
+        SideId(side),
+        id,
+        Attribution {
+            source: mon(0),
+            effect: EffectRef::None,
+        },
+    )
+}
+fn has_side(b: &Battle<Trace>, side: u8, id: EffectId) -> bool {
+    b.get_side_condition(SideId(side), id).is_some()
+}
+use crate::actions::{Attribution, MoveInput};
+
+#[test]
+#[ignore = "needs core"]
+fn ceaseless_edge_and_stone_axe_install_foe_hazards_through_the_dispatcher() {
+    use crate::state::scratch::move_runtime::HAS_SHEER_FORCE;
+    for (mv, hazard, text) in [
+        (dex::MOVE_CEASELESSEDGE, dex::CONDITION_SPIKES, "Spikes"),
+        (dex::MOVE_STONEAXE, dex::CONDITION_STEALTHROCK, "move: Stealth Rock"),
+    ] {
+        for (event, relay) in [
+            (EventId::AfterHit, Relay::Undefined),
+            (EventId::AfterSubDamage, Relay::Number(12.0)),
+        ] {
+            let mut b = battle(Trace::default());
+            let h = move_frame(&mut b, mv);
+            single(&mut b, event, h, 6, 0, relay);
+            assert!(has_side(&b, 1, hazard) && !has_side(&b, 0, hazard));
+            assert_eq!(b.log.0, vec![format!("-sidestart|side1|{text}")]);
+            // side.addSideCondition(id) passes no source: it takes the event target (side.ts:414).
+            let cell = b.get_side_condition_data(SideId(1), hazard).unwrap();
+            assert_eq!(b.state.effects.cells[cell.0 as usize].source, MonId(6));
+            assert_eq!(b.seed(), [1, 2, 3, 4]);
+
+            // Sheer Force removed the effect.
+            let mut b = battle(Trace::default());
+            let h = move_frame(&mut b, mv);
+            b.active_move_mut(MoveHandle(h)).runtime_flags |= HAS_SHEER_FORCE;
+            single(&mut b, event, h, 6, 0, relay);
+            assert!(!has_side(&b, 1, hazard) && b.log.0.is_empty());
+
+            // Behind a Substitute the user must still be alive.
+            if event == EventId::AfterSubDamage {
+                let mut b = battle(Trace::default());
+                let h = move_frame(&mut b, mv);
+                b.state.pokemon[0].hp = 0;
+                single(&mut b, event, h, 6, 0, relay);
+                assert!(!has_side(&b, 1, hazard) && b.log.0.is_empty());
+            }
+        }
+    }
+}
+
+#[test]
+#[ignore = "needs core"]
+fn spins_clear_the_users_side_in_source_order() {
+    use crate::state::scratch::move_runtime::HAS_SHEER_FORCE;
+    for (mv, name) in [(dex::MOVE_RAPIDSPIN, "Rapid Spin"), (dex::MOVE_MORTALSPIN, "Mortal Spin")] {
+        for (event, relay) in [
+            (EventId::AfterHit, Relay::Undefined),
+            (EventId::AfterSubDamage, Relay::Number(12.0)),
+        ] {
+            let setup = |b: &mut Battle<Trace>| {
+                for id in [
+                    dex::CONDITION_STICKYWEB,
+                    dex::CONDITION_STEALTHROCK,
+                    dex::CONDITION_TOXICSPIKES,
+                    dex::CONDITION_SPIKES,
+                    dex::CONDITION_REFLECT,
+                ] {
+                    add_side(b, 0, id);
+                }
+                // Hazards on the foe's side stay.
+                add_side(b, 1, dex::CONDITION_SPIKES);
+                let seed = b.state.effects.alloc(
+                    Holder::mon(MonId(0)),
+                    Holder::mon(MonId(0)),
+                    dex::CONDITION_LEECHSEED,
+                    0,
+                );
+                b.state.pokemon[0].volatiles.push(seed);
+                b.log.0.clear();
+            };
+            let mut b = battle(Trace::default());
+            setup(&mut b);
+            let h = move_frame(&mut b, mv);
+            single(&mut b, event, h, 6, 0, relay);
+            // Leech Seed first, then spikes/toxicspikes/stealthrock/stickyweb (not the insertion order
+            // of the side's list), each tagged with the move and the user.
+            let tags = format!("[from] {name}|[of] mon0");
+            assert_eq!(
+                b.log.0,
+                vec![
+                    format!("-end|mon0|Leech Seed|{tags}"),
+                    format!("-sideend|side0|Spikes|{tags}"),
+                    format!("-sideend|side0|Toxic Spikes|{tags}"),
+                    format!("-sideend|side0|Stealth Rock|{tags}"),
+                    format!("-sideend|side0|Sticky Web|{tags}"),
+                ]
+            );
+            assert!(has_side(&b, 0, dex::CONDITION_REFLECT), "screens are not hazards");
+            assert!(has_side(&b, 1, dex::CONDITION_SPIKES));
+            assert!(b.get_volatile(MonId(0), dex::CONDITION_LEECHSEED).is_none());
+            assert_eq!(b.seed(), [1, 2, 3, 4]);
+
+            // Sheer Force keeps everything; a fainted user (after a Substitute) stops at once.
+            let mut b = battle(Trace::default());
+            setup(&mut b);
+            let h = move_frame(&mut b, mv);
+            b.active_move_mut(MoveHandle(h)).runtime_flags |= HAS_SHEER_FORCE;
+            single(&mut b, event, h, 6, 0, relay);
+            assert!(b.log.0.is_empty() && has_side(&b, 0, dex::CONDITION_SPIKES));
+            if event == EventId::AfterSubDamage {
+                let mut b = battle(Trace::default());
+                setup(&mut b);
+                let h = move_frame(&mut b, mv);
+                b.state.pokemon[0].hp = 0;
+                single(&mut b, event, h, 6, 0, relay);
+                assert!(b.log.0.is_empty() && has_side(&b, 0, dex::CONDITION_SPIKES));
+            }
+        }
+    }
+}
+
+#[test]
+#[ignore = "needs core"]
+fn screen_shatterers_remove_reflect_light_screen_aurora_veil_from_the_target_side() {
+    for (mv, event_hook_move) in [
+        (dex::MOVE_BRICKBREAK, "brickbreak"),
+        (dex::MOVE_PSYCHICFANGS, "psychicfangs"),
+        (dex::MOVE_RAGINGBULL, "ragingbull"),
+    ] {
+        let mut b = battle(Trace::default());
+        for id in [
+            dex::CONDITION_AURORAVEIL,
+            dex::CONDITION_REFLECT,
+            dex::CONDITION_LIGHTSCREEN,
+            dex::CONDITION_SPIKES,
+        ] {
+            add_side(&mut b, 1, id);
+        }
+        add_side(&mut b, 0, dex::CONDITION_REFLECT);
+        b.log.0.clear();
+        let h = move_frame(&mut b, mv);
+        // singleEvent('TryHit', moveData, {}, target, source, move): the foe (mon 6) is the target.
+        let r = single(&mut b, EventId::TryHit, h, 6, 0, Relay::Undefined);
+        assert_eq!(r, Relay::Bool(true), "{event_hook_move}");
+        assert_eq!(
+            b.log.0,
+            vec![
+                "-sideend|side1|Reflect",
+                "-sideend|side1|move: Light Screen",
+                "-sideend|side1|move: Aurora Veil"
+            ],
+            "{event_hook_move}"
+        );
+        assert!(has_side(&b, 1, dex::CONDITION_SPIKES), "hazards stay");
+        assert!(has_side(&b, 0, dex::CONDITION_REFLECT), "own side untouched");
+        assert_eq!(b.seed(), [1, 2, 3, 4]);
+    }
+}
+
+#[test]
+#[ignore = "needs core"]
+fn court_change_swaps_through_hit_field() {
+    let mut b = battle(Trace::default());
+    let h = move_frame(&mut b, dex::MOVE_COURTCHANGE);
+    // Nothing to swap: `false` (the move fails), no lines.
+    assert_eq!(
+        single(&mut b, EventId::HitField, h, 0, 0, Relay::Undefined),
+        Relay::Bool(false)
+    );
+    assert!(b.log.0.is_empty());
+    add_side(&mut b, 0, dex::CONDITION_REFLECT);
+    add_side(&mut b, 0, dex::CONDITION_WIDEGUARD);
+    add_side(&mut b, 1, dex::CONDITION_SPIKES);
+    b.log.0.clear();
+    assert_eq!(
+        single(&mut b, EventId::HitField, h, 0, 0, Relay::Undefined),
+        Relay::Bool(true)
+    );
+    assert_eq!(b.log.0, vec!["-swapsideconditions", "-activate|mon0|move: Court Change"]);
+    assert!(has_side(&b, 1, dex::CONDITION_REFLECT) && has_side(&b, 0, dex::CONDITION_SPIKES));
+    assert!(has_side(&b, 0, dex::CONDITION_WIDEGUARD), "Wide Guard is not swapped");
+    assert!(!has_side(&b, 0, dex::CONDITION_REFLECT));
+    // Swapped states announce their end on the side they now live on.
+    b.log.0.clear();
+    b.remove_side_condition(SideId(1), dex::CONDITION_REFLECT);
+    assert_eq!(b.log.0, vec!["-sideend|side1|Reflect"]);
+    assert_eq!(b.seed(), [1, 2, 3, 4]);
+}
+
+#[test]
+#[ignore = "needs core"]
+fn durations_come_from_the_direct_callbacks_installed_by_the_mutators() {
+    let attribution = Attribution {
+        source: mon(0),
+        effect: EffectRef::None,
+    };
+    for (clay, expected) in [(true, 8), (false, 5)] {
+        for id in [
+            dex::CONDITION_REFLECT,
+            dex::CONDITION_LIGHTSCREEN,
+            dex::CONDITION_AURORAVEIL,
+        ] {
+            let mut b = battle(Trace::default());
+            if clay {
+                b.state.pokemon[0].item = dex::ITEM_LIGHTCLAY;
+            }
+            b.add_side_condition(SideId(0), id, attribution);
+            let cell = b.get_side_condition_data(SideId(0), id).unwrap();
+            assert_eq!(b.state.effects.cells[cell.0 as usize].duration, expected, "{id:?}");
+        }
+    }
+    let mut b = battle(Trace::default());
+    b.add_side_condition(SideId(0), dex::CONDITION_TAILWIND, attribution);
+    let cell = b.get_side_condition_data(SideId(0), dex::CONDITION_TAILWIND).unwrap();
+    assert_eq!(b.state.effects.cells[cell.0 as usize].duration, 4);
+
+    // Trick Room: fieldstart line, 5 turns, and the second use removes it again.
+    b.log.0.clear();
+    assert_eq!(
+        b.add_pseudo_weather(dex::CONDITION_TRICKROOM, attribution),
+        Relay::Bool(true)
+    );
+    let cell = b.get_pseudo_weather(dex::CONDITION_TRICKROOM).unwrap();
+    assert_eq!(b.state.effects.cells[cell.0 as usize].duration, 5);
+    assert_eq!(b.log.0, vec!["-fieldstart|move: Trick Room|[of] mon0"]);
+    b.log.0.clear();
+    assert_eq!(
+        b.add_pseudo_weather(dex::CONDITION_TRICKROOM, attribution),
+        Relay::Bool(true)
+    );
+    assert!(b.get_pseudo_weather(dex::CONDITION_TRICKROOM).is_none());
+    assert_eq!(b.log.0, vec!["-fieldend|move: Trick Room"]);
+    assert_eq!(b.seed(), [1, 2, 3, 4]);
+}
+
+#[test]
+#[ignore = "needs core"]
+fn tailwind_and_screens_modify_the_event_relay() {
+    use crate::event::RunEventOptions;
+    let mut b = battle(Trace::default());
+    add_side(&mut b, 0, dex::CONDITION_TAILWIND);
+    let speed = b.run_event(
+        EventId::ModifySpe,
+        mon(0),
+        EventArg::Null,
+        EffectRef::None,
+        Relay::Number(100.0),
+        RunEventOptions::default(),
+    );
+    assert_eq!(speed, Relay::Number(200.0));
+    // The foe is unaffected.
+    let speed = b.run_event(
+        EventId::ModifySpe,
+        mon(6),
+        EventArg::Null,
+        EffectRef::None,
+        Relay::Number(100.0),
+        RunEventOptions::default(),
+    );
+    assert_eq!(speed, Relay::Number(100.0));
+
+    // runEvent('ModifyDamage', attacker, defender, move, damage): 100 -> 67 (2732/4096) behind the
+    // matching screen only, and not at all for a critical hit.
+    for (screen, mv, weakened) in [
+        (dex::CONDITION_REFLECT, dex::MOVE_BRICKBREAK, true),
+        (dex::CONDITION_REFLECT, dex::MOVE_THUNDERBOLT, false),
+        (dex::CONDITION_LIGHTSCREEN, dex::MOVE_THUNDERBOLT, true),
+        (dex::CONDITION_LIGHTSCREEN, dex::MOVE_BRICKBREAK, false),
+        (dex::CONDITION_AURORAVEIL, dex::MOVE_BRICKBREAK, true),
+        (dex::CONDITION_AURORAVEIL, dex::MOVE_THUNDERBOLT, true),
+    ] {
+        for crit in [false, true] {
+            let mut b = battle(Trace::default());
+            add_side(&mut b, 0, screen);
+            let h = b.get_active_move(MoveInput::Dex(mv));
+            b.move_hit_data(MonId(0), h).crit = crit;
+            let damage = b.run_event(
+                EventId::ModifyDamage,
+                mon(6),
+                mon(0),
+                EffectRef::ActiveMove(h.0),
+                Relay::Number(100.0),
+                RunEventOptions::default(),
+            );
+            let want = if weakened && !crit { 67.0 } else { 100.0 };
+            assert_eq!(damage, Relay::Number(want), "{screen:?} {mv:?} crit={crit}");
+        }
+    }
+    assert_eq!(b.seed(), [1, 2, 3, 4]);
+}
+
+#[test]
+#[ignore = "needs core"]
+fn move_callbacks_see_the_documented_argument_layouts() {
+    // Aurora Veil onTry: singleEvent('Try', move, null, pokemon, target, move).
+    let mut b = battle(Trace::default());
+    let h = move_frame(&mut b, dex::MOVE_AURORAVEIL);
+    assert_eq!(single(&mut b, EventId::Try, h, 0, 6, Relay::Undefined), Relay::Bool(false));
+    let cell = b.state.field.weather;
+    b.state.effects.cells[cell.0 as usize].id = dex::CONDITION_SNOWSCAPE;
+    assert_eq!(single(&mut b, EventId::Try, h, 0, 6, Relay::Undefined), Relay::Bool(true));
+
+    // Raging Bull onModifyType: singleEvent('ModifyType', move, null, pokemon, target, move, move).
+    let mut b = battle(Trace::default());
+    b.state.pokemon[0].species = dex::SPECIES_TAUROSPALDEABLAZE;
+    let h = move_frame(&mut b, dex::MOVE_RAGINGBULL);
+    single(&mut b, EventId::ModifyType, h, 0, 6, Relay::ActiveMove(h));
+    assert_eq!(b.active_move(MoveHandle(h)).move_type, dex::type_id("Fire").unwrap());
+
+    // Tidy Up onHit: clears both sides' hazards, logs, boosts +1 Atk / +1 Spe, returns true.
+    let mut b = battle(Trace::default());
+    for id in [dex::CONDITION_SPIKES, dex::CONDITION_STEALTHROCK] {
+        add_side(&mut b, 0, id);
+    }
+    add_side(&mut b, 1, dex::CONDITION_STICKYWEB);
+    add_side(&mut b, 1, dex::CONDITION_REFLECT);
+    b.log.0.clear();
+    let h = move_frame(&mut b, dex::MOVE_TIDYUP);
+    assert_eq!(single(&mut b, EventId::Hit, h, 0, 0, Relay::Undefined), Relay::Bool(true));
+    assert_eq!(b.log.0[..3], ["-sideend|side0|Spikes", "-sideend|side0|Stealth Rock", "-sideend|side1|Sticky Web"]);
+    assert_eq!(b.log.0[3], "-activate|mon0|move: Tidy Up");
+    assert!(has_side(&b, 1, dex::CONDITION_REFLECT));
+    assert_eq!((b.state.pokemon[0].boosts[0], b.state.pokemon[0].boosts[4]), (1, 1));
+    // With nothing to clear it still succeeds by boosting; at +6/+6 it fails.
+    b.state.pokemon[0].boosts = [6, 0, 0, 0, 6, 0, 0];
+    b.log.0.clear();
+    assert_eq!(single(&mut b, EventId::Hit, h, 0, 0, Relay::Undefined), Relay::Bool(false));
+    assert!(b.log.0.is_empty());
+
+    // Ice Spinner onAfterHit clears the terrain.
+    let mut b = battle(Trace::default());
+    let cell = b.state.field.terrain;
+    b.state.effects.cells[cell.0 as usize].id = dex::CONDITION_GRASSYTERRAIN;
+    let h = move_frame(&mut b, dex::MOVE_ICESPINNER);
+    single(&mut b, EventId::AfterHit, h, 6, 0, Relay::Undefined);
+    assert_eq!(b.state.effects.cells[cell.0 as usize].id, EffectId::NONE);
 }
