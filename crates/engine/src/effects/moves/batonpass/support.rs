@@ -10,8 +10,9 @@ use crate::{
 pub fn mon(m: MonId) -> EventArg {
     EventArg::Holder(Holder::mon(m))
 }
-pub fn volatile<L: LogSink>(b: &Battle<L>, m: MonId, key: &str) -> bool {
-    let id = crate::effects::support::optional_id(dex::CONDITIONS_DATA, key);
+/// `id` is `optional_id(dex::CONDITIONS_DATA, key)`, resolved by the caller at compile
+/// time; NONE (a key outside the scope) never matches.
+pub fn volatile<L: LogSink>(b: &Battle<L>, m: MonId, id: EffectId) -> bool {
     id != EffectId::NONE && b.get_volatile(m, id).is_some()
 }
 pub fn effect<L: LogSink>(b: &Battle<L>, cx: HookCtx, i: usize) -> EffectRef {

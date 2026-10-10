@@ -57,7 +57,10 @@ impl<L: LogSink> Battle<L> {
         }
         if !ignore_immunities && status != EffectId::NONE {
             let corroded = (status == dex::CONDITION_PSN || status == dex::CONDITION_TOX)
-                && self.query_has_ability(Self::arg_mon(a.source).unwrap(), "corrosion");
+                && self.query_has_ability(
+                    Self::arg_mon(a.source).unwrap(),
+                    dex::key_ids!("corrosion"),
+                );
             let im = match status {
                 dex::CONDITION_BRN => ImmunityId::Brn,
                 dex::CONDITION_PAR => ImmunityId::Par,
@@ -287,8 +290,7 @@ impl<L: LogSink> Battle<L> {
         if status == EffectId::NONE {
             return true;
         }
-        let key = dex::effect(status).key;
-        if let Some(i) = dex::IMMUNITY_NAMES.iter().position(|name| *name == key) {
+        if let Some(i) = dex::immunity_column_of(status) {
             let immunity = [
                 ImmunityId::Brn,
                 ImmunityId::Frz,

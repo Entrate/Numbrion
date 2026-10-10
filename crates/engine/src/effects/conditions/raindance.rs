@@ -29,7 +29,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/conditions.ts:478-483. `source?.hasItem('damprock') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_RAINDANCE_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "damprock")
+            support::duration_callback(b, cx, dex::key_ids!("damprock"))
         }
         // data/conditions.ts:484-494. defender.effectiveWeather() === rain: Water x1.5, Fire x0.5 via chainModify. PRNG: none.
         dex::HOOK_CONDITION_RAINDANCE_ONWEATHERMODIFYDAMAGE => support::weather_modify_damage(

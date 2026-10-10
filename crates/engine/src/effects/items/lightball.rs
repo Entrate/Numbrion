@@ -23,8 +23,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_ITEM_LIGHTBALL_ONMODIFYATK => {
             // Dynamax is unavailable in the pinned Gen 9 format.
             if dex::species(b.state.pokemon[mon_arg(b, cx, 1).0 as usize].base_species)
-                .base_species_name
-                == "Pikachu"
+                .base_species
+                == dex::SPECIES_PIKACHU
             {
                 b.chain_modify(2.0, 1.0);
             }
@@ -32,8 +32,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_ITEM_LIGHTBALL_ONMODIFYSPA => {
             // Dynamax is unavailable in the pinned Gen 9 format.
             if dex::species(b.state.pokemon[mon_arg(b, cx, 1).0 as usize].base_species)
-                .base_species_name
-                == "Pikachu"
+                .base_species
+                == dex::SPECIES_PIKACHU
             {
                 b.chain_modify(2.0, 1.0);
             }

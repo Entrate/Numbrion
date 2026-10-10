@@ -216,10 +216,10 @@ impl<L: LogSink> Battle<L> {
                 } else if effect_id.0 != 0 {
                     // Perish Body/Stall are outside current scope, but preserve defaults
                     // if the pinned closure later acquires their identifiers.
-                    match dex::effect(effect_id).key {
-                        "perishbody" => listener.priority.sub_order = 6.0,
-                        "stall" => listener.priority.sub_order = 9.0,
-                        _ => {}
+                    if dex::key_ids!("perishbody").contains(effect_id) {
+                        listener.priority.sub_order = 6.0;
+                    } else if dex::key_ids!("stall").contains(effect_id) {
+                        listener.priority.sub_order = 9.0;
                     }
                 }
             }

@@ -145,7 +145,7 @@ impl<L: LogSink> Battle<L> {
                 );
                 tags[1] = LogTag::Bare("partiallytrapped");
                 len = 2;
-            } else if id != EffectId::NONE && dex::effect(id).key == "powder" {
+            } else if dex::key_ids!("powder").contains(id) {
                 len = 1;
             } else if e == EffectRef::Synthetic(SyntheticEffect::Confused) {
                 tags[0] = LogTag::Value("from", LogArg::Text("confusion"));
@@ -444,9 +444,7 @@ impl<L: LogSink> Battle<L> {
             let id = self.event_effect_id(a.effect);
             if by != 0 {
                 success = Relay::Bool(true);
-                if id == dex::MOVE_BELLYDRUM
-                    || id != EffectId::NONE && dex::effect(id).key == "angerpoint"
-                {
+                if id == dex::MOVE_BELLYDRUM || dex::key_ids!("angerpoint").contains(id) {
                     self.add(LogEntry::new(
                         "-setboost",
                         &[

@@ -71,7 +71,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                 return Relay::Number(2.0);
             }
             if let Some(source) = source {
-                if b.query_has_ability(source, "persistent") {
+                if b.query_has_ability(source, dex::key_ids!("persistent")) {
                     b.add(LogEntry::new(
                         "-activate",
                         &[

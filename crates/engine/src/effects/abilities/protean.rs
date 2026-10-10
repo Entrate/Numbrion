@@ -44,7 +44,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             // Future Sight / Doom Desire (futuremove), all seven callsMove moves and Snatch are outside the scoped dex (pinned data/moves.ts).
             // There is no scoped writer of callsMove; sourceEffect cannot become Snatch.
             let ty = mv.move_type;
-            if ty != TypeId::NONE && ty != type_named("???") {
+            if ty != TypeId::NONE && ty != dex::TYPE_UNKNOWN {
                 let types = b.get_types(source, false, false);
                 if types.len != 1 || types.values[0] != ty {
                     if !b.set_type(

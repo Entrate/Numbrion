@@ -115,7 +115,7 @@ impl<L: LogSink> Battle<L> {
         {
             return false;
         }
-        if dex::effect(item).key == "redcard" {
+        if dex::key_ids!("redcard").contains(item) {
             self.add(LogEntry::new(
                 "-enditem",
                 &[LogArg::Mon(pokemon), LogArg::Effect(EffectRef::Dex(item))],
@@ -200,7 +200,7 @@ impl<L: LogSink> Battle<L> {
         if item == EffectId::NONE {
             return false;
         }
-        let after_faint = matches!(dex::effect(item).key, "jabocaberry" | "rowapberry");
+        let after_faint = dex::key_ids!("jabocaberry", "rowapberry").contains(item);
         if (p.hp == 0 && !after_faint) || p.flags & mon_flags::ACTIVE == 0 {
             return false;
         }
@@ -295,16 +295,21 @@ impl<L: LogSink> Battle<L> {
         if mon.flags & mon_flags::ACTIVE == 0 {
             return true;
         }
-        if self.query_has_volatile(pokemon, "embargo")
+        if self.query_has_volatile(pokemon, dex::key_ids!("embargo"))
             || self.state.field.pseudo_weather.cells[..self.state.field.pseudo_weather.len as usize]
                 .iter()
-                .any(|c| query_effect_is(self.state.effects.cells[c.0 as usize].id, "magicroom"))
+                .any(|c| {
+                    query_effect_is(
+                        self.state.effects.cells[c.0 as usize].id,
+                        dex::key_ids!("magicroom"),
+                    )
+                })
         {
             return true;
         }
         let ignore_klutz = mon.item != EffectId::NONE
             && dex::ITEMS[(mon.item.0 - dex::ITEM_START) as usize].ignore_klutz;
-        !ignore_klutz && self.query_has_ability(pokemon, "klutz")
+        !ignore_klutz && self.query_has_ability(pokemon, dex::key_ids!("klutz"))
     }
     /// Old-ability relay/false/null; End/Start and suppression restrictions
     /// Ports `sim/pokemon.ts:1908-1950`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
@@ -365,7 +370,7 @@ impl<L: LogSink> Battle<L> {
         self.release_cell(old_cell);
         if a.effect != EffectRef::None && !is_from_forme_change && !is_transform {
             let id = self.event_effect_id(a.effect);
-            if id != EffectId::NONE && matches!(dex::effect(id).key, "mummy" | "lingeringaroma") {
+            if dex::key_ids!("mummy", "lingeringaroma").contains(id) {
                 self.add(LogEntry::new(
                     "-activate",
                     &[
@@ -457,11 +462,11 @@ impl<L: LogSink> Battle<L> {
         if flags & dex::FLAG_CANTSUPPRESS != 0 {
             return false;
         }
-        if self.query_has_volatile(pokemon, "gastroacid") {
+        if self.query_has_volatile(pokemon, dex::key_ids!("gastroacid")) {
             return true;
         }
-        if self.query_has_item(pokemon, "abilityshield")
-            || query_effect_is(mon.ability, "neutralizinggas")
+        if self.query_has_item(pokemon, dex::key_ids!("abilityshield"))
+            || query_effect_is(mon.ability, dex::key_ids!("neutralizinggas"))
         {
             return false;
         }
@@ -476,13 +481,13 @@ impl<L: LogSink> Battle<L> {
                 if holder.flags & mon_flags::FAINTED != 0 {
                     continue;
                 }
-                if query_effect_is(holder.ability, "neutralizinggas")
-                    && !self.query_has_volatile(active, "gastroacid")
+                if query_effect_is(holder.ability, dex::key_ids!("neutralizinggas"))
+                    && !self.query_has_volatile(active, dex::key_ids!("gastroacid"))
                     && holder.flags & mon_flags::TRANSFORMED == 0
                     && self.state.effects.cells[holder.ability_state.0 as usize].present
                         & present::ENDING
                         == 0
-                    && !self.query_has_volatile(pokemon, "commanding")
+                    && !self.query_has_volatile(pokemon, dex::key_ids!("commanding"))
                 {
                     return true;
                 }
@@ -493,24 +498,25 @@ impl<L: LogSink> Battle<L> {
 }
 
 // Static Dex keys let format-excluded source branches remain explicit without
-// fabricating IDs for effects absent from this generated scope. NONE never
-// matches a named ability/item/condition. These queries allocate and draw nothing.
-fn query_effect_is(effect: EffectId, key: &str) -> bool {
-    effect != EffectId::NONE && dex::effect(effect).key == key
+// fabricating IDs for effects absent from this generated scope: `dex::key_ids!`
+// resolves each key at compile time to every raw id that carries it (empty when
+// absent). NONE never matches. These queries allocate and draw nothing.
+fn query_effect_is(effect: EffectId, keys: dex::KeyIds) -> bool {
+    keys.contains(effect)
 }
 impl<L: LogSink> Battle<L> {
-    pub(crate) fn query_has_volatile(&self, pokemon: MonId, key: &str) -> bool {
+    pub(crate) fn query_has_volatile(&self, pokemon: MonId, keys: dex::KeyIds) -> bool {
         let list = &self.state.pokemon[pokemon.0 as usize].volatiles;
         list.cells[..list.len as usize]
             .iter()
-            .any(|c| query_effect_is(self.state.effects.cells[c.0 as usize].id, key))
+            .any(|c| query_effect_is(self.state.effects.cells[c.0 as usize].id, keys))
     }
-    pub(crate) fn query_has_ability(&self, pokemon: MonId, key: &str) -> bool {
-        query_effect_is(self.state.pokemon[pokemon.0 as usize].ability, key)
+    pub(crate) fn query_has_ability(&self, pokemon: MonId, keys: dex::KeyIds) -> bool {
+        query_effect_is(self.state.pokemon[pokemon.0 as usize].ability, keys)
             && !self.ignoring_ability(pokemon)
     }
-    pub(crate) fn query_has_item(&self, pokemon: MonId, key: &str) -> bool {
-        query_effect_is(self.state.pokemon[pokemon.0 as usize].item, key)
+    pub(crate) fn query_has_item(&self, pokemon: MonId, keys: dex::KeyIds) -> bool {
+        query_effect_is(self.state.pokemon[pokemon.0 as usize].item, keys)
             && !self.ignoring_item(pokemon)
     }
 }

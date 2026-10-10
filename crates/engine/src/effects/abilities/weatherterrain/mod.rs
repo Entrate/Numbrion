@@ -163,7 +163,7 @@ pub fn in_rain<L: LogSink>(b: &mut Battle<L>, m: MonId) -> bool {
 /// The five extender items are outside the scoped item list, so hasItem is false for scoped
 /// teams, but the query is still performed (static key; no executable id is invented).
 /// PRNG: none.
-pub fn duration_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx, item: &'static str) -> Relay {
+pub fn duration_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx, item: dex::KeyIds) -> Relay {
     if let Some(m) = opt_mon(b, cx, 0)
         && b.query_has_item(m, item)
     {
@@ -350,17 +350,17 @@ pub fn primal_orb_holder<L: LogSink>(
     b: &Battle<L>,
     m: MonId,
     species: EffectId,
-    orb: &'static str,
+    orb: dex::KeyIds,
 ) -> bool {
     let p = &b.state.pokemon[m.0 as usize];
-    p.species == species && p.item != EffectId::NONE && dex::effect(p.item).key == orb
+    p.species == species && orb.contains(p.item)
 }
 /// Drizzle/Drought onStart (abilities.ts:1079,1089). PRNG: none directly (setWeather events).
 pub fn set_weather_on_start<L: LogSink>(
     b: &mut Battle<L>,
     cx: HookCtx,
     weather: EffectId,
-    blocked_by_orb: Option<(EffectId, &'static str)>,
+    blocked_by_orb: Option<(EffectId, dex::KeyIds)>,
 ) -> Relay {
     if let Some((species, orb)) = blocked_by_orb {
         let source = mon_arg(b, cx, 0);

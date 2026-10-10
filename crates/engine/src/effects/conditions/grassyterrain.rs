@@ -29,7 +29,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/moves.ts:7686-7691. `source?.hasItem('terrainextender') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_GRASSYTERRAIN_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "terrainextender")
+            support::duration_callback(b, cx, dex::key_ids!("terrainextender"))
         }
         // data/moves.ts:7693-7703 (priority 6). Earthquake (Bulldoze/Magnitude outside scope) on grounded, not semi-invulnerable defender: chainModify(0.5); else Grass move from grounded attacker: chainModify([5325, 4096]). PRNG: none directly.
         dex::HOOK_CONDITION_GRASSYTERRAIN_ONBASEPOWER => base_power(b, cx),

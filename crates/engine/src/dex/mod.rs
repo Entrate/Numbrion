@@ -20,7 +20,10 @@ pub use hook_index::{
 };
 mod keys;
 pub(crate) use keys::key_ids;
-pub use keys::{KeyIds, condition_id, same_key_condition};
+pub use keys::{
+    ABILITY_SLOT_NAMES_ARE_NOT_KEYS, KeyIds, condition_id, immunity_column, immunity_column_of,
+    key_id, same_key_condition,
+};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq)]

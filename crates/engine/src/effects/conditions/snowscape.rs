@@ -29,7 +29,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/conditions.ts:698-703. `source?.hasItem('icyrock') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_SNOWSCAPE_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "icyrock")
+            support::duration_callback(b, cx, dex::key_ids!("icyrock"))
         }
         // data/conditions.ts:705-709. Ice type in snowscape: returns modify(def, 1.5). PRNG: none directly (Type events).
         dex::HOOK_CONDITION_SNOWSCAPE_ONMODIFYDEF => {
