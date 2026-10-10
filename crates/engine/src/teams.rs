@@ -303,8 +303,7 @@ impl SetDef {
             || self.nature as isize >= dex::NATURES.len() as isize
             || self.level == 0
             || self.ivs.iter().any(|&iv| iv > 31)
-            || self.tera_type == TypeId::NONE
-            || self.tera_type.0 as usize > dex::TYPE_NAMES.len()
+            || self.tera_type.0 as usize >= dex::TYPE_NAMES.len()
         {
             return Err(TeamError("Invalid typed set definition".into()));
         }

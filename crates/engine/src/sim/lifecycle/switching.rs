@@ -166,7 +166,6 @@ impl<L: LogSink> Battle<L> {
             party[usize::from(incoming_position)] = old_active;
         }
         self.lc_set_flag(pokemon, mon_flags::ACTIVE, true);
-        self.mark_revealed(pokemon);
         self.state.sides[s].active[usize::from(position)] = pokemon;
         {
             let p = self.lc_mon_mut(pokemon);
