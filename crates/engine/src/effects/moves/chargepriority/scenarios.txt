@@ -1,0 +1,3171 @@
+scenario truant_recharge_loafing
+seed 11,22,33,44
+p1 Slaking|||Truant|GigaImpact,BodySlam,Agility,Earthquake|Serious|252,,128,,128,|M|||50|]Sableye|||Prankster|FakeOut,ThunderWave,Agility,IronDefense|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Kingambit|||Pressure|SuckerPunch,Crunch,Agility,SwordsDance|Serious|252,,128,,128,|M|||50|]Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 57388,452,34593,29177
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Slaking|Slaking, L50, M|257/257
+log |switch|p1a: Slaking|Slaking, L50, M|100/100
+log |split|p1
+log |switch|p1b: Sableye|Sableye, L50, M|157/157
+log |switch|p1b: Sableye|Sableye, L50, M|100/100
+log |split|p2
+log |switch|p2a: Kingambit|Kingambit, L50, M|207/207
+log |switch|p2a: Kingambit|Kingambit, L50, M|100/100
+log |split|p2
+log |switch|p2b: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2b: Incineroar|Incineroar, L50, M|100/100
+log |-ability|p2b: Incineroar|Intimidate|boost
+log |-unboost|p1a: Slaking|atk|1
+log |-unboost|p1b: Sableye|atk|1
+log |-ability|p2a: Kingambit|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 1, move 1 2
+seed_after 27219,15418,58774,61302
+log |
+log |t:|
+log |move|p2b: Incineroar|Fake Out|p1b: Sableye
+log |-immune|p1b: Sableye
+log |move|p1b: Sableye|Fake Out|p2b: Incineroar
+log |split|p2
+log |-damage|p2b: Incineroar|193/202
+log |-damage|p2b: Incineroar|96/100
+log |move|p2a: Kingambit|Sucker Punch|p1a: Slaking
+log |split|p1
+log |-damage|p1a: Slaking|205/257
+log |-damage|p1a: Slaking|80/100
+log |move|p1a: Slaking|Giga Impact|p2a: Kingambit
+log |-resisted|p2a: Kingambit
+log |split|p2
+log |-damage|p2a: Kingambit|169/207
+log |-damage|p2a: Kingambit|82/100
+log |-mustrecharge|p1a: Slaking
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 2 1	move 1 1, move 2 1
+seed_after 59541,18413,42181,50682
+log |
+log |t:|
+log |move|p2a: Kingambit|Sucker Punch||[still]
+log |-fail|p2a: Kingambit
+log |move|p1b: Sableye|Thunder Wave|p2a: Kingambit
+log |-hint|Since gen 7, Dark is immune to Prankster moves.
+log |-immune|p2a: Kingambit
+log |cant|p1a: Slaking|recharge
+log |move|p2b: Incineroar|Flare Blitz|p1a: Slaking
+log |split|p1
+log |-damage|p1a: Slaking|126/257
+log |-damage|p1a: Slaking|50/100
+log |split|p2
+log |-damage|p2b: Incineroar|167/202|[from] Recoil
+log |-damage|p2b: Incineroar|83/100|[from] Recoil
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2 1, move 3	move 3, move 4
+seed_after 27240,48873,36155,12804
+log |
+log |t:|
+log |move|p1b: Sableye|Agility|p1b: Sableye
+log |-boost|p1b: Sableye|spe|2
+log |move|p1a: Slaking|Body Slam|p2a: Kingambit
+log |-resisted|p2a: Kingambit
+log |split|p2
+log |-damage|p2a: Kingambit|148/207
+log |-damage|p2a: Kingambit|72/100
+log |-status|p2a: Kingambit|par
+log |move|p2b: Incineroar|Agility|p2b: Incineroar
+log |-boost|p2b: Incineroar|spe|2
+log |move|p2a: Kingambit|Agility|p2a: Kingambit
+log |-boost|p2a: Kingambit|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	move 2 1, move 4	move 2 1, move 2 2
+seed_after 28086,32530,50276,51295
+log |
+log |t:|
+log |move|p1b: Sableye|Iron Defense|p1b: Sableye
+log |-boost|p1b: Sableye|def|2
+log |move|p2b: Incineroar|Flare Blitz|p1b: Sableye
+log |split|p1
+log |-damage|p1b: Sableye|112/157
+log |-damage|p1b: Sableye|72/100
+log |split|p2
+log |-damage|p2b: Incineroar|152/202|[from] Recoil
+log |-damage|p2b: Incineroar|76/100|[from] Recoil
+log |cant|p1a: Slaking|ability: Truant
+log |move|p2a: Kingambit|Crunch|p1a: Slaking
+log |split|p1
+log |-damage|p1a: Slaking|71/257
+log |-damage|p1a: Slaking|28/100
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2 1, move 4	move 2 1, move 2 2
+seed_after 25724,16069,7960,19098
+log |
+log |t:|
+log |move|p1b: Sableye|Iron Defense|p1b: Sableye
+log |-boost|p1b: Sableye|def|2
+log |move|p2b: Incineroar|Flare Blitz|p1b: Sableye
+log |split|p1
+log |-damage|p1b: Sableye|82/157
+log |-damage|p1b: Sableye|53/100
+log |split|p2
+log |-damage|p2b: Incineroar|142/202|[from] Recoil
+log |-damage|p2b: Incineroar|71/100|[from] Recoil
+log |move|p1a: Slaking|Body Slam|p2a: Kingambit
+log |-resisted|p2a: Kingambit
+log |split|p2
+log |-damage|p2a: Kingambit|126/207 par
+log |-damage|p2a: Kingambit|61/100 par
+log |move|p2a: Kingambit|Crunch|p1a: Slaking
+log |-crit|p1a: Slaking
+log |split|p1
+log |-damage|p1a: Slaking|0 fnt
+log |-damage|p1a: Slaking|0 fnt
+log |faint|p1a: Slaking
+log |
+log |upkeep
+step forced1	switch 3, pass	
+seed_after 25724,16069,7960,19098
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1a: Snorlax|Snorlax, L50, M|100/100
+log |turn|6
+scenario electromorphosis_charge
+seed 101,202,303,404
+p1 Bellibolt|||Electromorphosis|Thunderbolt,Agility,MuddyWater,BodySlam|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|]Garchomp|||RoughSkin|BodySlam,DragonClaw,EarthPower,Agility|Serious|252,,128,,128,252|M|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 51180,49713,46438,18113
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Bellibolt|Bellibolt, L50, M|216/216
+log |switch|p1a: Bellibolt|Bellibolt, L50, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, L50, M|202/202
+log |switch|p1b: Clefable|Clefable, L50, M|100/100
+log |split|p2
+log |switch|p2a: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2a: Incineroar|Incineroar, L50, M|100/100
+log |split|p2
+log |switch|p2b: Garchomp|Garchomp, L50, M|215/215
+log |switch|p2b: Garchomp|Garchomp, L50, M|100/100
+log |-ability|p2a: Incineroar|Intimidate|boost
+log |-unboost|p1a: Bellibolt|atk|1
+log |-unboost|p1b: Clefable|atk|1
+log |turn|1
+step turn1	move 1 1, move 2	move 1 1, move 1 1
+seed_after 18353,6696,28210,13994
+log |
+log |t:|
+log |move|p2a: Incineroar|Fake Out|p1a: Bellibolt
+log |split|p1
+log |-damage|p1a: Bellibolt|199/216
+log |-damage|p1a: Bellibolt|93/100
+log |-start|p1a: Bellibolt|Charge|Fake Out|[from] ability: Electromorphosis
+log |move|p2b: Garchomp|Body Slam|p1a: Bellibolt
+log |split|p1
+log |-damage|p1a: Bellibolt|154/216
+log |-damage|p1a: Bellibolt|72/100
+log |-start|p1a: Bellibolt|Charge|Body Slam|[from] ability: Electromorphosis
+log |move|p1b: Clefable|Agility|p1b: Clefable
+log |-boost|p1b: Clefable|spe|2
+log |cant|p1a: Bellibolt|flinch
+log |-end|p1a: Bellibolt|Charge|[silent]
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 2	move 4, move 1 1
+seed_after 5508,27577,27036,50514
+log |
+log |t:|
+log |move|p1b: Clefable|Agility|p1b: Clefable
+log |-boost|p1b: Clefable|spe|2
+log |move|p2b: Garchomp|Body Slam|p1a: Bellibolt
+log |split|p1
+log |-damage|p1a: Bellibolt|110/216
+log |-damage|p1a: Bellibolt|51/100
+log |-start|p1a: Bellibolt|Charge|Body Slam|[from] ability: Electromorphosis
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1a: Bellibolt|Thunderbolt|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|99/202
+log |-damage|p2a: Incineroar|50/100
+log |-status|p2a: Incineroar|par
+log |-end|p1a: Bellibolt|Charge|[silent]
+log |
+log |upkeep
+log |turn|3
+step turn3	move 3, move 2	move 4, move 1 1
+seed_after 64865,12119,4715,22294
+log |
+log |t:|
+log |move|p1b: Clefable|Agility|p1b: Clefable
+log |-boost|p1b: Clefable|spe|2
+log |move|p2b: Garchomp|Body Slam|p1a: Bellibolt
+log |split|p1
+log |-damage|p1a: Bellibolt|66/216
+log |-damage|p1a: Bellibolt|31/100
+log |-start|p1a: Bellibolt|Charge|Body Slam|[from] ability: Electromorphosis
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1a: Bellibolt|Muddy Water|p2b: Garchomp|[spread] p2a,p2b
+log |-supereffective|p2a: Incineroar
+log |-crit|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|23/202 par
+log |-damage|p2a: Incineroar|12/100 par
+log |split|p2
+log |-damage|p2b: Garchomp|187/215
+log |-damage|p2b: Garchomp|87/100
+log |-unboost|p2a: Incineroar|accuracy|1
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 2	move 4, move 4
+seed_after 7456,817,16917,42229
+log |
+log |t:|
+log |move|p1b: Clefable|Agility|p1b: Clefable
+log |-boost|p1b: Clefable|spe|0
+log |move|p2b: Garchomp|Agility|p2b: Garchomp
+log |-boost|p2b: Garchomp|spe|2
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1a: Bellibolt|Thunderbolt|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|0 fnt
+log |-damage|p2a: Incineroar|0 fnt
+log |faint|p2a: Incineroar
+log |-end|p1a: Bellibolt|Charge|[silent]
+log |
+log |upkeep
+step forced1		switch 3, pass
+seed_after 7456,817,16917,42229
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2a: Dondozo|Dondozo, L50, M|100/100
+log |turn|5
+step turn5	move 1 1, move 2	move 2, move 1 1
+seed_after 41389,10061,42218,4413
+log |
+log |t:|
+log |move|p1b: Clefable|Agility|p1b: Clefable
+log |-boost|p1b: Clefable|spe|0
+log |move|p2b: Garchomp|Body Slam|p1a: Bellibolt
+log |split|p1
+log |-damage|p1a: Bellibolt|23/216
+log |-damage|p1a: Bellibolt|11/100
+log |-start|p1a: Bellibolt|Charge|Body Slam|[from] ability: Electromorphosis
+log |move|p1a: Bellibolt|Thunderbolt|p2a: Dondozo
+log |-supereffective|p2a: Dondozo
+log |split|p2
+log |-damage|p2a: Dondozo|0 fnt
+log |-damage|p2a: Dondozo|0 fnt
+log |faint|p2a: Dondozo
+log |-end|p1a: Bellibolt|Charge|[silent]
+log |
+log |upkeep
+log |turn|6
+scenario solar_beam_weathers
+seed 5,6,7,8
+p1 Venusaur|||Chlorophyll|SolarBeam,Agility,SludgeBomb,SleepPowder|Serious|252,,128,,128,|M|||50|]Rillaboom|||Overgrow|SolarBeam,Agility,WoodHammer,GrassyGlide|Serious|252,,128,,128,|M|||50|]Torkoal|||Drought|SolarBeam,Agility,WillOWisp,IronDefense|Serious|252,,128,,128,|M|||50|
+p2 Pelipper|||Drizzle|Hurricane,Agility,IronDefense,Scald|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Tyranitar|||SandStream|RockSlide,Agility,Crunch,Earthquake|Serious|252,,128,,128,|M|||50|]Abomasnow|||SnowWarning|Blizzard,Agility,WoodHammer,IceShard|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 5,6,7,8
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Venusaur|Venusaur, L50, M|187/187
+log |switch|p1a: Venusaur|Venusaur, L50, M|100/100
+log |split|p1
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|207/207
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|100/100
+log |split|p2
+log |switch|p2a: Pelipper|Pelipper, L50, M|167/167
+log |switch|p2a: Pelipper|Pelipper, L50, M|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2b: Snorlax|Snorlax, L50, M|100/100
+log |-weather|RainDance|[from] ability: Drizzle|[of] p2a: Pelipper
+log |turn|1
+step turn1	move 1 1, move 1 2	move 2, move 2
+seed_after 4742,50088,47031,36837
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p1a: Venusaur|Solar Beam||[still]
+log |-prepare|p1a: Venusaur|Solar Beam
+log |move|p2a: Pelipper|Agility|p2a: Pelipper
+log |-boost|p2a: Pelipper|spe|2
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|2
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 2, move 2
+seed_after 42026,17808,9591,43968
+log |
+log |t:|
+log |move|p2a: Pelipper|Agility|p2a: Pelipper
+log |-boost|p2a: Pelipper|spe|2
+log |move|p1b: Rillaboom|Solar Beam|p2b: Snorlax|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Snorlax|243/267
+log |-damage|p2b: Snorlax|92/100
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|2
+log |move|p1a: Venusaur|Solar Beam|p2a: Pelipper|[from] lockedmove
+log |split|p2
+log |-damage|p2a: Pelipper|127/167
+log |-damage|p2a: Pelipper|77/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|3
+step turn3	switch 3, move 2	move 2, move 2
+seed_after 42026,17808,9591,43968
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Torkoal|Torkoal, L50, M|177/177
+log |switch|p1a: Torkoal|Torkoal, L50, M|100/100
+log |-weather|SunnyDay|[from] ability: Drought|[of] p1a: Torkoal
+log |move|p2a: Pelipper|Agility|p2a: Pelipper
+log |-boost|p2a: Pelipper|spe|2
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|2
+log |move|p1b: Rillaboom|Agility|p1b: Rillaboom
+log |-boost|p1b: Rillaboom|spe|2
+log |
+log |-weather|SunnyDay|[upkeep]
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 2, move 2
+seed_after 46372,6950,21042,41190
+log |
+log |t:|
+log |move|p2a: Pelipper|Agility|p2a: Pelipper
+log |-boost|p2a: Pelipper|spe|0
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |-anim|p1b: Rillaboom|Solar Beam|p2b: Snorlax
+log |split|p2
+log |-damage|p2b: Snorlax|203/267
+log |-damage|p2b: Snorlax|77/100
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|0
+log |move|p1a: Torkoal|Solar Beam||[still]
+log |-prepare|p1a: Torkoal|Solar Beam
+log |-anim|p1a: Torkoal|Solar Beam|p2a: Pelipper
+log |split|p2
+log |-damage|p2a: Pelipper|79/167
+log |-damage|p2a: Pelipper|48/100
+log |
+log |-weather|SunnyDay|[upkeep]
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	switch 3, move 2
+seed_after 46372,6950,21042,41190
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Tyranitar|Tyranitar, L50, M|207/207
+log |switch|p2a: Tyranitar|Tyranitar, L50, M|100/100
+log |-weather|Sandstorm|[from] ability: Sand Stream|[of] p2a: Tyranitar
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|0
+log |move|p1a: Torkoal|Solar Beam||[still]
+log |-prepare|p1a: Torkoal|Solar Beam
+log |
+log |-weather|Sandstorm|[upkeep]
+log |split|p1
+log |-damage|p1b: Rillaboom|195/207|[from] Sandstorm
+log |-damage|p1b: Rillaboom|95/100|[from] Sandstorm
+log |split|p2
+log |-damage|p2b: Snorlax|187/267|[from] Sandstorm
+log |-damage|p2b: Snorlax|71/100|[from] Sandstorm
+log |split|p1
+log |-damage|p1a: Torkoal|166/177|[from] Sandstorm
+log |-damage|p1a: Torkoal|94/100|[from] Sandstorm
+log |upkeep
+log |turn|6
+step turn6	move 1, move 1	move 2, move 2
+seed_after 11733,61599,5523,15548
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam|p2b: Snorlax|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Snorlax|168/267
+log |-damage|p2b: Snorlax|63/100
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|0
+log |move|p2a: Tyranitar|Agility|p2a: Tyranitar
+log |-boost|p2a: Tyranitar|spe|2
+log |move|p1a: Torkoal|Solar Beam|p2a: Tyranitar|[from] lockedmove
+log |-supereffective|p2a: Tyranitar
+log |split|p2
+log |-damage|p2a: Tyranitar|179/207
+log |-damage|p2a: Tyranitar|87/100
+log |
+log |-weather|Sandstorm|[upkeep]
+log |split|p1
+log |-damage|p1b: Rillaboom|183/207|[from] Sandstorm
+log |-damage|p1b: Rillaboom|89/100|[from] Sandstorm
+log |split|p2
+log |-damage|p2b: Snorlax|152/267|[from] Sandstorm
+log |-damage|p2b: Snorlax|57/100|[from] Sandstorm
+log |split|p1
+log |-damage|p1a: Torkoal|155/177|[from] Sandstorm
+log |-damage|p1a: Torkoal|88/100|[from] Sandstorm
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 1 2	switch 4, move 2
+seed_after 11733,61599,5523,15548
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Abomasnow|Abomasnow, L50, M|197/197
+log |switch|p2a: Abomasnow|Abomasnow, L50, M|100/100
+log |-weather|Snowscape|[from] ability: Snow Warning|[of] p2a: Abomasnow
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|0
+log |move|p1a: Torkoal|Solar Beam||[still]
+log |-prepare|p1a: Torkoal|Solar Beam
+log |
+log |-weather|Snowscape|[upkeep]
+log |upkeep
+log |turn|8
+step turn8	move 1, move 1	move 2, move 2
+seed_after 32050,50818,52091,194
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam|p2b: Snorlax|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Snorlax|131/267
+log |-damage|p2b: Snorlax|50/100
+log |move|p2b: Snorlax|Agility|p2b: Snorlax
+log |-boost|p2b: Snorlax|spe|0
+log |move|p2a: Abomasnow|Agility|p2a: Abomasnow
+log |-boost|p2a: Abomasnow|spe|2
+log |move|p1a: Torkoal|Solar Beam|p2a: Abomasnow|[from] lockedmove
+log |-resisted|p2a: Abomasnow
+log |split|p2
+log |-damage|p2a: Abomasnow|186/197
+log |-damage|p2a: Abomasnow|95/100
+log |
+log |-weather|Snowscape|[upkeep]
+log |upkeep
+log |turn|9
+scenario power_herb_charge_moves
+seed 15,25,35,45
+p1 Sableye||PowerHerb|Prankster|MeteorBeam,Agility,FakeOut,IronDefense|Serious|252,,128,,128,|M|||50|]Rillaboom||PowerHerb|Overgrow|SolarBeam,Agility,WoodHammer,GrassyGlide|Serious|252,,128,,128,|M|||50|]Gengar||PowerHerb|Pressure|ShadowForce,PhantomForce,Agility,ShadowBall|Serious|252,,128,,128,|M|||50|]Pincurchin||PowerHerb|ElectricSurge|ElectroShot,Agility,Recover,IronDefense|Serious|252,,128,,128,|M|||50|
+p2 Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 15,25,35,45
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Sableye|Sableye, L50, M|157/157
+log |switch|p1a: Sableye|Sableye, L50, M|100/100
+log |split|p1
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|207/207
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|100/100
+log |split|p2
+log |switch|p2a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2a: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 1, move 1
+seed_after 38248,53045,50663,23035
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |-enditem|p1b: Rillaboom|Power Herb
+log |-anim|p1b: Rillaboom|Solar Beam|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|323/362
+log |-damage|p2b: Blissey|90/100
+log |move|p2b: Blissey|Soft-Boiled|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|362/362
+log |-heal|p2b: Blissey|100/100
+log |move|p1a: Sableye|Meteor Beam||[still]
+log |-prepare|p1a: Sableye|Meteor Beam
+log |-boost|p1a: Sableye|spa|1
+log |-enditem|p1a: Sableye|Power Herb
+log |-anim|p1a: Sableye|Meteor Beam|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|225/267
+log |-damage|p2a: Snorlax|85/100
+log |move|p2a: Snorlax|Body Slam|p1a: Sableye
+log |-immune|p1a: Sableye
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 1 1, move 1
+seed_after 38248,53045,50663,23035
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p2b: Blissey|Soft-Boiled||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1a: Sableye|Meteor Beam||[still]
+log |-prepare|p1a: Sableye|Meteor Beam
+log |-boost|p1a: Sableye|spa|1
+log |move|p2a: Snorlax|Body Slam|p1a: Sableye
+log |-immune|p1a: Sableye
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 1	move 2, move 2
+seed_after 51795,16581,45536,22969
+log |
+log |t:|
+log |move|p1b: Rillaboom|Solar Beam|p2b: Blissey|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Blissey|328/362
+log |-damage|p2b: Blissey|91/100
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Sableye|Meteor Beam|p2a: Snorlax|[from] lockedmove
+log |split|p2
+log |-damage|p2a: Snorlax|170/267
+log |-damage|p2a: Snorlax|64/100
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 3, switch 4	move 2, move 2
+seed_after 51795,16581,45536,22969
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Pincurchin|Pincurchin, L50, M|155/155
+log |switch|p1b: Pincurchin|Pincurchin, L50, M|100/100
+log |-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p1b: Pincurchin
+log |split|p1
+log |switch|p1a: Gengar|Gengar, L50, M|167/167
+log |switch|p1a: Gengar|Gengar, L50, M|100/100
+log |-ability|p1a: Gengar|Pressure
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	move 2, move 2
+seed_after 51910,17968,27294,15474
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |move|p1a: Gengar|Shadow Force||[still]
+log |-prepare|p1a: Gengar|Shadow Force
+log |-enditem|p1a: Gengar|Power Herb
+log |-anim|p1a: Gengar|Shadow Force|p2a: Snorlax
+log |-immune|p2a: Snorlax
+log |move|p1b: Pincurchin|Electro Shot||[still]
+log |-prepare|p1b: Pincurchin|Electro Shot
+log |-boost|p1b: Pincurchin|spa|1
+log |-enditem|p1b: Pincurchin|Power Herb
+log |-anim|p1b: Pincurchin|Electro Shot|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|231/362
+log |-damage|p2b: Blissey|64/100
+log |
+log |upkeep
+log |turn|6
+step turn6	move 2 1, move 1 2	move 2, move 2
+seed_after 41095,1270,32267,31165
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p1a: Gengar|Phantom Force||[still]
+log |-prepare|p1a: Gengar|Phantom Force
+log |move|p1b: Pincurchin|Electro Shot||[still]
+log |-prepare|p1b: Pincurchin|Electro Shot
+log |-boost|p1b: Pincurchin|spa|1
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1, move 1	move 2, move 2
+seed_after 34390,14461,30789,19174
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p1a: Gengar|Phantom Force|p2a: Snorlax|[from] lockedmove
+log |-immune|p2a: Snorlax
+log |move|p1b: Pincurchin|Electro Shot|p2b: Blissey|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Blissey|96/362
+log |-damage|p2b: Blissey|27/100
+log |
+log |upkeep
+log |turn|8
+scenario electro_shot_rain
+seed 31,32,33,34
+p1 Pincurchin|||ElectricSurge|ElectroShot,Agility,Recover,IronDefense|Serious|252,,128,,128,|M|||50|]Pelipper|||Drizzle|Hurricane,Agility,IronDefense,Scald|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 31,32,33,34
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Pincurchin|Pincurchin, L50, M|155/155
+log |switch|p1a: Pincurchin|Pincurchin, L50, M|100/100
+log |split|p1
+log |switch|p1b: Pelipper|Pelipper, L50, M|167/167
+log |switch|p1b: Pelipper|Pelipper, L50, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, L50, F|362/362
+log |switch|p2a: Blissey|Blissey, L50, F|100/100
+log |split|p2
+log |switch|p2b: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2b: Dondozo|Dondozo, L50, M|100/100
+log |-weather|RainDance|[from] ability: Drizzle|[of] p1b: Pelipper
+log |-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p1a: Pincurchin
+log |turn|1
+step turn1	move 1 1, move 2	move 1, move 2
+seed_after 14872,51494,23566,24023
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|2
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |-anim|p1a: Pincurchin|Electro Shot|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|256/362
+log |-damage|p2a: Blissey|71/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 2	move 1, move 2
+seed_after 11380,31196,63611,60632
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|2
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|362/362
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |-anim|p1a: Pincurchin|Electro Shot|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|218/362
+log |-damage|p2a: Blissey|61/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 2	move 1, move 2
+seed_after 64931,52812,64374,47989
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|2
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|362/362
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |-anim|p1a: Pincurchin|Electro Shot|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|208/362
+log |-damage|p2a: Blissey|58/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 2	move 1, move 2
+seed_after 61735,38942,23059,190
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|362/362
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |-anim|p1a: Pincurchin|Electro Shot|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|176/362
+log |-damage|p2a: Blissey|49/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 2	move 1, move 2
+seed_after 21279,59043,4565,12675
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|357/362
+log |-heal|p2a: Blissey|99/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |-anim|p1a: Pincurchin|Electro Shot|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|116/362
+log |-damage|p2a: Blissey|33/100
+log |
+log |-weather|none
+log |-fieldend|move: Electric Terrain
+log |upkeep
+log |turn|6
+step turn6	move 1 1, move 2	move 1, move 2
+seed_after 21279,59043,4565,12675
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|297/362
+log |-heal|p2a: Blissey|83/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|1
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1, move 2	move 1, move 2
+seed_after 13459,40133,19546,57684
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|362/362
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Pincurchin|Electro Shot|p2a: Blissey|[from] lockedmove
+log |split|p2
+log |-damage|p2a: Blissey|145/362
+log |-damage|p2a: Blissey|41/100
+log |
+log |upkeep
+log |turn|8
+step turn8	move 1 1, move 2	move 1, move 2
+seed_after 13459,40133,19546,57684
+log |
+log |t:|
+log |move|p1b: Pelipper|Agility|p1b: Pelipper
+log |-boost|p1b: Pelipper|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|326/362
+log |-heal|p2a: Blissey|91/100
+log |move|p1a: Pincurchin|Electro Shot||[still]
+log |-prepare|p1a: Pincurchin|Electro Shot
+log |-boost|p1a: Pincurchin|spa|0
+log |
+log |upkeep
+log |turn|9
+scenario force_moves_invulnerable
+seed 51,52,53,54
+p1 Gengar|||Pressure|ShadowForce,PhantomForce,Agility,ShadowBall|Serious|252,,128,,128,|M|||50|]Sableye|||Prankster|PhantomForce,Agility,FakeOut,IronDefense|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|]Garchomp|||RoughSkin|BodySlam,DragonClaw,EarthPower,Agility|Serious|252,,128,,128,252|M|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 51,52,53,54
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Gengar|Gengar, L50, M|167/167
+log |switch|p1a: Gengar|Gengar, L50, M|100/100
+log |split|p1
+log |switch|p1b: Sableye|Sableye, L50, M|157/157
+log |switch|p1b: Sableye|Sableye, L50, M|100/100
+log |split|p2
+log |switch|p2a: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2a: Incineroar|Incineroar, L50, M|100/100
+log |split|p2
+log |switch|p2b: Garchomp|Garchomp, L50, M|215/215
+log |switch|p2b: Garchomp|Garchomp, L50, M|100/100
+log |-ability|p1a: Gengar|Pressure
+log |-ability|p2a: Incineroar|Intimidate|boost
+log |-unboost|p1a: Gengar|atk|1
+log |-unboost|p1b: Sableye|atk|1
+log |turn|1
+step turn1	move 1 1, move 1 2	move 3 1, move 1 1
+seed_after 45702,46750,5067,32888
+log |
+log |t:|
+log |move|p2b: Garchomp|Body Slam|p1a: Gengar
+log |-immune|p1a: Gengar
+log |move|p1a: Gengar|Shadow Force||[still]
+log |-prepare|p1a: Gengar|Shadow Force
+log |move|p2a: Incineroar|Crunch|p1a: Gengar|[miss]
+log |-miss|p2a: Incineroar|p1a: Gengar
+log |move|p1b: Sableye|Phantom Force||[still]
+log |-prepare|p1b: Sableye|Phantom Force
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 4, move 4
+seed_after 63034,59286,57324,55646
+log |
+log |t:|
+log |move|p2b: Garchomp|Agility|p2b: Garchomp
+log |-boost|p2b: Garchomp|spe|2
+log |move|p1a: Gengar|Shadow Force|p2a: Incineroar|[from] lockedmove
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|185/202
+log |-damage|p2a: Incineroar|92/100
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1b: Sableye|Phantom Force|p2b: Garchomp|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Garchomp|190/215
+log |-damage|p2b: Garchomp|89/100
+log |split|p1
+log |-damage|p1b: Sableye|138/157|[from] ability: Rough Skin|[of] p2b: Garchomp
+log |-damage|p1b: Sableye|88/100|[from] ability: Rough Skin|[of] p2b: Garchomp
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2 1, move 1 2	move 2 1, move 1 1
+seed_after 27834,58353,11672,26356
+log |
+log |t:|
+log |move|p2b: Garchomp|Body Slam|p1a: Gengar
+log |-immune|p1a: Gengar
+log |move|p2a: Incineroar|Flare Blitz|p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|58/167
+log |-damage|p1a: Gengar|35/100
+log |-status|p1a: Gengar|brn
+log |split|p2
+log |-damage|p2a: Incineroar|149/202|[from] Recoil
+log |-damage|p2a: Incineroar|74/100|[from] Recoil
+log |move|p1a: Gengar|Phantom Force||[still]
+log |-prepare|p1a: Gengar|Phantom Force
+log |move|p1b: Sableye|Phantom Force||[still]
+log |-prepare|p1b: Sableye|Phantom Force
+log |
+log |split|p1
+log |-damage|p1a: Gengar|48/167 brn|[from] brn
+log |-damage|p1a: Gengar|29/100 brn|[from] brn
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 4, move 2 1
+seed_after 60043,38523,44763,39610
+log |
+log |t:|
+log |move|p2b: Garchomp|Dragon Claw|p1a: Gengar|[miss]
+log |-miss|p2b: Garchomp|p1a: Gengar
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1a: Gengar|Phantom Force|p2a: Incineroar|[from] lockedmove
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|143/202
+log |-damage|p2a: Incineroar|71/100
+log |move|p1b: Sableye|Phantom Force|p2b: Garchomp|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Garchomp|163/215
+log |-damage|p2b: Garchomp|76/100
+log |split|p1
+log |-damage|p1b: Sableye|119/157|[from] ability: Rough Skin|[of] p2b: Garchomp
+log |-damage|p1b: Sableye|76/100|[from] ability: Rough Skin|[of] p2b: Garchomp
+log |
+log |split|p1
+log |-damage|p1a: Gengar|38/167 brn|[from] brn
+log |-damage|p1a: Gengar|23/100 brn|[from] brn
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 2	move 4, move 1 1
+seed_after 33624,1545,13742,13349
+log |
+log |t:|
+log |move|p1b: Sableye|Agility|p1b: Sableye
+log |-boost|p1b: Sableye|spe|2
+log |move|p2b: Garchomp|Body Slam|p1a: Gengar
+log |-immune|p1a: Gengar
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1a: Gengar|Shadow Force||[still]
+log |-prepare|p1a: Gengar|Shadow Force
+log |
+log |split|p1
+log |-damage|p1a: Gengar|28/167 brn|[from] brn
+log |-damage|p1a: Gengar|17/100 brn|[from] brn
+log |upkeep
+log |turn|6
+step turn6	move 1, move 2	move 4, move 4
+seed_after 34736,29187,7234,38062
+log |
+log |t:|
+log |move|p1b: Sableye|Agility|p1b: Sableye
+log |-boost|p1b: Sableye|spe|2
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|0
+log |move|p2b: Garchomp|Agility|p2b: Garchomp
+log |-boost|p2b: Garchomp|spe|2
+log |move|p1a: Gengar|Shadow Force|p2a: Incineroar|[from] lockedmove
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|135/202
+log |-damage|p2a: Incineroar|67/100
+log |
+log |split|p1
+log |-damage|p1a: Gengar|18/167 brn|[from] brn
+log |-damage|p1a: Gengar|11/100 brn|[from] brn
+log |upkeep
+log |turn|7
+scenario solar_beam_flinched
+seed 57,58,59,60
+p1 Venusaur|||Chlorophyll|SolarBeam,Agility,SludgeBomb,SleepPowder|Serious|252,,128,,128,|M|||50|]Rillaboom|||Overgrow|SolarBeam,Agility,WoodHammer,GrassyGlide|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 57,58,59,60
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Venusaur|Venusaur, L50, M|187/187
+log |switch|p1a: Venusaur|Venusaur, L50, M|100/100
+log |split|p1
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|207/207
+log |switch|p1b: Rillaboom|Rillaboom, L50, M|100/100
+log |split|p2
+log |switch|p2a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2a: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+step turn1	move 1 1, move 1 2	switch 3, move 2
+seed_after 57,58,59,60
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2a: Incineroar|Incineroar, L50, M|100/100
+log |-ability|p2a: Incineroar|Intimidate|boost
+log |-unboost|p1a: Venusaur|atk|1
+log |-unboost|p1b: Rillaboom|atk|1
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p1a: Venusaur|Solar Beam||[still]
+log |-prepare|p1a: Venusaur|Solar Beam
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 1 1, move 2
+seed_after 44649,24634,36501,51917
+log |
+log |t:|
+log |move|p2a: Incineroar|Fake Out|p1a: Venusaur
+log |split|p1
+log |-damage|p1a: Venusaur|168/187
+log |-damage|p1a: Venusaur|90/100
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1b: Rillaboom|Solar Beam|p2b: Blissey|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Blissey|328/362
+log |-damage|p2b: Blissey|91/100
+log |cant|p1a: Venusaur|flinch
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 4, move 2
+seed_after 44649,24634,36501,51917
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1b: Rillaboom|Solar Beam||[still]
+log |-prepare|p1b: Rillaboom|Solar Beam
+log |move|p1a: Venusaur|Solar Beam||[still]
+log |-prepare|p1a: Venusaur|Solar Beam
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 4, move 2
+seed_after 49024,21602,39389,57755
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p2a: Incineroar|Agility|p2a: Incineroar
+log |-boost|p2a: Incineroar|spe|2
+log |move|p1b: Rillaboom|Solar Beam|p2b: Blissey|[from] lockedmove
+log |split|p2
+log |-damage|p2b: Blissey|295/362
+log |-damage|p2b: Blissey|82/100
+log |move|p1a: Venusaur|Solar Beam|p2a: Incineroar|[from] lockedmove
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|168/202
+log |-damage|p2a: Incineroar|84/100
+log |
+log |upkeep
+log |turn|5
+scenario priority_abilities
+seed 61,62,63,64
+p1 Talonflame|||GaleWings|BraveBird,Agility,FlareBlitz,IronDefense|Serious|,,,,,252|M|||50|]Comfey|||Triage|FloralHealing,DrainingKiss,Agility,IronDefense|Serious|252,,128,,128,|M|||50|]Toedscruel|||MyceliumMight|Spore,Agility,IronDefense,Crunch|Serious|252,,128,,128,|M|||50|]Sableye|||Prankster|ThunderWave,Agility,FakeOut,IronDefense|Serious|252,,128,,128,|M|||50|
+p2 Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Hypno|||Insomnia|Psychic,Agility,ThunderWave,Hypnosis|Serious|252,,128,,128,|M|||50|]Kingambit|||Pressure|SuckerPunch,Crunch,Agility,SwordsDance|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 61,62,63,64
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Talonflame|Talonflame, L50, M|153/153
+log |switch|p1a: Talonflame|Talonflame, L50, M|100/100
+log |split|p1
+log |switch|p1b: Comfey|Comfey, L50, M|158/158
+log |switch|p1b: Comfey|Comfey, L50, M|100/100
+log |split|p2
+log |switch|p2a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2a: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+step turn1	move 1 1, move 1 -1	move 1 1, move 2
+seed_after 19940,42221,37521,23041
+log |
+log |t:|
+log |move|p1b: Comfey|Floral Healing|p1a: Talonflame
+log |-fail|p1a: Talonflame|heal
+log |move|p1a: Talonflame|Brave Bird|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|197/267
+log |-damage|p2a: Snorlax|74/100
+log |split|p1
+log |-damage|p1a: Talonflame|130/153|[from] Recoil
+log |-damage|p1a: Talonflame|85/100|[from] Recoil
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Snorlax|Body Slam|p1a: Talonflame
+log |split|p1
+log |-damage|p1a: Talonflame|58/153
+log |-damage|p1a: Talonflame|38/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 -1	move 1 1, move 2
+seed_after 22367,9328,36618,23694
+log |
+log |t:|
+log |move|p1b: Comfey|Floral Healing|p1a: Talonflame
+log |split|p1
+log |-heal|p1a: Talonflame|135/153
+log |-heal|p1a: Talonflame|89/100
+log |move|p1a: Talonflame|Brave Bird|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|118/267
+log |-damage|p2a: Snorlax|45/100
+log |split|p1
+log |-damage|p1a: Talonflame|109/153|[from] Recoil
+log |-damage|p1a: Talonflame|72/100|[from] Recoil
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Snorlax|Body Slam|p1a: Talonflame
+log |split|p1
+log |-damage|p1a: Talonflame|37/153
+log |-damage|p1a: Talonflame|25/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 3	move 2, move 2
+seed_after 22367,9328,36618,23694
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Talonflame|Agility|p1a: Talonflame
+log |-boost|p1a: Talonflame|spe|2
+log |move|p1b: Comfey|Agility|p1b: Comfey
+log |-boost|p1b: Comfey|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 3, move 4	switch 3, move 2
+seed_after 22367,9328,36618,23694
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Toedscruel|Toedscruel, L50, M|187/187
+log |switch|p1a: Toedscruel|Toedscruel, L50, M|100/100
+log |split|p2
+log |switch|p2a: Hypno|Hypno, L50, M|192/192
+log |switch|p2a: Hypno|Hypno, L50, M|100/100
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Comfey|Iron Defense|p1b: Comfey
+log |-boost|p1b: Comfey|def|2
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 4	move 1 2, move 2
+seed_after 32474,11611,9940,28580
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Comfey|Iron Defense|p1b: Comfey
+log |-boost|p1b: Comfey|def|2
+log |move|p2a: Hypno|Psychic|p1b: Comfey
+log |split|p1
+log |-damage|p1b: Comfey|121/158
+log |-damage|p1b: Comfey|77/100
+log |move|p1a: Toedscruel|Spore|p2a: Hypno
+log |-status|p2a: Hypno|slp|[from] move: Spore
+log |-activate|p2a: Hypno|ability: Insomnia
+log |-curestatus|p2a: Hypno|slp|[msg]
+log |
+log |upkeep
+log |turn|6
+step turn6	move 2, move 2 1	move 1 2, move 2
+seed_after 14483,916,34293,24844
+log |
+log |t:|
+log |move|p1b: Comfey|Draining Kiss|p2a: Hypno
+log |split|p2
+log |-damage|p2a: Hypno|170/192
+log |-damage|p2a: Hypno|89/100
+log |split|p1
+log |-heal|p1b: Comfey|138/158|[from] drain|[of] p2a: Hypno
+log |-heal|p1b: Comfey|88/100|[from] drain|[of] p2a: Hypno
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p2a: Hypno|Psychic|p1b: Comfey
+log |split|p1
+log |-damage|p1b: Comfey|99/158
+log |-damage|p1b: Comfey|63/100
+log |-unboost|p1b: Comfey|spd|1
+log |move|p1a: Toedscruel|Agility|p1a: Toedscruel
+log |-boost|p1a: Toedscruel|spe|2
+log |
+log |upkeep
+log |turn|7
+step turn7	move 4 1, move 2 1	move 1 2, move 2
+seed_after 33301,63633,48230,55108
+log |
+log |t:|
+log |move|p1b: Comfey|Draining Kiss|p2a: Hypno
+log |split|p2
+log |-damage|p2a: Hypno|148/192
+log |-damage|p2a: Hypno|78/100
+log |split|p1
+log |-heal|p1b: Comfey|116/158|[from] drain|[of] p2a: Hypno
+log |-heal|p1b: Comfey|74/100|[from] drain|[of] p2a: Hypno
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1a: Toedscruel|Crunch|p2a: Hypno
+log |-supereffective|p2a: Hypno
+log |split|p2
+log |-damage|p2a: Hypno|96/192
+log |-damage|p2a: Hypno|50/100
+log |move|p2a: Hypno|Psychic|p1b: Comfey
+log |-crit|p1b: Comfey
+log |split|p1
+log |-damage|p1b: Comfey|34/158
+log |-damage|p1b: Comfey|22/100
+log |
+log |upkeep
+log |turn|8
+scenario quash_sucker_punch_thunderclap
+seed 71,72,73,74
+p1 Grimmsnarl|||Prankster|Quash,SpiritBreak,Agility,ThunderWave|Serious|252,,128,,128,|M|||50|]Kingambit|||Pressure|SuckerPunch,Crunch,Agility,SwordsDance|Serious|252,,128,,128,|M|||50|]Thundurus|||Prankster|Thunderclap,ThunderWave,Agility,IronDefense|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Garchomp|||RoughSkin|BodySlam,DragonClaw,EarthPower,Agility|Serious|252,,128,,128,252|M|||50|]Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 20374,63739,22754,44639
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Grimmsnarl|Grimmsnarl, L50, M|202/202
+log |switch|p1a: Grimmsnarl|Grimmsnarl, L50, M|100/100
+log |split|p1
+log |switch|p1b: Kingambit|Kingambit, L50, M|207/207
+log |switch|p1b: Kingambit|Kingambit, L50, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2b: Incineroar|Incineroar, L50, M|100/100
+log |-ability|p2b: Incineroar|Intimidate|boost
+log |-unboost|p1a: Grimmsnarl|atk|1
+log |-unboost|p1b: Kingambit|atk|1
+log |-ability|p1b: Kingambit|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 1, move 1 1
+seed_after 49345,15342,51007,50960
+log |
+log |t:|
+log |move|p2b: Incineroar|Fake Out|p1a: Grimmsnarl
+log |split|p1
+log |-damage|p1a: Grimmsnarl|180/202
+log |-damage|p1a: Grimmsnarl|90/100
+log |cant|p1a: Grimmsnarl|flinch
+log |move|p1b: Kingambit|Sucker Punch||[still]
+log |-fail|p1b: Kingambit
+log |move|p2a: Garchomp|Body Slam|p1a: Grimmsnarl
+log |split|p1
+log |-damage|p1a: Grimmsnarl|129/202
+log |-damage|p1a: Grimmsnarl|64/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 4, move 1 1
+seed_after 39302,821,46460,35084
+log |
+log |t:|
+log |move|p2b: Incineroar|Fake Out||[still]
+log |-hint|Fake Out only works on your first turn out.
+log |-fail|p2b: Incineroar
+log |move|p1a: Grimmsnarl|Quash|p2a: Garchomp
+log |-activate|p2a: Garchomp|move: Quash
+log |move|p1b: Kingambit|Sucker Punch||[still]
+log |-fail|p1b: Kingambit
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 1 1, move 4
+seed_after 59218,64590,50193,7482
+log |
+log |t:|
+log |move|p1a: Grimmsnarl|Quash|p2a: Garchomp
+log |-activate|p2a: Garchomp|move: Quash
+log |move|p1b: Kingambit|Sucker Punch||[still]
+log |-fail|p1b: Kingambit
+log |move|p2b: Incineroar|Agility|p2b: Incineroar
+log |-boost|p2b: Incineroar|spe|2
+log |move|p2a: Garchomp|Body Slam|p1a: Grimmsnarl
+log |split|p1
+log |-damage|p1a: Grimmsnarl|76/202
+log |-damage|p1a: Grimmsnarl|38/100
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 3, move 1 1	move 1 1, move 3 1
+seed_after 20474,33298,45584,47255
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Thundurus|Thundurus, L50, M|186/186
+log |switch|p1a: Thundurus|Thundurus, L50, M|100/100
+log |move|p1b: Kingambit|Sucker Punch|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|178/215
+log |-damage|p2a: Garchomp|83/100
+log |split|p1
+log |-damage|p1b: Kingambit|182/207|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |-damage|p1b: Kingambit|88/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |move|p2a: Garchomp|Body Slam|p1a: Thundurus
+log |split|p1
+log |-damage|p1a: Thundurus|137/186
+log |-damage|p1a: Thundurus|74/100
+log |move|p2b: Incineroar|Crunch|p1a: Thundurus
+log |split|p1
+log |-damage|p1a: Thundurus|73/186
+log |-damage|p1a: Thundurus|40/100
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 2 1	move 4, move 4
+seed_after 24958,34018,46914,54971
+log |
+log |t:|
+log |move|p1a: Thundurus|Thunderclap||[still]
+log |-fail|p1a: Thundurus
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |move|p2b: Incineroar|Agility|p2b: Incineroar
+log |-boost|p2b: Incineroar|spe|2
+log |move|p1b: Kingambit|Crunch|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|138/215
+log |-damage|p2a: Garchomp|65/100
+log |split|p1
+log |-damage|p1b: Kingambit|157/207|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |-damage|p1b: Kingambit|76/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |
+log |upkeep
+log |turn|6
+step turn6	move 4, move 1 1	move 4, move 1 1
+seed_after 24958,34018,46914,54971
+log |
+log |t:|
+log |move|p2b: Incineroar|Fake Out||[still]
+log |-hint|Fake Out only works on your first turn out.
+log |-fail|p2b: Incineroar
+log |move|p1a: Thundurus|Iron Defense|p1a: Thundurus
+log |-boost|p1a: Thundurus|def|2
+log |move|p1b: Kingambit|Sucker Punch||[still]
+log |-fail|p1b: Kingambit
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 3	switch 3, move 1 1
+seed_after 24958,34018,46914,54971
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Blissey|Blissey, L50, F|362/362
+log |switch|p2a: Blissey|Blissey, L50, F|100/100
+log |move|p2b: Incineroar|Fake Out||[still]
+log |-hint|Fake Out only works on your first turn out.
+log |-fail|p2b: Incineroar
+log |move|p1a: Thundurus|Thunderclap||[still]
+log |-fail|p1a: Thundurus
+log |move|p1b: Kingambit|Agility|p1b: Kingambit
+log |-boost|p1b: Kingambit|spe|2
+log |
+log |upkeep
+log |turn|8
+scenario fake_out_first_impression
+seed 81,82,83,84
+p1 Incineroar|||Intimidate|FakeOut,FlareBlitz,Crunch,Agility|Serious|252,,128,,128,|M|||50|]Kingambit|||Pressure|FirstImpression,SuckerPunch,Agility,SwordsDance|Serious|252,,128,,128,|M|||50|]Ambipom|||SkillLink|FakeOut,Crunch,Agility,IronDefense|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Garchomp|||RoughSkin|BodySlam,DragonClaw,EarthPower,Agility|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 81,82,83,84
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Incineroar|Incineroar, L50, M|202/202
+log |switch|p1a: Incineroar|Incineroar, L50, M|100/100
+log |split|p1
+log |switch|p1b: Kingambit|Kingambit, L50, M|207/207
+log |switch|p1b: Kingambit|Kingambit, L50, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |-ability|p1a: Incineroar|Intimidate|boost
+log |-unboost|p2a: Garchomp|atk|1
+log |-unboost|p2b: Blissey|atk|1
+log |-ability|p1b: Kingambit|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 4, move 2
+seed_after 27468,64620,42619,9733
+log |
+log |t:|
+log |move|p1a: Incineroar|Fake Out|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|198/215
+log |-damage|p2a: Garchomp|93/100
+log |split|p1
+log |-damage|p1a: Incineroar|177/202|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |-damage|p1a: Incineroar|88/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |move|p1b: Kingambit|First Impression|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|236/362
+log |-damage|p2b: Blissey|66/100
+log |cant|p2a: Garchomp|flinch
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 4, move 2
+seed_after 27468,64620,42619,9733
+log |
+log |t:|
+log |move|p1a: Incineroar|Fake Out||[still]
+log |-hint|Fake Out only works on your first turn out.
+log |-fail|p1a: Incineroar
+log |move|p1b: Kingambit|First Impression||[still]
+log |-hint|First Impression only works on your first turn out.
+log |-fail|p1b: Kingambit
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	switch 3, switch 4	move 4, move 2
+seed_after 27468,64620,42619,9733
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Ambipom|Ambipom, L50, M|182/182
+log |switch|p1a: Ambipom|Ambipom, L50, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 3	move 4, move 2
+seed_after 29340,31856,25394,63817
+log |
+log |t:|
+log |move|p1a: Ambipom|Fake Out|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|176/215
+log |-damage|p2a: Garchomp|82/100
+log |split|p1
+log |-damage|p1a: Ambipom|160/182|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |-damage|p1a: Ambipom|88/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |cant|p2a: Garchomp|flinch
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Snorlax|Iron Defense|p1b: Snorlax
+log |-boost|p1b: Snorlax|def|2
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 3	move 4, move 2
+seed_after 29340,31856,25394,63817
+log |
+log |t:|
+log |move|p1a: Ambipom|Fake Out||[still]
+log |-hint|Fake Out only works on your first turn out.
+log |-fail|p1a: Ambipom
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Snorlax|Iron Defense|p1b: Snorlax
+log |-boost|p1b: Snorlax|def|2
+log |
+log |upkeep
+log |turn|6
+step turn6	switch 3, move 3	move 4, move 2
+seed_after 29340,31856,25394,63817
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Incineroar|Incineroar, L50, M|177/202
+log |switch|p1a: Incineroar|Incineroar, L50, M|88/100
+log |-ability|p1a: Incineroar|Intimidate|boost
+log |-unboost|p2a: Garchomp|atk|1
+log |-unboost|p2b: Blissey|atk|1
+log |move|p2a: Garchomp|Agility|p2a: Garchomp
+log |-boost|p2a: Garchomp|spe|0
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Snorlax|Iron Defense|p1b: Snorlax
+log |-boost|p1b: Snorlax|def|2
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 1 2	move 4, move 2
+seed_after 41184,12858,17625,48913
+log |
+log |t:|
+log |move|p1a: Incineroar|Fake Out|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|157/215
+log |-damage|p2a: Garchomp|74/100
+log |split|p1
+log |-damage|p1a: Incineroar|152/202|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |-damage|p1a: Incineroar|76/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+log |cant|p2a: Garchomp|flinch
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p1b: Snorlax|Body Slam|p2b: Blissey
+log |-crit|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|20/362
+log |-damage|p2b: Blissey|6/100
+log |
+log |upkeep
+log |turn|8
+scenario multihit_skill_link_loaded_dice
+seed 91,92,93,94
+p1 Cloyster|||SkillLink|IcicleSpear,RockBlast,Agility,ShellSmash|Serious|252,,128,,128,|M|||50|]Maushold||LoadedDice|Technician|PopulationBomb,Agility,Crunch,IronDefense|Serious|252,,128,,128,|N|||50|]Cinccino|||SkillLink|BulletSeed,RockBlast,PopulationBomb,Agility|Serious|252,,128,,128,|M|||50|]Weavile||LoadedDice|Pressure|TripleAxel,IceShard,Agility,Crunch|Serious|252,,128,,128,|M|||50|
+p2 Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 91,92,93,94
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Cloyster|Cloyster, L50, M|157/157
+log |switch|p1a: Cloyster|Cloyster, L50, M|100/100
+log |split|p1
+log |switch|p1b: Maushold|Maushold, L50|181/181
+log |switch|p1b: Maushold|Maushold, L50|100/100
+log |split|p2
+log |switch|p2a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2a: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+step turn1	move 1 1, move 1 2	move 2, move 2
+seed_after 48993,44397,28234,15127
+log |
+log |t:|
+log |move|p1b: Maushold|Population Bomb|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|325/362
+log |-damage|p2b: Blissey|90/100
+log |split|p2
+log |-damage|p2b: Blissey|285/362
+log |-damage|p2b: Blissey|79/100
+log |split|p2
+log |-damage|p2b: Blissey|246/362
+log |-damage|p2b: Blissey|68/100
+log |split|p2
+log |-damage|p2b: Blissey|209/362
+log |-damage|p2b: Blissey|58/100
+log |split|p2
+log |-damage|p2b: Blissey|169/362
+log |-damage|p2b: Blissey|47/100
+log |-hitcount|p2b: Blissey|5
+log |move|p1a: Cloyster|Icicle Spear|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|257/267
+log |-damage|p2a: Snorlax|97/100
+log |split|p2
+log |-damage|p2a: Snorlax|247/267
+log |-damage|p2a: Snorlax|93/100
+log |split|p2
+log |-damage|p2a: Snorlax|238/267
+log |-damage|p2a: Snorlax|90/100
+log |split|p2
+log |-damage|p2a: Snorlax|229/267
+log |-damage|p2a: Snorlax|86/100
+log |split|p2
+log |-damage|p2a: Snorlax|219/267
+log |-damage|p2a: Snorlax|83/100
+log |-hitcount|p2a: Snorlax|5
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 1, move 1 2	move 2, move 2
+seed_after 41977,50847,43841,26876
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1b: Maushold|Population Bomb|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|130/362
+log |-damage|p2b: Blissey|36/100
+log |split|p2
+log |-damage|p2b: Blissey|91/362
+log |-damage|p2b: Blissey|26/100
+log |split|p2
+log |-damage|p2b: Blissey|51/362
+log |-damage|p2b: Blissey|15/100
+log |split|p2
+log |-damage|p2b: Blissey|9/362
+log |-damage|p2b: Blissey|3/100
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |-hitcount|p2: Blissey|5
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |move|p1a: Cloyster|Rock Blast|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|207/267
+log |-damage|p2a: Snorlax|78/100
+log |split|p2
+log |-damage|p2a: Snorlax|195/267
+log |-damage|p2a: Snorlax|74/100
+log |split|p2
+log |-damage|p2a: Snorlax|183/267
+log |-damage|p2a: Snorlax|69/100
+log |split|p2
+log |-damage|p2a: Snorlax|171/267
+log |-damage|p2a: Snorlax|65/100
+log |-crit|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|153/267
+log |-damage|p2a: Snorlax|58/100
+log |-hitcount|p2a: Snorlax|5
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 41977,50847,43841,26876
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2b: Dondozo|Dondozo, L50, M|100/100
+log |turn|3
+step turn3	move 1 1, move 1 2	move 2, move 2
+seed_after 17805,62670,12369,11343
+log |
+log |t:|
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |move|p1b: Maushold|Population Bomb|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|245/257
+log |-damage|p2b: Dondozo|96/100
+log |split|p2
+log |-damage|p2b: Dondozo|233/257
+log |-damage|p2b: Dondozo|91/100
+log |split|p2
+log |-damage|p2b: Dondozo|220/257
+log |-damage|p2b: Dondozo|86/100
+log |split|p2
+log |-damage|p2b: Dondozo|208/257
+log |-damage|p2b: Dondozo|81/100
+log |split|p2
+log |-damage|p2b: Dondozo|196/257
+log |-damage|p2b: Dondozo|77/100
+log |split|p2
+log |-damage|p2b: Dondozo|183/257
+log |-damage|p2b: Dondozo|72/100
+log |split|p2
+log |-damage|p2b: Dondozo|170/257
+log |-damage|p2b: Dondozo|67/100
+log |split|p2
+log |-damage|p2b: Dondozo|157/257
+log |-damage|p2b: Dondozo|62/100
+log |split|p2
+log |-damage|p2b: Dondozo|145/257
+log |-damage|p2b: Dondozo|57/100
+log |split|p2
+log |-damage|p2b: Dondozo|132/257
+log |-damage|p2b: Dondozo|52/100
+log |-hitcount|p2b: Dondozo|10
+log |move|p1a: Cloyster|Icicle Spear|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|143/267
+log |-damage|p2a: Snorlax|54/100
+log |split|p2
+log |-damage|p2a: Snorlax|133/267
+log |-damage|p2a: Snorlax|50/100
+log |split|p2
+log |-damage|p2a: Snorlax|123/267
+log |-damage|p2a: Snorlax|47/100
+log |split|p2
+log |-damage|p2a: Snorlax|113/267
+log |-damage|p2a: Snorlax|43/100
+log |split|p2
+log |-damage|p2a: Snorlax|103/267
+log |-damage|p2a: Snorlax|39/100
+log |-hitcount|p2a: Snorlax|5
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 3, switch 4	move 2, move 2
+seed_after 17805,62670,12369,11343
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Weavile|Weavile, L50, M|177/177
+log |switch|p1b: Weavile|Weavile, L50, M|100/100
+log |-ability|p1b: Weavile|Pressure
+log |split|p1
+log |switch|p1a: Cinccino|Cinccino, L50, M|182/182
+log |switch|p1a: Cinccino|Cinccino, L50, M|100/100
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	move 2, move 2
+seed_after 56970,33656,12547,23865
+log |
+log |t:|
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|126/257
+log |-damage|p2b: Dondozo|50/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|114/257
+log |-damage|p2b: Dondozo|45/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|96/257
+log |-damage|p2b: Dondozo|38/100
+log |-hitcount|p2b: Dondozo|3
+log |move|p1a: Cinccino|Bullet Seed|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|91/267
+log |-damage|p2a: Snorlax|35/100
+log |split|p2
+log |-damage|p2a: Snorlax|78/267
+log |-damage|p2a: Snorlax|30/100
+log |split|p2
+log |-damage|p2a: Snorlax|65/267
+log |-damage|p2a: Snorlax|25/100
+log |split|p2
+log |-damage|p2a: Snorlax|53/267
+log |-damage|p2a: Snorlax|20/100
+log |split|p2
+log |-damage|p2a: Snorlax|41/267
+log |-damage|p2a: Snorlax|16/100
+log |-hitcount|p2a: Snorlax|5
+log |
+log |upkeep
+log |turn|6
+step turn6	move 3 1, move 2 2	move 2, move 2
+seed_after 35029,61381,5430,60299
+log |
+log |t:|
+log |move|p1b: Weavile|Ice Shard|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|85/257
+log |-damage|p2b: Dondozo|34/100
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p1a: Cinccino|Population Bomb|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|25/267
+log |-damage|p2a: Snorlax|10/100
+log |split|p2
+log |-damage|p2a: Snorlax|10/267
+log |-damage|p2a: Snorlax|4/100
+log |split|p2
+log |-damage|p2a: Snorlax|0 fnt
+log |-damage|p2a: Snorlax|0 fnt
+log |faint|p2a: Snorlax
+log |-hitcount|p2: Snorlax|3
+log |
+log |upkeep
+step forced2		switch 4, pass
+seed_after 35029,61381,5430,60299
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Clefable|Clefable, L50, M|202/202
+log |switch|p2a: Clefable|Clefable, L50, M|100/100
+log |turn|7
+step turn7	move 2 1, move 4 2	move 2, move 2
+seed_after 40719,8873,450,17912
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p1b: Weavile|Crunch|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|36/257
+log |-damage|p2b: Dondozo|15/100
+log |move|p1a: Cinccino|Rock Blast|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|191/202
+log |-damage|p2a: Clefable|95/100
+log |split|p2
+log |-damage|p2a: Clefable|179/202
+log |-damage|p2a: Clefable|89/100
+log |split|p2
+log |-damage|p2a: Clefable|167/202
+log |-damage|p2a: Clefable|83/100
+log |split|p2
+log |-damage|p2a: Clefable|156/202
+log |-damage|p2a: Clefable|78/100
+log |split|p2
+log |-damage|p2a: Clefable|145/202
+log |-damage|p2a: Clefable|72/100
+log |-hitcount|p2a: Clefable|5
+log |move|p2a: Clefable|Agility|p2a: Clefable
+log |-boost|p2a: Clefable|spe|2
+log |
+log |upkeep
+log |turn|8
+step turn8	move 3 1, move 1 2	move 2, move 2
+seed_after 59828,48024,24185,3652
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Clefable|Agility|p2a: Clefable
+log |-boost|p2a: Clefable|spe|2
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|30/257
+log |-damage|p2b: Dondozo|12/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|19/257
+log |-damage|p2b: Dondozo|8/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|2/257
+log |-damage|p2b: Dondozo|1/100
+log |-hitcount|p2b: Dondozo|3
+log |move|p1a: Cinccino|Population Bomb|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|132/202
+log |-damage|p2a: Clefable|66/100
+log |split|p2
+log |-damage|p2a: Clefable|119/202
+log |-damage|p2a: Clefable|59/100
+log |split|p2
+log |-damage|p2a: Clefable|103/202
+log |-damage|p2a: Clefable|51/100
+log |split|p2
+log |-damage|p2a: Clefable|88/202
+log |-damage|p2a: Clefable|44/100
+log |split|p2
+log |-damage|p2a: Clefable|75/202
+log |-damage|p2a: Clefable|38/100
+log |split|p2
+log |-damage|p2a: Clefable|60/202
+log |-damage|p2a: Clefable|30/100
+log |split|p2
+log |-damage|p2a: Clefable|45/202
+log |-damage|p2a: Clefable|23/100
+log |split|p2
+log |-damage|p2a: Clefable|32/202
+log |-damage|p2a: Clefable|16/100
+log |split|p2
+log |-damage|p2a: Clefable|17/202
+log |-damage|p2a: Clefable|9/100
+log |split|p2
+log |-damage|p2a: Clefable|4/202
+log |-damage|p2a: Clefable|2/100
+log |-hitcount|p2a: Clefable|10
+log |
+log |upkeep
+log |turn|9
+step turn9	move 3 2, move 1 1	move 2, move 2
+seed_after 37516,22234,55382,62360
+log |
+log |t:|
+log |move|p2a: Clefable|Agility|p2a: Clefable
+log |-boost|p2a: Clefable|spe|2
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p1b: Weavile|Triple Axel|p2a: Clefable|[miss]
+log |-miss|p1b: Weavile|p2a: Clefable
+log |move|p1a: Cinccino|Population Bomb|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|0 fnt
+log |-damage|p2b: Dondozo|0 fnt
+log |faint|p2b: Dondozo
+log |-hitcount|p2: Dondozo|1
+log |
+log |upkeep
+log |turn|10
+scenario triple_axel_accuracy
+seed 95,96,97,98
+p1 Weavile|||Pressure|TripleAxel,IceShard,Agility,Crunch|Serious|252,,128,,128,|M|||50|]Weavile||LoadedDice|Pressure|TripleAxel,IceShard,Agility,Crunch|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|
+step start		
+seed_after 49890,44871,61589,17687
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Weavile|Weavile, L50, M|177/177
+log |switch|p1a: Weavile|Weavile, L50, M|100/100
+log |split|p1
+log |switch|p1b: Weavile|Weavile, L50, M|177/177
+log |switch|p1b: Weavile|Weavile, L50, M|100/100
+log |split|p2
+log |switch|p2a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2a: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2b: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2b: Dondozo|Dondozo, L50, M|100/100
+log |-ability|p1a: Weavile|Pressure
+log |-ability|p1b: Weavile|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 2, move 2
+seed_after 62760,64890,29678,44202
+log |
+log |t:|
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|251/257
+log |-damage|p2b: Dondozo|98/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|239/257
+log |-damage|p2b: Dondozo|93/100
+log |-resisted|p2b: Dondozo
+log |-crit|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|212/257
+log |-damage|p2b: Dondozo|83/100
+log |-hitcount|p2b: Dondozo|3
+log |move|p1a: Weavile|Triple Axel|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|257/267
+log |-damage|p2a: Snorlax|97/100
+log |split|p2
+log |-damage|p2a: Snorlax|239/267
+log |-damage|p2a: Snorlax|90/100
+log |split|p2
+log |-damage|p2a: Snorlax|212/267
+log |-damage|p2a: Snorlax|80/100
+log |-hitcount|p2a: Snorlax|3
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 2, move 2
+seed_after 14113,14702,52913,38713
+log |
+log |t:|
+log |move|p1a: Weavile|Triple Axel|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|202/267
+log |-damage|p2a: Snorlax|76/100
+log |split|p2
+log |-damage|p2a: Snorlax|183/267
+log |-damage|p2a: Snorlax|69/100
+log |split|p2
+log |-damage|p2a: Snorlax|158/267
+log |-damage|p2a: Snorlax|60/100
+log |-hitcount|p2a: Snorlax|3
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|205/257
+log |-damage|p2b: Dondozo|80/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|193/257
+log |-damage|p2b: Dondozo|76/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|176/257
+log |-damage|p2b: Dondozo|69/100
+log |-hitcount|p2b: Dondozo|3
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 2, move 2
+seed_after 57234,21348,30023,59654
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|2
+log |move|p1a: Weavile|Triple Axel|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|148/267
+log |-damage|p2a: Snorlax|56/100
+log |split|p2
+log |-damage|p2a: Snorlax|129/267
+log |-damage|p2a: Snorlax|49/100
+log |split|p2
+log |-damage|p2a: Snorlax|101/267
+log |-damage|p2a: Snorlax|38/100
+log |-hitcount|p2a: Snorlax|3
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|170/257
+log |-damage|p2b: Dondozo|67/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|158/257
+log |-damage|p2b: Dondozo|62/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|142/257
+log |-damage|p2b: Dondozo|56/100
+log |-hitcount|p2b: Dondozo|3
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 2, move 2
+seed_after 52409,27984,56059,5579
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p1a: Weavile|Triple Axel|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|92/267
+log |-damage|p2a: Snorlax|35/100
+log |split|p2
+log |-damage|p2a: Snorlax|73/267
+log |-damage|p2a: Snorlax|28/100
+log |split|p2
+log |-damage|p2a: Snorlax|46/267
+log |-damage|p2a: Snorlax|18/100
+log |-hitcount|p2a: Snorlax|3
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|135/257
+log |-damage|p2b: Dondozo|53/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|123/257
+log |-damage|p2b: Dondozo|48/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|106/257
+log |-damage|p2b: Dondozo|42/100
+log |-hitcount|p2b: Dondozo|3
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	move 2, move 2
+seed_after 2731,19680,47108,5404
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Snorlax|Agility|p2a: Snorlax
+log |-boost|p2a: Snorlax|spe|0
+log |move|p1a: Weavile|Triple Axel|p2a: Snorlax
+log |split|p2
+log |-damage|p2a: Snorlax|36/267
+log |-damage|p2a: Snorlax|14/100
+log |split|p2
+log |-damage|p2a: Snorlax|17/267
+log |-damage|p2a: Snorlax|7/100
+log |split|p2
+log |-damage|p2a: Snorlax|0 fnt
+log |-damage|p2a: Snorlax|0 fnt
+log |faint|p2a: Snorlax
+log |-hitcount|p2: Snorlax|3
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|100/257
+log |-damage|p2b: Dondozo|39/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|88/257
+log |-damage|p2b: Dondozo|35/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|72/257
+log |-damage|p2b: Dondozo|29/100
+log |-hitcount|p2b: Dondozo|3
+log |
+log |upkeep
+step forced1		switch 3, pass
+seed_after 51631,12117,28234,39209
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Blissey|Blissey, L50, F|362/362
+log |switch|p2a: Blissey|Blissey, L50, F|100/100
+log |turn|6
+step turn6	move 1 1, move 1 2	move 2, move 2
+seed_after 5178,34688,30459,37197
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p1a: Weavile|Triple Axel|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|322/362
+log |-damage|p2a: Blissey|89/100
+log |split|p2
+log |-damage|p2a: Blissey|249/362
+log |-damage|p2a: Blissey|69/100
+log |split|p2
+log |-damage|p2a: Blissey|141/362
+log |-damage|p2a: Blissey|39/100
+log |-hitcount|p2a: Blissey|3
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|66/257
+log |-damage|p2b: Dondozo|26/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|54/257
+log |-damage|p2b: Dondozo|22/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|36/257
+log |-damage|p2b: Dondozo|15/100
+log |-hitcount|p2b: Dondozo|3
+log |move|p2a: Blissey|Agility|p2a: Blissey
+log |-boost|p2a: Blissey|spe|2
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 1 2	move 2, move 2
+seed_after 61741,47100,54720,61875
+log |
+log |t:|
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p2a: Blissey|Agility|p2a: Blissey
+log |-boost|p2a: Blissey|spe|2
+log |move|p1a: Weavile|Triple Axel|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|99/362
+log |-damage|p2a: Blissey|28/100
+log |-hitcount|p2a: Blissey|1
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|30/257
+log |-damage|p2b: Dondozo|12/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|18/257
+log |-damage|p2b: Dondozo|8/100
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|2/257
+log |-damage|p2b: Dondozo|1/100
+log |-hitcount|p2b: Dondozo|3
+log |
+log |upkeep
+log |turn|8
+step turn8	move 1 1, move 1 2	move 2, move 2
+seed_after 46756,9302,55038,19802
+log |
+log |t:|
+log |move|p2a: Blissey|Agility|p2a: Blissey
+log |-boost|p2a: Blissey|spe|2
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|0
+log |move|p1a: Weavile|Triple Axel|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|62/362
+log |-damage|p2a: Blissey|18/100
+log |split|p2
+log |-damage|p2a: Blissey|0 fnt
+log |-damage|p2a: Blissey|0 fnt
+log |faint|p2a: Blissey
+log |-hitcount|p2: Blissey|2
+log |move|p1b: Weavile|Triple Axel|p2b: Dondozo
+log |-resisted|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|0 fnt
+log |-damage|p2b: Dondozo|0 fnt
+log |faint|p2b: Dondozo
+log |-hitcount|p2: Dondozo|1
+log |
+log |win|Alice
+scenario high_jump_kick_crash
+seed 111,112,113,114
+p1 Hawlucha|||MoldBreaker|HighJumpKick,Agility,SwordsDance,CloseCombat|Serious|252,,128,,128,|M|||50|]Lucario|||InnerFocus|HighJumpKick,Agility,SwordsDance,CloseCombat|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+p2 Gengar|||Pressure|ShadowBall,Agility,SludgeBomb,Hypnosis|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 111,112,113,114
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Hawlucha|Hawlucha, L50, M|185/185
+log |switch|p1a: Hawlucha|Hawlucha, L50, M|100/100
+log |split|p1
+log |switch|p1b: Lucario|Lucario, L50, M|177/177
+log |switch|p1b: Lucario|Lucario, L50, M|100/100
+log |split|p2
+log |switch|p2a: Gengar|Gengar, L50, M|167/167
+log |switch|p2a: Gengar|Gengar, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |-ability|p1a: Hawlucha|Mold Breaker
+log |-ability|p2a: Gengar|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 2, move 2
+seed_after 61257,57005,49430,52669
+log |
+log |t:|
+log |move|p1a: Hawlucha|High Jump Kick|p2a: Gengar
+log |-immune|p2a: Gengar
+log |split|p1
+log |-damage|p1a: Hawlucha|93/185|[from] highjumpkick
+log |-damage|p1a: Hawlucha|51/100|[from] highjumpkick
+log |move|p2a: Gengar|Agility|p2a: Gengar
+log |-boost|p2a: Gengar|spe|2
+log |move|p1b: Lucario|High Jump Kick|p2b: Blissey|[miss]
+log |-miss|p1b: Lucario|p2b: Blissey
+log |split|p1
+log |-damage|p1b: Lucario|89/177|[from] highjumpkick
+log |-damage|p1b: Lucario|51/100|[from] highjumpkick
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 2, move 2
+seed_after 60942,8638,11283,52966
+log |
+log |t:|
+log |move|p2a: Gengar|Agility|p2a: Gengar
+log |-boost|p2a: Gengar|spe|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Hawlucha|High Jump Kick|p2a: Gengar
+log |-immune|p2a: Gengar
+log |split|p1
+log |-damage|p1a: Hawlucha|1/185|[from] highjumpkick
+log |-damage|p1a: Hawlucha|1/100|[from] highjumpkick
+log |move|p1b: Lucario|High Jump Kick|p2b: Blissey
+log |-supereffective|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 60942,8638,11283,52966
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2b: Dondozo|Dondozo, L50, M|100/100
+log |turn|3
+step turn3	move 1 1, move 1 2	move 3 1, move 2
+seed_after 34152,62564,15518,16910
+log |
+log |t:|
+log |move|p2a: Gengar|Sludge Bomb|p1a: Hawlucha
+log |split|p1
+log |-damage|p1a: Hawlucha|0 fnt
+log |-damage|p1a: Hawlucha|0 fnt
+log |faint|p1a: Hawlucha
+log |move|p1b: Lucario|High Jump Kick|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|190/257
+log |-damage|p2b: Dondozo|74/100
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |
+log |upkeep
+step forced2	switch 3, pass	
+seed_after 44142,56771,65199,44947
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1a: Snorlax|Snorlax, L50, M|100/100
+log |turn|4
+step turn4	move 1 1, move 1 2	move 3 1, move 2
+seed_after 213,53296,27331,28038
+log |
+log |t:|
+log |move|p2a: Gengar|Sludge Bomb|p1a: Snorlax
+log |split|p1
+log |-damage|p1a: Snorlax|204/267
+log |-damage|p1a: Snorlax|77/100
+log |-status|p1a: Snorlax|psn
+log |move|p1b: Lucario|High Jump Kick|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|123/257
+log |-damage|p2b: Dondozo|48/100
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p1a: Snorlax|Body Slam|p2a: Gengar
+log |-immune|p2a: Gengar
+log |
+log |split|p1
+log |-damage|p1a: Snorlax|171/267 psn|[from] psn
+log |-damage|p1a: Snorlax|65/100 psn|[from] psn
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	move 2, move 2
+seed_after 43272,37361,41705,43
+log |
+log |t:|
+log |move|p2a: Gengar|Agility|p2a: Gengar
+log |-boost|p2a: Gengar|spe|2
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |move|p1b: Lucario|High Jump Kick|p2b: Dondozo
+log |split|p2
+log |-damage|p2b: Dondozo|56/257
+log |-damage|p2b: Dondozo|22/100
+log |move|p1a: Snorlax|Body Slam|p2a: Gengar
+log |-immune|p2a: Gengar
+log |
+log |split|p1
+log |-damage|p1a: Snorlax|138/267 psn|[from] psn
+log |-damage|p1a: Snorlax|52/100 psn|[from] psn
+log |upkeep
+log |turn|6
+scenario lockedmove_expiry_confusion_0
+seed 121,122,123,124
+p1 Garchomp|||RoughSkin|Earthquake,Agility,DragonClaw,SwordsDance|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Gengar|||Pressure|ShadowBall,Agility,SludgeBomb,Hypnosis|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 121,122,123,124
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2a: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2a: Dondozo|Dondozo, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+pre addvolatile	p1	0	lockedmove	swordsdance
+step turn1	move 1, move 2	move 2, move 2
+seed_after 40178,59105,22356,11183
+log |
+log |t:|
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 2	move 2, move 2
+seed_after 40178,59105,22356,11183
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 2	move 2, move 2
+seed_after 28426,59152,55380,41151
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |move|p1a: Garchomp|Earthquake|p2a: Dondozo|[spread] p1b,p2a,p2b
+log |split|p1
+log |-damage|p1b: Snorlax|63/267
+log |-damage|p1b: Snorlax|24/100
+log |split|p2
+log |-damage|p2a: Dondozo|115/257
+log |-damage|p2a: Dondozo|45/100
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 28426,59152,55380,41151
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |-ability|p2b: Gengar|Pressure
+log |turn|4
+step turn4	move 1, move 2	move 2, move 2
+seed_after 56345,50861,1420,45519
+log |
+log |t:|
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|0
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|0
+log |move|p2b: Gengar|Agility|p2b: Gengar
+log |-boost|p2b: Gengar|spe|2
+log |move|p1a: Garchomp|Earthquake|p2a: Dondozo|[spread] p1b,p2a,p2b
+log |-supereffective|p2b: Gengar
+log |split|p1
+log |-damage|p1b: Snorlax|0 fnt
+log |-damage|p1b: Snorlax|0 fnt
+log |split|p2
+log |-damage|p2a: Dondozo|0 fnt
+log |-damage|p2a: Dondozo|0 fnt
+log |split|p2
+log |-damage|p2b: Gengar|0 fnt
+log |-damage|p2b: Gengar|0 fnt
+log |faint|p1b: Snorlax
+log |faint|p2a: Dondozo
+log |faint|p2b: Gengar
+log |
+log |win|Alice
+scenario lockedmove_expiry_confusion_1
+seed 221,222,223,224
+p1 Garchomp|||RoughSkin|Earthquake,Agility,DragonClaw,SwordsDance|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Gengar|||Pressure|ShadowBall,Agility,SludgeBomb,Hypnosis|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 221,222,223,224
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2a: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2a: Dondozo|Dondozo, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+pre addvolatile	p1	0	lockedmove	swordsdance
+step turn1	move 1, move 2	move 2, move 2
+seed_after 25997,14565,13753,55075
+log |
+log |t:|
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 2	move 2, move 2
+seed_after 43586,56533,19599,14994
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |-start|p1a: Garchomp|confusion|[fatigue]
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 2	move 2, move 2
+seed_after 19101,13100,21051,58277
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |-activate|p1a: Garchomp|confusion
+log |split|p1
+log |-damage|p1a: Garchomp|156/215|[from] confusion
+log |-damage|p1a: Garchomp|73/100|[from] confusion
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 2	move 2, move 2
+seed_after 50115,39762,42593,48708
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|0
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|0
+log |-activate|p1a: Garchomp|confusion
+log |split|p1
+log |-damage|p1a: Garchomp|102/215|[from] confusion
+log |-damage|p1a: Garchomp|48/100|[from] confusion
+log |
+log |upkeep
+log |turn|5
+scenario lockedmove_expiry_confusion_2
+seed 321,322,323,324
+p1 Garchomp|||RoughSkin|Earthquake,Agility,DragonClaw,SwordsDance|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Gengar|||Pressure|ShadowBall,Agility,SludgeBomb,Hypnosis|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 321,322,323,324
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2a: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2a: Dondozo|Dondozo, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+pre addvolatile	p1	0	lockedmove	swordsdance
+step turn1	move 1, move 2	move 2, move 2
+seed_after 11815,35561,5151,33431
+log |
+log |t:|
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 2	move 2, move 2
+seed_after 19211,58433,5016,62294
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |-start|p1a: Garchomp|confusion|[fatigue]
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 2	move 2, move 2
+seed_after 4800,62222,41745,30273
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |-activate|p1a: Garchomp|confusion
+log |move|p1a: Garchomp|Earthquake|p2a: Dondozo|[spread] p1b,p2a,p2b
+log |split|p1
+log |-damage|p1b: Snorlax|71/267
+log |-damage|p1b: Snorlax|27/100
+log |split|p2
+log |-damage|p2a: Dondozo|121/257
+log |-damage|p2a: Dondozo|48/100
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 4800,62222,41745,30273
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |-ability|p2b: Gengar|Pressure
+log |turn|4
+step turn4	move 1, move 2	move 2, move 2
+seed_after 54055,44266,59407,37944
+log |
+log |t:|
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|0
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|0
+log |move|p2b: Gengar|Agility|p2b: Gengar
+log |-boost|p2b: Gengar|spe|2
+log |-activate|p1a: Garchomp|confusion
+log |move|p1a: Garchomp|Earthquake|p2b: Gengar|[spread] p1b,p2a,p2b
+log |-supereffective|p2b: Gengar
+log |split|p1
+log |-damage|p1b: Snorlax|0 fnt
+log |-damage|p1b: Snorlax|0 fnt
+log |split|p2
+log |-damage|p2a: Dondozo|0 fnt
+log |-damage|p2a: Dondozo|0 fnt
+log |split|p2
+log |-damage|p2b: Gengar|0 fnt
+log |-damage|p2b: Gengar|0 fnt
+log |faint|p1b: Snorlax
+log |faint|p2a: Dondozo
+log |faint|p2b: Gengar
+log |
+log |win|Alice
+scenario lockedmove_expiry_confusion_3
+seed 421,422,423,424
+p1 Garchomp|||RoughSkin|Earthquake,Agility,DragonClaw,SwordsDance|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|BodySlam,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Gengar|||Pressure|ShadowBall,Agility,SludgeBomb,Hypnosis|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 421,422,423,424
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2a: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2a: Dondozo|Dondozo, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+pre addvolatile	p1	0	lockedmove	swordsdance
+step turn1	move 1, move 2	move 2, move 2
+seed_after 63169,56556,62085,11787
+log |
+log |t:|
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 2	move 2, move 2
+seed_after 63169,56556,62085,11787
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 2	move 2, move 2
+seed_after 10883,22090,43670,37915
+log |
+log |t:|
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|2
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|2
+log |move|p1a: Garchomp|Earthquake|p2b: Blissey|[spread] p1b,p2a,p2b
+log |split|p1
+log |-damage|p1b: Snorlax|53/267
+log |-damage|p1b: Snorlax|20/100
+log |split|p2
+log |-damage|p2a: Dondozo|116/257
+log |-damage|p2a: Dondozo|46/100
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 10883,22090,43670,37915
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |-ability|p2b: Gengar|Pressure
+log |turn|4
+step turn4	move 1, move 2	move 2, move 2
+seed_after 9358,8036,689,22059
+log |
+log |t:|
+log |move|p2a: Dondozo|Agility|p2a: Dondozo
+log |-boost|p2a: Dondozo|spe|0
+log |move|p1b: Snorlax|Agility|p1b: Snorlax
+log |-boost|p1b: Snorlax|spe|0
+log |move|p2b: Gengar|Agility|p2b: Gengar
+log |-boost|p2b: Gengar|spe|2
+log |move|p1a: Garchomp|Earthquake|p2b: Gengar|[spread] p1b,p2a,p2b
+log |-crit|p1b: Snorlax
+log |-supereffective|p2b: Gengar
+log |split|p1
+log |-damage|p1b: Snorlax|0 fnt
+log |-damage|p1b: Snorlax|0 fnt
+log |split|p2
+log |-damage|p2a: Dondozo|0 fnt
+log |-damage|p2a: Dondozo|0 fnt
+log |split|p2
+log |-damage|p2b: Gengar|0 fnt
+log |-damage|p2b: Gengar|0 fnt
+log |faint|p1b: Snorlax
+log |faint|p2a: Dondozo
+log |faint|p2b: Gengar
+log |
+log |win|Alice
+scenario lockedmove_restart_and_sleep
+seed 131,132,133,134
+p1 Garchomp|||RoughSkin|Earthquake,Agility,DragonClaw,SwordsDance|Serious|252,,128,,128,|M|||50|]Dragonite|||InnerFocus|Recover,Agility,DragonClaw,ExtremeSpeed|Serious|252,,128,,128,|M|||50|]Clefable|||MagicGuard|Moonblast,Agility,CalmMind,ThunderWave|Serious|252,,128,,128,|M|||50|
+p2 Vileplume|||Chlorophyll|Spore,Agility,SludgeBomb,GigaDrain|Serious|252,,128,,128,252|M|||50|]Blissey|||SereneGrace|SoftBoiled,Agility,ThunderWave,IronDefense|Serious|252,,128,,128,|F|||50|]Dondozo|||Oblivious|WaveCrash,Agility,IronDefense,Earthquake|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 131,132,133,134
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|215/215
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Dragonite|Dragonite, L50, M|198/198
+log |switch|p1b: Dragonite|Dragonite, L50, M|100/100
+log |split|p2
+log |switch|p2a: Vileplume|Vileplume, L50, M|182/182
+log |switch|p2a: Vileplume|Vileplume, L50, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, L50, F|362/362
+log |switch|p2b: Blissey|Blissey, L50, F|100/100
+log |turn|1
+pre addvolatile	p1	0	lockedmove	swordsdance
+pre addvolatile	p1	1	lockedmove	recover
+step turn1	move 1, move 1	move 2, move 2
+seed_after 52417,8948,19616,5192
+log |
+log |t:|
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |move|p2a: Vileplume|Agility|p2a: Vileplume
+log |-boost|p2a: Vileplume|spe|2
+log |move|p1b: Dragonite|Recover||[from] lockedmove|[still]
+log |-fail|p1b: Dragonite|heal
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |
+log |upkeep
+log |turn|2
+pre addvolatile	p1	0	lockedmove	swordsdance
+pre addvolatile	p1	1	lockedmove	recover
+step turn2	move 1, move 1	move 2, move 2
+seed_after 28628,16570,54305,10027
+log |
+log |t:|
+log |move|p2a: Vileplume|Agility|p2a: Vileplume
+log |-boost|p2a: Vileplume|spe|2
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |move|p1a: Garchomp|Swords Dance|p1a: Garchomp|[from] lockedmove
+log |-boost|p1a: Garchomp|atk|2
+log |-start|p1a: Garchomp|confusion|[fatigue]
+log |move|p1b: Dragonite|Recover||[from] lockedmove|[still]
+log |-fail|p1b: Dragonite|heal
+log |
+log |upkeep
+log |turn|3
+pre addvolatile	p1	0	lockedmove	swordsdance
+step turn3	move 1, move 1	move 1 1, move 2
+seed_after 13521,55082,22595,41999
+log |
+log |t:|
+log |move|p2a: Vileplume|Spore|p1a: Garchomp
+log |-status|p1a: Garchomp|slp|[from] move: Spore
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|2
+log |cant|p1a: Garchomp|slp
+log |move|p1b: Dragonite|Recover||[from] lockedmove|[still]
+log |-fail|p1b: Dragonite|heal
+log |-start|p1b: Dragonite|confusion|[fatigue]
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 1 1, move 2
+seed_after 5374,55563,62968,8662
+log |
+log |t:|
+log |move|p2a: Vileplume|Spore|p1a: Garchomp
+log |-fail|p1a: Garchomp|slp
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |cant|p1a: Garchomp|slp
+log |-activate|p1b: Dragonite|confusion
+log |split|p1
+log |-damage|p1b: Dragonite|177/198|[from] confusion
+log |-damage|p1b: Dragonite|90/100|[from] confusion
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1, move 1	move 1 1, move 2
+seed_after 17439,59458,29386,2452
+log |
+log |t:|
+log |move|p2a: Vileplume|Spore|p1a: Garchomp
+log |-fail|p1a: Garchomp|slp
+log |move|p2b: Blissey|Agility|p2b: Blissey
+log |-boost|p2b: Blissey|spe|0
+log |-curestatus|p1a: Garchomp|slp|[msg]
+log |-activate|p1a: Garchomp|confusion
+log |move|p1a: Garchomp|Earthquake|p2b: Blissey|[spread] p2a,p2b
+log |-immune|p1b: Dragonite
+log |split|p2
+log |-damage|p2a: Vileplume|19/182
+log |-damage|p2a: Vileplume|11/100
+log |split|p2
+log |-damage|p2b: Blissey|0 fnt
+log |-damage|p2b: Blissey|0 fnt
+log |faint|p2b: Blissey
+log |-end|p1b: Dragonite|confusion
+log |move|p1b: Dragonite|Recover|p1b: Dragonite
+log |split|p1
+log |-heal|p1b: Dragonite|198/198
+log |-heal|p1b: Dragonite|100/100
+log |
+log |upkeep
+step forced1		pass, switch 3
+seed_after 17439,59458,29386,2452
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Dondozo|Dondozo, L50, M|257/257
+log |switch|p2b: Dondozo|Dondozo, L50, M|100/100
+log |turn|6
+step turn6	move 1, move 1	move 1 1, move 2
+seed_after 42366,14716,57921,20037
+log |
+log |t:|
+log |move|p2a: Vileplume|Spore|p1a: Garchomp
+log |-status|p1a: Garchomp|slp|[from] move: Spore
+log |cant|p1a: Garchomp|slp
+log |move|p1b: Dragonite|Recover||[still]
+log |-fail|p1b: Dragonite|heal
+log |move|p2b: Dondozo|Agility|p2b: Dondozo
+log |-boost|p2b: Dondozo|spe|2
+log |
+log |upkeep
+log |turn|7
