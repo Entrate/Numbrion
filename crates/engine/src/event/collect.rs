@@ -61,6 +61,9 @@ impl<L: LogSink> Battle<L> {
                 ] {
                     let (mons, len) = self.living_actives(side);
                     for a in mons[..len].iter().copied() {
+                        if self.state.pokemon[a.0 as usize].hp == 0 {
+                            continue;
+                        }
                         self.find_pokemon_event_handlers(
                             a,
                             HookSelector { rel, ..selector },
