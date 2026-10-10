@@ -315,6 +315,22 @@ impl Battle {
         lock(&self.g).reseed(seed);
     }
 
+    /// Determinization: indices into the opponent's packed team (construction order, stable for the battle)
+    /// of the Pokemon `viewer` has never seen and whose sets `replace_hidden_set` can swap now.
+    fn hidden_team_indices(&self, viewer: usize) -> PyResult<Vec<usize>> {
+        check_side(viewer)?;
+        Ok(lock(&self.g).hidden_team_indices(viewer))
+    }
+
+    /// Give the opponent's never-revealed Pokemon at packed-team `index` the single packed set `packed_set`,
+    /// in place, with no events, log lines or PRNG draws: the result equals constructing the battle with that set
+    /// and replaying the same choices (docs/design/TRAINING-API.md). Raises ValueError, battle unchanged, when
+    /// the Pokemon was revealed or the swap is unsupported. Call `reseed` before searching the world.
+    fn replace_hidden_set(&self, viewer: usize, index: usize, packed_set: &str) -> PyResult<()> {
+        check_side(viewer)?;
+        lock(&self.g).replace_hidden_set(viewer, index, packed_set).map_err(PyValueError::new_err)
+    }
+
     #[getter]
     fn names(&self) -> (String, String) {
         let g = lock(&self.g);

@@ -150,6 +150,7 @@ b.start()                         # run to the first decision (turn 1)
 | `drain_log()` | **omniscient** raw lines (engine `battle.log`, `\|split\|pN` triples intact) since the last call; needs `log=True` |
 | `drain_player_log(side)` | **player view**, see below; needs `log=True` |
 | `clone()`, `copy_from(other)`, `reseed(seed)`, `prng_seed` | search support, see below |
+| `hidden_team_indices(viewer)`, `replace_hidden_set(viewer, index, packed_set)` | determinization, see below |
 
 A committing `choose`/`choose_action` runs the battle synchronously to the next decision or the end. A side
 may re-submit (Showdown's cancel support) until the other side has answered. Time-line `\|t:\|` entries have
@@ -173,10 +174,9 @@ an empty timestamp, as in the fixtures.
 `clone()` returns an independent battle at the same decision boundary. **It copies the whole true state:
 both teams in full, all hidden information, and the PRNG state.** A search that must not see the real future
 randomness or the opponent's hidden sets must call `reseed(new_seed)` on the copy (it replaces the PRNG state;
-the next draw is the first of the new stream) and must itself determinize the opponent (the engine has no
-notion of "unknown" slots: the copy always has the real teams, so hidden-set sampling means constructing a
-new `Battle` from sampled teams). Unseeded clones replay *exactly* what the original will do, which is
-useful for debugging and for reproducing a position.
+the next draw is the first of the new stream) and must determinize the opponent: never-revealed opponent sets
+can be swapped in place (next section); everything else in the copy is the real state. Unseeded clones replay
+*exactly* what the original will do, which is useful for debugging and for reproducing a position.
 
 Implementation: `Battle` is not `Clone`, so `clone()` rebuilds the battle from the packed teams and overwrites
 its `BattleState` (a `Copy` snapshot, ~38 KB) with the original's; the copy's log buffers start empty.
@@ -184,6 +184,47 @@ Measured on this PC: `clone()` ~45 us, `copy_from()` ~0.7 us, `legal_mask` ~1.5 
 scratch clone per search worker and call `scratch.copy_from(root)` (same seed, teams and names required) to
 reset it. A cloned battle plays out bit-identically to the original under identical decisions, including the
 omniscient and both player logs (tested at random boundaries of many battles).
+
+### Determinization: `hidden_team_indices`, `replace_hidden_set`
+
+```python
+world = root.clone()                                  # one sampled world per determinization
+for i in world.hidden_team_indices(viewer):           # opponent Pokemon the viewer has never seen
+    world.replace_hidden_set(viewer, i, sample_set())  # one packed set, e.g. a line's record from a team pool
+world.reseed(world_seed)                              # the PRNG is hidden information too
+worker = world.clone()                                # then worker.copy_from(world) per grid cell
+```
+
+* `hidden_team_indices(viewer)`: indices into the opponent's *packed team* (construction order, stable for the
+  whole battle; not the request's party order) whose set can be swapped now: never switched in (the leads
+  are), never chosen or inspected by an Illusion user as its disguise, and unchanged since construction.
+  Only the count is visible to a player, so which index holds which unseen Pokemon carries no information.
+* `replace_hidden_set(viewer, index, packed_set)` gives that Pokemon a new set, raising `ValueError` (battle
+  unchanged) for any other Pokemon, after the end, for Zacian/Zamazenta-style species (their `BattleStart`
+  forme change already ran at start), and for a random-gender species with an empty gender field when the
+  replaced input had an explicit or fixed gender: write `M`/`F` into the packed gender field. When both sets
+  leave a random gender unspecified, the replaced Pokemon's drawn gender is reused; give it explicitly to avoid
+  that small leak. Everything derived from the set changes (species, stats, HP, types, weight, moves and PP,
+  ability, item, Tera type, level, gender, name, details); no log lines, events or PRNG draws happen, and
+  `teams` reports the new packed text, so `copy_from` between the world and battles cloned before the swap is
+  refused (clone the world instead).
+* **Contract (tested):** the result is exactly the battle constructed with the sampled set from the start
+  (all genders resolved, PRNG at its post-construction state) after replaying the same choices: that replay
+  reproduces the original log, PRNG and the viewer's requests at every boundary, ends in the identical state,
+  and both then play out bit-identically. When the swap does not change the constructor's gender-draw count it
+  is also the battle built from the original seed and the swapped packed teams. Checked by
+  `crates/engine/tests/determinize.rs` (random battles, explicit and drawn genders) and
+  `difftest determinize_check` on all 13,034 recorded gate battles (25,582 swaps at 33,505 boundaries,
+  including mid-turn replacement requests); through this API by `crates/pyengine/tests/determinize.rs` and
+  `pytests/test_determinize.py`. Engine API: `Battle::replace_hidden_set`, `hidden_mons`, `revealed_mons`
+  (`crates/engine/src/battle/determinize.rs`).
+* Not determinized: what is hidden about *revealed* Pokemon (unrevealed moves, item, ability, EVs, Tera type)
+  stays true in the copy, and so does a choice the opponent already submitted at this boundary (a search
+  re-submits both sides anyway).
+* Cost (Ryzen 5 3600, shared and noisy): one swap ~1.7 us, a whole world (~4 hidden sets) ~6 us on top of a
+  ~1.1 us restore, versus ~9 us for a scratch-reusing `reset_from_team_defs` and ~17 us for `from_team_defs`
+  (~49 us from packed text) followed by a full history replay. `crates/difftest/src/bin/search_bench.rs`
+  measures these (`--op replace|replace-all|reset-defs|construct-defs`).
 
 ## `numbrion.BatchEnv`
 
@@ -327,3 +368,4 @@ Revival Blessing); the Python run used the full pools.
    rebuilds team definitions and a fresh `Scratch` (~70 us instead of ~1 us).
 2. `Battle::reset(seed, p1, p2)` reusing an existing `Scratch`, to make auto-reset cheaper.
 3. A public tracker of revealed information, so NoLog environments can offer a public board state.
+   (`Battle::revealed_mons` covers only which Pokemon were ever switched in or used as a disguise.)

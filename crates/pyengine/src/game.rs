@@ -322,6 +322,30 @@ impl Game {
         with_mut!(self, b => b.state.prng = Prng::from_seed(seed));
     }
 
+    /// Packed-team indices of `viewer`'s opponent whose sets `replace_hidden_set` accepts now.
+    pub fn hidden_team_indices(&self, viewer: usize) -> Vec<usize> {
+        let mask = with!(self, b => b.hidden_mons(SideId(viewer as u8)));
+        (0..12).filter(|m| mask & (1 << m) != 0).map(|m| m % 6).collect()
+    }
+
+    /// Determinization (`Battle::replace_hidden_set`): `index` is the packed-team position of a
+    /// never-revealed Pokemon of `viewer`'s opponent; `packed_set` is one packed set. The packed
+    /// team text follows, so `same_origin` only holds for copies taken after the swap.
+    pub fn replace_hidden_set(&mut self, viewer: usize, index: usize, packed_set: &str) -> Result<(), String> {
+        let team = TeamDef::unpack(packed_set).map_err(|e| e.0)?;
+        if viewer >= 2 || index >= 6 || team.len != 1 {
+            return Err("viewer must be 0/1, index 0..5, and packed_set exactly one packed set".into());
+        }
+        let side = 1 - viewer;
+        let mon = MonId((side * 6 + index) as u8);
+        with_mut!(self, b => b.replace_hidden_set(SideId(viewer as u8), mon, &team.sets[0]))
+            .map_err(|e| e.to_string())?;
+        let mut records: Vec<&str> = self.packed[side].split(']').collect();
+        records[index] = packed_set;
+        self.packed[side] = Arc::from(records.join("]"));
+        Ok(())
+    }
+
     /// Omniscient raw battle log since the last call (engine `battle.log` entries, split triples included).
     pub fn drain_omni(&mut self) -> Vec<String> {
         self.views.as_mut().map(|v| std::mem::take(&mut v.omni)).unwrap_or_default()
