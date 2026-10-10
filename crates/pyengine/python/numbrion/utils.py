@@ -30,3 +30,17 @@ def sample_uniform(result: dict, env, rng: np.random.Generator) -> np.ndarray:
     out = np.stack([a0, a1], axis=-1).astype(np.int32)
     out[~result["needs_action"]] = -1
     return out
+
+
+def grid_actions(p1_pairs, p2_pairs) -> np.ndarray:
+    """All joint cells of a search grid: ``[k1, 2]`` slot-code pairs of side 0 and ``[k2, 2]`` of side 1 ->
+    int32 ``[k1 * k2, 2, 2]`` for ``GridExecutor.run``, cell ``i * k2 + j`` = (``p1_pairs[i]``, ``p2_pairs[j]``).
+
+    A side that needs no action at the root may pass ``[[-1, -1]]``.
+    """
+    p1 = np.asarray(p1_pairs, dtype=np.int32).reshape(-1, 2)
+    p2 = np.asarray(p2_pairs, dtype=np.int32).reshape(-1, 2)
+    out = np.empty((len(p1), len(p2), 2, 2), dtype=np.int32)
+    out[:, :, 0] = p1[:, None]
+    out[:, :, 1] = p2[None, :]
+    return out.reshape(-1, 2, 2)
