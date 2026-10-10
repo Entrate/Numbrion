@@ -35,16 +35,34 @@ impl<L: LogSink> Battle<L> {
         default_effect: bool,
     ) -> Attribution {
         if let Some(f) = self.mutation_frame() {
-            if Self::arg_mon(a.source).is_none() {
+            if !arg_truthy(a.source) {
                 a.source = if from_target { f.target } else { f.source };
             }
             if default_effect && a.effect == EffectRef::None {
                 a.effect = self.scratch.current_effect;
             }
-        } else if default_effect && from_target && a.effect == EffectRef::None {
-            a.effect = self.scratch.current_effect;
+        } else {
+            // Showdown always retains an initial {id: ''} event and effect.
+            // Dex(NONE) is the mutation boundary's truthy empty-effect view.
+            if !arg_truthy(a.source) {
+                a.source = EventArg::Undefined;
+            }
+            if default_effect && a.effect == EffectRef::None {
+                a.effect = if self.scratch.current_effect == EffectRef::None {
+                    EffectRef::Dex(EffectId::NONE)
+                } else {
+                    self.scratch.current_effect
+                };
+            }
         }
         a
+    }
+    pub(crate) fn mutation_from(&self, effect: EffectRef) -> crate::log::LogTag<'static> {
+        if effect == EffectRef::Dex(EffectId::NONE) {
+            crate::log::LogTag::Value("from", crate::log::LogArg::Text("undefined"))
+        } else {
+            crate::log::LogTag::From(effect)
+        }
     }
     pub(crate) fn mutation_event(
         &mut self,
@@ -186,5 +204,17 @@ impl<L: LogSink> Battle<L> {
             }
             _ => EffectId::NONE,
         }
+    }
+}
+
+fn arg_truthy(a: EventArg) -> bool {
+    match a {
+        EventArg::Undefined | EventArg::Null | EventArg::Bool(false) => false,
+        EventArg::Number(n) => n != 0. && !n.is_nan(),
+        EventArg::Relay(r) => r.truthy(),
+        EventArg::Holder(h) => h != Holder::NONE,
+        EventArg::StaticText(s) => !s.is_empty(),
+        EventArg::Effect(e) => e != EffectRef::None,
+        _ => true,
     }
 }

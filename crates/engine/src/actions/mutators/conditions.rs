@@ -436,6 +436,8 @@ impl<L: LogSink> Battle<L> {
         let c = self.mutation_cell(Holder::FIELD, Holder::NONE, status);
         self.state.field.pseudo_weather.push(c);
         self.condition_source(c, a, true, false);
+        // The initializer includes these keys even for an undefined source.
+        self.state.effects.cells[c.0 as usize].present |= present::SOURCE | present::SOURCE_SLOT;
         if self
             .event_hook(effect, EventId::DurationCallback, dex::HookRel::Direct)
             .is_some()

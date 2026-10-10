@@ -1,4 +1,4 @@
-//! Item/ability queries ported from pinned Showdown; lifecycle mutators remain explicit stubs.
+//! Item/ability queries and mutations ported from pinned Showdown.
 #![allow(unused_variables, unused_imports)]
 use super::common::{ATE_BERRY, USED_ITEM_THIS_TURN, mon_arg, number};
 use crate::{
@@ -321,7 +321,11 @@ impl<L: LogSink> Battle<L> {
         }
         let mut a = attribution;
         if a.effect == EffectRef::None {
-            a.effect = self.scratch.current_effect;
+            a.effect = if self.scratch.current_effect == EffectRef::None {
+                EffectRef::Dex(EffectId::NONE)
+            } else {
+                self.scratch.current_effect
+            };
         }
         let old = self.state.pokemon[pokemon.0 as usize].ability;
         let cant = |id: EffectId| {
@@ -379,7 +383,7 @@ impl<L: LogSink> Battle<L> {
                     )],
                 ));
             } else {
-                let mut tags = [LogTag::From(a.effect), LogTag::Bare("silent")];
+                let mut tags = [self.mutation_from(a.effect), LogTag::Bare("silent")];
                 let len = if let Some(s) = Self::arg_mon(a.source) {
                     tags[1] = LogTag::Of(s);
                     2
@@ -418,7 +422,7 @@ impl<L: LogSink> Battle<L> {
             );
         }
         if old == EffectId::NONE {
-            Relay::Number(0.)
+            Relay::NotFail
         } else {
             Relay::Effect(old)
         }

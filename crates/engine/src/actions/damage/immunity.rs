@@ -1,4 +1,4 @@
-//! Type/groundedness queries ported from pinned Showdown; damage immunity remains explicit stubs.
+//! Type, effectiveness and immunity ports from pinned Showdown.
 #![allow(unused_variables, unused_imports)]
 use crate::{
     Battle,

@@ -283,6 +283,24 @@ impl<L: LogSink> Battle<L> {
         if self.state.pokemon[mon.0 as usize].flags & mon_flags::FAINTED != 0 {
             return false;
         }
+        let key = dex::effect(status).key;
+        if let Some(i) = dex::IMMUNITY_NAMES.iter().position(|name| *name == key) {
+            let immunity = [
+                ImmunityId::Brn,
+                ImmunityId::Frz,
+                ImmunityId::Hail,
+                ImmunityId::Par,
+                ImmunityId::Powder,
+                ImmunityId::Prankster,
+                ImmunityId::Psn,
+                ImmunityId::Sandstorm,
+                ImmunityId::Tox,
+                ImmunityId::Trapped,
+            ][i];
+            return self.run_status_immunity(mon, immunity, ImmunityMessage::Silent);
+        }
+        // Dex.getImmunity queries types even for an unknown immunity string.
+        let _ = self.get_types(mon, false, false);
         self.mutation_event(
             EventId::Immunity,
             mon_arg(Some(mon)),

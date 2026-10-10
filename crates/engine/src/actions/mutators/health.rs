@@ -81,7 +81,12 @@ impl<L: LogSink> Battle<L> {
                 result.values[i] = Relay::Bool(false);
                 continue;
             }
-            let e = attribution.effect;
+            // TS materializes EMPTY_CONDITION before calling onEffect Damage.
+            let e = if attribution.effect == EffectRef::None {
+                EffectRef::Dex(EffectId::NONE)
+            } else {
+                attribution.effect
+            };
             let id = self.event_effect_id(e);
             let kind = self.event_effect_type(e);
             let mut d = if cur == Relay::Number(0.) {
@@ -145,7 +150,7 @@ impl<L: LogSink> Battle<L> {
             } else if e == EffectRef::Synthetic(SyntheticEffect::Confused) {
                 tags[0] = LogTag::Value("from", LogArg::Text("confusion"));
                 len = 1;
-            } else if kind == dex::EffectType::Move || e == EffectRef::None {
+            } else if kind == dex::EffectType::Move || e == EffectRef::Dex(EffectId::NONE) {
                 len = 0;
             } else {
                 tags[0] = if id == dex::CONDITION_TOX {
@@ -292,7 +297,7 @@ impl<L: LogSink> Battle<L> {
             } else if self.event_effect_type(a.effect) == dex::EffectType::Move {
                 len = 0;
             } else {
-                tags[0] = LogTag::From(a.effect);
+                tags[0] = self.mutation_from(a.effect);
                 len = if let Some(s) = source.filter(|s| *s != t) {
                     tags[1] = LogTag::Of(s);
                     2
@@ -449,7 +454,7 @@ impl<L: LogSink> Battle<L> {
                             LogArg::Text("atk"),
                             LogArg::Number(self.state.pokemon[t.0 as usize].boosts[0] as i32),
                         ],
-                        &[LogTag::From(a.effect)],
+                        &[self.mutation_from(a.effect)],
                     ));
                 } else if a.effect != EffectRef::None {
                     if kind == dex::EffectType::Ability && !boosted {
@@ -465,7 +470,7 @@ impl<L: LogSink> Battle<L> {
                         boosted = true;
                     }
                     let tags: &[LogTag<'_>] = if kind == dex::EffectType::Item {
-                        &[LogTag::From(a.effect)]
+                        &[self.mutation_from(a.effect)]
                     } else {
                         &[]
                     };
@@ -508,6 +513,7 @@ impl<L: LogSink> Battle<L> {
         }
         let h = self.stash_boosts(b);
         let r = self.mutation_event(EventId::AfterBoost, mon_arg(Some(t)), a, Relay::Boosts(h));
+        let b = *self.scratch_boosts(h);
         if r != Relay::Boosts(h) {
             self.release_relay(r);
         }
@@ -523,7 +529,7 @@ impl<L: LogSink> Battle<L> {
         }
         success
     }
-    /// Clamp requested stages; return total actual delta
+    /// Clamp requested stages; return the last actual delta
     /// Ports `sim/pokemon.ts:1221-1230`. PRNG: none.
     pub fn boost_by(&mut self, pokemon: MonId, boosts: OrderedBoosts) -> i8 {
         let b = self.get_capped_boost(pokemon, boosts);
