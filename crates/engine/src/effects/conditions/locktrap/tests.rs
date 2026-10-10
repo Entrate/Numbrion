@@ -165,6 +165,52 @@ fn deferred_scenarios_match_pinned_showdown() {
     }
 }
 
+/// Every function site of the 19 effects of the batch is implemented (58 sites; the Residual entries of
+/// Disable/Heal Block/Taunt/Throat Chop are ordering-only metadata, not functions).
+#[test]
+fn complete_batch_manifest_coverage() {
+    let mut functions = 0;
+    for id in [
+        dex::MOVE_CURSE,
+        dex::MOVE_DISABLE,
+        dex::MOVE_NORETREAT,
+        dex::MOVE_SPIRITSHACKLE,
+        dex::MOVE_THROATCHOP,
+        dex::ABILITY_ARENATRAP,
+        dex::ABILITY_MAGNETPULL,
+        dex::ABILITY_SHADOWTAG,
+        dex::CONDITION_CHOICELOCK,
+        dex::CONDITION_CURSE,
+        dex::CONDITION_DISABLE,
+        dex::CONDITION_ENCORE,
+        dex::CONDITION_HEALBLOCK,
+        dex::CONDITION_IMPRISON,
+        dex::CONDITION_NORETREAT,
+        dex::CONDITION_PARTIALLYTRAPPED,
+        dex::CONDITION_TAUNT,
+        dex::CONDITION_THROATCHOP,
+        dex::CONDITION_TRAPPED,
+    ] {
+        let manifest = &dex::MANIFESTS[id.0 as usize];
+        for (i, h) in manifest.hooks().iter().enumerate() {
+            if matches!(h.value, dex::HookValue::Function) {
+                functions += 1;
+                assert_eq!(
+                    crate::effects::registry::hook_coverage(dex::HookId(
+                        manifest.hooks_start + i as u16
+                    )),
+                    crate::effects::HookCoverage::Implemented,
+                    "{} {} {:?}",
+                    dex::effect(id).key,
+                    h.key,
+                    h.site
+                );
+            }
+        }
+    }
+    assert_eq!(functions, 58);
+}
+
 #[test]
 fn type_ids_match_the_generated_type_table() {
     assert_eq!(dex::TYPE_NAMES[TYPE_GHOST.0 as usize - 1], "Ghost");
