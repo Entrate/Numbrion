@@ -53,7 +53,7 @@ pub(super) fn on_type<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
         dex::ITEMS[(p.item.0 - dex::ITEM_START) as usize].on_plate
     };
     let ty = if plate == TypeId::NONE {
-        type_named("Normal")
+        dex::TYPE_NORMAL
     } else {
         plate
     };

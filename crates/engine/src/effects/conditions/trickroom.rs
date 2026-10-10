@@ -29,7 +29,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         // `source?.hasAbility('persistent')` logs `-activate|source|ability: Persistent|[move]
         // Trick Room` and returns 7; otherwise 5.
         dex::HOOK_CONDITION_TRICKROOM_DURATIONCALLBACK => match opt_mon_arg(b, cx, 0) {
-            Some(source) if b.query_has_ability(source, "persistent") => {
+            Some(source) if b.query_has_ability(source, dex::key_ids!("persistent")) => {
                 b.add(LogEntry::new(
                     "-activate",
                     &[
@@ -48,7 +48,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         // `[of]` tag. Returns undefined. PRNG: none.
         dex::HOOK_CONDITION_TRICKROOM_ONFIELDSTART => {
             let source = mon_arg(b, cx, 1);
-            let persistent = b.query_has_ability(source, "persistent");
+            let persistent = b.query_has_ability(source, dex::key_ids!("persistent"));
             if persistent {
                 b.add(LogEntry::new(
                     "-fieldstart",

@@ -29,7 +29,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/moves.ts:14108-14113. `source?.hasItem('terrainextender') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_PSYCHICTERRAIN_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "terrainextender")
+            support::duration_callback(b, cx, dex::key_ids!("terrainextender"))
         }
         // data/moves.ts:14115-14129 (priority 4). Blocks priority > 0.1, non-self-target moves against grounded, non-ally, not semi-invulnerable targets: -activate, return null; hint when an airborne target dodges a priority move. PRNG: none directly.
         dex::HOOK_CONDITION_PSYCHICTERRAIN_ONTRYHIT => try_hit(b, cx),

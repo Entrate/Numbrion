@@ -114,12 +114,10 @@ impl<L: LogSink> Battle<L> {
         };
         self.state.effects.alloc(owner, target, id, order)
     }
+    /// Same-key condition record, else the id itself, then the alias step;
+    /// a compile-time table (`dex::condition_id`). NONE stays NONE.
     pub(crate) fn condition_id(&self, id: EffectId) -> EffectId {
-        if id == EffectId::NONE {
-            return id;
-        }
-        dex::lookup(EffectKind::Condition, dex::effect(id).key)
-            .map_or(dex::canonical_effect(id), dex::canonical_effect)
+        dex::condition_id(id)
     }
     pub(crate) fn condition_ref(&self, id: EffectId) -> EffectRef {
         let id = self.condition_id(id);
@@ -165,12 +163,8 @@ impl<L: LogSink> Battle<L> {
         a: Attribution,
     ) {
         let id = self.event_effect_id(effect);
-        if id != EffectId::NONE {
-            if let Some(dex::DataValue::Number(n)) = dex::effect(id).data.get(dex::FIELD_DURATION) {
-                if n != 0. {
-                    self.state.effects.cells[cell.0 as usize].duration = n as i16;
-                }
-            }
+        if let Some(n) = dex::data_duration(id) {
+            self.state.effects.cells[cell.0 as usize].duration = n;
         }
         if let Some(h) = self.event_hook(effect, EventId::DurationCallback, HookRel::Direct) {
             let r = self.call_hook(

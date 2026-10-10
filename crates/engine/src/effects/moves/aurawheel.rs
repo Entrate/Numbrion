@@ -62,9 +62,9 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let m = mon(b, cx, 1);
             b.active_move_mut(h).move_type =
                 if b.state.pokemon[m.0 as usize].species == dex::SPECIES_MORPEKOHANGRY {
-                    type_named("Dark")
+                    dex::TYPE_DARK
                 } else {
-                    type_named("Electric")
+                    dex::TYPE_ELECTRIC
                 };
             Relay::Undefined
         }

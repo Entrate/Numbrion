@@ -179,7 +179,7 @@ impl<L: LogSink> Battle<L> {
         let m = *self.active_move(move_handle);
         if self.state.pokemon[source.0 as usize].status == crate::state::Status::Burn
             && m.category == dex::Category::Physical
-            && !self.query_has_ability(source, "guts")
+            && !self.query_has_ability(source, dex::key_ids!("guts"))
             && m.id != dex::MOVE_FACADE
         {
             damage = self.modify(damage, 0.5, 1.);

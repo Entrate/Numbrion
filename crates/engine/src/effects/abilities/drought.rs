@@ -26,7 +26,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             b,
             cx,
             dex::CONDITION_SUNNYDAY,
-            Some((dex::SPECIES_GROUDON, "redorb")),
+            Some((dex::SPECIES_GROUDON, dex::key_ids!("redorb"))),
         ),
         _ => panic!("unexpected drought hook"),
     }

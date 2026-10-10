@@ -27,7 +27,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         // [side.active[0], source, sourceEffect]. `source?.hasAbility('persistent')` logs
         // `-activate|source|ability: Persistent|[move] Tailwind` and returns 6; otherwise 4.
         dex::HOOK_CONDITION_TAILWIND_DURATIONCALLBACK => match opt_mon_arg(b, cx, 1) {
-            Some(source) if b.query_has_ability(source, "persistent") => {
+            Some(source) if b.query_has_ability(source, dex::key_ids!("persistent")) => {
                 b.add(LogEntry::new(
                     "-activate",
                     &[
@@ -46,7 +46,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_CONDITION_TAILWIND_ONSIDESTART => {
             let side = side_arg(b, cx, 0);
             let persistent = match opt_mon_arg(b, cx, 1) {
-                Some(source) => b.query_has_ability(source, "persistent"),
+                Some(source) => b.query_has_ability(source, dex::key_ids!("persistent")),
                 None => false,
             };
             if persistent {

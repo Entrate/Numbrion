@@ -483,13 +483,10 @@ impl<L: LogSink> Battle<L> {
     /// immune to trapping (Ghost). Calls `pokemon.getTypes()`, i.e. the Type event.
     fn lc_not_immune_to_trapped(&mut self, pokemon: MonId) -> bool {
         let types = self.get_types(pokemon, false, false);
-        let col = dex::IMMUNITY_NAMES
-            .iter()
-            .position(|&n| n == "trapped")
-            .expect("trapped immunity column");
+        const COL: usize = dex::immunity_column("trapped");
         types.values[..usize::from(types.len)]
             .iter()
-            .all(|t| dex::IMMUNITY_CHART[usize::from(t.0) - 1][col] != 3)
+            .all(|t| dex::IMMUNITY_CHART[usize::from(t.0) - 1][COL] != 3)
     }
 
     /// The per-Pokemon body of endTurn's side loop (battle.ts:1658-1759).
@@ -646,12 +643,10 @@ impl<L: LogSink> Battle<L> {
                 if slot.key.is_empty() {
                     continue; // no such ability slot
                 }
-                // `abilityName === source.ability` compares a display name with an id.
-                let source_ability = self.lc_mon(source).ability;
-                if source_ability != EffectId::NONE && slot.name == dex::effect(source_ability).key
-                {
-                    continue;
-                }
+                // `abilityName === source.ability` compares a display name with an id. No
+                // display name equals any effect key (`dex::ABILITY_SLOT_NAMES_ARE_NOT_KEYS`,
+                // checked at compile time), so this never skips.
+                const _: () = assert!(dex::ABILITY_SLOT_NAMES_ARE_NOT_KEYS);
                 // 'obtainableabilities' is present and the format has a team generator, and no
                 // gen-9 species has unreleasedHidden or a '-ability:' ban, so nothing else skips.
                 if self.lc_flag(pokemon, mon_flags::KNOWN_TYPE)

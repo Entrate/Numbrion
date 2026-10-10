@@ -113,7 +113,7 @@ pub fn clear_smart_target<L: LogSink>(b: &mut Battle<L>, mv: u8) {
 /// volatile key can never be present; the query stays literal, by key, like
 /// `is_semi_invulnerable`.
 pub fn is_sky_dropped<L: LogSink>(b: &Battle<L>, m: MonId) -> bool {
-    if b.query_has_volatile(m, "skydrop") {
+    if b.query_has_volatile(m, dex::key_ids!("skydrop")) {
         return true;
     }
     let foe = (m.side().0 ^ 1) as usize;
@@ -124,7 +124,7 @@ pub fn is_sky_dropped<L: LogSink>(b: &Battle<L>, m: MonId) -> bool {
         let list = &b.state.pokemon[active.0 as usize].volatiles;
         if list.as_slice().iter().any(|c| {
             let cell = &b.state.effects.cells[c.0 as usize];
-            dex::effect(cell.id).key == "skydrop" && cell.source == m
+            dex::key_ids!("skydrop").contains(cell.id) && cell.source == m
         }) {
             return true;
         }

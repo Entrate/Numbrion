@@ -302,18 +302,6 @@ pub(super) fn effects_scratch(base: &'static dex::MoveEffects) -> MoveEffectsScr
     }
 }
 
-/// `self.chance` is not in `MoveEffects`; it survives in the declarative property tree.
-fn self_chance(id: EffectId) -> Option<u16> {
-    match dex::effect(id)
-        .data
-        .get(dex::FIELD_SELF)?
-        .get(dex::FIELD_CHANCE)?
-    {
-        dex::DataValue::Number(n) => Some(n as u16),
-        _ => None,
-    }
-}
-
 /// `dex.getActiveMove(id)` for a scoped move (sim/dex.ts:316-321).
 pub(super) fn build_active_move(id: EffectId) -> ActiveMove {
     assert_eq!(
@@ -367,7 +355,9 @@ pub(super) fn build_active_move(id: EffectId) -> ActiveMove {
     effects.chance = None;
     let mut self_effect = m.effects.self_effect.map(effects_scratch);
     if let Some(e) = self_effect.as_mut() {
-        e.chance = self_chance(id);
+        // `self.chance` is not in `MoveEffects`; it survives in the declarative
+        // property tree, read through a compile-time per-id table.
+        e.chance = dex::self_chance(id);
     }
     ActiveMove {
         flags: m.flags,

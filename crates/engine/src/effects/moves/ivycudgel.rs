@@ -37,7 +37,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_MOVE_IVYCUDGEL_ONPREPAREHIT => {
             let h = MoveHandle(move_arg(b, cx, 2));
             let ty = b.active_move(h).move_type;
-            if ty != type_named("Grass") {
+            if ty != dex::TYPE_GRASS {
                 let parts = [LogArg::Text("Ivy Cudgel "), LogArg::Type(ty)];
                 b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
                     "anim",
@@ -52,13 +52,13 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let m = mon(b, cx, 1);
             let ty = match b.state.pokemon[m.0 as usize].species {
                 dex::SPECIES_OGERPONWELLSPRING | dex::SPECIES_OGERPONWELLSPRINGTERA => {
-                    Some(type_named("Water"))
+                    Some(dex::TYPE_WATER)
                 }
                 dex::SPECIES_OGERPONHEARTHFLAME | dex::SPECIES_OGERPONHEARTHFLAMETERA => {
-                    Some(type_named("Fire"))
+                    Some(dex::TYPE_FIRE)
                 }
                 dex::SPECIES_OGERPONCORNERSTONE | dex::SPECIES_OGERPONCORNERSTONETERA => {
-                    Some(type_named("Rock"))
+                    Some(dex::TYPE_ROCK)
                 }
                 _ => None,
             };

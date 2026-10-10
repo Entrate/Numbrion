@@ -38,7 +38,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);
             if b.state.pokemon[m.0 as usize].species == dex::SPECIES_TERAPAGOSSTELLAR {
-                b.active_move_mut(h).move_type = type_named("Stellar");
+                b.active_move_mut(h).move_type = dex::TYPE_STELLAR;
                 if b.state.pokemon[m.0 as usize].terastallized != TypeId::NONE
                     && b.get_stat(
                         m,

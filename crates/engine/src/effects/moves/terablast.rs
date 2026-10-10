@@ -40,7 +40,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let m = mon(b, cx, 0);
             let h = MoveHandle(move_arg(b, cx, 2));
             Relay::Number(
-                if b.state.pokemon[m.0 as usize].terastallized == type_named("Stellar") {
+                if b.state.pokemon[m.0 as usize].terastallized == dex::TYPE_STELLAR {
                     100.
                 } else {
                     b.active_move(h).base_power
@@ -95,7 +95,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             {
                 b.active_move_mut(h).category = Category::Physical;
             }
-            if tera == type_named("Stellar") {
+            if tera == dex::TYPE_STELLAR {
                 b.active_move_mut(h).self_effect = Some(stellar_self());
             }
             Relay::Undefined

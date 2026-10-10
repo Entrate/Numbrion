@@ -775,7 +775,7 @@ fn complete_batch_manifest_coverage() {
 }
 #[test]
 fn cure_and_volatile_update_call_order_matches_source() {
-    use super::host::{UpdateHost, update};
+    use super::host::{UpdateHost, UpdateVolatile, update};
     use crate::state::Status;
     struct Recording {
         v: u32,
@@ -786,12 +786,11 @@ fn cure_and_volatile_update_call_order_matches_source() {
         fn status(&mut self) -> Status {
             [Status::Sleep, Status::Burn, Status::Poison, Status::None][self.v as usize % 4]
         }
-        fn volatile(&mut self, key: &'static str) -> bool {
-            match key {
-                "attract" => self.v % 3 != 0,
-                "taunt" => self.v % 2 != 0,
-                "confusion" => self.v % 2 == 0,
-                _ => panic!(),
+        fn volatile(&mut self, v: UpdateVolatile) -> bool {
+            match v {
+                UpdateVolatile::Attract => self.v % 3 != 0,
+                UpdateVolatile::Taunt => self.v % 2 != 0,
+                UpdateVolatile::Confusion => self.v % 2 == 0,
             }
         }
         fn activate(&mut self) {
@@ -803,7 +802,12 @@ fn cure_and_volatile_update_call_order_matches_source() {
         fn cure(&mut self) {
             self.trace.push("cure".into())
         }
-        fn remove(&mut self, key: &'static str) {
+        fn remove(&mut self, v: UpdateVolatile) {
+            let key = match v {
+                UpdateVolatile::Confusion => "confusion",
+                UpdateVolatile::Attract => "attract",
+                UpdateVolatile::Taunt => "taunt",
+            };
             self.trace.push(format!("remove:{key}"))
         }
         fn attract_end(&mut self) {

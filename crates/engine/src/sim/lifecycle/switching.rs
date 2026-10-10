@@ -414,11 +414,11 @@ impl<L: LogSink> Battle<L> {
         let tera_type = self.lc_tera_type(pokemon);
         let illusion = self.lc_mon(pokemon).illusion;
         let illusion_base = (illusion != MonId::NONE)
-            .then(|| dex::species(self.lc_mon(illusion).species).base_species_name);
+            .then(|| dex::species(self.lc_mon(illusion).species).base_species);
         let species = dex::species(self.lc_mon(pokemon).species);
-        if species.base_species_name == "Ogerpon"
+        if species.base_species == dex::SPECIES_OGERPON
             && ![TYPE_FIRE, TYPE_GRASS, TYPE_ROCK, TYPE_WATER].contains(&tera_type)
-            && illusion_base.is_none_or(|b| b == "Ogerpon")
+            && illusion_base.is_none_or(|b| b == dex::SPECIES_OGERPON)
         {
             self.hint(
                 LogArg::Text(
@@ -430,7 +430,7 @@ impl<L: LogSink> Battle<L> {
             return;
         }
 
-        if matches!(illusion_base, Some("Ogerpon" | "Terapagos")) {
+        if matches!(illusion_base, Some(dex::SPECIES_OGERPON | dex::SPECIES_TERAPAGOS)) {
             let cell = self.lc_mon(pokemon).ability_state;
             let state = self.lc_capture(cell);
             self.single_event(
@@ -461,7 +461,7 @@ impl<L: LogSink> Battle<L> {
         self.state.sides[usize::from(pokemon.side().0)].tera_used = true;
 
         let species = dex::species(self.lc_mon(pokemon).species);
-        if species.base_species_name == "Ogerpon" {
+        if species.base_species == dex::SPECIES_OGERPON {
             // toID(species.battleOnly || species.id) + (== 'ogerpon' ? 'tealtera' : 'tera')
             let base = species.battle_only.first().copied().unwrap_or(species.id);
             let target = match base {
@@ -500,7 +500,7 @@ impl<L: LogSink> Battle<L> {
                 p.flags & mon_flags::TRANSFORMED != 0,
             )
         };
-        if dex::species(species_id).base_species_name == "Morpeko"
+        if dex::species(species_id).base_species == dex::SPECIES_MORPEKO
             && !transformed
             && base_species_id != species_id
         {

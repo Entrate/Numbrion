@@ -35,7 +35,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);
             let types = b.get_types(m, false, false);
-            let ty = if types.values[0] == type_named("???") && types.len > 1 {
+            let ty = if types.values[0] == dex::TYPE_UNKNOWN && types.len > 1 {
                 types.values[1]
             } else {
                 types.values[0]

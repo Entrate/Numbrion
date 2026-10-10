@@ -37,7 +37,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         // PRNG: one `random(5, 7)` draw unless the source holds a Grip Claw.
         dex::HOOK_CONDITION_PARTIALLYTRAPPED_DURATIONCALLBACK => {
             if let Some(source) = support::opt_mon_arg(b, cx, 1) {
-                if b.query_has_item(source, "gripclaw") {
+                if b.query_has_item(source, dex::key_ids!("gripclaw")) {
                     return Relay::Number(8.0);
                 }
             }
@@ -58,7 +58,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                 ],
                 &[LogTag::Of(source)],
             ));
-            let divisor = if b.query_has_item(source, "bindingband") {
+            let divisor = if b.query_has_item(source, dex::key_ids!("bindingband")) {
                 6
             } else {
                 8
