@@ -12,7 +12,7 @@ use crate::{
     actions::Attribution,
     dex,
     ids::{MonId, TypeId},
-    log::NoLog,
+    log::{LogSink, NoLog},
     state::{
         Status,
         choices::{ActionKind, ActionQueue, RequestKind},
@@ -44,7 +44,7 @@ fn loop_no_end(b: &mut Battle<NoLog>) -> &'static str {
     "empty"
 }
 
-pub(super) fn flow_state(b: &Battle<NoLog>) -> String {
+pub(super) fn flow_state<L: LogSink>(b: &Battle<L>) -> String {
     let s = state_summary(b);
     let rs = match b.state.request_state {
         RequestKind::None => "-",

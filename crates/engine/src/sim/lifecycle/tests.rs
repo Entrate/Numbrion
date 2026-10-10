@@ -6,7 +6,7 @@ use crate::{
     Battle,
     event::EffectRef,
     ids::MonId,
-    log::NoLog,
+    log::{LogSink, NoLog},
     state::choices::{Action, ActionKind},
 };
 
@@ -57,7 +57,7 @@ pub(super) fn action_summary(a: &Action) -> String {
     )
 }
 
-pub(super) fn queue_summary(b: &Battle<NoLog>) -> String {
+pub(super) fn queue_summary<L: LogSink>(b: &Battle<L>) -> String {
     let q = &b.state.queue;
     if q.len == 0 {
         return "-".into();
@@ -69,7 +69,7 @@ pub(super) fn queue_summary(b: &Battle<NoLog>) -> String {
         .join("/")
 }
 
-pub(super) fn seed_words(b: &Battle<NoLog>) -> String {
+pub(super) fn seed_words<L: LogSink>(b: &Battle<L>) -> String {
     b.seed()
         .iter()
         .map(u16::to_string)
@@ -91,7 +91,7 @@ pub(super) struct StateSummary {
     pub(super) speed_order: String,
 }
 
-pub(super) fn state_summary(b: &Battle<NoLog>) -> StateSummary {
+pub(super) fn state_summary<L: LogSink>(b: &Battle<L>) -> StateSummary {
     let mut active = vec![];
     let mut party = vec![];
     let mut speeds = vec![];
