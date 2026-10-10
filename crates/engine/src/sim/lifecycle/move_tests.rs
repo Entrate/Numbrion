@@ -3,10 +3,9 @@
 //! getActionSpeed, the commit sort, the gen-8 dynamic re-sort after every action and
 //! mid-turn faints. Move *execution* (owner M's run_move) is replaced by "nothing happens
 //! (optionally someone faints during the move)" on both sides, so only queue behaviour is
-//! compared. Needs owner M (get_active_move, get_target, get_random_target, ...) and owner C
-//! (make_request / clear_request / all_choices_done).
+//! compared. Requests use the same thread-scoped recorder as the oracle flow probe.
 
-use super::flow_tests::{faint_mon, flow_state};
+use super::flow_tests::{RequestRecorder, faint_mon, flow_state};
 use super::queue::ActionChoice;
 use super::tests::{
     battle_with_start_queued, drain_queue, kind_name, parse_seed, queue_summary, seed_words,
@@ -113,8 +112,8 @@ fn run_move_op(b: &mut Battle<NoLog>, held: &mut ActionQueue, op: &str) -> Strin
 }
 
 #[test]
-#[ignore = "needs M (get_active_move/get_target/get_random_target/get_loc_of/get_at_loc) and C (make_request/clear_request/all_choices_done)"]
 fn move_queue_matches_pinned_showdown() {
+    let _recorder = RequestRecorder::enter();
     let mut rows = 0;
     let mut current_case = String::new();
     let mut b: Option<Battle<NoLog>> = None;

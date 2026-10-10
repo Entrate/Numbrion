@@ -1,7 +1,8 @@
 //! Flow vectors (tools/probes/lifecycle/flow-vectors.mjs). They exercise switch/instaswitch,
 //! terastallize, forced replacement requests, drags, Revival Blessing, residual, endTurn and
-//! the win checks against the pinned Showdown, so they need owner C (make_request /
-//! clear_request / all_choices_done) to be present; until then the test is ignored.
+//! the win checks against the pinned Showdown. The oracle intercepts makeRequest;
+//! a thread-scoped recorder below applies the identical interception to this port.
+//! Request JSON/choice validation remain separate integration checks.
 
 use super::queue::ActionChoice;
 use super::tests::{
@@ -19,6 +20,27 @@ use crate::{
         mon_flags,
     },
 };
+
+thread_local! {
+    static RECORD_REQUESTS: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Scope the same makeRequest interception used by the Node flow/move probes.
+/// Other concurrently running tests use the real C request implementation.
+pub(super) struct RequestRecorder(bool);
+impl RequestRecorder {
+    pub(super) fn enter() -> Self {
+        Self(RECORD_REQUESTS.with(|enabled| enabled.replace(true)))
+    }
+}
+impl Drop for RequestRecorder {
+    fn drop(&mut self) {
+        RECORD_REQUESTS.with(|enabled| enabled.set(self.0));
+    }
+}
+pub(super) fn records_requests() -> bool {
+    RECORD_REQUESTS.with(std::cell::Cell::get)
+}
 
 /// `pokemon.faint()` with the default null source and effect (pokemon.ts:1581-1593).
 pub(super) fn faint_mon(b: &mut Battle<NoLog>, m: MonId) {
@@ -146,8 +168,8 @@ fn run_flow_op(b: &mut Battle<NoLog>, held: &mut ActionQueue, op: &str) -> Strin
 }
 
 #[test]
-#[ignore = "needs C (make_request/clear_request/all_choices_done)"]
 fn lifecycle_flows_match_pinned_showdown() {
+    let _recorder = RequestRecorder::enter();
     let mut rows = 0;
     let mut current_case = String::new();
     let mut b: Option<Battle<NoLog>> = None;

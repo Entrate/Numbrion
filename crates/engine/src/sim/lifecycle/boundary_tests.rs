@@ -117,3 +117,53 @@ fn termination_tera_and_turn_limit_match_pinned_showdown() {
     }
     assert_eq!(rows, 290);
 }
+
+/// Full startup uses real rule dispatch, endTurn and C request caches. Unlike the
+/// flow/queue suites this test has no request recorder or interrupted turn loop.
+#[test]
+#[ignore = "integration gate: six rule Begin hooks must be registered"]
+fn full_startup_matches_pinned_showdown() {
+    let mut rows = 0;
+    for line in include_str!("vectors/startup.tsv")
+        .lines()
+        .filter(|l| !l.starts_with('#'))
+    {
+        let columns: Vec<_> = line.split('\t').collect();
+        let [
+            case,
+            seed,
+            p1,
+            p2,
+            seed_after,
+            state,
+            log,
+            request1,
+            request2,
+        ] = columns[..]
+        else {
+            panic!("malformed startup vector")
+        };
+        let mut b =
+            Battle::from_players(parse_seed(seed), ("A", p1), ("B", p2), TextLog::default())
+                .unwrap();
+        b.start().unwrap();
+        assert_eq!(seed_words(&b), seed_after, "case {case}: startup seed");
+        assert_eq!(flow_state(&b), state, "case {case}: startup state");
+        let mut entries = vec![];
+        b.drain_log(&mut entries);
+        assert_eq!(entries.join("~"), log, "case {case}: startup protocol");
+        assert_eq!(
+            b.request_json(0).as_deref(),
+            Some(request1),
+            "case {case}: p1 request bytes"
+        );
+        assert_eq!(
+            b.request_json(1).as_deref(),
+            Some(request2),
+            "case {case}: p2 request bytes"
+        );
+        assert!(b.outcome().is_none());
+        rows += 1;
+    }
+    assert_eq!(rows, 50);
+}
