@@ -93,6 +93,10 @@ engine contract in `docs/design/ARCHITECTURE.md` outranks anything here.
 
 ## Search, phase 2
 
+**Before implementing search, read [SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md)**:
+fair-information determinization is required (otherwise search sees the opponent's true hidden sets), and
+the MSVC + PGO build should land at the same time.
+
 - Simultaneous moves: sample about 10 candidate joint actions per side from the
   policy, score the 10×10 grid with the value net and the engine, solve it with
   regret matching (as the Diplomacy bots did), and play the result.

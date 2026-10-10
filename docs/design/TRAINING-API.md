@@ -326,6 +326,11 @@ in the engine yet.
 
 ## Search (`numbrion.GridExecutor`)
 
+> **Not ready for training targets or strength claims yet.** Read
+> [SEARCH-PREREQUISITES.md](SEARCH-PREREQUISITES.md) first: worlds must come from fair-information
+> determinization, not from the live battle. `numbrion.GridExecutor` warns until
+> `NUMBRION_SEARCH_PREREQS_DONE=1` is set.
+
 One-turn search evaluates a grid of joint actions: per decision ~10 candidate pairs per side, optionally
 several determinized worlds, each cell = restore the root, submit both sides' choices, advance to the next
 decision boundary, score the leaf with a value net. `GridExecutor` runs the engine part of that in Rust:
