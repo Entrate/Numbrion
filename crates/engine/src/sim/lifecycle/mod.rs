@@ -10,6 +10,8 @@ mod util;
 #[cfg(test)]
 mod flow_tests;
 #[cfg(test)]
+mod move_tests;
+#[cfg(test)]
 mod tests;
 
 pub use queue::{ActionChoice, QueueHandle, ResolvedActions};

@@ -1,8 +1,7 @@
 //! Flow vectors (tools/probes/lifecycle/flow-vectors.mjs). They exercise switch/instaswitch,
 //! terastallize, forced replacement requests, drags, Revival Blessing, residual, endTurn and
-//! the win checks against the pinned Showdown, so they need owners C (make_request /
-//! clear_request / all_choices_done) and T (hint) to be present; until then the test is
-//! ignored.
+//! the win checks against the pinned Showdown, so they need owner C (make_request /
+//! clear_request / all_choices_done) to be present; until then the test is ignored.
 
 use super::queue::ActionChoice;
 use super::tests::{
@@ -45,7 +44,7 @@ fn loop_no_end(b: &mut Battle<NoLog>) -> &'static str {
     "empty"
 }
 
-fn flow_state(b: &Battle<NoLog>) -> String {
+pub(super) fn flow_state(b: &Battle<NoLog>) -> String {
     let s = state_summary(b);
     let rs = match b.state.request_state {
         RequestKind::None => "-",
@@ -147,7 +146,7 @@ fn run_flow_op(b: &mut Battle<NoLog>, held: &mut ActionQueue, op: &str) -> Strin
 }
 
 #[test]
-#[ignore = "needs C (make_request/clear_request/all_choices_done) and T (hint)"]
+#[ignore = "needs C (make_request/clear_request/all_choices_done)"]
 fn lifecycle_flows_match_pinned_showdown() {
     let mut rows = 0;
     let mut current_case = String::new();
