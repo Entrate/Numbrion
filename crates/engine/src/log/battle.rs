@@ -7,8 +7,28 @@ use crate::Battle;
 const ONCE_HINT_UNSUPPORTED: &str = "once-hint with a side is not reachable in the scoped format (only Illusion Level Mod uses `once`)";
 
 impl<L: LogSink> Battle<L> {
+    // Record mentions for NoLog too; Illusion may display a never-active bench set.
+    fn reveal_arg(&mut self, arg: LogArg<'_>) {
+        match arg {
+            LogArg::Mon(m) | LogArg::Health(m) | LogArg::Details(m) | LogArg::FullDetails(m) => self.mark_revealed(m),
+            LogArg::Parts(parts) => { for &part in parts { self.reveal_arg(part); } }
+            LogArg::Spread { mons, len } => { for m in &mons[..len as usize] { self.mark_revealed(*m); } }
+            _ => {}
+        }
+    }
+
+    fn reveal_tag(&mut self, tag: LogTag<'_>) {
+        match tag {
+            LogTag::Of(m) => self.mark_revealed(m),
+            LogTag::Value(_, arg) => self.reveal_arg(arg),
+            _ => {}
+        }
+    }
+
     /// Ports battle.ts:3091-3113. PRNG: none; count without formatting for NoLog.
     pub fn add(&mut self, entry: LogEntry<'_>) {
+        for &arg in entry.args { self.reveal_arg(arg); }
+        for &tag in entry.tags { self.reveal_tag(tag); }
         self.scratch.unsent_lines = self
             .scratch
             .unsent_lines
@@ -36,6 +56,11 @@ impl<L: LogSink> Battle<L> {
 
     /// Ports battle.ts:3121-3144. PRNG: none. Does not append/count new lines.
     pub fn attr_last_move(&mut self, edit: MoveLineEdit<'_>) {
+        match edit {
+            MoveLineEdit::Retarget(m) => self.mark_revealed(m),
+            MoveLineEdit::Tag(tag) => self.reveal_tag(tag),
+            _ => {}
+        }
         if L::ENABLED {
             let view = LogView {
                 state: &self.state,

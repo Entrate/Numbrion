@@ -9,6 +9,7 @@ use engine::{
     prng::Prng,
     sim::{ChoiceError, Outcome},
     state::{BattleState, choices::SlotChoice},
+    teams::TeamDef,
 };
 use std::sync::Arc;
 
@@ -72,7 +73,7 @@ impl LogViews {
 pub struct Game {
     pub sink: Sink,
     packed: [Arc<str>; 2],
-    names: [String; 2],
+    names: Arc<[String; 2]>,
     seed0: [u16; 4],
     views: Option<LogViews>,
 }
@@ -121,7 +122,42 @@ impl Game {
             Sink::No(build::<NoLog>(seed, &packed, &names)?)
         };
         let views = log.then(|| LogViews { keep_omni, ..LogViews::default() });
-        Ok(Game { sink, packed, names, seed0: seed, views })
+        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views })
+    }
+
+    pub fn from_team_defs(
+        seed: [u16; 4], packed: [Arc<str>; 2], teams: [Arc<TeamDef>; 2],
+        names: [String; 2], log: bool, keep_omni: bool,
+    ) -> Result<Game, String> {
+        let [p1, p2] = teams;
+        let sink = if log {
+            Sink::Text(Battle::from_team_defs(seed, p1, p2, names.clone(), TextLog::default()).map_err(|e| e.0)?)
+        } else {
+            Sink::No(Battle::from_team_defs(seed, p1, p2, names.clone(), NoLog).map_err(|e| e.0)?)
+        };
+        let views = log.then(|| LogViews { keep_omni, ..LogViews::default() });
+        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views })
+    }
+
+    /// Reset to pre-start, retaining names, log mode and worker allocations.
+    pub fn reset(&mut self, seed: [u16; 4], p1: Arc<str>, p2: Arc<str>) -> Result<(), String> {
+        if self.packed[0] == p1 && self.packed[1] == p2 {
+            with_mut!(self, b => b.reset_seed(seed)).map_err(|e| e.0)?;
+            self.seed0 = seed;
+            self.clear_views();
+            return Ok(());
+        }
+        let teams = [Arc::new(TeamDef::unpack(&p1).map_err(|e| e.0)?), Arc::new(TeamDef::unpack(&p2).map_err(|e| e.0)?)];
+        self.reset_from_team_defs(seed, [p1, p2], teams)
+    }
+
+    pub fn reset_from_team_defs(&mut self, seed: [u16; 4], packed: [Arc<str>; 2], teams: [Arc<TeamDef>; 2]) -> Result<(), String> {
+        let [p1, p2] = teams;
+        with_mut!(self, b => b.reset_from_team_defs(seed, p1, p2)).map_err(|e| e.0)?;
+        self.packed = packed;
+        self.seed0 = seed;
+        self.clear_views();
+        Ok(())
     }
 
     pub fn start(&mut self) -> Result<(), String> {
@@ -232,42 +268,73 @@ impl Game {
 
     /// An independent copy of the battle at its current decision boundary: same state, same PRNG.
     ///
-    /// Rebuilds the battle from the packed teams (immutable team definitions are not part of the
-    /// copyable snapshot) and overwrites its `BattleState` with a bitwise copy of this one. The log views
-    /// of the copy start empty.
+    /// Shares immutable definitions and copies state directly; allocates independent scratch.
+    /// The copy's logs and views start empty. Constructor parsing/draws are skipped.
     pub fn duplicate(&self) -> Game {
-        let mut g = Game::new(
-            self.seed0,
-            self.packed[0].clone(),
-            self.packed[1].clone(),
-            self.names.clone(),
-            self.is_text(),
-            self.views.as_ref().is_some_and(|v| v.keep_omni),
-        )
-        .expect("teams that built the original battle build again");
-        g.copy_state_from(self);
-        g
+        let sink = match &self.sink { Sink::No(b) => Sink::No(b.clone()), Sink::Text(b) => Sink::Text(b.clone()) };
+        Game { sink, packed: self.packed.clone(), names: Arc::clone(&self.names), seed0: self.seed0,
+            views: self.views.as_ref().map(|v| LogViews { keep_omni: v.keep_omni, ..LogViews::default() }) }
+    }
+
+    /// Adopt a root's immutable context as well as its state, reusing this worker's scratch.
+    pub fn restore_from(&mut self, other: &Game) -> Result<(), String> {
+        match (&mut self.sink, &other.sink) {
+            (Sink::No(b), Sink::No(o)) => b.clone_from(o),
+            (Sink::Text(b), Sink::Text(o)) => b.clone_from(o),
+            _ => return Err("restore requires matching log modes".into()),
+        }
+        self.packed = other.packed.clone();
+        self.names = Arc::clone(&other.names);
+        self.seed0 = other.seed0;
+        self.clear_views();
+        Ok(())
     }
 
     /// Overwrite this battle's state with `other`'s (same teams and seed required: `same_origin`).
     pub fn copy_state_from(&mut self, other: &Game) {
-        debug_assert!(self.same_origin(other));
-        let state = *other.state();
-        with_mut!(self, b => b.state = state);
-        if let (Sink::Text(b), Some(v)) = (&self.sink, &mut self.views) {
-            // The copy's own log restarts at the copied position.
-            v.cursor = b.log.entries.len();
+        assert!(self.same_origin(other));
+        match (&mut self.sink, &other.sink) {
+            (Sink::No(b), Sink::No(o)) => b.restore_from(o),
+            (Sink::Text(b), Sink::Text(o)) => b.restore_from(o),
+            _ => panic!("restore requires matching log modes"),
+        }
+        self.clear_views();
+    }
+
+    fn clear_views(&mut self) {
+        if let Some(v) = &mut self.views {
+            v.cursor = 0;
+            v.omni.clear();
+            for player in &mut v.players {
+                player.clear();
+            }
         }
     }
 
     /// Both games were built from the same packed teams, names and seed (so team definitions agree).
     pub fn same_origin(&self, other: &Game) -> bool {
         self.seed0 == other.seed0 && self.packed == other.packed && self.names == other.names
+            && self.is_text() == other.is_text()
     }
 
     /// Replace the battle's PRNG state. The next draw is the first draw of the new stream.
     pub fn reseed(&mut self, seed: [u16; 4]) {
         with_mut!(self, b => b.state.prng = Prng::from_seed(seed));
+    }
+
+    /// `party` is the opponent's current request order; replacement must contain one set.
+    pub fn replace_unrevealed_set(&mut self, viewer: usize, party: usize, packed: Arc<str>, replacement: &TeamDef) -> Result<(), String> {
+        if viewer >= 2 || party >= self.state().sides[1 - viewer].pokemon_count as usize || replacement.len != 1 {
+            return Err("viewer must be 0/1, party must exist, and replacement must contain exactly one set".into());
+        }
+        let side = 1 - viewer;
+        let mon = self.state().sides[side].party[party];
+        let mut records: Vec<_> = self.packed[side].split(']').collect();
+        records[mon.0 as usize % 6] = &packed;
+        let updated: Arc<str> = Arc::from(records.join("]"));
+        with_mut!(self, b => b.replace_unrevealed_set(SideId(viewer as u8), mon, replacement.sets[0].clone())).map_err(|e| e.0)?;
+        self.packed[side] = updated;
+        Ok(())
     }
 
     /// Omniscient raw battle log since the last call (engine `battle.log` entries, split triples included).

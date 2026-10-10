@@ -1,5 +1,6 @@
 //! Showdown packed team input; allocations are confined to this input boundary.
 use crate::{dex, ids::*};
+use std::sync::Arc;
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Gender {
     #[default]
@@ -17,7 +18,7 @@ impl Gender {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SetDef {
     pub name: String,
     pub species: EffectId,
@@ -62,7 +63,7 @@ impl Default for SetDef {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TeamDef {
     pub sets: [SetDef; 6],
     pub len: u8,
@@ -75,9 +76,9 @@ impl Default for TeamDef {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TeamDefs {
-    pub sides: [TeamDef; 2],
+    pub sides: [Arc<TeamDef>; 2],
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TeamError(pub String);
@@ -165,6 +166,17 @@ fn truncate_utf16(text: &str, n: usize) -> String {
         .collect()
 }
 impl TeamDef {
+    /// Check typed input before constructors index the generated dex tables.
+    pub fn validate(&self) -> Result<(), TeamError> {
+        if !(1..=6).contains(&self.len) {
+            return Err(TeamError("A parsed team must contain 1..=6 Pokemon".into()));
+        }
+        for set in &self.sets[..self.len as usize] {
+            set.validate()?;
+        }
+        Ok(())
+    }
+
     pub fn unpack(packed: &str) -> Result<Self, TeamError> {
         if packed.is_empty() {
             return Err(TeamError("Explicit packed teams must be nonempty".into()));
@@ -270,5 +282,32 @@ impl TeamDef {
             team.len += 1;
         }
         Ok(team)
+    }
+}
+
+impl SetDef {
+    pub(crate) fn validate(&self) -> Result<(), TeamError> {
+        let in_table = |id: EffectId, kind| {
+            let table = dex::table(kind);
+            table.first().is_some_and(|first| id.0 >= first.id.0)
+                && table.last().is_some_and(|last| id.0 <= last.id.0)
+        };
+        if !in_table(self.species, EffectKind::Species)
+            || (self.ability != EffectId::NONE && !in_table(self.ability, EffectKind::Ability))
+            || (self.item != EffectId::NONE && !in_table(self.item, EffectKind::Item))
+            || !(1..=4).contains(&self.move_count)
+            || self.moves[..self.move_count as usize]
+                .iter()
+                .any(|&m| !in_table(m, EffectKind::Move))
+            || self.nature < -1
+            || self.nature as isize >= dex::NATURES.len() as isize
+            || self.level == 0
+            || self.ivs.iter().any(|&iv| iv > 31)
+            || self.tera_type == TypeId::NONE
+            || self.tera_type.0 as usize > dex::TYPE_NAMES.len()
+        {
+            return Err(TeamError("Invalid typed set definition".into()));
+        }
+        Ok(())
     }
 }

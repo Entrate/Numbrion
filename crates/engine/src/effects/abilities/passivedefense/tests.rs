@@ -194,6 +194,7 @@ fn logged() -> crate::Battle<TraceSink> {
     crate::Battle {
         state: b.state,
         teams: b.teams,
+        parsed: b.parsed,
         log: TraceSink::default(),
         names: b.names,
         scratch: b.scratch,

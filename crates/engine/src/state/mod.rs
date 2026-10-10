@@ -46,7 +46,7 @@ pub struct MoveSlot {
 }
 /// Present + numeric-present bits, positive-damage-this-turn bit. Latest qualifying
 /// records reproduce every scoped consumer without an unbounded attack history.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct AttackRecord {
     pub last_seq: u32,
@@ -58,7 +58,7 @@ pub struct AttackRecord {
     pub numeric_slot: SlotId,
     pub flags: u8,
 }
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Pokemon {
     pub flags: u32,
@@ -245,6 +245,8 @@ pub struct FaintEntry {
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
 pub struct BattleState {
+    /// Conservative protocol/switch history; independent of Pokemon's mechanic flag bits.
+    pub revealed_mons: u16,
     pub prng: Prng,
     pub pokemon: [Pokemon; 12],
     pub sides: [Side; 2],
@@ -279,6 +281,7 @@ impl BattleState {
         let terrain = effects.alloc(Holder::FIELD, Holder::NONE, EffectId::NONE, 0);
         let format_state = effects.alloc(Holder::BATTLE, Holder::NONE, EffectId::NONE, 0);
         Self {
+            revealed_mons: 0,
             prng: Prng::from_seed(seed),
             pokemon: [Pokemon::default(); 12],
             sides: [Side::default(); 2],

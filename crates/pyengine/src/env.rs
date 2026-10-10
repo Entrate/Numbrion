@@ -235,7 +235,10 @@ impl Env {
             let j = rng.below(shared.pool.len());
             let seed = rng.battle_seed();
             let names = ["Player 1".to_string(), "Player 2".to_string()];
-            match Game::new(seed, shared.pool.get(i).clone(), shared.pool.get(j).clone(), names, shared.cfg.log, false) {
+            let game = shared.pool.parsed(i).and_then(|p1| shared.pool.parsed(j).and_then(|p2|
+                Game::from_team_defs(seed, [shared.pool.get(i).clone(), shared.pool.get(j).clone()],
+                    [p1, p2], names, shared.cfg.log, false)));
+            match game {
                 Ok(mut g) => {
                     g.start().map_err(|e| format!("battle failed to start (teams {i} vs {j}, seed {seed:?}): {e}"))?;
                     return Ok(g);
@@ -247,12 +250,31 @@ impl Env {
     }
 
     fn reset(&mut self, shared: &Shared) -> Result<(), String> {
-        self.game = Self::new_game(&mut self.rng, shared)?;
+        self.reset_game(shared)?;
         self.battle_id += 1;
         self.prev_log = [Vec::new(), Vec::new()];
         self.out = EnvOut::fresh();
         self.refresh(shared);
         Ok(())
+    }
+
+    fn reset_game(&mut self, shared: &Shared) -> Result<(), String> {
+        let mut last = String::new();
+        for _ in 0..100 {
+            let i = self.rng.below(shared.pool.len());
+            let j = self.rng.below(shared.pool.len());
+            let seed = self.rng.battle_seed();
+            let reset = shared.pool.parsed(i).and_then(|p1| shared.pool.parsed(j).and_then(|p2|
+                self.game.reset_from_team_defs(seed, [shared.pool.get(i).clone(), shared.pool.get(j).clone()], [p1, p2])));
+            match reset {
+                Ok(()) => {
+                    self.game.start().map_err(|e| format!("battle failed to start (teams {i} vs {j}, seed {seed:?}): {e}"))?;
+                    return Ok(());
+                }
+                Err(e) => last = format!("teams {i} vs {j}: {e}"),
+            }
+        }
+        Err(format!("could not build a battle from the team pool: {last}"))
     }
 
     /// Recompute the legal-action information for the current decision boundary.
@@ -361,7 +383,7 @@ impl Env {
                     self.prev_log[s].extend(lines);
                 }
             }
-            self.game = Self::new_game(&mut self.rng, shared)?;
+            self.reset_game(shared)?;
             self.battle_id += 1;
             self.out.done = true;
         }

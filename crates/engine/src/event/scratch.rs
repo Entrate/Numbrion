@@ -62,6 +62,50 @@ impl Default for Scratch {
         }
     }
 }
+impl Scratch {
+    /// Require an unwound execution stack before whole-state writes. PRNG: none.
+    pub(crate) fn assert_idle(&self) {
+        assert_eq!(self.event_depth, 0, "snapshot during an event");
+        assert_eq!(self.handler_depth, 0, "snapshot during handler dispatch");
+        assert_eq!(self.move_depth, 0, "snapshot during a move");
+        assert_eq!(self.call_depth, 0, "snapshot during a hook");
+        assert_eq!(self.boosts_used, 0, "snapshot with a live boost relay");
+        assert_eq!(self.secondaries_used, 0, "snapshot with a live secondary relay");
+        assert!(self.types.iter().all(Option::is_none), "snapshot with a live type relay");
+        assert!(self.handlers.iter().all(|h| h.len == 0 && h.entries.is_empty()),
+            "snapshot with pinned handlers");
+    }
+
+    /// Reset every transient field while retaining all handler allocations. PRNG: none.
+    pub(crate) fn reset(&mut self, started: bool) {
+        self.frames.fill(None);
+        for h in &mut self.handlers {
+            h.entries.clear();
+            h.len = 0;
+        }
+        self.moves.fill(None);
+        self.calls.fill(None);
+        self.boosts.fill(OrderedBoosts::default());
+        self.types.fill(None);
+        self.secondaries.fill([None; 4]);
+        self.event_depth = 0;
+        self.handler_depth = 0;
+        self.current_context = None;
+        self.boosts_used = 0;
+        self.secondaries_used = 0;
+        self.move_depth = 0;
+        self.call_depth = 0;
+        self.current_frame = 255;
+        self.initial_modifier = 0;
+        self.initial_modifier_present = false;
+        self.current_effect = EffectRef::None;
+        self.current_state = None;
+        self.active_move = MoveHandle::NONE;
+        self.active_pokemon = MonId::NONE;
+        self.active_target = MonId::NONE;
+        self.unsent_lines = if started { 0 } else { 4 };
+    }
+}
 #[allow(unused_variables)]
 impl<L: crate::log::LogSink> crate::Battle<L> {
     /// Engine storage for battle.ts:862-866 mutable relay objects. PRNG: none.
