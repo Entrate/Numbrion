@@ -1,3 +1,2 @@
-# This engine is tuned for the machine it runs on (Ryzen 5 3600 / znver2).
-[build]
-rustflags = ["-C", "target-cpu=native"]
+# Portable by default (training will run on other machines, incl. Windows).
+# For a build tuned to the local CPU: RUSTFLAGS="-C target-cpu=native" cargo build --release
