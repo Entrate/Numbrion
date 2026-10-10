@@ -50,6 +50,17 @@ const RULE_BEGIN_HOOKS: [dex::HookId; 6] = [
 ];
 
 impl<L: LogSink> Battle<L> {
+    /// Production request dispatch, with the exact oracle recorder available only to
+    /// isolated lifecycle vector tests. The scripts intentionally omit choice objects.
+    fn lc_make_request(&mut self, kind: RequestKind) {
+        #[cfg(test)]
+        if super::flow_tests::records_requests() {
+            self.state.request_state = kind;
+            return;
+        }
+        self.make_request(Some(kind));
+    }
+
     /// Start synchronously through the first request; sim/battle.ts:1909-1973.
     /// PRNG: Begin/BattleStart callbacks, initial switch/runSwitch/event ordering.
     pub fn start(&mut self) -> Result<(), BattleError> {
@@ -465,7 +476,7 @@ impl<L: LogSink> Battle<L> {
             &[],
         ));
         // gen 2 / gen 3 quickClawRoll: absent.
-        self.make_request(Some(RequestKind::Move));
+        self.lc_make_request(RequestKind::Move);
     }
 
     /// `this.dex.getImmunity('trapped', pokemon)`: true unless a Type of the Pokemon is
@@ -490,9 +501,8 @@ impl<L: LogSink> Battle<L> {
             p.move_last_turn_result = p.move_this_turn_result;
             p.move_this_turn_result = ResultFlag::Undefined;
             if turn != 1 {
-                p.flags &= !(USED_ITEM_THIS_TURN
-                    | mon_flags::STATS_RAISED
-                    | mon_flags::STATS_LOWERED);
+                p.flags &=
+                    !(USED_ITEM_THIS_TURN | mon_flags::STATS_RAISED | mon_flags::STATS_LOWERED);
             }
             p.flags &= !(mon_flags::MAYBE_DISABLED | mon_flags::MAYBE_LOCKED);
         }
@@ -854,7 +864,7 @@ impl<L: LogSink> Battle<L> {
 
         for player_switch in switches {
             if player_switch {
-                self.make_request(Some(RequestKind::Switch));
+                self.lc_make_request(RequestKind::Switch);
                 return true;
             }
         }
