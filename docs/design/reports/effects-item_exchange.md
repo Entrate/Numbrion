@@ -1,0 +1,81 @@
+# effects(item_exchange)
+
+All ten assigned records / 13 function sites are ported against the read-only
+Showdown checkout at `7332b60e22b9e8194bb53549549eba241d73cc9a`. All function
+sites are in `HOOKS`; no waivers, missing-API todos, or core modifications.
+Branch `gpt/recursive`, base `878d619`.
+
+## Files and semantics
+
+Canonical files under `crates/engine/src/effects/`:
+
+| File | Pinned source and semantics |
+| --- | --- |
+| `moves/bugbite.rs` | `data/moves.ts:1920-1931`. Living source, raw berry flag, takeItem(source). Logs stealeat with ordered from/move/of tags. Eat singleEvent uses the cleared victim item-state object but attacker target/source; on truthy Eat result dispatches EatItem with berry relay. Sets ateBerry only when onEat exists. Leppa Berry's external staleness branch is outside the scoped item list. |
+| `moves/incinerate.rs` | `data/moves.ts:9533-9538`. Raw berry/gem check, then takeItem(source) and exact removal attribution. |
+| `moves/knockoff.rs` | `data/moves.ts:9968-9980`. Power modifier invokes only the held item's TakeItem singleEvent, with target as both target/source; active Sticky Hold therefore does not prevent the 1.5x power boost. Removal occurs onAfterHit via omitted-source takeItem(), including Sticky Hold's special Knock Off veto. |
+| `moves/poltergeist.rs` | `data/moves.ts:13604-13609`. Try returns the raw held-item boolean; TryHit logs the raw item name after gates. |
+| `moves/recycle.rs` | `data/moves.ts:14830-14837`. Rejects occupied item or absent lastItem; clears lastItem before logging, then setItem with explicit move/source attribution. |
+| `moves/trick.rs` | `data/moves.ts:19874-19912`. Sticky Hold immunity callback; target takeItem(source) then source takeItem(). Preserves strict false versus undefined and short-circuit checks. Cross-recipient item TakeItem singleEvents use the original cleared item-state objects. Failure restores raw item IDs without Start; success sets each item before logging, with exact silent/enditem order for one-sided transfers. |
+| `abilities/frisk.rs` | `data/abilities.ts:1547-1553`. Raw item disclosure in foes() position order; no speed sorting or sampling. |
+| `abilities/magician.rs` | `data/abilities.ts:2479-2496`. Preserves boolean-true switchFlag separately from string switch flags, item/gem/Fling/status gates. Sorts the mutable live hitTargets array using cached Pokemon speeds and the literal core speed sort, including tie draws. Steals first takeable nonself item; failed setItem restores raw victim ID and continues. |
+| `abilities/pickpocket.rs` | `data/abilities.ts:3241-3258`. Uses the move's contact flag, rather than the contact-adjustment helper. Checks target item/switch/force-switch and source boolean-true switch flag. Takes with target source, restores raw source ID on setItem failure, then logs silent removal followed by receipt. |
+| `abilities/stickyhold.rs` | `data/abilities.ts:4624-4631`. Requires activeMove, bypasses fainted holder/Sticky Barb, rejects foreign source or Knock Off, and logs activation only on rejection. Sticky Barb is outside the item closure; optional NONE never matches. |
+
+Switcheroo is absent from the pinned format's move closure and from this batch's
+manifest assignment; it requires no additional effect file. Dancer and unrelated
+item/berry/choice effects remain with core/their assigned owners.
+
+## Payload, draws and API contract
+
+All ten effects have **zero payload words**. Item state, lastItem and ateBerry
+use existing universal state; no scratch indexes survive callbacks. Private
+argument/berry helpers live in the recursive batch's nested
+`moves/batonpass/support.rs`. No core signatures or other owners' files changed.
+
+Magician is the only handler with direct PRNG consumption: the exact core
+selection-sort/tie shuffle on hit targets. Other handlers draw only through
+nested events/mutators. Structured logs preserve name versus fullname, original
+source/target identity, and tag order. No allocations or string formatting in
+production handlers. No missing/requested core APIs or core bug fixes.
+
+## Validation
+
+```sh
+node tools/oracle/gen-directed.mjs --profile batch:item_exchange --count 100 --threads 2 --out /tmp/itemx.jsonl.gz --verify
+cd crates/difftest
+cargo build --release -j 3
+./target/release/difftest replay /tmp/itemx.jsonl.gz --sim engine --jobs 3 --top 20
+./target/release/difftest replay ../../data/fixtures/slice0-200.jsonl.gz --sim engine --jobs 3 --top 20
+```
+
+Run seed **1113**: oracle verification **100/100**. Engine: **67 passed,
+33 other-batch panics, zero log/request/PRNG divergences or ordering warnings**.
+All exclusions are `abilities:naturalcure onCheckShow`, hook 340
+(healing_residual). Adjusted pass rate **67/67 = 100%**. JSON:
+`/tmp/itemx-replay.json`; human replay: `/tmp/itemx-replay.txt`.
+Core regression remains **200/200**.
+
+The private shared tests in `moves/batonpass/tests.rs` replay 15 item full battles
+from `item_exchange.tsv`, generated by
+`tools/probes/recursive_switch/scenarios.mjs`. They cover two-sided and one-sided
+Trick, empty/Sticky Hold failures, Knock Off removal/Sticky Hold power and veto,
+Magician single-target and spread speed ties, Pickpocket contact/no-contact,
+Frisk both opposing slots, Poltergeist held/empty, and Recycle failure. Tests
+use scoped passive items (Heavy-Duty Boots/Silk Scarf) to avoid unrelated Choice
+Lock and Leftovers hooks. Each compares all protocol lines and final PRNG seed.
+
+`tools/probes/recursive_switch/callbacks.mjs` supplies eight additional callback
+vectors in `callbacks.tsv`: Incinerate berry removal/nonberry/Sticky Hold;
+Bug Bite nonberry/fainted source/Sticky Hold; Recycle restoration/occupied item.
+These compare return relay, both item IDs, lastItem, exact log and PRNG seed.
+Successful Bug Bite's nested berry Eat/EatItem needs the consumables batch to
+land for a full integration test; the callback is implemented, with no waiver
+or fake no-op. The requested directed corpus uses passive items, so it does not
+certify berry consumption. Recheck that cross-batch path after integration.
+
+`cargo test -j 2 --lib moves_batonpass -- --include-ignored` passes all shared
+checks (30 full battles, eight callback vectors, and team-scope validation).
+Normal `cargo build -j 2` / `cargo test -j 2` pass, including registry/manifest
+coverage and NoLog compilation. Initial implementation commit: `6087295`;
+validation/probes/reports are in the subsequent validation commit. No push.

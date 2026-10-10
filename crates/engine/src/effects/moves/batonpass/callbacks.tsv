@@ -1,0 +1,9 @@
+# name	move	target item	source item	target ability	fainted source	last item	result	target item after	source item after	last item after	seed	log
+incinerate_berry	incinerate	sitrusberry		earlybird	false		true				61826,43751,12808,6070	|-enditem|p2a: Mew|Sitrus Berry|[from] move: Incinerate
+incinerate_nonberry	incinerate	heavydutyboots		earlybird	false		true	heavydutyboots			61826,43751,12808,6070	
+incinerate_stickyhold	incinerate	sitrusberry		stickyhold	false		true	sitrusberry			61826,43751,12808,6070	|-activate|p2a: Mew|ability: Sticky Hold
+bugbite_nonberry	bugbite	heavydutyboots		earlybird	false		true	heavydutyboots			61826,43751,12808,6070	
+bugbite_fainted_source	bugbite	sitrusberry		earlybird	true		true	sitrusberry			61826,43751,12808,6070	
+bugbite_stickyhold	bugbite	sitrusberry		stickyhold	false		true	sitrusberry			61826,43751,12808,6070	|-activate|p2a: Mew|ability: Sticky Hold
+recycle_restore	recycle			earlybird	false	sitrusberry	true	sitrusberry	sitrusberry		61826,43751,12808,6070	|-item|p1a: Mew|Sitrus Berry|[from] move: Recycle
+recycle_occupied	recycle		heavydutyboots	earlybird	false	sitrusberry	false	heavydutyboots	heavydutyboots	sitrusberry	61826,43751,12808,6070	
