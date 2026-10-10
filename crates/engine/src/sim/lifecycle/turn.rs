@@ -660,6 +660,13 @@ impl<L: LogSink> Battle<L> {
                     continue;
                 }
                 if slot.id != EffectId::NONE {
+                    // Generated hooks split `onFoeMaybeTrapPokemon` into the base
+                    // event and Foe relation; singleEvent's On lookup cannot find it.
+                    let hook = self.event_hook(
+                        EffectRef::Dex(slot.id),
+                        EventId::MaybeTrapPokemon,
+                        dex::HookRel::Foe,
+                    );
                     self.single_event(
                         EventId::FoeMaybeTrapPokemon,
                         EffectRef::Dex(slot.id),
@@ -668,7 +675,7 @@ impl<L: LogSink> Battle<L> {
                         mon_arg(source),
                         EffectRef::None,
                         Relay::Undefined,
-                        None,
+                        hook,
                     );
                 }
                 // Abilities outside the executable closure have no FoeMaybeTrapPokemon

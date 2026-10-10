@@ -107,7 +107,7 @@ impl<L: LogSink> Battle<L> {
     }
 
     /// The move's own callback (or a secondary's) for a hit event, as singleEvent with the
-    /// move as effect (battle-actions.ts:1030-1035, 1257-1268, 1116). A missing callback is
+    /// hit object as effect (battle-actions.ts:1030-1035, 1257-1268, 1116). A missing callback is
     /// the implicit `true`.
     fn hit_single_event(
         &mut self,
@@ -122,7 +122,7 @@ impl<L: LogSink> Battle<L> {
                 let effect = EffectRef::ActiveMove(move_handle.0);
                 self.single_event(
                     event,
-                    effect,
+                    view.callback_effect,
                     None,
                     target,
                     mon_arg(source),

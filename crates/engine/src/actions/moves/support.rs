@@ -10,7 +10,7 @@ use crate::{
     dex::{
         self, BoostChange, EventId, HookId, HookRel, HookValue, MoveData, MoveTarget, SelfDestruct,
     },
-    event::{EventArg, Relay},
+    event::{EffectRef, EventArg, Relay},
     ids::*,
     log::LogSink,
     state::{
@@ -458,6 +458,8 @@ pub(super) fn build_recharge_move() -> ActiveMove {
 #[derive(Clone, Copy, Debug)]
 pub(super) struct HitView {
     pub effects: MoveEffectsScratch,
+    /// Primary callbacks run as the move; nested hit objects have no id or effectType.
+    pub callback_effect: EffectRef,
     /// `moveData.self` is present.
     pub has_self: bool,
     pub self_effect: Option<MoveEffectsScratch>,
@@ -536,6 +538,7 @@ impl<L: LogSink> Battle<L> {
         let m = self.active_move(h);
         match effect {
             HitEffect::Primary => HitView {
+                callback_effect: EffectRef::ActiveMove(h.0),
                 effects: m.effects,
                 has_self: m.self_effect.is_some(),
                 self_effect: m.self_effect,
@@ -543,6 +546,7 @@ impl<L: LogSink> Battle<L> {
                 self_destruct: m.self_destruct,
             },
             HitEffect::SelfEffect => HitView {
+                callback_effect: EffectRef::Dex(EffectId::NONE),
                 effects: m.self_effect.expect("move has no self effect"),
                 has_self: false,
                 self_effect: None,
@@ -558,6 +562,7 @@ impl<L: LogSink> Battle<L> {
                 let mut effects = effects_scratch(base);
                 effects.boosts = m.self_boosts;
                 HitView {
+                    callback_effect: EffectRef::Dex(EffectId::NONE),
                     effects,
                     has_self: false,
                     self_effect: None,
@@ -568,6 +573,7 @@ impl<L: LogSink> Battle<L> {
             HitEffect::Secondary(code) => {
                 let s = self.secondary_entry(code);
                 HitView {
+                    callback_effect: EffectRef::Dex(EffectId::NONE),
                     effects: s.effects,
                     has_self: s.self_effect.is_some(),
                     self_effect: s.self_effect,
@@ -578,6 +584,7 @@ impl<L: LogSink> Battle<L> {
             HitEffect::SecondarySelf(code) => {
                 let s = self.secondary_entry(code);
                 HitView {
+                    callback_effect: EffectRef::Dex(EffectId::NONE),
                     effects: s.self_effect.expect("secondary has no self effect"),
                     has_self: false,
                     self_effect: None,
@@ -586,6 +593,7 @@ impl<L: LogSink> Battle<L> {
                 }
             }
             HitEffect::Scratch(effects) => HitView {
+                callback_effect: EffectRef::Dex(EffectId::NONE),
                 effects,
                 has_self: false,
                 self_effect: None,

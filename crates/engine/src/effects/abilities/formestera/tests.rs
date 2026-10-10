@@ -2,6 +2,29 @@ pub(crate) mod support;
 use crate::{actions::*, dex, event::*, ids::*, state::mon_flags};
 use support::*;
 #[test]
+fn teraform_zero_is_silent_on_an_empty_field() {
+    let ally = "Mew|||earlybird|irondefense|Serious||N|||100|,,,,,Normal";
+    let team = format!("Terapagos|||terashift|irondefense|Serious||M|||73|,,,,,Stellar]{ally}");
+    let foe = format!("{ally}]{ally}");
+    let mut b = crate::Battle::from_players(
+        [15999, 37686, 31317, 49466],
+        ("A", &team),
+        ("B", &foe),
+        crate::log::TextLog::default(),
+    )
+    .unwrap();
+    b.start().unwrap();
+    let mut log = Vec::new();
+    b.drain_log(&mut log);
+    log.clear();
+    b.terastallize(MonId(0));
+    b.drain_log(&mut log);
+    assert_eq!(b.state.pokemon[0].ability, dex::ABILITY_TERAFORMZERO);
+    assert!(log.iter().any(|l| l.starts_with("|-terastallize|")));
+    assert!(!log.iter().any(|l| l.contains("Teraform Zero")), "{log:?}");
+}
+
+#[test]
 fn move_overlays_match_pinned_callbacks() {
     for row in include_str!("moves.tsv").lines() {
         let c: Vec<_> = row.split('\t').collect();
@@ -176,7 +199,6 @@ fn battle_scenario_teams_are_in_scope() {
 macro_rules! scenario {
     ($($name:ident),*) => {$ (
         #[test]
-        #[ignore = "needs core"]
         fn $name() { replay_scenario(include_str!("scenarios.tsv"), stringify!($name)); }
     )*};
 }

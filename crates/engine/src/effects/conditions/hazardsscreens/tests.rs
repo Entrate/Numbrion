@@ -5,7 +5,7 @@
 //!   (`Battle::call_hook`) with hand-built frames and only the already-implemented queries.
 //! * `scenarios.txt` holds complete battles replayed on the pinned Showdown
 //!   (`tools/probes/hazards_screens/scenarios.mjs`): exact log lines and PRNG state after every
-//!   decision boundary. They need the unfinished battle core and are `#[ignore = "needs core"]`.
+//!   decision boundary. The replay awaits partiallytrapped in disable_lock_trap.
 use super::*;
 use crate::{
     actions::MoveHandle,
@@ -482,7 +482,6 @@ fn reflect_and_light_screen_weakening_matches_pinned_handlers() {
 
 /// Aurora Veil asks `getSideCondition`, an unfinished core mutator.
 #[test]
-#[ignore = "needs core"]
 fn aurora_veil_weakening_matches_pinned_handler() {
     assert_eq!(run_screen_vectors(&["auroraveil"]), 384);
 }
@@ -626,7 +625,7 @@ const SCENARIOS: usize = 15;
 /// Exact log lines and PRNG state after every decision boundary of the directed battles, which
 /// together reach every file in the batch. Set HAZARDS_SCENARIO=<name> to run just one.
 #[test]
-#[ignore = "needs core"]
+#[ignore = "pending disable_lock_trap: conditions:partiallytrapped durationCallback"]
 fn scenarios_match_pinned_showdown() {
     use crate::log::TextLog;
     let only = std::env::var("HAZARDS_SCENARIO").ok();

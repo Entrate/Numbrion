@@ -152,7 +152,7 @@ impl<L: LogSink> Battle<L> {
                     if let Some(hook) = self.hit_hook(&view, EventId::HitField) {
                         let hit_result = self.single_event(
                             EventId::HitField,
-                            effect,
+                            view.callback_effect,
                             None,
                             EventArg::Holder(Holder::mon(target)),
                             EventArg::Holder(Holder::mon(user)),
@@ -168,7 +168,7 @@ impl<L: LogSink> Battle<L> {
                     if let Some(hook) = self.hit_hook(&view, EventId::HitSide) {
                         let hit_result = self.single_event(
                             EventId::HitSide,
-                            effect,
+                            view.callback_effect,
                             None,
                             EventArg::Holder(Holder::side(target.side())),
                             EventArg::Holder(Holder::mon(user)),
@@ -182,7 +182,7 @@ impl<L: LogSink> Battle<L> {
                     if let Some(hook) = self.hit_hook(&view, EventId::Hit) {
                         let hit_result = self.single_event(
                             EventId::Hit,
-                            effect,
+                            view.callback_effect,
                             None,
                             EventArg::Holder(Holder::mon(target)),
                             EventArg::Holder(Holder::mon(user)),

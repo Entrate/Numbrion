@@ -2,10 +2,9 @@
 //!
 //! * `callbacks.tsv` holds oracle rows from tools/probes/weather_terrain/callbacks.mjs: the
 //!   pinned Showdown handlers run against stub contexts. Rows that do not consult
-//!   `Field::isTerrain` replay against the real Rust callbacks and implemented core queries now;
-//!   the terrain rows need the (still unimplemented) `Battle::is_terrain`.
+//!   `Field::isTerrain`, and the terrain rows, replay against the real Rust core queries.
 //! * `scenarios.txt` holds whole recorded battles (log, turn and PRNG seed at every decision
-//!   boundary) from tools/probes/weather_terrain/scenarios.mjs; their replay needs the core.
+//!   boundary) from tools/probes/weather_terrain/scenarios.mjs. Rain awaits Roost; snow awaits Protect.
 use super::*;
 use crate::{
     Battle,
@@ -263,7 +262,6 @@ fn weather_and_terrain_callbacks_match_pinned_showdown() {
     assert!(n > 700, "{n} rows");
 }
 #[test]
-#[ignore = "needs core: Battle::is_terrain"]
 fn terrain_dependent_callbacks_match_pinned_showdown() {
     let n = rows().filter(|l| run_row(l, true)).count();
     assert!(n > 40, "{n} rows");
@@ -419,7 +417,6 @@ fn scenario_file_is_well_formed_and_every_team_is_in_scope() {
 macro_rules! scenario_tests {
     ($($name:ident),*) => {$(
         #[test]
-        #[ignore = "needs core"]
         fn $name() {
             replay(stringify!($name));
         }
@@ -428,13 +425,19 @@ macro_rules! scenario_tests {
 scenario_tests!(
     weather_leads,
     sun,
-    rain,
     sand,
-    snow,
     electric_terrain,
     grassy_terrain,
     psychic_terrain
 );
+
+#[test]
+#[ignore = "pending move_callbacks: conditions:roost onStart"]
+fn rain() { replay("rain"); }
+
+#[test]
+#[ignore = "pending protect_redirection: moves:protect onPrepareHit"]
+fn snow() { replay("snow"); }
 
 // ---------------------------------------------------------------------------------
 // Handler branches that log or mutate state, against a recording sink. Expected lines are
