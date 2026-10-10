@@ -13,3 +13,8 @@ when the owning module merges; difftest is the final arbiter.
 - `boost`, `is_ally`, `get_side_condition`, `cure_status`: reactive_stats relies on their TS
   semantics incl. omitted-source defaulting (`this.boost(...)` without source = undefined, defaults
   from the event) — see effects-reactive_stats.md.
+
+## actions/moves (owner M) — open core issues
+- `hit_single_event` (actions/moves/hit.rs) sets the current effect to the live move for a secondary's
+  `onHit`; Showdown's current effect there is the plain secondary object. Dire Claw/Tri Attack work
+  around it by passing `EffectRef::Dex(EffectId::NONE)` explicitly (rules_status report). Fix centrally.
