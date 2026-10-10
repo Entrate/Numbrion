@@ -55,18 +55,6 @@ pub struct EffectCell {
     free_next_or_pins: u16,
 }
 impl EffectCell {
-    pub(crate) fn is_initial(&self, owner: Holder, target: Holder, id: EffectId) -> bool {
-        *self == Self {
-            generation: 1,
-            owner,
-            target,
-            id,
-            present: if target == Holder::NONE { 0 } else { present::TARGET },
-            free_next_or_pins: 0,
-            ..Self::EMPTY
-        }
-    }
-
     pub const EMPTY: Self = Self {
         generation: 0,
         effect_order: 0,
@@ -203,7 +191,7 @@ impl EffectArena {
         c.owner != Holder::NONE && c.present & RETIRED == 0 && c.generation == reference.generation
     }
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug)]
 #[repr(C)]
 pub struct EffectList<const N: usize> {
     pub cells: [CellId; N],

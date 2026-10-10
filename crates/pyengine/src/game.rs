@@ -322,21 +322,6 @@ impl Game {
         with_mut!(self, b => b.state.prng = Prng::from_seed(seed));
     }
 
-    /// `party` is the opponent's current request order; replacement must contain one set.
-    pub fn replace_unrevealed_set(&mut self, viewer: usize, party: usize, packed: Arc<str>, replacement: &TeamDef) -> Result<(), String> {
-        if viewer >= 2 || party >= self.state().sides[1 - viewer].pokemon_count as usize || replacement.len != 1 {
-            return Err("viewer must be 0/1, party must exist, and replacement must contain exactly one set".into());
-        }
-        let side = 1 - viewer;
-        let mon = self.state().sides[side].party[party];
-        let mut records: Vec<_> = self.packed[side].split(']').collect();
-        records[mon.0 as usize % 6] = &packed;
-        let updated: Arc<str> = Arc::from(records.join("]"));
-        with_mut!(self, b => b.replace_unrevealed_set(SideId(viewer as u8), mon, replacement.sets[0].clone())).map_err(|e| e.0)?;
-        self.packed[side] = updated;
-        Ok(())
-    }
-
     /// Omniscient raw battle log since the last call (engine `battle.log` entries, split triples included).
     pub fn drain_omni(&mut self) -> Vec<String> {
         self.views.as_mut().map(|v| std::mem::take(&mut v.omni)).unwrap_or_default()
