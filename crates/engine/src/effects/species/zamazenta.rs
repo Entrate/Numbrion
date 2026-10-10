@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/conditions.ts:912-939; sim/dex-species.ts:529-536 inherits base view.
+        // data/conditions.ts:912-938; sim/dex-species.ts:529-536 inherits base view.
         // PRNG: ModifySpecies/setAbility events only. Crowned views route the same body.
         dex::HOOK_SPECIES_ZAMAZENTA_ONBATTLESTART => on_start(b, cx),
         _ => panic!("unexpected zamazenta hook"),
@@ -67,8 +67,8 @@ pub(super) fn on_start<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
         .position(|slot| slot.id == dex::MOVE_IRONHEAD)
     {
         // pokemon.ts:361-373: explicit packed teams give Iron Head three PP Ups.
-        // No calculatePP core signature exists; do not duplicate universal PP calculation here.
-        let pp = calculate_pp(b, dex::MOVE_BEHEMOTHBASH, 3);
+        // Delegate the universal PP calculation to the core.
+        let pp = b.calculate_pp(dex::MOVE_BEHEMOTHBASH, 3);
         b.state.pokemon[m.0 as usize].base_move_slots[i] = crate::state::MoveSlot {
             id: dex::MOVE_BEHEMOTHBASH,
             pp,
@@ -79,8 +79,4 @@ pub(super) fn on_start<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
         b.state.pokemon[m.0 as usize].virtual_move_count = 0;
     }
     Relay::Undefined
-}
-// sim/battle.ts:2378-2383; data/conditions.ts:925. PRNG: none.
-fn calculate_pp<L: LogSink>(_b: &Battle<L>, _move_id: EffectId, _pp_ups: u8) -> u8 {
-    todo!("needs Battle::calculate_pp(move_id, pp_ups): crowned Iron Head replacement PP")
 }
