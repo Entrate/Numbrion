@@ -13,6 +13,8 @@ pub use data_generated::*;
 pub use events_generated::*;
 pub use hooks_generated::*;
 pub use ids_generated::*;
+mod hook_index;
+pub use hook_index::event_hook;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq)]
