@@ -4,3 +4,7 @@ pub mod health;
 pub mod items;
 pub mod pokemon;
 pub mod status;
+
+pub mod common;
+#[cfg(test)]
+mod tests;
