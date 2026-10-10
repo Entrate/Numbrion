@@ -14,6 +14,8 @@ default = ["engine"]
 # Links the real engine (src/engine_sim.rs). Build with `--no-default-features` to test the harness
 # alone while the engine is mid-edit.
 engine = ["dep:engine"]
+# Engine diagnostic: every Pokemon named in the protocol must be marked revealed.
+reveal-audit = ["engine", "engine?/reveal-audit"]
 
 [dependencies]
 engine = { path = "../engine", optional = true }
@@ -27,6 +29,11 @@ pprof = { version = "0.14", default-features = false, features = ["flamegraph", 
 [[bin]]
 name = "bench"
 path = "src/bin/bench.rs"
+required-features = ["engine"]
+
+[[bin]]
+name = "determinize_check"
+path = "src/bin/determinize_check.rs"
 required-features = ["engine"]
 
 # Profiles are only read from a workspace root, so they must be repeated here.

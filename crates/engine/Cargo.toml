@@ -10,3 +10,5 @@ license.workspace = true
 trace-hooks = []
 event-probes = []
 event-trace = ["trace-hooks"]
+# Assert that every Pokemon named in the protocol is marked in `revealed_mons` (determinization).
+reveal-audit = []

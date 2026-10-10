@@ -9,6 +9,8 @@ const ONCE_HINT_UNSUPPORTED: &str = "once-hint with a side is not reachable in t
 impl<L: LogSink> Battle<L> {
     /// Ports battle.ts:3091-3113. PRNG: none; count without formatting for NoLog.
     pub fn add(&mut self, entry: LogEntry<'_>) {
+        #[cfg(feature = "reveal-audit")]
+        self.audit_entry(entry);
         self.scratch.unsent_lines = self
             .scratch
             .unsent_lines
@@ -36,6 +38,8 @@ impl<L: LogSink> Battle<L> {
 
     /// Ports battle.ts:3121-3144. PRNG: none. Does not append/count new lines.
     pub fn attr_last_move(&mut self, edit: MoveLineEdit<'_>) {
+        #[cfg(feature = "reveal-audit")]
+        self.audit_edit(edit);
         if L::ENABLED {
             let view = LogView {
                 state: &self.state,
