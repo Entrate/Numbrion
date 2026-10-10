@@ -1,0 +1,3178 @@
+scenario acrobatics_facade
+seed 101,102,103,104
+p1 Garchomp||Leftovers|RoughSkin|Acrobatics,Facade,SwordsDance,Recover|Serious|,,,,,252|M||||,,,,,Dragon]Snorlax|||ThickFat|Facade,Acrobatics,Recover,SwordsDance|Serious|252,,128,,128,|M||||,,,,,Normal]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Incineroar|||Intimidate|ThunderWave,WillOWisp,Recover,Reflect|Serious|252,,128,,128,|M||||,,,,,Fire]Amoonguss|||Regenerator|Spore,Recover,Reflect,LightScreen|Serious|252,,128,,128,|M||||,,,,,Grass]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 57269,40155,5761,60101
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, M|357/357
+log |switch|p1a: Garchomp|Garchomp, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, M|524/524
+log |switch|p1b: Snorlax|Snorlax, M|100/100
+log |split|p2
+log |switch|p2a: Incineroar|Incineroar, M|394/394
+log |switch|p2a: Incineroar|Incineroar, M|100/100
+log |split|p2
+log |switch|p2b: Amoonguss|Amoonguss, M|432/432
+log |switch|p2b: Amoonguss|Amoonguss, M|100/100
+log |-ability|p2a: Incineroar|Intimidate|boost
+log |-unboost|p1a: Garchomp|atk|1
+log |-unboost|p1b: Snorlax|atk|1
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 2, move 2
+seed_after 47222,12224,18669,29726
+log |
+log |t:|
+log |move|p1a: Garchomp|Acrobatics|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|360/394
+log |-damage|p2a: Incineroar|92/100
+log |move|p2a: Incineroar|Thunder Wave|p1b: Snorlax
+log |-status|p1b: Snorlax|par
+log |move|p2b: Amoonguss|Recover||[still]
+log |-fail|p2b: Amoonguss|heal
+log |move|p1b: Snorlax|Facade|p2b: Amoonguss
+log |split|p2
+log |-damage|p2b: Amoonguss|302/432
+log |-damage|p2b: Amoonguss|70/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 1, move 2 2	move 2 1, move 2
+seed_after 11172,1641,34693,11933
+log |
+log |t:|
+log |move|p1a: Garchomp|Facade|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|318/394
+log |-damage|p2a: Incineroar|81/100
+log |move|p2a: Incineroar|Will-O-Wisp|p1a: Garchomp
+log |-status|p1a: Garchomp|brn
+log |move|p2b: Amoonguss|Recover|p2b: Amoonguss
+log |split|p2
+log |-heal|p2b: Amoonguss|432/432
+log |-heal|p2b: Amoonguss|100/100
+log |cant|p1b: Snorlax|par
+log |
+log |split|p1
+log |-damage|p1a: Garchomp|335/357 brn|[from] brn
+log |-damage|p1a: Garchomp|94/100 brn|[from] brn
+log |upkeep
+log |turn|3
+step turn3	move 2 1, move 1 2	move 3, move 3
+seed_after 53471,40842,18861,61818
+log |
+log |t:|
+log |move|p1a: Garchomp|Facade|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|238/394
+log |-damage|p2a: Incineroar|61/100
+log |move|p2a: Incineroar|Recover|p2a: Incineroar
+log |split|p2
+log |-heal|p2a: Incineroar|394/394
+log |-heal|p2a: Incineroar|100/100
+log |move|p2b: Amoonguss|Reflect|p2b: Amoonguss
+log |-sidestart|p2: Bob|Reflect
+log |move|p1b: Snorlax|Facade|p2b: Amoonguss
+log |split|p2
+log |-damage|p2b: Amoonguss|347/432
+log |-damage|p2b: Amoonguss|81/100
+log |
+log |split|p1
+log |-heal|p1a: Garchomp|357/357 brn|[from] item: Leftovers
+log |-heal|p1a: Garchomp|100/100 brn|[from] item: Leftovers
+log |split|p1
+log |-damage|p1a: Garchomp|335/357 brn|[from] brn
+log |-damage|p1a: Garchomp|94/100 brn|[from] brn
+log |upkeep
+log |turn|4
+step turn4	move 2 1, move 1 2	move 3, move 3
+seed_after 64069,46542,65128,62323
+log |
+log |t:|
+log |move|p1a: Garchomp|Facade|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|334/394
+log |-damage|p2a: Incineroar|85/100
+log |move|p2a: Incineroar|Recover|p2a: Incineroar
+log |split|p2
+log |-heal|p2a: Incineroar|394/394
+log |-heal|p2a: Incineroar|100/100
+log |move|p2b: Amoonguss|Reflect||[still]
+log |-fail|p2b: Amoonguss
+log |move|p1b: Snorlax|Facade|p2b: Amoonguss
+log |split|p2
+log |-damage|p2b: Amoonguss|264/432
+log |-damage|p2b: Amoonguss|62/100
+log |
+log |split|p1
+log |-heal|p1a: Garchomp|357/357 brn|[from] item: Leftovers
+log |-heal|p1a: Garchomp|100/100 brn|[from] item: Leftovers
+log |split|p1
+log |-damage|p1a: Garchomp|335/357 brn|[from] brn
+log |-damage|p1a: Garchomp|94/100 brn|[from] brn
+log |upkeep
+log |turn|5
+scenario stomping_tantrum_after_failure
+seed 111,112,113,114
+p1 Garchomp|||RoughSkin|Recover,StompingTantrum,SwordsDance,Earthquake|Serious||M|||50|,,,,,Dragon]Dragonite|||Multiscale|Recover,StompingTantrum,DragonDance,ExtremeSpeed|Serious||M|||50|,,,,,Dragon]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 111,112,113,114
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p1a: Garchomp|Garchomp, L50, M|100/100
+log |split|p1
+log |switch|p1b: Dragonite|Dragonite, L50, M|166/166
+log |switch|p1b: Dragonite|Dragonite, L50, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Clefable|Clefable, M|394/394
+log |switch|p2b: Clefable|Clefable, M|100/100
+log |turn|1
+step turn1	move 1, move 1	move 2, move 2
+seed_after 111,112,113,114
+log |
+log |t:|
+log |move|p2b: Clefable|Reflect|p2b: Clefable
+log |-sidestart|p2: Bob|Reflect
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Garchomp|Recover||[still]
+log |-fail|p1a: Garchomp|heal
+log |move|p1b: Dragonite|Recover||[still]
+log |-fail|p1b: Dragonite|heal
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 2, move 2 1	move 2, move 2
+seed_after 28646,33722,24115,25512
+log |
+log |t:|
+log |move|p2b: Clefable|Reflect||[still]
+log |-fail|p2b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Garchomp|Stomping Tantrum|p2b: Clefable
+log |split|p2
+log |-damage|p2b: Clefable|349/394
+log |-damage|p2b: Clefable|89/100
+log |move|p1b: Dragonite|Stomping Tantrum|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|641/714
+log |-damage|p2a: Blissey|90/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2 2, move 2 1	move 2, move 2
+seed_after 34152,62564,15518,16910
+log |
+log |t:|
+log |move|p2b: Clefable|Reflect||[still]
+log |-fail|p2b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Garchomp|Stomping Tantrum|p2b: Clefable
+log |split|p2
+log |-damage|p2b: Clefable|328/394
+log |-damage|p2b: Clefable|84/100
+log |move|p1b: Dragonite|Stomping Tantrum|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|605/714
+log |-damage|p2a: Blissey|85/100
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 2, move 2
+seed_after 34152,62564,15518,16910
+log |
+log |t:|
+log |move|p2b: Clefable|Reflect||[still]
+log |-fail|p2b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Garchomp|Recover||[still]
+log |-fail|p1a: Garchomp|heal
+log |move|p1b: Dragonite|Recover||[still]
+log |-fail|p1b: Dragonite|heal
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2 2, move 2 1	move 2, move 2
+seed_after 60434,7167,23285,57636
+log |
+log |t:|
+log |move|p2b: Clefable|Reflect||[still]
+log |-fail|p2b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Garchomp|Stomping Tantrum|p2b: Clefable
+log |split|p2
+log |-damage|p2b: Clefable|285/394
+log |-damage|p2b: Clefable|73/100
+log |move|p1b: Dragonite|Stomping Tantrum|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|538/714
+log |-damage|p2a: Blissey|76/100
+log |
+log |-sideend|p2: Bob|Reflect
+log |upkeep
+log |turn|6
+scenario avalanche_ragefist_lashout
+seed 121,122,123,124
+p1 Kingambit|||Defiant|Avalanche,RageFist,LashOut,Recover|Serious|252,,128,,128,|M|||50|,,,,,Dark]Ursaluna|||Guts|RageFist,Avalanche,LashOut,Recover|Serious|252,,128,,128,|M|||50|,,,,,Ground]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Incineroar|||Intimidate|BodySlam,Snarl,Recover,Reflect|Serious|252,,128,,128,|M|||50|,,,,,Fire]Grimmsnarl|||Pressure|Snarl,BodySlam,Recover,ThunderWave|Serious|252,,128,,128,|M|||50|,,,,,Dark]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 63572,50422,2794,21122
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Kingambit|Kingambit, L50, M|207/207
+log |switch|p1a: Kingambit|Kingambit, L50, M|100/100
+log |split|p1
+log |switch|p1b: Ursaluna|Ursaluna, L50, M|237/237
+log |switch|p1b: Ursaluna|Ursaluna, L50, M|100/100
+log |split|p2
+log |switch|p2a: Incineroar|Incineroar, L50, M|202/202
+log |switch|p2a: Incineroar|Incineroar, L50, M|100/100
+log |split|p2
+log |switch|p2b: Grimmsnarl|Grimmsnarl, L50, M|202/202
+log |switch|p2b: Grimmsnarl|Grimmsnarl, L50, M|100/100
+log |-ability|p2b: Grimmsnarl|Pressure
+log |-ability|p2a: Incineroar|Intimidate|boost
+log |-unboost|p1a: Kingambit|atk|1
+log |-ability|p1a: Kingambit|Defiant|boost
+log |-boost|p1a: Kingambit|atk|2
+log |-unboost|p1b: Ursaluna|atk|1
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 1, move 2 2
+seed_after 63893,48704,51571,26304
+log |
+log |t:|
+log |move|p2b: Grimmsnarl|Body Slam|p1b: Ursaluna
+log |split|p1
+log |-damage|p1b: Ursaluna|200/237
+log |-damage|p1b: Ursaluna|85/100
+log |move|p2a: Incineroar|Body Slam|p1a: Kingambit
+log |-resisted|p1a: Kingambit
+log |split|p1
+log |-damage|p1a: Kingambit|192/207
+log |-damage|p1a: Kingambit|93/100
+log |move|p1b: Ursaluna|Rage Fist|p2b: Grimmsnarl
+log |-resisted|p2b: Grimmsnarl
+log |split|p2
+log |-damage|p2b: Grimmsnarl|180/202
+log |-damage|p2b: Grimmsnarl|90/100
+log |move|p1a: Kingambit|Avalanche|p2a: Incineroar
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|159/202
+log |-damage|p2a: Incineroar|79/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 3, move 3
+seed_after 4592,32582,39230,4742
+log |
+log |t:|
+log |move|p2b: Grimmsnarl|Recover|p2b: Grimmsnarl
+log |split|p2
+log |-heal|p2b: Grimmsnarl|202/202
+log |-heal|p2b: Grimmsnarl|100/100
+log |move|p2a: Incineroar|Recover|p2a: Incineroar
+log |split|p2
+log |-heal|p2a: Incineroar|202/202
+log |-heal|p2a: Incineroar|100/100
+log |move|p1b: Ursaluna|Rage Fist|p2b: Grimmsnarl
+log |-resisted|p2b: Grimmsnarl
+log |split|p2
+log |-damage|p2b: Grimmsnarl|179/202
+log |-damage|p2b: Grimmsnarl|89/100
+log |move|p1a: Kingambit|Avalanche|p2a: Incineroar
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|177/202
+log |-damage|p2a: Incineroar|88/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 3 1, move 3 2	move 2, move 1
+seed_after 56583,18427,35513,31773
+log |
+log |t:|
+log |move|p2b: Grimmsnarl|Snarl|p1b: Ursaluna|[spread] p1a,p1b
+log |-resisted|p1a: Kingambit
+log |split|p1
+log |-damage|p1a: Kingambit|180/207
+log |-damage|p1a: Kingambit|87/100
+log |split|p1
+log |-damage|p1b: Ursaluna|175/237
+log |-damage|p1b: Ursaluna|74/100
+log |-unboost|p1a: Kingambit|spa|1
+log |-ability|p1a: Kingambit|Defiant|boost
+log |-boost|p1a: Kingambit|atk|2
+log |-unboost|p1b: Ursaluna|spa|1
+log |move|p2a: Incineroar|Snarl|p1b: Ursaluna|[spread] p1a,p1b
+log |-resisted|p1a: Kingambit
+log |split|p1
+log |-damage|p1a: Kingambit|171/207
+log |-damage|p1a: Kingambit|83/100
+log |split|p1
+log |-damage|p1b: Ursaluna|154/237
+log |-damage|p1b: Ursaluna|65/100
+log |-unboost|p1a: Kingambit|spa|1
+log |-ability|p1a: Kingambit|Defiant|boost
+log |-boost|p1a: Kingambit|atk|2
+log |-unboost|p1b: Ursaluna|spa|1
+log |move|p1a: Kingambit|Lash Out|p2a: Incineroar
+log |-resisted|p2a: Incineroar
+log |split|p2
+log |-damage|p2a: Incineroar|0 fnt
+log |-damage|p2a: Incineroar|0 fnt
+log |faint|p2a: Incineroar
+log |move|p1b: Ursaluna|Lash Out|p2b: Grimmsnarl
+log |-resisted|p2b: Grimmsnarl
+log |split|p2
+log |-damage|p2b: Grimmsnarl|164/202
+log |-damage|p2b: Grimmsnarl|82/100
+log |
+log |upkeep
+step forced1		switch 3, pass
+seed_after 37045,58672,1820,57286
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Corviknight|Corviknight, M|400/400
+log |switch|p2a: Corviknight|Corviknight, M|100/100
+log |-ability|p2a: Corviknight|Pressure
+log |turn|4
+step turn4	move 3 1, move 3 2	move 3, move 3
+seed_after 42782,47912,64016,46943
+log |
+log |t:|
+log |move|p2a: Corviknight|Light Screen|p2a: Corviknight
+log |-sidestart|p2: Bob|move: Light Screen
+log |move|p2b: Grimmsnarl|Recover|p2b: Grimmsnarl
+log |split|p2
+log |-heal|p2b: Grimmsnarl|202/202
+log |-heal|p2b: Grimmsnarl|100/100
+log |move|p1a: Kingambit|Lash Out|p2a: Corviknight
+log |split|p2
+log |-damage|p2a: Corviknight|304/400
+log |-damage|p2a: Corviknight|76/100
+log |move|p1b: Ursaluna|Lash Out|p2b: Grimmsnarl
+log |-resisted|p2b: Grimmsnarl
+log |-crit|p2b: Grimmsnarl
+log |split|p2
+log |-damage|p2b: Grimmsnarl|185/202
+log |-damage|p2b: Grimmsnarl|92/100
+log |
+log |upkeep
+log |turn|5
+scenario last_respects_after_faints
+seed 131,132,133,134
+p1 Gengar|||CursedBody|Explosion,ShadowBall,Recover,LastRespects|Serious||M|||50|,,,,,Ghost]Chandelure|||FlameBody|LastRespects,Explosion,ShadowBall,Recover|Serious||M|||50|,,,,,Ghost]Dragapult|||ClearBody|LastRespects,ShadowBall,Recover,Explosion|Serious||M|||50|,,,,,Dragon]Mimikyu|||Disguise|LastRespects,ShadowBall,Recover,Explosion|Serious||M|||50|,,,,,Ghost
+p2 Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 131,132,133,134
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Gengar|Gengar, L50, M|135/135
+log |switch|p1a: Gengar|Gengar, L50, M|100/100
+log |split|p1
+log |switch|p1b: Chandelure|Chandelure, L50, M|135/135
+log |switch|p1b: Chandelure|Chandelure, L50, M|100/100
+log |split|p2
+log |switch|p2a: Clefable|Clefable, M|394/394
+log |switch|p2a: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |turn|1
+step turn1	move 1, move 4	move 1, move 1
+seed_after 43641,19317,46401,4706
+log |
+log |t:|
+log |move|p2a: Clefable|Recover||[still]
+log |-fail|p2a: Clefable|heal
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1a: Gengar|Explosion|p2b: Blissey|[spread] p2a,p2b
+log |-immune|p1b: Chandelure
+log |split|p2
+log |-damage|p2a: Clefable|362/394
+log |-damage|p2a: Clefable|92/100
+log |split|p2
+log |-damage|p2b: Blissey|642/714
+log |-damage|p2b: Blissey|90/100
+log |faint|p1a: Gengar
+log |move|p1b: Chandelure|Recover||[still]
+log |-fail|p1b: Chandelure|heal
+log |
+log |upkeep
+step forced1	switch 3, pass	
+seed_after 43641,19317,46401,4706
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Dragapult|Dragapult, L50, M|163/163
+log |switch|p1a: Dragapult|Dragapult, L50, M|100/100
+log |turn|2
+step turn2	move 1 1, move 1 2	move 1, move 1
+seed_after 706,39820,14822,20247
+log |
+log |t:|
+log |move|p1a: Dragapult|Last Respects|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|317/394
+log |-damage|p2a: Clefable|81/100
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |move|p1b: Chandelure|Last Respects|p2b: Blissey
+log |-immune|p2b: Blissey
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 2	move 1, move 1
+seed_after 25065,46234,7176,39463
+log |
+log |t:|
+log |move|p1a: Dragapult|Last Respects|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|352/394
+log |-damage|p2a: Clefable|90/100
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1b: Chandelure|Explosion|p2b: Blissey|[spread] p2a,p2b
+log |-immune|p1a: Dragapult
+log |split|p2
+log |-damage|p2a: Clefable|369/394
+log |-damage|p2a: Clefable|94/100
+log |split|p2
+log |-damage|p2b: Blissey|648/714
+log |-damage|p2b: Blissey|91/100
+log |faint|p1b: Chandelure
+log |
+log |upkeep
+step forced2	pass, switch 4	
+seed_after 25065,46234,7176,39463
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Mimikyu|Mimikyu, L50, M|130/130
+log |switch|p1b: Mimikyu|Mimikyu, L50, M|100/100
+log |turn|4
+step turn4	move 1 1, move 1 2	move 1, move 1
+seed_after 2105,15326,56799,23016
+log |
+log |t:|
+log |move|p1a: Dragapult|Last Respects|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|302/394
+log |-damage|p2a: Clefable|77/100
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |move|p1b: Mimikyu|Last Respects|p2b: Blissey
+log |-immune|p2b: Blissey
+log |
+log |upkeep
+log |turn|5
+scenario hp_scaled_power_after_bellydrum
+seed 141,142,143,144
+p1 Typhlosion|||Blaze|Eruption,BellyDrum,Reflect,Recover|Serious|252,,128,,128,|M||||,,,,,Fire]Kyogre|||Drizzle|WaterSpout,BellyDrum,Reflect,Recover|Serious|252,,128,,128,|N||||,,,,,Water]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 141,142,143,144
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Typhlosion|Typhlosion, M|360/360
+log |switch|p1a: Typhlosion|Typhlosion, M|100/100
+log |split|p1
+log |switch|p1b: Kyogre|Kyogre|404/404
+log |switch|p1b: Kyogre|Kyogre|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-weather|RainDance|[from] ability: Drizzle|[of] p1b: Kyogre
+log |-ability|p2b: Corviknight|Pressure
+log |turn|1
+step turn1	move 1, move 1	move 1, move 1
+seed_after 64642,56802,35659,16647
+log |
+log |t:|
+log |move|p1a: Typhlosion|Eruption|p2b: Corviknight|[spread] p2a,p2b
+log |-supereffective|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|669/714
+log |-damage|p2a: Blissey|94/100
+log |split|p2
+log |-damage|p2b: Corviknight|268/400
+log |-damage|p2b: Corviknight|67/100
+log |move|p1b: Kyogre|Water Spout|p2b: Corviknight|[spread] p2a,p2b
+log |split|p2
+log |-damage|p2a: Blissey|480/714
+log |-damage|p2a: Blissey|68/100
+log |split|p2
+log |-damage|p2b: Corviknight|13/400
+log |-damage|p2b: Corviknight|4/100
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|213/400
+log |-heal|p2b: Corviknight|54/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|2
+step turn2	move 2, move 2	move 1, move 1
+seed_after 64642,56802,35659,16647
+log |
+log |t:|
+log |move|p1a: Typhlosion|Belly Drum|p1a: Typhlosion
+log |split|p1
+log |-damage|p1a: Typhlosion|180/360
+log |-damage|p1a: Typhlosion|50/100
+log |-setboost|p1a: Typhlosion|atk|6|[from] move: Belly Drum
+log |move|p1b: Kyogre|Belly Drum|p1b: Kyogre
+log |split|p1
+log |-damage|p1b: Kyogre|202/404
+log |-damage|p1b: Kyogre|50/100
+log |-setboost|p1b: Kyogre|atk|6|[from] move: Belly Drum
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	move 1, move 1
+seed_after 64642,56802,35659,16647
+log |
+log |t:|
+log |move|p1a: Typhlosion|Belly Drum||[still]
+log |-fail|p1a: Typhlosion
+log |move|p1b: Kyogre|Belly Drum||[still]
+log |-fail|p1b: Kyogre
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 1, move 1
+seed_after 12767,59848,604,46858
+log |
+log |t:|
+log |move|p1a: Typhlosion|Eruption|p2b: Corviknight|[spread] p2a,p2b
+log |-supereffective|p2b: Corviknight
+log |-crit|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|690/714
+log |-damage|p2a: Blissey|97/100
+log |split|p2
+log |-damage|p2b: Corviknight|286/400
+log |-damage|p2b: Corviknight|72/100
+log |move|p1b: Kyogre|Water Spout|p2a: Blissey|[spread] p2a,p2b
+log |split|p2
+log |-damage|p2a: Blissey|590/714
+log |-damage|p2a: Blissey|83/100
+log |split|p2
+log |-damage|p2b: Corviknight|141/400
+log |-damage|p2b: Corviknight|36/100
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|341/400
+log |-heal|p2b: Corviknight|86/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|5
+scenario dragonenergy_after_clangoroussoul
+seed 145,146,147,148
+p1 Rayquaza|||AirLock|DragonEnergy,ClangorousSoul,Reflect,Recover|Serious|252,,128,,128,|N||||,,,,,Dragon]Kommo-o|||Soundproof|DragonEnergy,ClangorousSoul,Reflect,Recover|Serious|252,,128,,128,|M||||,,,,,Dragon]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 145,146,147,148
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Rayquaza|Rayquaza|414/414
+log |switch|p1a: Rayquaza|Rayquaza|100/100
+log |split|p1
+log |switch|p1b: Kommo-o|Kommo-o, M|354/354
+log |switch|p1b: Kommo-o|Kommo-o, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p1a: Rayquaza|Air Lock
+log |-ability|p2b: Corviknight|Pressure
+log |turn|1
+step turn1	move 1, move 1	move 1, move 1
+seed_after 15049,2460,36633,22619
+log |
+log |t:|
+log |move|p1a: Rayquaza|Dragon Energy|p2a: Blissey|[spread] p2a,p2b
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|579/714
+log |-damage|p2a: Blissey|82/100
+log |split|p2
+log |-damage|p2b: Corviknight|313/400
+log |-damage|p2b: Corviknight|79/100
+log |move|p1b: Kommo-o|Dragon Energy|p2a: Blissey|[spread] p2a,p2b
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|492/714
+log |-damage|p2a: Blissey|69/100
+log |split|p2
+log |-damage|p2b: Corviknight|245/400
+log |-damage|p2b: Corviknight|62/100
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2, move 2	move 1, move 1
+seed_after 15049,2460,36633,22619
+log |
+log |t:|
+log |move|p1a: Rayquaza|Clangorous Soul|p1a: Rayquaza
+log |-boost|p1a: Rayquaza|atk|1
+log |-boost|p1a: Rayquaza|def|1
+log |-boost|p1a: Rayquaza|spa|1
+log |-boost|p1a: Rayquaza|spd|1
+log |-boost|p1a: Rayquaza|spe|1
+log |split|p1
+log |-damage|p1a: Rayquaza|278/414
+log |-damage|p1a: Rayquaza|68/100
+log |move|p1b: Kommo-o|Clangorous Soul|p1b: Kommo-o
+log |-boost|p1b: Kommo-o|atk|1
+log |-boost|p1b: Kommo-o|def|1
+log |-boost|p1b: Kommo-o|spa|1
+log |-boost|p1b: Kommo-o|spd|1
+log |-boost|p1b: Kommo-o|spe|1
+log |split|p1
+log |-damage|p1b: Kommo-o|238/354
+log |-damage|p1b: Kommo-o|68/100
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	move 1, move 1
+seed_after 15049,2460,36633,22619
+log |
+log |t:|
+log |move|p1a: Rayquaza|Clangorous Soul|p1a: Rayquaza
+log |-boost|p1a: Rayquaza|atk|1
+log |-boost|p1a: Rayquaza|def|1
+log |-boost|p1a: Rayquaza|spa|1
+log |-boost|p1a: Rayquaza|spd|1
+log |-boost|p1a: Rayquaza|spe|1
+log |split|p1
+log |-damage|p1a: Rayquaza|142/414
+log |-damage|p1a: Rayquaza|35/100
+log |move|p1b: Kommo-o|Clangorous Soul|p1b: Kommo-o
+log |-boost|p1b: Kommo-o|atk|1
+log |-boost|p1b: Kommo-o|def|1
+log |-boost|p1b: Kommo-o|spa|1
+log |-boost|p1b: Kommo-o|spd|1
+log |-boost|p1b: Kommo-o|spe|1
+log |split|p1
+log |-damage|p1b: Kommo-o|122/354
+log |-damage|p1b: Kommo-o|35/100
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |upkeep
+log |turn|4
+step turn4	move 2, move 2	move 1, move 1
+seed_after 15049,2460,36633,22619
+log |
+log |t:|
+log |move|p1a: Rayquaza|Clangorous Soul|p1a: Rayquaza
+log |-boost|p1a: Rayquaza|atk|1
+log |-boost|p1a: Rayquaza|def|1
+log |-boost|p1a: Rayquaza|spa|1
+log |-boost|p1a: Rayquaza|spd|1
+log |-boost|p1a: Rayquaza|spe|1
+log |split|p1
+log |-damage|p1a: Rayquaza|6/414
+log |-damage|p1a: Rayquaza|2/100
+log |move|p1b: Kommo-o|Clangorous Soul|p1b: Kommo-o
+log |-boost|p1b: Kommo-o|atk|1
+log |-boost|p1b: Kommo-o|def|1
+log |-boost|p1b: Kommo-o|spa|1
+log |-boost|p1b: Kommo-o|spd|1
+log |-boost|p1b: Kommo-o|spe|1
+log |split|p1
+log |-damage|p1b: Kommo-o|6/354
+log |-damage|p1b: Kommo-o|2/100
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2, move 2	move 1, move 1
+seed_after 15049,2460,36633,22619
+log |
+log |t:|
+log |move|p1a: Rayquaza|Clangorous Soul||[still]
+log |-fail|p1a: Rayquaza
+log |move|p1b: Kommo-o|Clangorous Soul||[still]
+log |-fail|p1b: Kommo-o
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |
+log |upkeep
+log |turn|6
+step turn6	move 1, move 1	move 1, move 1
+seed_after 6418,11925,22220,50158
+log |
+log |t:|
+log |move|p1a: Rayquaza|Dragon Energy|p2b: Corviknight|[spread] p2a,p2b
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|710/714
+log |-damage|p2a: Blissey|99/100
+log |split|p2
+log |-damage|p2b: Corviknight|397/400
+log |-damage|p2b: Corviknight|99/100
+log |move|p1b: Kommo-o|Dragon Energy|p2a: Blissey|[spread] p2a,p2b
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2a: Blissey|707/714
+log |-damage|p2a: Blissey|99/100
+log |split|p2
+log |-damage|p2b: Corviknight|395/400
+log |-damage|p2b: Corviknight|99/100
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |
+log |upkeep
+log |turn|7
+scenario bellydrum_gates
+seed 151,152,153,154
+p1 Snorlax|||ThickFat|BellyDrum,SwordsDance,Reflect,Recover|Serious|252,,128,,128,|M||||,,,,,Normal]Serperior|||Contrary|BellyDrum,ClangorousSoul,Reflect,Recover|Serious|252,,128,,128,|M||||,,,,,Grass]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 151,152,153,154
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Snorlax|Snorlax, M|524/524
+log |switch|p1a: Snorlax|Snorlax, M|100/100
+log |split|p1
+log |switch|p1b: Serperior|Serperior, M|354/354
+log |switch|p1b: Serperior|Serperior, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |turn|1
+step turn1	move 2, move 1	move 1, move 1
+seed_after 151,152,153,154
+log |
+log |t:|
+log |move|p1b: Serperior|Belly Drum|p1b: Serperior
+log |split|p1
+log |-damage|p1b: Serperior|177/354
+log |-damage|p1b: Serperior|50/100
+log |-setboost|p1b: Serperior|atk|-6|[from] move: Belly Drum
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Snorlax|Swords Dance|p1a: Snorlax
+log |-boost|p1a: Snorlax|atk|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2, move 2	move 1, move 1
+seed_after 151,152,153,154
+log |
+log |t:|
+log |move|p1b: Serperior|Clangorous Soul|p1b: Serperior
+log |-unboost|p1b: Serperior|atk|0
+log |-unboost|p1b: Serperior|def|1
+log |-unboost|p1b: Serperior|spa|1
+log |-unboost|p1b: Serperior|spd|1
+log |-unboost|p1b: Serperior|spe|1
+log |split|p1
+log |-damage|p1b: Serperior|61/354
+log |-damage|p1b: Serperior|18/100
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Snorlax|Swords Dance|p1a: Snorlax
+log |-boost|p1a: Snorlax|atk|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	move 1, move 1
+seed_after 151,152,153,154
+log |
+log |t:|
+log |move|p1b: Serperior|Clangorous Soul||[still]
+log |-fail|p1b: Serperior
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Snorlax|Swords Dance|p1a: Snorlax
+log |-boost|p1a: Snorlax|atk|2
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 2	move 1, move 1
+seed_after 151,152,153,154
+log |
+log |t:|
+log |move|p1b: Serperior|Clangorous Soul||[still]
+log |-fail|p1b: Serperior
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Snorlax|Belly Drum||[still]
+log |-fail|p1a: Snorlax
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1, move 2	move 1, move 1
+seed_after 151,152,153,154
+log |
+log |t:|
+log |move|p1b: Serperior|Clangorous Soul||[still]
+log |-fail|p1b: Serperior
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Snorlax|Belly Drum||[still]
+log |-fail|p1a: Snorlax
+log |
+log |upkeep
+log |turn|6
+scenario hyperspacefury_forms
+seed 161,162,163,164
+p1 Hoopa-Unbound|||Pressure|HyperspaceFury,Recover,Reflect,Psychic|Serious||N|||50|,,,,,Psychic]Hoopa|||Pressure|HyperspaceFury,Recover,Reflect,Psychic|Serious||N|||50|,,,,,Psychic]Mew|||Synchronize|HyperspaceFury,Recover,Psychic,Transform|Serious||N|||50|,,,,,Psychic]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 161,162,163,164
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Hoopa|Hoopa-Unbound, L50|155/155
+log |switch|p1a: Hoopa|Hoopa-Unbound, L50|100/100
+log |split|p1
+log |switch|p1b: Hoopa|Hoopa, L50|155/155
+log |switch|p1b: Hoopa|Hoopa, L50|100/100
+log |split|p2
+log |switch|p2a: Clefable|Clefable, M|394/394
+log |switch|p2a: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |-ability|p1a: Hoopa|Pressure
+log |-ability|p1b: Hoopa|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 1	move 1, move 1
+seed_after 65522,58522,37312,25489
+log |
+log |t:|
+log |move|p2a: Clefable|Recover||[still]
+log |-fail|p2a: Clefable|heal
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1a: Hoopa|Hyperspace Fury|p2a: Clefable
+log |-resisted|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|366/394
+log |-damage|p2a: Clefable|93/100
+log |-unboost|p1a: Hoopa|def|1
+log |move|p1b: Hoopa|Hyperspace Fury||[still]
+log |-hint|Only a Pokemon whose form is Hoopa Unbound can use this move.
+log |-fail|p1b: Hoopa|move: Hyperspace Fury|[forme]
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, switch 3	move 1, move 1
+seed_after 6669,51684,48582,3562
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Mew|Mew, L50|175/175
+log |switch|p1b: Mew|Mew, L50|100/100
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1a: Hoopa|Hyperspace Fury|p2a: Clefable
+log |-resisted|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|365/394
+log |-damage|p2a: Clefable|93/100
+log |-unboost|p1a: Hoopa|def|1
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 1 1	move 1, move 1
+seed_after 6669,51684,48582,3562
+log |
+log |t:|
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1b: Mew|Hyperspace Fury||[still]
+log |-hint|Only a Pokemon whose form is Hoopa Unbound can use this move.
+log |-fail|p1b: Mew|move: Hyperspace Fury
+log |move|p1a: Hoopa|Recover||[still]
+log |-fail|p1a: Hoopa|heal
+log |
+log |upkeep
+log |turn|4
+scenario doubleshock_types
+seed 171,172,173,174
+p1 Raichu|||Static|DoubleShock,Recover,Thunderbolt,VoltSwitch|Serious||M|||50|,,,,,Electric]Zapdos|||Pressure|DoubleShock,Recover,Roost,Hurricane|Serious||N|||50|,,,,,Electric]Iron Hands|||QuarkDrive|DoubleShock,Recover,DrainPunch,WildCharge|Serious||N|||50|,,,,,Fighting]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 171,172,173,174
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Raichu|Raichu, L50, M|135/135
+log |switch|p1a: Raichu|Raichu, L50, M|100/100
+log |split|p1
+log |switch|p1b: Zapdos|Zapdos, L50|165/165
+log |switch|p1b: Zapdos|Zapdos, L50|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |-ability|p1b: Zapdos|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1, move 1
+seed_after 41596,2848,27260,64708
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Raichu|Double Shock|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|621/714
+log |-damage|p2a: Blissey|87/100
+log |-start|p1a: Raichu|typechange|???|[from] move: Double Shock
+log |move|p1b: Zapdos|Double Shock|p2b: Corviknight
+log |-supereffective|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|344/400
+log |-damage|p2b: Corviknight|86/100
+log |-start|p1b: Zapdos|typechange|???/Flying|[from] move: Double Shock
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 1, move 1
+seed_after 41596,2848,27260,64708
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Raichu|Double Shock||[still]
+log |-fail|p1a: Raichu|move: Double Shock
+log |move|p1b: Zapdos|Double Shock||[still]
+log |-fail|p1b: Zapdos|move: Double Shock
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, switch 3	move 1, move 1
+seed_after 41596,2848,27260,64708
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Iron Hands|Iron Hands, L50|229/229
+log |switch|p1b: Iron Hands|Iron Hands, L50|100/100
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Raichu|Recover||[still]
+log |-fail|p1a: Raichu|heal
+log |
+log |upkeep
+log |turn|4
+step turn4	move 2, move 1 1	move 1, move 1
+seed_after 21251,54159,64679,25393
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Raichu|Recover||[still]
+log |-fail|p1a: Raichu|heal
+log |move|p1b: Iron Hands|Double Shock|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|575/714
+log |-damage|p2a: Blissey|81/100
+log |-start|p1b: Iron Hands|typechange|Fighting/???|[from] move: Double Shock
+log |
+log |upkeep
+log |turn|5
+scenario doubleshock_tera
+seed 181,182,183,184
+p1 Iron Hands|||QuarkDrive|DoubleShock,Recover,DrainPunch,WildCharge|Serious||N|||50|,,,,,Electric]Zapdos|||Pressure|DoubleShock,Recover,Roost,Hurricane|Serious||N|||50|,,,,,Electric]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 181,182,183,184
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Iron Hands|Iron Hands, L50|229/229
+log |switch|p1a: Iron Hands|Iron Hands, L50|100/100
+log |split|p1
+log |switch|p1b: Zapdos|Zapdos, L50|165/165
+log |switch|p1b: Zapdos|Zapdos, L50|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |-ability|p1b: Zapdos|Pressure
+log |turn|1
+step turn1	move 1 1 terastallize, move 2	move 1, move 1
+seed_after 2737,64645,4138,35797
+log |
+log |t:|
+log |-terastallize|p1a: Iron Hands|Electric
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1b: Zapdos|Recover||[still]
+log |-fail|p1b: Zapdos|heal
+log |move|p1a: Iron Hands|Double Shock|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|518/714
+log |-damage|p2a: Blissey|73/100
+log |-start|p1a: Iron Hands|typechange|Electric|[from] move: Double Shock
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 2	move 1, move 1
+seed_after 10986,19548,5939,60318
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1b: Zapdos|Recover||[still]
+log |-fail|p1b: Zapdos|heal
+log |move|p1a: Iron Hands|Double Shock|p2a: Blissey
+log |-crit|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|426/714
+log |-damage|p2a: Blissey|60/100
+log |-start|p1a: Iron Hands|typechange|Electric|[from] move: Double Shock
+log |
+log |upkeep
+log |turn|3
+scenario roost_types
+seed 191,192,193,194
+p1 Corviknight|||Pressure|Roost,Recover,BraveBird,LightScreen|Serious|252,,128,,128,|M||||,,,,,Flying]Tornadus|||Defiant|Roost,Recover,Hurricane,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Garchomp|||RoughSkin|Earthquake,Recover,RockSlide,DragonClaw|Serious||M|||50|,,,,,Dragon]Weavile|||Pressure|IcicleCrash,Recover,Reflect,BodySlam|Serious|252,,128,,128,|M|||50|,,,,,Dark]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 191,192,193,194
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |split|p1
+log |switch|p1b: Tornadus|Tornadus, M|362/362
+log |switch|p1b: Tornadus|Tornadus, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Weavile|Weavile, L50, M|177/177
+log |switch|p2b: Weavile|Weavile, L50, M|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |-ability|p2b: Weavile|Pressure
+log |turn|1
+step turn1	move 4, move 4	move 4 1, move 4 2
+seed_after 36106,56743,37889,2075
+log |
+log |t:|
+log |move|p1b: Tornadus|Tailwind|p1b: Tornadus
+log |-sidestart|p1: Alice|move: Tailwind
+log |move|p1a: Corviknight|Light Screen|p1a: Corviknight
+log |-sidestart|p1: Alice|move: Light Screen
+log |move|p2b: Weavile|Body Slam|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|338/362
+log |-damage|p1b: Tornadus|94/100
+log |move|p2a: Garchomp|Dragon Claw|p1a: Corviknight
+log |-resisted|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|387/400
+log |-damage|p1a: Corviknight|97/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 1, move 1 1
+seed_after 64233,12666,53277,5903
+log |
+log |t:|
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362
+log |-heal|p1b: Tornadus|100/100
+log |-singleturn|p1b: Tornadus|move: Roost
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-singleturn|p1a: Corviknight|move: Roost
+log |move|p2b: Weavile|Icicle Crash|p1a: Corviknight
+log |-resisted|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|385/400
+log |-damage|p1a: Corviknight|97/100
+log |move|p2a: Garchomp|Earthquake|p1b: Tornadus|[spread] p2b,p1a,p1b
+log |-supereffective|p1a: Corviknight
+log |-crit|p1b: Tornadus
+log |split|p2
+log |-damage|p2b: Weavile|113/177
+log |-damage|p2b: Weavile|64/100
+log |split|p1
+log |-damage|p1a: Corviknight|331/400
+log |-damage|p1a: Corviknight|83/100
+log |split|p1
+log |-damage|p1b: Tornadus|316/362
+log |-damage|p1b: Tornadus|88/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	move 3, move 1 2
+seed_after 45577,49269,30468,44800
+log |
+log |t:|
+log |move|p1b: Tornadus|Recover|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362
+log |-heal|p1b: Tornadus|100/100
+log |move|p1a: Corviknight|Recover|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |move|p2b: Weavile|Icicle Crash|p1b: Tornadus
+log |-supereffective|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|288/362
+log |-damage|p1b: Tornadus|80/100
+log |move|p2a: Garchomp|Rock Slide|p1a: Corviknight|[spread] p1a,p1b
+log |-supereffective|p1b: Tornadus
+log |split|p1
+log |-damage|p1a: Corviknight|387/400
+log |-damage|p1a: Corviknight|97/100
+log |split|p1
+log |-damage|p1b: Tornadus|256/362
+log |-damage|p1b: Tornadus|71/100
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 1	move 1, move 1 2
+seed_after 8239,21406,36664,33380
+log |
+log |t:|
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362
+log |-heal|p1b: Tornadus|100/100
+log |-singleturn|p1b: Tornadus|move: Roost
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-singleturn|p1a: Corviknight|move: Roost
+log |move|p2b: Weavile|Icicle Crash|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|325/362
+log |-damage|p1b: Tornadus|90/100
+log |move|p2a: Garchomp|Earthquake|p1a: Corviknight|[spread] p2b,p1a,p1b
+log |-supereffective|p1a: Corviknight
+log |split|p2
+log |-damage|p2b: Weavile|44/177
+log |-damage|p2b: Weavile|25/100
+log |split|p1
+log |-damage|p1a: Corviknight|352/400
+log |-damage|p1a: Corviknight|88/100
+log |split|p1
+log |-damage|p1b: Tornadus|289/362
+log |-damage|p1b: Tornadus|80/100
+log |
+log |-sideend|p1: Alice|move: Tailwind
+log |upkeep
+log |turn|5
+scenario roost_tera_flying
+seed 201,202,203,204
+p1 Corviknight|||Pressure|Roost,Recover,BraveBird,LightScreen|Serious|252,,128,,128,|M||||,,,,,Flying]Tornadus|||Defiant|Roost,Recover,Hurricane,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Garchomp|||RoughSkin|Earthquake,Recover,RockSlide,DragonClaw|Serious||M|||50|,,,,,Dragon]Weavile|||Pressure|IcicleCrash,Recover,Reflect,BodySlam|Serious|252,,128,,128,|M|||50|,,,,,Dark]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 201,202,203,204
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |split|p1
+log |switch|p1b: Tornadus|Tornadus, M|362/362
+log |switch|p1b: Tornadus|Tornadus, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Weavile|Weavile, L50, M|177/177
+log |switch|p2b: Weavile|Weavile, L50, M|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |-ability|p2b: Weavile|Pressure
+log |turn|1
+step turn1	move 4 terastallize, move 4	move 4 1, move 4 2
+seed_after 7103,2407,7669,60957
+log |
+log |t:|
+log |-terastallize|p1a: Corviknight|Flying
+log |move|p1b: Tornadus|Tailwind|p1b: Tornadus
+log |-sidestart|p1: Alice|move: Tailwind
+log |move|p1a: Corviknight|Light Screen|p1a: Corviknight
+log |-sidestart|p1: Alice|move: Light Screen
+log |move|p2b: Weavile|Body Slam|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|336/362
+log |-damage|p1b: Tornadus|93/100
+log |move|p2a: Garchomp|Dragon Claw|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|372/400
+log |-damage|p1a: Corviknight|93/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 1, move 1 1
+seed_after 45157,63443,2397,52996
+log |
+log |t:|
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362
+log |-heal|p1b: Tornadus|100/100
+log |-singleturn|p1b: Tornadus|move: Roost
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-hint|If a Terastallized Pokemon uses Roost, it remains Flying-type.
+log |move|p2b: Weavile|Icicle Crash|p1a: Corviknight
+log |-supereffective|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|350/400
+log |-damage|p1a: Corviknight|88/100
+log |move|p2a: Garchomp|Earthquake|p1b: Tornadus|[spread] p2b,p1b
+log |-immune|p1a: Corviknight
+log |split|p2
+log |-damage|p2b: Weavile|114/177
+log |-damage|p2b: Weavile|65/100
+log |split|p1
+log |-damage|p1b: Tornadus|329/362
+log |-damage|p1b: Tornadus|91/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 1	move 1, move 1 2
+seed_after 25325,53949,49956,10855
+log |
+log |t:|
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362
+log |-heal|p1b: Tornadus|100/100
+log |-singleturn|p1b: Tornadus|move: Roost
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-hint|If a Terastallized Pokemon uses Roost, it remains Flying-type.
+log |move|p2b: Weavile|Icicle Crash|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|326/362
+log |-damage|p1b: Tornadus|91/100
+log |move|p2a: Garchomp|Earthquake|p1a: Corviknight|[spread] p2b,p1b
+log |-immune|p1a: Corviknight
+log |split|p2
+log |-damage|p2b: Weavile|42/177
+log |-damage|p2b: Weavile|24/100
+log |split|p1
+log |-damage|p1b: Tornadus|292/362
+log |-damage|p1b: Tornadus|81/100
+log |
+log |upkeep
+log |turn|4
+scenario roost_tera_other
+seed 205,206,207,208
+p1 Corviknight|||Pressure|Roost,Recover,BraveBird,LightScreen|Serious|252,,128,,128,|M||||,,,,,Flying]Tornadus|||Defiant|Roost,Recover,Hurricane,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fighting]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Garchomp|||RoughSkin|Earthquake,Recover,RockSlide,DragonClaw|Serious||M|||50|,,,,,Dragon]Weavile|||Pressure|IcicleCrash,Recover,Reflect,BodySlam|Serious|252,,128,,128,|M|||50|,,,,,Dark]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 205,206,207,208
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |split|p1
+log |switch|p1b: Tornadus|Tornadus, M|362/362
+log |switch|p1b: Tornadus|Tornadus, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Weavile|Weavile, L50, M|177/177
+log |switch|p2b: Weavile|Weavile, L50, M|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |-ability|p2b: Weavile|Pressure
+log |turn|1
+step turn1	move 4, move 4 terastallize	move 4 1, move 4 2
+seed_after 47930,19994,8689,32081
+log |
+log |t:|
+log |-terastallize|p1b: Tornadus|Fighting
+log |move|p1b: Tornadus|Tailwind|p1b: Tornadus
+log |-sidestart|p1: Alice|move: Tailwind
+log |move|p1a: Corviknight|Light Screen|p1a: Corviknight
+log |-sidestart|p1: Alice|move: Light Screen
+log |move|p2b: Weavile|Body Slam|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|337/362
+log |-damage|p1b: Tornadus|94/100
+log |-status|p1b: Tornadus|par
+log |move|p2a: Garchomp|Dragon Claw|p1a: Corviknight
+log |-resisted|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|388/400
+log |-damage|p1a: Corviknight|97/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 1, move 1 1
+seed_after 22169,18472,22187,21148
+log |
+log |t:|
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-singleturn|p1a: Corviknight|move: Roost
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362 par
+log |-heal|p1b: Tornadus|100/100 par
+log |move|p2b: Weavile|Icicle Crash|p1a: Corviknight
+log |-resisted|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|386/400
+log |-damage|p1a: Corviknight|97/100
+log |move|p2a: Garchomp|Earthquake|p1b: Tornadus|[spread] p2b,p1a,p1b
+log |-crit|p2b: Weavile
+log |-supereffective|p1a: Corviknight
+log |split|p2
+log |-damage|p2b: Weavile|80/177
+log |-damage|p2b: Weavile|46/100
+log |split|p1
+log |-damage|p1a: Corviknight|332/400
+log |-damage|p1a: Corviknight|83/100
+log |split|p1
+log |-damage|p1b: Tornadus|328/362 par
+log |-damage|p1b: Tornadus|91/100 par
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 1	move 1, move 1 2
+seed_after 12448,1924,18659,49411
+log |
+log |t:|
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-singleturn|p1a: Corviknight|move: Roost
+log |move|p1b: Tornadus|Roost|p1b: Tornadus
+log |split|p1
+log |-heal|p1b: Tornadus|362/362 par
+log |-heal|p1b: Tornadus|100/100 par
+log |move|p2b: Weavile|Icicle Crash|p1b: Tornadus
+log |split|p1
+log |-damage|p1b: Tornadus|322/362 par
+log |-damage|p1b: Tornadus|89/100 par
+log |move|p2a: Garchomp|Earthquake|p1a: Corviknight|[spread] p2b,p1a,p1b
+log |-supereffective|p1a: Corviknight
+log |split|p2
+log |-damage|p2b: Weavile|13/177
+log |-damage|p2b: Weavile|8/100
+log |split|p1
+log |-damage|p1a: Corviknight|350/400
+log |-damage|p1a: Corviknight|88/100
+log |split|p1
+log |-damage|p1b: Tornadus|286/362 par
+log |-damage|p1b: Tornadus|80/100 par
+log |
+log |upkeep
+log |turn|4
+scenario roost_transform
+seed 211,212,213,214
+p1 Corviknight|||Pressure|Roost,Recover,RockSlide,LightScreen|Serious|252,,128,,128,|M||||,,,,,Flying]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+p2 Garchomp|||RoughSkin|Earthquake,Recover,RockSlide,DragonClaw|Serious||M|||50|,,,,,Dragon]Mew|||Synchronize|Transform,Recover,Reflect,LightScreen|Serious||N|||50|,,,,,Psychic]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 211,212,213,214
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |split|p1
+log |switch|p1b: Blissey|Blissey, F|714/714
+log |switch|p1b: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Mew|Mew, L50|175/175
+log |switch|p2b: Mew|Mew, L50|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |turn|1
+step turn1	move 4, move 1	move 4 1, move 2
+seed_after 39632,41060,52681,51259
+log |
+log |t:|
+log |move|p1a: Corviknight|Light Screen|p1a: Corviknight
+log |-sidestart|p1: Alice|move: Light Screen
+log |move|p1b: Blissey|Recover||[still]
+log |-fail|p1b: Blissey|heal
+log |move|p2a: Garchomp|Dragon Claw|p1a: Corviknight
+log |-resisted|p1a: Corviknight
+log |split|p1
+log |-damage|p1a: Corviknight|387/400
+log |-damage|p1a: Corviknight|97/100
+log |move|p2b: Mew|Recover||[still]
+log |-fail|p2b: Mew|heal
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1	move 2, move 1 1
+seed_after 42836,810,35463,12554
+log |
+log |t:|
+log |move|p1a: Corviknight|Roost|p1a: Corviknight
+log |split|p1
+log |-heal|p1a: Corviknight|400/400
+log |-heal|p1a: Corviknight|100/100
+log |-singleturn|p1a: Corviknight|move: Roost
+log |move|p1b: Blissey|Recover||[still]
+log |-fail|p1b: Blissey|heal
+log |move|p2a: Garchomp|Recover||[still]
+log |-fail|p2a: Garchomp|heal
+log |move|p2b: Mew|Transform|p1a: Corviknight
+log |-transform|p2b: Mew|p1a: Corviknight
+log |-ability|p2b: Mew|Pressure
+log |
+log |upkeep
+log |turn|3
+step turn3	move 3, move 1	move 2, move 4
+seed_after 3206,51525,50125,4563
+log |
+log |t:|
+log |move|p1a: Corviknight|Rock Slide|p2a: Garchomp|[spread] p2a,p2b
+log |-resisted|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|143/183
+log |-damage|p2a: Garchomp|79/100
+log |split|p2
+log |-damage|p2b: Mew|143/175
+log |-damage|p2b: Mew|82/100
+log |cant|p2b: Mew|flinch
+log |move|p1b: Blissey|Recover||[still]
+log |-fail|p1b: Blissey|heal
+log |cant|p2a: Garchomp|flinch
+log |
+log |upkeep
+log |turn|4
+step turn4	move 3, move 1	move 2, move 4
+seed_after 12951,40560,57379,40860
+log |
+log |t:|
+log |move|p2b: Mew|Light Screen|p2b: Mew
+log |-sidestart|p2: Bob|move: Light Screen
+log |move|p1a: Corviknight|Rock Slide|p2b: Mew|[spread] p2a,p2b
+log |-resisted|p2a: Garchomp
+log |split|p2
+log |-damage|p2a: Garchomp|103/183
+log |-damage|p2a: Garchomp|57/100
+log |split|p2
+log |-damage|p2b: Mew|107/175
+log |-damage|p2b: Mew|62/100
+log |move|p1b: Blissey|Recover||[still]
+log |-fail|p1b: Blissey|heal
+log |cant|p2a: Garchomp|flinch
+log |
+log |upkeep
+log |turn|5
+scenario shellsidearm_targets
+seed 221,222,223,224
+p1 Slowbro|||Regenerator|ShellSideArm,Recover,Reflect,SlackOff|Serious|252,,128,,128,|M||||,,,,,Water]Toxapex|||Regenerator|ShellSideArm,Recover,Reflect,Toxic|Serious|252,,128,,128,|M||||,,,,,Poison]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 221,222,223,224
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Slowbro|Slowbro, M|394/394
+log |switch|p1a: Slowbro|Slowbro, M|100/100
+log |split|p1
+log |switch|p1b: Toxapex|Toxapex, M|304/304
+log |switch|p1b: Toxapex|Toxapex, M|100/100
+log |split|p2
+log |switch|p2a: Clefable|Clefable, M|394/394
+log |switch|p2a: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1, move 1
+seed_after 33382,34091,27373,46792
+log |
+log |t:|
+log |move|p2a: Clefable|Recover||[still]
+log |-fail|p2a: Clefable|heal
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1b: Toxapex|Shell Side Arm|p2b: Blissey|[anim] Shell Side Arm Physical
+log |split|p2
+log |-damage|p2b: Blissey|507/714
+log |-damage|p2b: Blissey|72/100
+log |-hint|Physical Shell Side Arm
+log |move|p1a: Slowbro|Shell Side Arm|p2a: Clefable|[anim] Shell Side Arm Special
+log |-supereffective|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|254/394
+log |-damage|p2a: Clefable|65/100
+log |-hint|Special Shell Side Arm
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 -2, move 1 -1	move 1, move 1
+seed_after 40748,12681,23125,47024
+log |
+log |t:|
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |move|p1b: Toxapex|Shell Side Arm|p1a: Slowbro
+log |split|p1
+log |-damage|p1a: Slowbro|324/394
+log |-damage|p1a: Slowbro|83/100
+log |move|p1a: Slowbro|Shell Side Arm|p1b: Toxapex
+log |-resisted|p1b: Toxapex
+log |-crit|p1b: Toxapex
+log |split|p1
+log |-damage|p1b: Toxapex|265/304
+log |-damage|p1b: Toxapex|88/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 1, move 1
+seed_after 33440,19950,49812,41880
+log |
+log |t:|
+log |move|p2a: Clefable|Recover||[still]
+log |-fail|p2a: Clefable|heal
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1b: Toxapex|Shell Side Arm|p2b: Blissey|[anim] Shell Side Arm Physical
+log |split|p2
+log |-damage|p2b: Blissey|510/714
+log |-damage|p2b: Blissey|72/100
+log |-hint|Physical Shell Side Arm
+log |move|p1a: Slowbro|Shell Side Arm|p2a: Clefable|[anim] Shell Side Arm Special
+log |-supereffective|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|262/394
+log |-damage|p2a: Clefable|67/100
+log |-hint|Special Shell Side Arm
+log |
+log |upkeep
+log |turn|4
+scenario alluring_burning_after_boost
+seed 231,232,233,234
+p1 Primarina|||LiquidVoice|AlluringVoice,Recover,Reflect,Moonblast|Serious||M|||50|,,,,,Water]Heatran|||FlashFire|BurningJealousy,Recover,Reflect,Flamethrower|Serious||M|||50|,,,,,Fire]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Dragonite|||Multiscale|DragonDance,Recover,Reflect,ExtremeSpeed|Serious|,,,,,252|M||||,,,,,Dragon]Volcarona|||FlameBody|QuiverDance,Recover,Reflect,BugBuzz|Serious|,,,,,252|M||||,,,,,Bug]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 231,232,233,234
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Primarina|Primarina, L50, M|155/155
+log |switch|p1a: Primarina|Primarina, L50, M|100/100
+log |split|p1
+log |switch|p1b: Heatran|Heatran, L50, M|166/166
+log |switch|p1b: Heatran|Heatran, L50, M|100/100
+log |split|p2
+log |switch|p2a: Dragonite|Dragonite, M|323/323
+log |switch|p2a: Dragonite|Dragonite, M|100/100
+log |split|p2
+log |switch|p2b: Volcarona|Volcarona, M|311/311
+log |switch|p2b: Volcarona|Volcarona, M|100/100
+log |turn|1
+step turn1	move 1 1, move 1	move 1, move 1
+seed_after 26636,43710,65468,37263
+log |
+log |t:|
+log |move|p2b: Volcarona|Quiver Dance|p2b: Volcarona
+log |-boost|p2b: Volcarona|spa|1
+log |-boost|p2b: Volcarona|spd|1
+log |-boost|p2b: Volcarona|spe|1
+log |move|p2a: Dragonite|Dragon Dance|p2a: Dragonite
+log |-boost|p2a: Dragonite|atk|1
+log |-boost|p2a: Dragonite|spe|1
+log |move|p1b: Heatran|Burning Jealousy|p2b: Volcarona|[spread] p2a,p2b
+log |-resisted|p2a: Dragonite
+log |split|p2
+log |-damage|p2a: Dragonite|318/323
+log |-damage|p2a: Dragonite|99/100
+log |split|p2
+log |-damage|p2b: Volcarona|298/311
+log |-damage|p2b: Volcarona|96/100
+log |-status|p2a: Dragonite|brn
+log |move|p1a: Primarina|Alluring Voice|p2a: Dragonite
+log |-resisted|p2a: Dragonite
+log |split|p2
+log |-damage|p2a: Dragonite|303/323 brn
+log |-damage|p2a: Dragonite|94/100 brn
+log |-start|p2a: Dragonite|confusion
+log |
+log |split|p2
+log |-damage|p2a: Dragonite|283/323 brn|[from] brn
+log |-damage|p2a: Dragonite|88/100 brn|[from] brn
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1	move 2, move 2
+seed_after 37093,55950,6925,12160
+log |
+log |t:|
+log |move|p2b: Volcarona|Recover|p2b: Volcarona
+log |split|p2
+log |-heal|p2b: Volcarona|311/311
+log |-heal|p2b: Volcarona|100/100
+log |-activate|p2a: Dragonite|confusion
+log |move|p2a: Dragonite|Recover|p2a: Dragonite
+log |split|p2
+log |-heal|p2a: Dragonite|323/323 brn
+log |-heal|p2a: Dragonite|100/100 brn
+log |move|p1b: Heatran|Burning Jealousy|p2b: Volcarona|[spread] p2a,p2b
+log |-resisted|p2a: Dragonite
+log |split|p2
+log |-damage|p2a: Dragonite|317/323 brn
+log |-damage|p2a: Dragonite|99/100 brn
+log |split|p2
+log |-damage|p2b: Volcarona|298/311
+log |-damage|p2b: Volcarona|96/100
+log |move|p1a: Primarina|Alluring Voice|p2a: Dragonite
+log |-resisted|p2a: Dragonite
+log |split|p2
+log |-damage|p2a: Dragonite|302/323 brn
+log |-damage|p2a: Dragonite|94/100 brn
+log |
+log |split|p2
+log |-damage|p2a: Dragonite|282/323 brn|[from] brn
+log |-damage|p2a: Dragonite|88/100 brn|[from] brn
+log |upkeep
+log |turn|3
+step turn3	move 1 2, move 1	move 1, move 1
+seed_after 6160,15458,20310,56036
+log |
+log |t:|
+log |move|p2b: Volcarona|Quiver Dance|p2b: Volcarona
+log |-boost|p2b: Volcarona|spa|1
+log |-boost|p2b: Volcarona|spd|1
+log |-boost|p2b: Volcarona|spe|1
+log |-activate|p2a: Dragonite|confusion
+log |move|p2a: Dragonite|Dragon Dance|p2a: Dragonite
+log |-boost|p2a: Dragonite|atk|1
+log |-boost|p2a: Dragonite|spe|1
+log |move|p1b: Heatran|Burning Jealousy|p2b: Volcarona|[spread] p2a,p2b
+log |-resisted|p2a: Dragonite
+log |split|p2
+log |-damage|p2a: Dragonite|271/323 brn
+log |-damage|p2a: Dragonite|84/100 brn
+log |split|p2
+log |-damage|p2b: Volcarona|288/311
+log |-damage|p2b: Volcarona|93/100
+log |move|p1a: Primarina|Alluring Voice|p2b: Volcarona
+log |-supereffective|p2b: Volcarona
+log |split|p2
+log |-damage|p2b: Volcarona|256/311
+log |-damage|p2b: Volcarona|83/100
+log |-start|p2b: Volcarona|confusion
+log |
+log |split|p2
+log |-damage|p2a: Dragonite|251/323 brn|[from] brn
+log |-damage|p2a: Dragonite|78/100 brn|[from] brn
+log |upkeep
+log |turn|4
+scenario weight_moves
+seed 241,242,243,244
+p1 Metagross|||ClearBody|HeavySlam,HeatCrash,Recover,GrassKnot|Serious|252,,128,,128,|N|||50|,,,,,Steel]Snorlax|||ThickFat|HeavySlam,LowKick,Recover,GrassKnot|Serious|252,,128,,128,|M|||50|,,,,,Normal]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Pikachu|||Static|Recover,Reflect,LightScreen,Tailwind|Serious||M|||50|,,,,,Electric]Registeel|||ClearBody|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|N|||50|,,,,,Steel]Copperajah|||HeavyMetal|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M|||50|,,,,,Steel]Ditto|||Imposter|Transform,Recover,Reflect,LightScreen|Serious||N|||50|,,,,,Normal
+step start		
+seed_after 241,242,243,244
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Metagross|Metagross, L50|187/187
+log |switch|p1a: Metagross|Metagross, L50|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p1b: Snorlax|Snorlax, L50, M|100/100
+log |split|p2
+log |switch|p2a: Pikachu|Pikachu, L50, M|110/110
+log |switch|p2a: Pikachu|Pikachu, L50, M|100/100
+log |split|p2
+log |switch|p2b: Registeel|Registeel, L50|187/187
+log |switch|p2b: Registeel|Registeel, L50|100/100
+log |turn|1
+step turn1	move 1 1, move 2 2	move 2, move 2
+seed_after 22159,47205,17865,34341
+log |
+log |t:|
+log |move|p2a: Pikachu|Reflect|p2a: Pikachu
+log |-sidestart|p2: Bob|Reflect
+log |move|p1a: Metagross|Heavy Slam|p2a: Pikachu
+log |-resisted|p2a: Pikachu
+log |split|p2
+log |-damage|p2a: Pikachu|43/110
+log |-damage|p2a: Pikachu|40/100
+log |move|p2b: Registeel|Reflect||[still]
+log |-fail|p2b: Registeel
+log |move|p1b: Snorlax|Low Kick|p2b: Registeel
+log |-supereffective|p2b: Registeel
+log |split|p2
+log |-damage|p2b: Registeel|139/187
+log |-damage|p2b: Registeel|75/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 2, move 4 1	move 2, move 2
+seed_after 55019,44389,26893,41314
+log |
+log |t:|
+log |move|p2a: Pikachu|Reflect||[still]
+log |-fail|p2a: Pikachu
+log |move|p1a: Metagross|Heat Crash|p2b: Registeel
+log |-supereffective|p2b: Registeel
+log |split|p2
+log |-damage|p2b: Registeel|112/187
+log |-damage|p2b: Registeel|60/100
+log |move|p2b: Registeel|Reflect||[still]
+log |-fail|p2b: Registeel
+log |move|p1b: Snorlax|Grass Knot|p2a: Pikachu
+log |split|p2
+log |-damage|p2a: Pikachu|33/110
+log |-damage|p2a: Pikachu|30/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 3, move 3	switch 3, switch 4
+seed_after 40474,55629,19160,52992
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Copperajah|Copperajah, L50, M|229/229
+log |switch|p2a: Copperajah|Copperajah, L50, M|100/100
+log |split|p2
+log |switch|p2b: Ditto|Ditto, L50|123/123
+log |switch|p2b: Ditto|Ditto, L50|100/100
+log |-transform|p2b: Ditto|p1a: Metagross|[from] ability: Imposter
+log |move|p1a: Metagross|Recover||[still]
+log |-fail|p1a: Metagross|heal
+log |move|p1b: Snorlax|Recover||[still]
+log |-fail|p1b: Snorlax|heal
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 2 2	move 2, move 2 1
+seed_after 7351,25232,49580,2667
+log |
+log |t:|
+log |move|p2b: Ditto|Heat Crash|p1a: Metagross
+log |-supereffective|p1a: Metagross
+log |split|p1
+log |-damage|p1a: Metagross|153/187
+log |-damage|p1a: Metagross|82/100
+log |move|p1a: Metagross|Heavy Slam|p2a: Copperajah
+log |-resisted|p2a: Copperajah
+log |split|p2
+log |-damage|p2a: Copperajah|216/229
+log |-damage|p2a: Copperajah|95/100
+log |move|p1b: Snorlax|Low Kick|p2b: Ditto
+log |split|p2
+log |-damage|p2b: Ditto|96/123
+log |-damage|p2b: Ditto|79/100
+log |move|p2a: Copperajah|Reflect||[still]
+log |-fail|p2a: Copperajah
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2 2, move 4 1	move 2, move 2 1
+seed_after 56584,64153,65265,17218
+log |
+log |t:|
+log |move|p2b: Ditto|Heat Crash|p1a: Metagross
+log |-supereffective|p1a: Metagross
+log |split|p1
+log |-damage|p1a: Metagross|121/187
+log |-damage|p1a: Metagross|65/100
+log |move|p1a: Metagross|Heat Crash|p2b: Ditto
+log |-supereffective|p2b: Ditto
+log |split|p2
+log |-damage|p2b: Ditto|76/123
+log |-damage|p2b: Ditto|62/100
+log |move|p1b: Snorlax|Grass Knot|p2a: Copperajah
+log |-resisted|p2a: Copperajah
+log |split|p2
+log |-damage|p2a: Copperajah|195/229
+log |-damage|p2a: Copperajah|86/100
+log |move|p2a: Copperajah|Reflect||[still]
+log |-fail|p2a: Copperajah
+log |
+log |-sideend|p2: Bob|Reflect
+log |upkeep
+log |turn|6
+scenario photon_geyser_boosts
+seed 251,252,253,254
+p1 Necrozma|||PrismArmor|PhotonGeyser,SwordsDance,NastyPlot,Recover|Serious||N|||50|,,,,,Psychic]Lunala|||ShadowShield|PhotonGeyser,SwordsDance,NastyPlot,Recover|Serious||N|||50|,,,,,Psychic]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 251,252,253,254
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Necrozma|Necrozma, L50|172/172
+log |switch|p1a: Necrozma|Necrozma, L50|100/100
+log |split|p1
+log |switch|p1b: Lunala|Lunala, L50|212/212
+log |switch|p1b: Lunala|Lunala, L50|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1, move 1
+seed_after 58862,5373,53300,29588
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1b: Lunala|Photon Geyser|p2b: Corviknight
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|380/400
+log |-damage|p2b: Corviknight|95/100
+log |move|p1a: Necrozma|Photon Geyser|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|687/714
+log |-damage|p2a: Blissey|97/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2, move 3	move 1, move 1
+seed_after 58862,5373,53300,29588
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1b: Lunala|Nasty Plot|p1b: Lunala
+log |-boost|p1b: Lunala|spa|2
+log |move|p1a: Necrozma|Swords Dance|p1a: Necrozma
+log |-boost|p1a: Necrozma|atk|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 3	move 1, move 1
+seed_after 58862,5373,53300,29588
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1b: Lunala|Nasty Plot|p1b: Lunala
+log |-boost|p1b: Lunala|spa|2
+log |move|p1a: Necrozma|Swords Dance|p1a: Necrozma
+log |-boost|p1a: Necrozma|atk|2
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 1, move 1
+seed_after 35035,21982,35089,62554
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1b: Lunala|Photon Geyser|p2b: Corviknight
+log |-resisted|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|336/400
+log |-damage|p2b: Corviknight|84/100
+log |move|p1a: Necrozma|Photon Geyser|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|450/714
+log |-damage|p2a: Blissey|64/100
+log |
+log |upkeep
+log |turn|5
+scenario fusion_pair_order
+seed 255,256,257,258
+p1 Reshiram|||Turboblaze|FusionFlare,FusionBolt,Recover,NastyPlot|Serious|,,,,,252|N|||50|,,,,,Dragon]Zekrom|||Teravolt|FusionBolt,FusionFlare,Recover,SwordsDance|Serious||N|||50|,,,,,Dragon]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 255,256,257,258
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Reshiram|Reshiram, L50|175/175
+log |switch|p1a: Reshiram|Reshiram, L50|100/100
+log |split|p1
+log |switch|p1b: Zekrom|Zekrom, L50|175/175
+log |switch|p1b: Zekrom|Zekrom, L50|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |-ability|p1a: Reshiram|Turboblaze
+log |-ability|p1b: Zekrom|Teravolt
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1, move 1
+seed_after 7296,38268,5450,27832
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Reshiram|Fusion Flare|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|680/714
+log |-damage|p2a: Blissey|96/100
+log |move|p1b: Zekrom|Fusion Bolt|p2b: Corviknight
+log |-supereffective|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|238/400
+log |-damage|p2b: Corviknight|60/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 1, move 2 2	move 1, move 1
+seed_after 23825,52654,54373,47006
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Reshiram|Fusion Bolt|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|646/714
+log |-damage|p2a: Blissey|91/100
+log |move|p1b: Zekrom|Fusion Flare|p2b: Corviknight
+log |-supereffective|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|300/400
+log |-damage|p2b: Corviknight|75/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 3	move 1, move 1
+seed_after 45974,39576,56376,63715
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|400/400
+log |-heal|p2b: Corviknight|100/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Reshiram|Fusion Flare|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|683/714
+log |-damage|p2a: Blissey|96/100
+log |move|p1b: Zekrom|Recover||[still]
+log |-fail|p1b: Zekrom|heal
+log |
+log |upkeep
+log |turn|4
+step turn4	move 3, move 1 2	move 1, move 1
+seed_after 13916,13364,43123,18228
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |move|p1a: Reshiram|Recover||[still]
+log |-fail|p1a: Reshiram|heal
+log |move|p1b: Zekrom|Fusion Bolt|p2b: Corviknight
+log |-supereffective|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|320/400
+log |-damage|p2b: Corviknight|80/100
+log |
+log |upkeep
+log |turn|5
+scenario freezedry_water_targets
+seed 261,262,263,264
+p1 Glaceon|||Pressure|FreezeDry,Recover,Reflect,IceBeam|Serious|,,,,,252|M|||50|,,,,,Ice]Weavile|||Pressure|FreezeDry,Recover,Reflect,IceBeam|Serious|,,,,,252|M|||50|,,,,,Dark]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Gyarados|||Intimidate|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M|||50|,,,,,Water]Quagsire|||Unaware|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M|||50|,,,,,Water]Pelipper|||Drizzle|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M|||50|,,,,,Water]Toxapex|||Regenerator|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M|||50|,,,,,Water
+step start		
+seed_after 261,262,263,264
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Glaceon|Glaceon, L50, M|140/140
+log |switch|p1a: Glaceon|Glaceon, L50, M|100/100
+log |split|p1
+log |switch|p1b: Weavile|Weavile, L50, M|145/145
+log |switch|p1b: Weavile|Weavile, L50, M|100/100
+log |split|p2
+log |switch|p2a: Gyarados|Gyarados, L50, M|202/202
+log |switch|p2a: Gyarados|Gyarados, L50, M|100/100
+log |split|p2
+log |switch|p2b: Quagsire|Quagsire, L50, M|202/202
+log |switch|p2b: Quagsire|Quagsire, L50, M|100/100
+log |-ability|p1b: Weavile|Pressure
+log |-ability|p1a: Glaceon|Pressure
+log |-ability|p2a: Gyarados|Intimidate|boost
+log |-unboost|p1a: Glaceon|atk|1
+log |-unboost|p1b: Weavile|atk|1
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1, move 1
+seed_after 63388,64388,13382,43635
+log |
+log |t:|
+log |move|p1b: Weavile|Freeze-Dry|p2b: Quagsire
+log |-supereffective|p2b: Quagsire
+log |split|p2
+log |-damage|p2b: Quagsire|82/202
+log |-damage|p2b: Quagsire|41/100
+log |-status|p2b: Quagsire|frz
+log |move|p1a: Glaceon|Freeze-Dry|p2a: Gyarados
+log |-supereffective|p2a: Gyarados
+log |split|p2
+log |-damage|p2a: Gyarados|10/202
+log |-damage|p2a: Gyarados|5/100
+log |move|p2a: Gyarados|Recover|p2a: Gyarados
+log |split|p2
+log |-heal|p2a: Gyarados|111/202
+log |-heal|p2a: Gyarados|55/100
+log |cant|p2b: Quagsire|frz
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	switch 3, switch 4
+seed_after 28978,2535,36808,48379
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Pelipper|Pelipper, L50, M|167/167
+log |switch|p2a: Pelipper|Pelipper, L50, M|100/100
+log |-weather|RainDance|[from] ability: Drizzle|[of] p2a: Pelipper
+log |split|p2
+log |switch|p2b: Toxapex|Toxapex, L50, M|157/157
+log |switch|p2b: Toxapex|Toxapex, L50, M|100/100
+log |move|p1b: Weavile|Freeze-Dry|p2b: Toxapex
+log |-supereffective|p2b: Toxapex
+log |split|p2
+log |-damage|p2b: Toxapex|121/157
+log |-damage|p2b: Toxapex|78/100
+log |move|p1a: Glaceon|Freeze-Dry|p2a: Pelipper
+log |-supereffective|p2a: Pelipper
+log |split|p2
+log |-damage|p2a: Pelipper|0 fnt
+log |-damage|p2a: Pelipper|0 fnt
+log |faint|p2a: Pelipper
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+step forced1		switch 3, pass
+seed_after 28978,2535,36808,48379
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Gyarados|Gyarados, L50, M|111/202
+log |switch|p2a: Gyarados|Gyarados, L50, M|55/100
+log |-ability|p2a: Gyarados|Intimidate|boost
+log |-unboost|p1a: Glaceon|atk|1
+log |-unboost|p1b: Weavile|atk|1
+log |turn|3
+step turn3	move 1 1, move 1 2	move 1 terastallize, move 1
+seed_after 58914,5794,15969,42627
+log |
+log |t:|
+log |-terastallize|p2a: Gyarados|Water
+log |move|p1b: Weavile|Freeze-Dry|p2b: Toxapex
+log |-supereffective|p2b: Toxapex
+log |split|p2
+log |-damage|p2b: Toxapex|85/157
+log |-damage|p2b: Toxapex|55/100
+log |move|p1a: Glaceon|Freeze-Dry|p2a: Gyarados
+log |-supereffective|p2a: Gyarados
+log |split|p2
+log |-damage|p2a: Gyarados|9/202
+log |-damage|p2a: Gyarados|5/100
+log |move|p2a: Gyarados|Recover|p2a: Gyarados
+log |split|p2
+log |-heal|p2a: Gyarados|110/202
+log |-heal|p2a: Gyarados|55/100
+log |move|p2b: Toxapex|Recover|p2b: Toxapex
+log |split|p2
+log |-heal|p2b: Toxapex|157/157
+log |-heal|p2b: Toxapex|100/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 1, move 1
+seed_after 60632,39614,9817,34571
+log |
+log |t:|
+log |move|p1b: Weavile|Freeze-Dry|p2b: Toxapex
+log |-supereffective|p2b: Toxapex
+log |split|p2
+log |-damage|p2b: Toxapex|125/157
+log |-damage|p2b: Toxapex|80/100
+log |move|p1a: Glaceon|Freeze-Dry|p2a: Gyarados
+log |-supereffective|p2a: Gyarados
+log |split|p2
+log |-damage|p2a: Gyarados|14/202
+log |-damage|p2a: Gyarados|7/100
+log |move|p2a: Gyarados|Recover|p2a: Gyarados
+log |split|p2
+log |-heal|p2a: Gyarados|115/202
+log |-heal|p2a: Gyarados|57/100
+log |move|p2b: Toxapex|Recover|p2b: Toxapex
+log |split|p2
+log |-heal|p2b: Toxapex|157/157
+log |-heal|p2b: Toxapex|100/100
+log |
+log |-weather|RainDance|[upkeep]
+log |upkeep
+log |turn|5
+scenario endeavor_gambit_fang_ruination
+seed 271,272,273,274
+p1 Pikachu|||Static|Endeavor,SuperFang,Reflect,Recover|Serious||M|||50|,,,,,Electric]Kingambit|||Defiant|FinalGambit,SuperFang,Reflect,Recover|Serious||M|||50|,,,,,Dark]Chien-Pao|||SwordofRuin|Ruination,SuperFang,Reflect,Recover|Serious||N|||50|,,,,,Dark]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy]Skarmory|||Sturdy|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Steel
+step start		
+seed_after 271,272,273,274
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Pikachu|Pikachu, L50, M|110/110
+log |switch|p1a: Pikachu|Pikachu, L50, M|100/100
+log |split|p1
+log |switch|p1b: Kingambit|Kingambit, L50, M|175/175
+log |switch|p1b: Kingambit|Kingambit, L50, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Corviknight|Corviknight, M|400/400
+log |switch|p2b: Corviknight|Corviknight, M|100/100
+log |-ability|p2b: Corviknight|Pressure
+log |turn|1
+step turn1	move 1 1, move 2 2	move 1, move 1
+seed_after 31399,24715,12308,5876
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover||[still]
+log |-fail|p2b: Corviknight|heal
+log |move|p2a: Blissey|Recover||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Pikachu|Endeavor|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|110/714
+log |-damage|p2a: Blissey|16/100
+log |move|p1b: Kingambit|Super Fang|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|200/400
+log |-damage|p2b: Corviknight|50/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 2, move 2
+seed_after 47885,59428,18696,16647
+log |
+log |t:|
+log |move|p2b: Corviknight|Reflect|p2b: Corviknight
+log |-sidestart|p2: Bob|Reflect
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Pikachu|Endeavor|p2a: Blissey
+log |-immune|p2a: Blissey
+log |move|p1b: Kingambit|Final Gambit|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|25/400
+log |-damage|p2b: Corviknight|7/100
+log |faint|p1b: Kingambit
+log |
+log |upkeep
+step forced1	pass, switch 3	
+seed_after 47885,59428,18696,16647
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Chien-Pao|Chien-Pao, L50|155/155
+log |switch|p1b: Chien-Pao|Chien-Pao, L50|100/100
+log |-ability|p1b: Chien-Pao|Sword of Ruin
+log |turn|3
+step turn3	move 1 1, move 2 2	move 1, move 1
+seed_after 40593,5807,32261,33441
+log |
+log |t:|
+log |move|p2b: Corviknight|Recover|p2b: Corviknight
+log |split|p2
+log |-heal|p2b: Corviknight|225/400
+log |-heal|p2b: Corviknight|57/100
+log |move|p1b: Chien-Pao|Super Fang|p2b: Corviknight
+log |split|p2
+log |-damage|p2b: Corviknight|113/400
+log |-damage|p2b: Corviknight|29/100
+log |move|p2a: Blissey|Recover|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|467/714
+log |-heal|p2a: Blissey|66/100
+log |move|p1a: Pikachu|Endeavor|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|110/714
+log |-damage|p2a: Blissey|16/100
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 2, move 2
+seed_after 63178,38773,10658,20808
+log |
+log |t:|
+log |move|p2b: Corviknight|Reflect||[still]
+log |-fail|p2b: Corviknight
+log |move|p1b: Chien-Pao|Ruination|p2b: Corviknight|[miss]
+log |-miss|p1b: Chien-Pao|p2b: Corviknight
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Pikachu|Endeavor|p2a: Blissey
+log |-immune|p2a: Blissey
+log |
+log |upkeep
+log |turn|5
+scenario glaive_rush_drawback
+seed 281,282,283,284
+p1 Dragonite|||Multiscale|GlaiveRush,Recover,Reflect,ExtremeSpeed|Serious|252,,128,,128,|M||||,,,,,Dragon]Gyarados|||Intimidate|GlaiveRush,Recover,Reflect,Waterfall|Serious|252,,128,,128,|M||||,,,,,Water]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Thundurus|||Defiant|FocusBlast,Thunder,Hurricane,Recover|Serious||M||||,,,,,Electric]Zapdos|||Pressure|Thunder,Hurricane,FocusBlast,Recover|Serious||N||||,,,,,Electric]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 281,282,283,284
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Dragonite|Dragonite, M|386/386
+log |switch|p1a: Dragonite|Dragonite, M|100/100
+log |split|p1
+log |switch|p1b: Gyarados|Gyarados, M|394/394
+log |switch|p1b: Gyarados|Gyarados, M|100/100
+log |split|p2
+log |switch|p2a: Thundurus|Thundurus, M|299/299
+log |switch|p2a: Thundurus|Thundurus, M|100/100
+log |split|p2
+log |switch|p2b: Zapdos|Zapdos|321/321
+log |switch|p2b: Zapdos|Zapdos|100/100
+log |-ability|p2b: Zapdos|Pressure
+log |-ability|p1b: Gyarados|Intimidate|boost
+log |-unboost|p2a: Thundurus|atk|1
+log |-ability|p2a: Thundurus|Defiant|boost
+log |-boost|p2a: Thundurus|atk|2
+log |-unboost|p2b: Zapdos|atk|1
+log |turn|1
+step turn1	move 1 1, move 1 2	move 1 1, move 2 2
+seed_after 33148,44898,61141,30666
+log |
+log |t:|
+log |move|p2a: Thundurus|Focus Blast|p1a: Dragonite
+log |-resisted|p1a: Dragonite
+log |split|p1
+log |-damage|p1a: Dragonite|360/386
+log |-damage|p1a: Dragonite|94/100
+log |move|p2b: Zapdos|Hurricane|p1b: Gyarados
+log |split|p1
+log |-damage|p1b: Gyarados|258/394
+log |-damage|p1b: Gyarados|66/100
+log |move|p1b: Gyarados|Glaive Rush|p2b: Zapdos
+log |split|p2
+log |-damage|p2b: Zapdos|197/321
+log |-damage|p2b: Zapdos|62/100
+log |-singlemove|p1b: Gyarados|Glaive Rush|[silent]
+log |move|p1a: Dragonite|Glaive Rush|p2a: Thundurus
+log |split|p2
+log |-damage|p2a: Thundurus|58/299
+log |-damage|p2a: Thundurus|20/100
+log |-singlemove|p1a: Dragonite|Glaive Rush|[silent]
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2, move 2	move 1 1, move 2 2
+seed_after 15771,9359,30262,48064
+log |
+log |t:|
+log |move|p2a: Thundurus|Focus Blast|p1a: Dragonite
+log |-resisted|p1a: Dragonite
+log |-crit|p1a: Dragonite
+log |split|p1
+log |-damage|p1a: Dragonite|214/386
+log |-damage|p1a: Dragonite|56/100
+log |move|p2b: Zapdos|Hurricane|p1b: Gyarados
+log |split|p1
+log |-damage|p1b: Gyarados|0 fnt
+log |-damage|p1b: Gyarados|0 fnt
+log |faint|p1b: Gyarados
+log |move|p1a: Dragonite|Recover|p1a: Dragonite
+log |split|p1
+log |-heal|p1a: Dragonite|386/386
+log |-heal|p1a: Dragonite|100/100
+log |
+log |upkeep
+step forced1	pass, switch 3	
+seed_after 15771,9359,30262,48064
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Blissey|Blissey, F|714/714
+log |switch|p1b: Blissey|Blissey, F|100/100
+log |turn|3
+step turn3	move 1 1, move 2	move 3 1, move 3 1
+seed_after 60814,24097,1234,30120
+log |
+log |t:|
+log |move|p2a: Thundurus|Hurricane|p1a: Dragonite
+log |split|p1
+log |-damage|p1a: Dragonite|322/386
+log |-damage|p1a: Dragonite|84/100
+log |move|p2b: Zapdos|Focus Blast|p1a: Dragonite|[miss]
+log |-miss|p2b: Zapdos|p1a: Dragonite
+log |move|p1a: Dragonite|Glaive Rush|p2a: Thundurus
+log |split|p2
+log |-damage|p2a: Thundurus|0 fnt
+log |-damage|p2a: Thundurus|0 fnt
+log |-singlemove|p1a: Dragonite|Glaive Rush|[silent]
+log |faint|p2a: Thundurus
+log |move|p1b: Blissey|Reflect|p1b: Blissey
+log |-sidestart|p1: Alice|Reflect
+log |
+log |upkeep
+step forced2		switch 3, pass
+seed_after 60814,24097,1234,30120
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Clefable|Clefable, M|394/394
+log |switch|p2a: Clefable|Clefable, M|100/100
+log |turn|4
+step turn4	move 3, move 2	move 2, move 2 1
+seed_after 56981,40224,20623,19644
+log |
+log |t:|
+log |move|p2b: Zapdos|Hurricane|p1a: Dragonite
+log |split|p1
+log |-damage|p1a: Dragonite|64/386
+log |-damage|p1a: Dragonite|17/100
+log |move|p1a: Dragonite|Reflect||[still]
+log |-fail|p1a: Dragonite
+log |move|p2a: Clefable|Reflect|p2a: Clefable
+log |-sidestart|p2: Bob|Reflect
+log |move|p1b: Blissey|Reflect||[still]
+log |-fail|p1b: Blissey
+log |
+log |upkeep
+log |turn|5
+scenario haze_clearsmog
+seed 291,292,293,294
+p1 Dragonite|||Multiscale|DragonDance,Recover,Reflect,Haze|Serious|252,,128,,128,|M||||,,,,,Dragon]Toxapex|||Regenerator|ClearSmog,Haze,Recover,Reflect|Serious|252,,128,,128,|M||||,,,,,Poison]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Volcarona|||FlameBody|QuiverDance,Recover,Reflect,LightScreen|Serious|252,,128,,128,|M||||,,,,,Bug]Snorlax|||ThickFat|BellyDrum,Recover,Reflect,LightScreen|Serious|252,,128,,128,|M||||,,,,,Normal]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 291,292,293,294
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Dragonite|Dragonite, M|386/386
+log |switch|p1a: Dragonite|Dragonite, M|100/100
+log |split|p1
+log |switch|p1b: Toxapex|Toxapex, M|304/304
+log |switch|p1b: Toxapex|Toxapex, M|100/100
+log |split|p2
+log |switch|p2a: Volcarona|Volcarona, M|374/374
+log |switch|p2a: Volcarona|Volcarona, M|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, M|524/524
+log |switch|p2b: Snorlax|Snorlax, M|100/100
+log |turn|1
+step turn1	move 1, move 3	move 1, move 1
+seed_after 291,292,293,294
+log |
+log |t:|
+log |move|p2a: Volcarona|Quiver Dance|p2a: Volcarona
+log |-boost|p2a: Volcarona|spa|1
+log |-boost|p2a: Volcarona|spd|1
+log |-boost|p2a: Volcarona|spe|1
+log |move|p1a: Dragonite|Dragon Dance|p1a: Dragonite
+log |-boost|p1a: Dragonite|atk|1
+log |-boost|p1a: Dragonite|spe|1
+log |move|p1b: Toxapex|Recover||[still]
+log |-fail|p1b: Toxapex|heal
+log |move|p2b: Snorlax|Belly Drum|p2b: Snorlax
+log |split|p2
+log |-damage|p2b: Snorlax|262/524
+log |-damage|p2b: Snorlax|50/100
+log |-setboost|p2b: Snorlax|atk|6|[from] move: Belly Drum
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, move 1 1	move 1, move 2
+seed_after 309,64416,48713,15336
+log |
+log |t:|
+log |move|p2a: Volcarona|Quiver Dance|p2a: Volcarona
+log |-boost|p2a: Volcarona|spa|1
+log |-boost|p2a: Volcarona|spd|1
+log |-boost|p2a: Volcarona|spe|1
+log |move|p1a: Dragonite|Dragon Dance|p1a: Dragonite
+log |-boost|p1a: Dragonite|atk|1
+log |-boost|p1a: Dragonite|spe|1
+log |move|p1b: Toxapex|Clear Smog|p2a: Volcarona
+log |split|p2
+log |-damage|p2a: Volcarona|356/374
+log |-damage|p2a: Volcarona|96/100
+log |-clearboost|p2a: Volcarona
+log |move|p2b: Snorlax|Recover|p2b: Snorlax
+log |split|p2
+log |-heal|p2b: Snorlax|524/524
+log |-heal|p2b: Snorlax|100/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 4, move 1 2	move 2, move 2
+seed_after 15243,60084,28592,19546
+log |
+log |t:|
+log |move|p1a: Dragonite|Haze|p1a: Dragonite
+log |-clearallboost
+log |move|p2a: Volcarona|Recover|p2a: Volcarona
+log |split|p2
+log |-heal|p2a: Volcarona|374/374
+log |-heal|p2a: Volcarona|100/100
+log |move|p1b: Toxapex|Clear Smog|p2b: Snorlax
+log |split|p2
+log |-damage|p2b: Snorlax|493/524
+log |-damage|p2b: Snorlax|95/100
+log |-clearboost|p2b: Snorlax
+log |move|p2b: Snorlax|Recover|p2b: Snorlax
+log |split|p2
+log |-heal|p2b: Snorlax|524/524
+log |-heal|p2b: Snorlax|100/100
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, move 2	move 1, move 1
+seed_after 15243,60084,28592,19546
+log |
+log |t:|
+log |move|p2a: Volcarona|Quiver Dance|p2a: Volcarona
+log |-boost|p2a: Volcarona|spa|1
+log |-boost|p2a: Volcarona|spd|1
+log |-boost|p2a: Volcarona|spe|1
+log |move|p1a: Dragonite|Dragon Dance|p1a: Dragonite
+log |-boost|p1a: Dragonite|atk|1
+log |-boost|p1a: Dragonite|spe|1
+log |move|p1b: Toxapex|Haze|p1b: Toxapex
+log |-clearallboost
+log |move|p2b: Snorlax|Belly Drum|p2b: Snorlax
+log |split|p2
+log |-damage|p2b: Snorlax|262/524
+log |-damage|p2b: Snorlax|50/100
+log |-setboost|p2b: Snorlax|atk|6|[from] move: Belly Drum
+log |
+log |upkeep
+log |turn|5
+step turn5	move 4, move 3	move 2, move 3
+seed_after 15243,60084,28592,19546
+log |
+log |t:|
+log |move|p2a: Volcarona|Recover||[still]
+log |-fail|p2a: Volcarona|heal
+log |move|p1a: Dragonite|Haze|p1a: Dragonite
+log |-clearallboost
+log |move|p1b: Toxapex|Recover||[still]
+log |-fail|p1b: Toxapex|heal
+log |move|p2b: Snorlax|Reflect|p2b: Snorlax
+log |-sidestart|p2: Bob|Reflect
+log |
+log |upkeep
+log |turn|6
+scenario shellsidearm_substitute
+seed 301,302,303,304
+p1 Slowbro|||Regenerator|ShellSideArm,Recover,Reflect,SlackOff|Serious|252,,128,,128,|M||||,,,,,Water]Toxapex|||Regenerator|ShellSideArm,Recover,Reflect,Toxic|Serious|252,,128,,128,|M||||,,,,,Poison]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Clefable|||MagicGuard|Substitute,Recover,Reflect,LightScreen|Serious|252,,128,,128,|M||||,,,,,Fairy]Blissey|||SereneGrace|Substitute,Recover,Reflect,LightScreen|Serious|252,,128,,128,|F||||,,,,,Normal]Corviknight|||Pressure|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Flying
+step start		
+seed_after 301,302,303,304
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Slowbro|Slowbro, M|394/394
+log |switch|p1a: Slowbro|Slowbro, M|100/100
+log |split|p1
+log |switch|p1b: Toxapex|Toxapex, M|304/304
+log |switch|p1b: Toxapex|Toxapex, M|100/100
+log |split|p2
+log |switch|p2a: Clefable|Clefable, M|394/394
+log |switch|p2a: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |turn|1
+step turn1	move 2, move 2	move 1, move 1
+seed_after 301,302,303,304
+log |
+log |t:|
+log |move|p2a: Clefable|Substitute|p2a: Clefable
+log |-start|p2a: Clefable|Substitute
+log |split|p2
+log |-damage|p2a: Clefable|296/394
+log |-damage|p2a: Clefable|76/100
+log |move|p2b: Blissey|Substitute|p2b: Blissey
+log |-start|p2b: Blissey|Substitute
+log |split|p2
+log |-damage|p2b: Blissey|536/714
+log |-damage|p2b: Blissey|76/100
+log |move|p1b: Toxapex|Recover||[still]
+log |-fail|p1b: Toxapex|heal
+log |move|p1a: Slowbro|Recover||[still]
+log |-fail|p1a: Slowbro|heal
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1 2	move 2, move 2
+seed_after 54123,64640,24844,15640
+log |
+log |t:|
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |move|p1b: Toxapex|Shell Side Arm|p2b: Blissey|[anim] Shell Side Arm Physical
+log |-end|p2b: Blissey|Substitute
+log |-hint|Physical Shell Side Arm
+log |move|p1a: Slowbro|Shell Side Arm|p2a: Clefable|[anim] Shell Side Arm Special
+log |-supereffective|p2a: Clefable
+log |-end|p2a: Clefable|Substitute
+log |-hint|Special Shell Side Arm
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 2, move 2
+seed_after 64909,25535,60528,1024
+log |
+log |t:|
+log |move|p2a: Clefable|Recover||[still]
+log |-fail|p2a: Clefable|heal
+log |move|p2b: Blissey|Recover||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1b: Toxapex|Shell Side Arm|p2b: Blissey|[anim] Shell Side Arm Physical
+log |split|p2
+log |-damage|p2b: Blissey|525/714
+log |-damage|p2b: Blissey|74/100
+log |-hint|Physical Shell Side Arm
+log |move|p1a: Slowbro|Shell Side Arm|p2a: Clefable|[anim] Shell Side Arm Special
+log |-supereffective|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|258/394
+log |-damage|p2a: Clefable|66/100
+log |-hint|Special Shell Side Arm
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 2, move 2
+seed_after 52105,42589,42863,62952
+log |
+log |t:|
+log |move|p2a: Clefable|Recover|p2a: Clefable
+log |split|p2
+log |-heal|p2a: Clefable|394/394
+log |-heal|p2a: Clefable|100/100
+log |move|p2b: Blissey|Recover|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |move|p1b: Toxapex|Shell Side Arm|p2b: Blissey|[anim] Shell Side Arm Physical
+log |split|p2
+log |-damage|p2b: Blissey|527/714
+log |-damage|p2b: Blissey|74/100
+log |-hint|Physical Shell Side Arm
+log |move|p1a: Slowbro|Shell Side Arm|p2a: Clefable|[anim] Shell Side Arm Special
+log |-supereffective|p2a: Clefable
+log |split|p2
+log |-damage|p2a: Clefable|256/394
+log |-damage|p2a: Clefable|65/100
+log |-hint|Special Shell Side Arm
+log |
+log |upkeep
+log |turn|5
+scenario clearsmog_substitute
+seed 311,312,313,314
+p1 Toxapex|||Regenerator|ClearSmog,Haze,Recover,Reflect|Serious|252,,128,,128,|M||||,,,,,Poison]Dragonite|||Multiscale|DragonDance,Recover,Reflect,Haze|Serious|252,,128,,128,|M||||,,,,,Dragon]Blissey|||SereneGrace|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|F||||,,,,,Normal
+p2 Volcarona|||FlameBody|QuiverDance,Substitute,Recover,Reflect|Serious|252,,128,,128,|M||||,,,,,Bug]Snorlax|||ThickFat|BellyDrum,Substitute,Recover,Reflect|Serious|252,,128,,128,|M||||,,,,,Normal]Clefable|||MagicGuard|Recover,Reflect,LightScreen,Tailwind|Serious|252,,128,,128,|M||||,,,,,Fairy
+step start		
+seed_after 311,312,313,314
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|3
+log |teamsize|p2|3
+log |start
+log |split|p1
+log |switch|p1a: Toxapex|Toxapex, M|304/304
+log |switch|p1a: Toxapex|Toxapex, M|100/100
+log |split|p1
+log |switch|p1b: Dragonite|Dragonite, M|386/386
+log |switch|p1b: Dragonite|Dragonite, M|100/100
+log |split|p2
+log |switch|p2a: Volcarona|Volcarona, M|374/374
+log |switch|p2a: Volcarona|Volcarona, M|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, M|524/524
+log |switch|p2b: Snorlax|Snorlax, M|100/100
+log |turn|1
+step turn1	move 3, move 2	move 1, move 3
+seed_after 311,312,313,314
+log |
+log |t:|
+log |move|p2a: Volcarona|Quiver Dance|p2a: Volcarona
+log |-boost|p2a: Volcarona|spa|1
+log |-boost|p2a: Volcarona|spd|1
+log |-boost|p2a: Volcarona|spe|1
+log |move|p1b: Dragonite|Recover||[still]
+log |-fail|p1b: Dragonite|heal
+log |move|p1a: Toxapex|Recover||[still]
+log |-fail|p1a: Toxapex|heal
+log |move|p2b: Snorlax|Recover||[still]
+log |-fail|p2b: Snorlax|heal
+log |
+log |upkeep
+log |turn|2
+step turn2	move 3, move 2	move 2, move 2
+seed_after 311,312,313,314
+log |
+log |t:|
+log |move|p2a: Volcarona|Substitute|p2a: Volcarona
+log |-start|p2a: Volcarona|Substitute
+log |split|p2
+log |-damage|p2a: Volcarona|281/374
+log |-damage|p2a: Volcarona|76/100
+log |move|p1b: Dragonite|Recover||[still]
+log |-fail|p1b: Dragonite|heal
+log |move|p1a: Toxapex|Recover||[still]
+log |-fail|p1a: Toxapex|heal
+log |move|p2b: Snorlax|Substitute|p2b: Snorlax
+log |-start|p2b: Snorlax|Substitute
+log |split|p2
+log |-damage|p2b: Snorlax|393/524
+log |-damage|p2b: Snorlax|75/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1	move 3, move 3
+seed_after 34756,38582,19582,24796
+log |
+log |t:|
+log |move|p2a: Volcarona|Recover|p2a: Volcarona
+log |split|p2
+log |-heal|p2a: Volcarona|374/374
+log |-heal|p2a: Volcarona|100/100
+log |move|p1b: Dragonite|Dragon Dance|p1b: Dragonite
+log |-boost|p1b: Dragonite|atk|1
+log |-boost|p1b: Dragonite|spe|1
+log |move|p1a: Toxapex|Clear Smog|p2a: Volcarona
+log |-activate|p2a: Volcarona|move: Substitute|[damage]
+log |move|p2b: Snorlax|Recover|p2b: Snorlax
+log |split|p2
+log |-heal|p2b: Snorlax|524/524
+log |-heal|p2b: Snorlax|100/100
+log |
+log |upkeep
+log |turn|4
+step turn4	move 2, move 4	move 3, move 3
+seed_after 34756,38582,19582,24796
+log |
+log |t:|
+log |move|p2a: Volcarona|Recover||[still]
+log |-fail|p2a: Volcarona|heal
+log |move|p1b: Dragonite|Haze|p1b: Dragonite
+log |-clearallboost
+log |move|p1a: Toxapex|Haze|p1a: Toxapex
+log |-clearallboost
+log |move|p2b: Snorlax|Recover||[still]
+log |-fail|p2b: Snorlax|heal
+log |
+log |upkeep
+log |turn|5
