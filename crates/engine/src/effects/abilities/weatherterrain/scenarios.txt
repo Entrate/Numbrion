@@ -1,0 +1,1387 @@
+# Weather/terrain scenarios recorded from the pinned Showdown build by
+# tools/probes/weather_terrain/scenarios.mjs. Do not edit by hand.
+# S name | SEED a,b,c,d | T1/T2 packed team | B turn seed (decision boundary) | L raw log line
+# (|t:| normalized) produced to reach that boundary | C side choice | E ended/running
+S weather_leads
+SEED 1,2,3,4
+T1 |Pelipper||Drizzle|swordsdance,protect,roost,tailwind|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Tyranitar||Sand Stream|swordsdance,protect,rockslide,crunch|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Torkoal||Drought|swordsdance,protect,eruption,willowisp|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Abomasnow||Snow Warning|swordsdance,protect,blizzard,woodhammer|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 1,2,3,4
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Pelipper|Pelipper, M|324/324
+L |switch|p1a: Pelipper|Pelipper, M|100/100
+L |split|p1
+L |switch|p1b: Tyranitar|Tyranitar, M|404/404
+L |switch|p1b: Tyranitar|Tyranitar, M|100/100
+L |split|p2
+L |switch|p2a: Torkoal|Torkoal, M|344/344
+L |switch|p2a: Torkoal|Torkoal, M|100/100
+L |split|p2
+L |switch|p2b: Abomasnow|Abomasnow, M|384/384
+L |switch|p2b: Abomasnow|Abomasnow, M|100/100
+L |-weather|RainDance|[from] ability: Drizzle|[of] p1a: Pelipper
+L |-weather|Sandstorm|[from] ability: Sand Stream|[of] p1b: Tyranitar
+L |-weather|Snowscape|[from] ability: Snow Warning|[of] p2b: Abomasnow
+L |-weather|SunnyDay|[from] ability: Drought|[of] p2a: Torkoal
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 2 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|2
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|2
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 3 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|2
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|2
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 4 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|2
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|2
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|2
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|2
+L |
+L |-weather|SunnyDay|[upkeep]
+L |upkeep
+L |turn|4
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 5 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|0
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|0
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|0
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|0
+L |
+L |-weather|SunnyDay|[upkeep]
+L |upkeep
+L |turn|5
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 6 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|0
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|0
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|0
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|0
+L |
+L |-weather|none
+L |upkeep
+L |turn|6
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 7 1,2,3,4
+L |
+L |t:|
+L |move|p1a: Pelipper|Swords Dance|p1a: Pelipper
+L |-boost|p1a: Pelipper|atk|0
+L |move|p1b: Tyranitar|Swords Dance|p1b: Tyranitar
+L |-boost|p1b: Tyranitar|atk|0
+L |move|p2b: Abomasnow|Swords Dance|p2b: Abomasnow
+L |-boost|p2b: Abomasnow|atk|0
+L |move|p2a: Torkoal|Swords Dance|p2a: Torkoal
+L |-boost|p2a: Torkoal|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S sun
+SEED 11,22,33,44
+T1 |Torkoal||Drought|weatherball,thunder,synthesis,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Charizard||Solar Power|flamethrower,willowisp,yawn,moonlight|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Snorlax||Chlorophyll|synthesis,swordsdance,weatherball,hurricane|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Blissey||Leaf Guard|swordsdance,seedbomb,synthesis,surf|Serious|252,0,128,0,128,0|F|||100|,,,,,
+B 1 11,22,33,44
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Torkoal|Torkoal, M|344/344
+L |switch|p1a: Torkoal|Torkoal, M|100/100
+L |split|p1
+L |switch|p1b: Charizard|Charizard, M|360/360
+L |switch|p1b: Charizard|Charizard, M|100/100
+L |split|p2
+L |switch|p2a: Snorlax|Snorlax, M|524/524
+L |switch|p2a: Snorlax|Snorlax, M|100/100
+L |split|p2
+L |switch|p2b: Blissey|Blissey, F|714/714
+L |switch|p2b: Blissey|Blissey, F|100/100
+L |-weather|SunnyDay|[from] ability: Drought|[of] p1a: Torkoal
+L |turn|1
+C p1 move 1 1, move 2 2
+C p2 move 1, move 1
+B 2 3932,55062,24613,55040
+L |
+L |t:|
+L |move|p1b: Charizard|Will-O-Wisp|p2b: Blissey
+L |-immune|p2b: Blissey|[from] ability: Leaf Guard
+L |move|p2a: Snorlax|Synthesis|p2a: Snorlax
+L |-fail|p2a: Snorlax|heal
+L |move|p2b: Blissey|Swords Dance|p2b: Blissey
+L |-boost|p2b: Blissey|atk|2
+L |move|p1a: Torkoal|Weather Ball|p2a: Snorlax
+L |split|p2
+L |-damage|p2a: Snorlax|385/524
+L |-damage|p2a: Snorlax|74/100
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1b: Charizard|315/360|[from] ability: Solar Power|[of] p1b: Charizard
+L |-damage|p1b: Charizard|88/100|[from] ability: Solar Power|[of] p1b: Charizard
+L |upkeep
+L |turn|2
+C p1 move 2 2, move 3 2
+C p2 move 4 1, move 2 1
+B 3 45576,22569,57262,33093
+L |
+L |t:|
+L |move|p1b: Charizard|Yawn|p2b: Blissey
+L |-immune|p2b: Blissey|[from] ability: Leaf Guard
+L |move|p2a: Snorlax|Hurricane|p1a: Torkoal
+L |split|p1
+L |-damage|p1a: Torkoal|276/344
+L |-damage|p1a: Torkoal|81/100
+L |move|p2b: Blissey|Seed Bomb|p1a: Torkoal
+L |-resisted|p1a: Torkoal
+L |split|p1
+L |-damage|p1a: Torkoal|266/344
+L |-damage|p1a: Torkoal|78/100
+L |move|p1a: Torkoal|Thunder|p2b: Blissey
+L |split|p2
+L |-damage|p2b: Blissey|665/714
+L |-damage|p2b: Blissey|94/100
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1b: Charizard|270/360|[from] ability: Solar Power|[of] p1b: Charizard
+L |-damage|p1b: Charizard|75/100|[from] ability: Solar Power|[of] p1b: Charizard
+L |upkeep
+L |turn|3
+C p1 move 3, move 4
+C p2 move 1, move 3
+B 4 45576,22569,57262,33093
+L |
+L |t:|
+L |move|p1b: Charizard|Moonlight|p1b: Charizard
+L |split|p1
+L |-heal|p1b: Charizard|360/360
+L |-heal|p1b: Charizard|100/100
+L |move|p2a: Snorlax|Synthesis|p2a: Snorlax
+L |split|p2
+L |-heal|p2a: Snorlax|524/524
+L |-heal|p2a: Snorlax|100/100
+L |move|p2b: Blissey|Synthesis|p2b: Blissey
+L |split|p2
+L |-heal|p2b: Blissey|714/714
+L |-heal|p2b: Blissey|100/100
+L |move|p1a: Torkoal|Synthesis|p1a: Torkoal
+L |split|p1
+L |-heal|p1a: Torkoal|344/344
+L |-heal|p1a: Torkoal|100/100
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1b: Charizard|315/360|[from] ability: Solar Power|[of] p1b: Charizard
+L |-damage|p1b: Charizard|88/100|[from] ability: Solar Power|[of] p1b: Charizard
+L |upkeep
+L |turn|4
+C p1 move 1 1, move 1 1
+C p2 move 3 2, move 4
+B 5 54635,13711,14274,14388
+L |
+L |t:|
+L |move|p1b: Charizard|Flamethrower|p2a: Snorlax
+L |split|p2
+L |-damage|p2a: Snorlax|302/524
+L |-damage|p2a: Snorlax|58/100
+L |-status|p2a: Snorlax|brn
+L |move|p2a: Snorlax|Weather Ball|p1b: Charizard
+L |-resisted|p1b: Charizard
+L |split|p1
+L |-damage|p1b: Charizard|273/360
+L |-damage|p1b: Charizard|76/100
+L |move|p2b: Blissey|Surf|p1b: Charizard|[spread] p2a,p1a,p1b
+L |-supereffective|p1a: Torkoal
+L |-supereffective|p1b: Charizard
+L |split|p2
+L |-damage|p2a: Snorlax|284/524 brn
+L |-damage|p2a: Snorlax|55/100 brn
+L |split|p1
+L |-damage|p1a: Torkoal|294/344
+L |-damage|p1a: Torkoal|86/100
+L |split|p1
+L |-damage|p1b: Charizard|227/360
+L |-damage|p1b: Charizard|64/100
+L |move|p1a: Torkoal|Weather Ball|p2a: Snorlax
+L |split|p2
+L |-damage|p2a: Snorlax|164/524 brn
+L |-damage|p2a: Snorlax|32/100 brn
+L |
+L |-weather|SunnyDay|[upkeep]
+L |split|p1
+L |-damage|p1b: Charizard|182/360|[from] ability: Solar Power|[of] p1b: Charizard
+L |-damage|p1b: Charizard|51/100|[from] ability: Solar Power|[of] p1b: Charizard
+L |split|p2
+L |-damage|p2a: Snorlax|132/524 brn|[from] brn
+L |-damage|p2a: Snorlax|26/100 brn|[from] brn
+L |upkeep
+L |turn|5
+C p1 move 4, move 4
+C p2 move 2, move 1
+B 6 54635,13711,14274,14388
+L |
+L |t:|
+L |move|p1b: Charizard|Moonlight|p1b: Charizard
+L |split|p1
+L |-heal|p1b: Charizard|360/360
+L |-heal|p1b: Charizard|100/100
+L |move|p2a: Snorlax|Swords Dance|p2a: Snorlax
+L |-boost|p2a: Snorlax|atk|2
+L |move|p2b: Blissey|Swords Dance|p2b: Blissey
+L |-boost|p2b: Blissey|atk|2
+L |move|p1a: Torkoal|Swords Dance|p1a: Torkoal
+L |-boost|p1a: Torkoal|atk|2
+L |
+L |-weather|none
+L |split|p2
+L |-damage|p2a: Snorlax|100/524 brn|[from] brn
+L |-damage|p2a: Snorlax|20/100 brn|[from] brn
+L |upkeep
+L |turn|6
+C p1 move 4, move 4
+C p2 move 2, move 1
+B 7 54635,13711,14274,14388
+L |
+L |t:|
+L |move|p1b: Charizard|Moonlight|p1b: Charizard
+L |-fail|p1b: Charizard|heal
+L |move|p2b: Blissey|Swords Dance|p2b: Blissey
+L |-boost|p2b: Blissey|atk|2
+L |move|p2a: Snorlax|Swords Dance|p2a: Snorlax
+L |-boost|p2a: Snorlax|atk|2
+L |move|p1a: Torkoal|Swords Dance|p1a: Torkoal
+L |-boost|p1a: Torkoal|atk|2
+L |
+L |split|p2
+L |-damage|p2a: Snorlax|68/524 brn|[from] brn
+L |-damage|p2a: Snorlax|13/100 brn|[from] brn
+L |upkeep
+L |turn|7
+E running
+S rain
+SEED 101,202,303,404
+T1 |Pelipper||Drizzle|hurricane,thunder,weatherball,roost|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Kingdra||Swift Swim|willowisp,bleakwindstorm,wildboltstorm,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Vaporeon||Hydration|swordsdance,protect,scald,recover|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Venusaur||Chlorophyll|synthesis,swordsdance,flamethrower,weatherball|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 25941,2170,43172,53736
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Pelipper|Pelipper, M|324/324
+L |switch|p1a: Pelipper|Pelipper, M|100/100
+L |split|p1
+L |switch|p1b: Kingdra|Kingdra, M|354/354
+L |switch|p1b: Kingdra|Kingdra, M|100/100
+L |split|p2
+L |switch|p2a: Vaporeon|Vaporeon, M|464/464
+L |switch|p2a: Vaporeon|Vaporeon, M|100/100
+L |split|p2
+L |switch|p2b: Venusaur|Venusaur, M|364/364
+L |switch|p2b: Venusaur|Venusaur, M|100/100
+L |-weather|RainDance|[from] ability: Drizzle|[of] p1a: Pelipper
+L |turn|1
+C p1 move 1 1, move 1 1
+C p2 move 1, move 1
+B 2 5508,27577,27036,50514
+L |
+L |t:|
+L |move|p1b: Kingdra|Will-O-Wisp|p2a: Vaporeon
+L |-status|p2a: Vaporeon|brn
+L |move|p2b: Venusaur|Synthesis|p2b: Venusaur
+L |-fail|p2b: Venusaur|heal
+L |move|p2a: Vaporeon|Swords Dance|p2a: Vaporeon
+L |-boost|p2a: Vaporeon|atk|2
+L |move|p1a: Pelipper|Hurricane|p2a: Vaporeon
+L |split|p2
+L |-damage|p2a: Vaporeon|347/464 brn
+L |-damage|p2a: Vaporeon|75/100 brn
+L |-start|p2a: Vaporeon|confusion
+L |
+L |-weather|RainDance|[upkeep]
+L |-activate|p2a: Vaporeon|ability: Hydration
+L |-curestatus|p2a: Vaporeon|brn|[msg]
+L |upkeep
+L |turn|2
+C p1 move 2 2, move 2
+C p2 move 3 1, move 3 1
+B 3 1507,43684,34474,53356
+L |
+L |t:|
+L |move|p1b: Kingdra|Bleakwind Storm|p2a: Vaporeon|[spread] p2a,p2b
+L |-supereffective|p2b: Venusaur
+L |split|p2
+L |-damage|p2a: Vaporeon|298/464
+L |-damage|p2a: Vaporeon|65/100
+L |split|p2
+L |-damage|p2b: Venusaur|268/364
+L |-damage|p2b: Venusaur|74/100
+L |-unboost|p2a: Vaporeon|spe|1
+L |move|p2b: Venusaur|Flamethrower|p1a: Pelipper
+L |-resisted|p1a: Pelipper
+L |split|p1
+L |-damage|p1a: Pelipper|306/324
+L |-damage|p1a: Pelipper|95/100
+L |move|p1a: Pelipper|Thunder|p2b: Venusaur
+L |-resisted|p2b: Venusaur
+L |split|p2
+L |-damage|p2b: Venusaur|235/364
+L |-damage|p2b: Venusaur|65/100
+L |-activate|p2a: Vaporeon|confusion
+L |split|p2
+L |-damage|p2a: Vaporeon|237/464|[from] confusion
+L |-damage|p2a: Vaporeon|52/100|[from] confusion
+L |
+L |-weather|RainDance|[upkeep]
+L |upkeep
+L |turn|3
+C p1 move 3 2, move 3
+C p2 move 4, move 1
+B 4 29576,51801,51467,19354
+L |
+L |t:|
+L |move|p1b: Kingdra|Wildbolt Storm|p2a: Vaporeon|[spread] p2a,p2b
+L |-supereffective|p2a: Vaporeon
+L |-resisted|p2b: Venusaur
+L |split|p2
+L |-damage|p2a: Vaporeon|137/464
+L |-damage|p2a: Vaporeon|30/100
+L |split|p2
+L |-damage|p2b: Venusaur|211/364
+L |-damage|p2b: Venusaur|58/100
+L |move|p2b: Venusaur|Synthesis|p2b: Venusaur
+L |split|p2
+L |-heal|p2b: Venusaur|302/364
+L |-heal|p2b: Venusaur|83/100
+L |move|p1a: Pelipper|Weather Ball|p2b: Venusaur
+L |-resisted|p2b: Venusaur
+L |split|p2
+L |-damage|p2b: Venusaur|230/364
+L |-damage|p2b: Venusaur|64/100
+L |-activate|p2a: Vaporeon|confusion
+L |move|p2a: Vaporeon|Recover|p2a: Vaporeon
+L |split|p2
+L |-heal|p2a: Vaporeon|369/464
+L |-heal|p2a: Vaporeon|80/100
+L |
+L |-weather|RainDance|[upkeep]
+L |upkeep
+L |turn|4
+C p1 move 4, move 4
+C p2 move 1, move 1
+B 5 29576,51801,51467,19354
+L |
+L |t:|
+L |move|p1b: Kingdra|Swords Dance|p1b: Kingdra
+L |-boost|p1b: Kingdra|atk|2
+L |move|p2b: Venusaur|Synthesis|p2b: Venusaur
+L |split|p2
+L |-heal|p2b: Venusaur|321/364
+L |-heal|p2b: Venusaur|89/100
+L |move|p1a: Pelipper|Roost|p1a: Pelipper
+L |split|p1
+L |-heal|p1a: Pelipper|324/324
+L |-heal|p1a: Pelipper|100/100
+L |-singleturn|p1a: Pelipper|move: Roost
+L |-end|p2a: Vaporeon|confusion
+L |move|p2a: Vaporeon|Swords Dance|p2a: Vaporeon
+L |-boost|p2a: Vaporeon|atk|2
+L |
+L |-weather|RainDance|[upkeep]
+L |upkeep
+L |turn|5
+C p1 move 4, move 4
+C p2 move 1, move 1
+B 6 29576,51801,51467,19354
+L |
+L |t:|
+L |move|p1b: Kingdra|Swords Dance|p1b: Kingdra
+L |-boost|p1b: Kingdra|atk|2
+L |move|p2b: Venusaur|Synthesis|p2b: Venusaur
+L |split|p2
+L |-heal|p2b: Venusaur|364/364
+L |-heal|p2b: Venusaur|100/100
+L |move|p1a: Pelipper|Roost||[still]
+L |-fail|p1a: Pelipper|heal
+L |move|p2a: Vaporeon|Swords Dance|p2a: Vaporeon
+L |-boost|p2a: Vaporeon|atk|2
+L |
+L |-weather|none
+L |upkeep
+L |turn|6
+C p1 move 4, move 4
+C p2 move 1, move 1
+B 7 29576,51801,51467,19354
+L |
+L |t:|
+L |move|p1b: Kingdra|Swords Dance|p1b: Kingdra
+L |-boost|p1b: Kingdra|atk|2
+L |move|p2b: Venusaur|Synthesis|p2b: Venusaur
+L |-fail|p2b: Venusaur|heal
+L |move|p1a: Pelipper|Roost||[still]
+L |-fail|p1a: Pelipper|heal
+L |move|p2a: Vaporeon|Swords Dance|p2a: Vaporeon
+L |-boost|p2a: Vaporeon|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S sand
+SEED 5,6,7,8
+T1 |Tyranitar||Sand Stream|weatherball,rockslide,shoreup,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Excadrill||Sand Rush|earthquake,swordsdance,shoreup,ironhead|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Garchomp||Sand Force|rockslide,swordsdance,weatherball,shoreup|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Clefable||Unaware|moonblast,swordsdance,recover,psychic|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 5,6,7,8
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Tyranitar|Tyranitar, M|404/404
+L |switch|p1a: Tyranitar|Tyranitar, M|100/100
+L |split|p1
+L |switch|p1b: Excadrill|Excadrill, M|424/424
+L |switch|p1b: Excadrill|Excadrill, M|100/100
+L |split|p2
+L |switch|p2a: Garchomp|Garchomp, M|420/420
+L |switch|p2a: Garchomp|Garchomp, M|100/100
+L |split|p2
+L |switch|p2b: Clefable|Clefable, M|394/394
+L |switch|p2b: Clefable|Clefable, M|100/100
+L |-weather|Sandstorm|[from] ability: Sand Stream|[of] p1a: Tyranitar
+L |turn|1
+C p1 move 1 2, move 4 1
+C p2 move 1, move 1 1
+B 2 46897,3886,2540,10207
+L |
+L |t:|
+L |move|p1b: Excadrill|Iron Head|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|314/420
+L |-damage|p2a: Garchomp|75/100
+L |move|p2a: Garchomp|Rock Slide|p1b: Excadrill|[spread] p1b
+L |-miss|p2a: Garchomp|p1a: Tyranitar
+L |-resisted|p1b: Excadrill
+L |split|p1
+L |-damage|p1b: Excadrill|400/424
+L |-damage|p1b: Excadrill|95/100
+L |move|p1a: Tyranitar|Weather Ball|p2b: Clefable
+L |split|p2
+L |-damage|p2b: Clefable|289/394
+L |-damage|p2b: Clefable|74/100
+L |move|p2b: Clefable|Moonblast|p1a: Tyranitar
+L |-supereffective|p1a: Tyranitar
+L |split|p1
+L |-damage|p1a: Tyranitar|278/404
+L |-damage|p1a: Tyranitar|69/100
+L |
+L |-weather|Sandstorm|[upkeep]
+L |split|p2
+L |-damage|p2b: Clefable|265/394|[from] Sandstorm
+L |-damage|p2b: Clefable|68/100|[from] Sandstorm
+L |upkeep
+L |turn|2
+C p1 move 2, move 2
+C p2 move 3 2, move 4 1
+B 3 13276,25528,37660,54286
+L |
+L |t:|
+L |move|p1b: Excadrill|Swords Dance|p1b: Excadrill
+L |-boost|p1b: Excadrill|atk|2
+L |move|p2a: Garchomp|Weather Ball|p1b: Excadrill
+L |-resisted|p1b: Excadrill
+L |split|p1
+L |-damage|p1b: Excadrill|376/424
+L |-damage|p1b: Excadrill|89/100
+L |move|p1a: Tyranitar|Rock Slide|p2b: Clefable|[spread] p2a,p2b
+L |-resisted|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|272/420
+L |-damage|p2a: Garchomp|65/100
+L |split|p2
+L |-damage|p2b: Clefable|166/394
+L |-damage|p2b: Clefable|43/100
+L |cant|p2b: Clefable|flinch
+L |
+L |-weather|Sandstorm|[upkeep]
+L |split|p2
+L |-damage|p2b: Clefable|142/394|[from] Sandstorm
+L |-damage|p2b: Clefable|37/100|[from] Sandstorm
+L |upkeep
+L |turn|3
+C p1 move 3, move 3
+C p2 move 4, move 3
+B 4 13276,25528,37660,54286
+L |
+L |t:|
+L |move|p1b: Excadrill|Shore Up|p1b: Excadrill
+L |split|p1
+L |-heal|p1b: Excadrill|424/424
+L |-heal|p1b: Excadrill|100/100
+L |move|p2a: Garchomp|Shore Up|p2a: Garchomp
+L |split|p2
+L |-heal|p2a: Garchomp|420/420
+L |-heal|p2a: Garchomp|100/100
+L |move|p1a: Tyranitar|Shore Up|p1a: Tyranitar
+L |split|p1
+L |-heal|p1a: Tyranitar|404/404
+L |-heal|p1a: Tyranitar|100/100
+L |move|p2b: Clefable|Recover|p2b: Clefable
+L |split|p2
+L |-heal|p2b: Clefable|339/394
+L |-heal|p2b: Clefable|87/100
+L |
+L |-weather|Sandstorm|[upkeep]
+L |split|p2
+L |-damage|p2b: Clefable|315/394|[from] Sandstorm
+L |-damage|p2b: Clefable|80/100|[from] Sandstorm
+L |upkeep
+L |turn|4
+C p1 move 4, move 2
+C p2 move 2, move 2
+B 5 13276,25528,37660,54286
+L |
+L |t:|
+L |move|p1b: Excadrill|Swords Dance|p1b: Excadrill
+L |-boost|p1b: Excadrill|atk|2
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1a: Tyranitar|Swords Dance|p1a: Tyranitar
+L |-boost|p1a: Tyranitar|atk|2
+L |move|p2b: Clefable|Swords Dance|p2b: Clefable
+L |-boost|p2b: Clefable|atk|2
+L |
+L |-weather|Sandstorm|[upkeep]
+L |split|p2
+L |-damage|p2b: Clefable|291/394|[from] Sandstorm
+L |-damage|p2b: Clefable|74/100|[from] Sandstorm
+L |upkeep
+L |turn|5
+C p1 move 4, move 2
+C p2 move 2, move 2
+B 6 13276,25528,37660,54286
+L |
+L |t:|
+L |move|p1b: Excadrill|Swords Dance|p1b: Excadrill
+L |-boost|p1b: Excadrill|atk|2
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1a: Tyranitar|Swords Dance|p1a: Tyranitar
+L |-boost|p1a: Tyranitar|atk|2
+L |move|p2b: Clefable|Swords Dance|p2b: Clefable
+L |-boost|p2b: Clefable|atk|2
+L |
+L |-weather|none
+L |upkeep
+L |turn|6
+C p1 move 4, move 2
+C p2 move 2, move 2
+B 7 13276,25528,37660,54286
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1b: Excadrill|Swords Dance|p1b: Excadrill
+L |-boost|p1b: Excadrill|atk|0
+L |move|p1a: Tyranitar|Swords Dance|p1a: Tyranitar
+L |-boost|p1a: Tyranitar|atk|2
+L |move|p2b: Clefable|Swords Dance|p2b: Clefable
+L |-boost|p2b: Clefable|atk|2
+L |
+L |upkeep
+L |turn|7
+E running
+S snow
+SEED 9,19,29,39
+T1 |Abomasnow||Snow Warning|blizzard,weatherball,bodyslam,swordsdance|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Beartic||Slush Rush|icepunch,swordsdance,bodyslam,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Glalie||Ice Body|bodyslam,weatherball,swordsdance,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Venusaur||Chlorophyll|synthesis,swordsdance,sludgebomb,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 3942,12037,43972,17739
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Abomasnow|Abomasnow, M|384/384
+L |switch|p1a: Abomasnow|Abomasnow, M|100/100
+L |split|p1
+L |switch|p1b: Beartic|Beartic, M|394/394
+L |switch|p1b: Beartic|Beartic, M|100/100
+L |split|p2
+L |switch|p2a: Glalie|Glalie, M|364/364
+L |switch|p2a: Glalie|Glalie, M|100/100
+L |split|p2
+L |switch|p2b: Venusaur|Venusaur, M|364/364
+L |switch|p2b: Venusaur|Venusaur, M|100/100
+L |-weather|Snowscape|[from] ability: Snow Warning|[of] p1a: Abomasnow
+L |turn|1
+C p1 move 1, move 3 1
+C p2 move 1 1, move 3 1
+B 2 37674,3909,4438,56598
+L |
+L |t:|
+L |move|p1b: Beartic|Body Slam|p2a: Glalie
+L |split|p2
+L |-damage|p2a: Glalie|310/364
+L |-damage|p2a: Glalie|86/100
+L |move|p2b: Venusaur|Sludge Bomb|p1a: Abomasnow
+L |-supereffective|p1a: Abomasnow
+L |split|p1
+L |-damage|p1a: Abomasnow|174/384
+L |-damage|p1a: Abomasnow|46/100
+L |-status|p1a: Abomasnow|psn
+L |move|p2a: Glalie|Body Slam|p1a: Abomasnow
+L |split|p1
+L |-damage|p1a: Abomasnow|134/384 psn
+L |-damage|p1a: Abomasnow|35/100 psn
+L |move|p1a: Abomasnow|Blizzard|p2a: Glalie|[spread] p2a,p2b
+L |-resisted|p2a: Glalie
+L |-supereffective|p2b: Venusaur
+L |-crit|p2b: Venusaur
+L |split|p2
+L |-damage|p2a: Glalie|261/364
+L |-damage|p2a: Glalie|72/100
+L |split|p2
+L |-damage|p2b: Venusaur|116/364
+L |-damage|p2b: Venusaur|32/100
+L |
+L |-weather|Snowscape|[upkeep]
+L |split|p2
+L |-heal|p2a: Glalie|283/364|[from] ability: Ice Body
+L |-heal|p2a: Glalie|78/100|[from] ability: Ice Body
+L |split|p1
+L |-damage|p1a: Abomasnow|86/384 psn|[from] psn
+L |-damage|p1a: Abomasnow|23/100 psn|[from] psn
+L |upkeep
+L |turn|2
+C p1 move 2 1, move 1 2
+C p2 move 2 2, move 1
+B 3 53742,32533,61664,47718
+L |
+L |t:|
+L |move|p1b: Beartic|Ice Punch|p2b: Venusaur
+L |-supereffective|p2b: Venusaur
+L |split|p2
+L |-damage|p2b: Venusaur|0 fnt
+L |-damage|p2b: Venusaur|0 fnt
+L |faint|p2b: Venusaur
+L |move|p2a: Glalie|Weather Ball|p1b: Beartic
+L |-resisted|p1b: Beartic
+L |split|p1
+L |-damage|p1b: Beartic|339/394
+L |-damage|p1b: Beartic|87/100
+L |move|p1a: Abomasnow|Weather Ball|p2a: Glalie
+L |-resisted|p2a: Glalie
+L |split|p2
+L |-damage|p2a: Glalie|229/364
+L |-damage|p2a: Glalie|63/100
+L |
+L |-weather|Snowscape|[upkeep]
+L |split|p2
+L |-heal|p2a: Glalie|251/364|[from] ability: Ice Body
+L |-heal|p2a: Glalie|69/100|[from] ability: Ice Body
+L |split|p1
+L |-damage|p1a: Abomasnow|38/384 psn|[from] psn
+L |-damage|p1a: Abomasnow|10/100 psn|[from] psn
+L |upkeep
+L |turn|3
+C p1 move 4, move 2
+C p2 move 3
+B 4 53742,32533,61664,47718
+L |
+L |t:|
+L |move|p1b: Beartic|Swords Dance|p1b: Beartic
+L |-boost|p1b: Beartic|atk|2
+L |move|p2a: Glalie|Swords Dance|p2a: Glalie
+L |-boost|p2a: Glalie|atk|2
+L |move|p1a: Abomasnow|Swords Dance|p1a: Abomasnow
+L |-boost|p1a: Abomasnow|atk|2
+L |
+L |-weather|Snowscape|[upkeep]
+L |split|p2
+L |-heal|p2a: Glalie|273/364|[from] ability: Ice Body
+L |-heal|p2a: Glalie|75/100|[from] ability: Ice Body
+L |split|p1
+L |-damage|p1a: Abomasnow|0 fnt|[from] psn
+L |-damage|p1a: Abomasnow|0 fnt|[from] psn
+L |faint|p1a: Abomasnow
+L |upkeep
+L |turn|4
+C p1 move 4
+C p2 move 3
+B 5 24386,12950,27994,48897
+L |
+L |t:|
+L |move|p1b: Beartic|Protect|p1b: Beartic
+L |-singleturn|p1b: Beartic|Protect
+L |move|p2a: Glalie|Swords Dance|p2a: Glalie
+L |-boost|p2a: Glalie|atk|2
+L |
+L |-weather|Snowscape|[upkeep]
+L |split|p2
+L |-heal|p2a: Glalie|295/364|[from] ability: Ice Body
+L |-heal|p2a: Glalie|82/100|[from] ability: Ice Body
+L |upkeep
+L |turn|5
+C p1 move 4
+C p2 move 3
+B 6 31625,58278,5212,50571
+L |
+L |t:|
+L |move|p1b: Beartic|Protect|p1b: Beartic
+L |-singleturn|p1b: Beartic|Protect
+L |move|p2a: Glalie|Swords Dance|p2a: Glalie
+L |-boost|p2a: Glalie|atk|2
+L |
+L |-weather|none
+L |upkeep
+L |turn|6
+C p1 move 4
+C p2 move 3
+B 7 41216,52258,47428,61850
+L |
+L |t:|
+L |move|p1b: Beartic|Protect||[still]
+L |-fail|p1b: Beartic
+L |move|p2a: Glalie|Swords Dance|p2a: Glalie
+L |-boost|p2a: Glalie|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S electric_terrain
+SEED 21,31,41,51
+T1 |Miraidon||Hadron Engine|psyblade,thunderbolt,protect,swordsdance|Serious|252,0,128,0,128,0|N|||100|,,,,,]|Raichu-Alola||Surge Surfer|thunderbolt,swordsdance,protect,psychic|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Miraidon||Hadron Engine|psyblade,thunderbolt,protect,swordsdance|Serious|252,0,128,0,128,0|N|||100|,,,,,]|Amoonguss||Unaware|spore,yawn,swordsdance,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 62062,37312,49495,15511
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Miraidon|Miraidon|404/404
+L |switch|p1a: Miraidon|Miraidon|100/100
+L |split|p1
+L |switch|p1b: Raichu|Raichu-Alola, M|324/324
+L |switch|p1b: Raichu|Raichu-Alola, M|100/100
+L |split|p2
+L |switch|p2a: Miraidon|Miraidon|404/404
+L |switch|p2a: Miraidon|Miraidon|100/100
+L |split|p2
+L |switch|p2b: Amoonguss|Amoonguss, M|432/432
+L |switch|p2b: Amoonguss|Amoonguss, M|100/100
+L |-fieldstart|move: Electric Terrain|[from] ability: Hadron Engine|[of] p2a: Miraidon
+L |-activate|p1a: Miraidon|ability: Hadron Engine
+L |turn|1
+C p1 move 1 1, move 1 1
+C p2 move 1 1, move 1 2
+B 2 27824,53987,12086,28240
+L |
+L |t:|
+L |move|p1b: Raichu|Thunderbolt|p2a: Miraidon
+L |-resisted|p2a: Miraidon
+L |split|p2
+L |-damage|p2a: Miraidon|379/404
+L |-damage|p2a: Miraidon|94/100
+L |move|p2a: Miraidon|Psyblade|p1a: Miraidon
+L |split|p1
+L |-damage|p1a: Miraidon|333/404
+L |-damage|p1a: Miraidon|83/100
+L |move|p1a: Miraidon|Psyblade|p2a: Miraidon
+L |split|p2
+L |-damage|p2a: Miraidon|311/404
+L |-damage|p2a: Miraidon|77/100
+L |move|p2b: Amoonguss|Spore|p1b: Raichu
+L |-activate|p1b: Raichu|move: Electric Terrain
+L |
+L |upkeep
+L |turn|2
+C p1 move 2 1, move 1 1
+C p2 move 4, move 2 2
+B 3 10152,8864,57006,55048
+L |
+L |t:|
+L |move|p1b: Raichu|Thunderbolt|p2a: Miraidon
+L |-resisted|p2a: Miraidon
+L |split|p2
+L |-damage|p2a: Miraidon|285/404
+L |-damage|p2a: Miraidon|71/100
+L |move|p2a: Miraidon|Swords Dance|p2a: Miraidon
+L |-boost|p2a: Miraidon|atk|2
+L |move|p1a: Miraidon|Thunderbolt|p2a: Miraidon
+L |-resisted|p2a: Miraidon
+L |split|p2
+L |-damage|p2a: Miraidon|236/404
+L |-damage|p2a: Miraidon|59/100
+L |move|p2b: Amoonguss|Yawn|p1b: Raichu
+L |-activate|p1b: Raichu|move: Electric Terrain
+L |
+L |upkeep
+L |turn|3
+C p1 move 4, move 2
+C p2 move 4, move 3
+B 4 11551,62139,27949,26314
+L |
+L |t:|
+L |move|p1b: Raichu|Swords Dance|p1b: Raichu
+L |-boost|p1b: Raichu|atk|2
+L |move|p1a: Miraidon|Swords Dance|p1a: Miraidon
+L |-boost|p1a: Miraidon|atk|2
+L |move|p2a: Miraidon|Swords Dance|p2a: Miraidon
+L |-boost|p2a: Miraidon|atk|2
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |upkeep
+L |turn|4
+C p1 move 4, move 2
+C p2 move 4, move 3
+B 5 9047,44983,24580,9148
+L |
+L |t:|
+L |move|p1b: Raichu|Swords Dance|p1b: Raichu
+L |-boost|p1b: Raichu|atk|2
+L |move|p2a: Miraidon|Swords Dance|p2a: Miraidon
+L |-boost|p2a: Miraidon|atk|2
+L |move|p1a: Miraidon|Swords Dance|p1a: Miraidon
+L |-boost|p1a: Miraidon|atk|2
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |upkeep
+L |turn|5
+C p1 move 4, move 2
+C p2 move 4, move 3
+B 6 17978,12322,35182,14591
+L |
+L |t:|
+L |move|p1b: Raichu|Swords Dance|p1b: Raichu
+L |-boost|p1b: Raichu|atk|2
+L |move|p1a: Miraidon|Swords Dance|p1a: Miraidon
+L |-boost|p1a: Miraidon|atk|2
+L |move|p2a: Miraidon|Swords Dance|p2a: Miraidon
+L |-boost|p2a: Miraidon|atk|0
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|2
+L |
+L |-fieldend|move: Electric Terrain
+L |upkeep
+L |turn|6
+C p1 move 4, move 2
+C p2 move 4, move 3
+B 7 14946,60969,48835,28294
+L |
+L |t:|
+L |move|p2a: Miraidon|Swords Dance|p2a: Miraidon
+L |-boost|p2a: Miraidon|atk|0
+L |move|p1a: Miraidon|Swords Dance|p1a: Miraidon
+L |-boost|p1a: Miraidon|atk|0
+L |move|p1b: Raichu|Swords Dance|p1b: Raichu
+L |-boost|p1b: Raichu|atk|0
+L |move|p2b: Amoonguss|Swords Dance|p2b: Amoonguss
+L |-boost|p2b: Amoonguss|atk|0
+L |
+L |upkeep
+L |turn|7
+E running
+S grassy_terrain
+SEED 61,71,81,91
+T1 |Rillaboom||Grassy Surge|grassyglide,woodhammer,swordsdance,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Arboliva||Seed Sower|floralhealing,energyball,swordsdance,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Garchomp||Unaware|earthquake,rockslide,swordsdance,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Pincurchin||Electric Surge|thunderbolt,swordsdance,protect,spikes|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 61,71,81,91
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Rillaboom|Rillaboom, M|404/404
+L |switch|p1a: Rillaboom|Rillaboom, M|100/100
+L |split|p1
+L |switch|p1b: Arboliva|Arboliva, M|360/360
+L |switch|p1b: Arboliva|Arboliva, M|100/100
+L |split|p2
+L |switch|p2a: Garchomp|Garchomp, M|420/420
+L |switch|p2a: Garchomp|Garchomp, M|100/100
+L |split|p2
+L |switch|p2b: Pincurchin|Pincurchin, M|300/300
+L |switch|p2b: Pincurchin|Pincurchin, M|100/100
+L |-fieldstart|move: Grassy Terrain|[from] ability: Grassy Surge|[of] p1a: Rillaboom
+L |-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p2b: Pincurchin
+L |turn|1
+C p1 move 1 1, move 2 1
+C p2 move 1, move 1 2
+B 2 9742,14311,60632,40435
+L |
+L |t:|
+L |move|p2a: Garchomp|Earthquake|p1a: Rillaboom|[spread] p2b,p1a,p1b
+L |-supereffective|p2b: Pincurchin
+L |-resisted|p1a: Rillaboom
+L |-resisted|p1b: Arboliva
+L |split|p2
+L |-damage|p2b: Pincurchin|90/300
+L |-damage|p2b: Pincurchin|30/100
+L |split|p1
+L |-damage|p1a: Rillaboom|350/404
+L |-damage|p1a: Rillaboom|87/100
+L |split|p1
+L |-damage|p1b: Arboliva|305/360
+L |-damage|p1b: Arboliva|85/100
+L |-fieldstart|move: Grassy Terrain|[from] ability: Seed Sower|[of] p1b: Arboliva
+L |move|p1a: Rillaboom|Grassy Glide|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|327/420
+L |-damage|p2a: Garchomp|78/100
+L |move|p1b: Arboliva|Energy Ball|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|159/420
+L |-damage|p2a: Garchomp|38/100
+L |move|p2b: Pincurchin|Thunderbolt|p1b: Arboliva
+L |-resisted|p1b: Arboliva
+L |split|p1
+L |-damage|p1b: Arboliva|261/360
+L |-damage|p1b: Arboliva|73/100
+L |
+L |split|p2
+L |-heal|p2a: Garchomp|185/420|[from] Grassy Terrain
+L |-heal|p2a: Garchomp|45/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1a: Rillaboom|375/404|[from] Grassy Terrain
+L |-heal|p1a: Rillaboom|93/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1b: Arboliva|283/360|[from] Grassy Terrain
+L |-heal|p1b: Arboliva|79/100|[from] Grassy Terrain
+L |split|p2
+L |-heal|p2b: Pincurchin|108/300|[from] Grassy Terrain
+L |-heal|p2b: Pincurchin|36/100|[from] Grassy Terrain
+L |upkeep
+L |turn|2
+C p1 move 1 1, move 1 -1
+C p2 move 2, move 2
+B 3 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p1a: Rillaboom|Grassy Glide|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|86/420
+L |-damage|p2a: Garchomp|21/100
+L |move|p2a: Garchomp|Rock Slide|p1b: Arboliva|[spread] p1a,p1b
+L |split|p1
+L |-damage|p1a: Rillaboom|319/404
+L |-damage|p1a: Rillaboom|79/100
+L |split|p1
+L |-damage|p1b: Arboliva|230/360
+L |-damage|p1b: Arboliva|64/100
+L |move|p1b: Arboliva|Floral Healing|p1a: Rillaboom
+L |split|p1
+L |-heal|p1a: Rillaboom|404/404
+L |-heal|p1a: Rillaboom|100/100
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|2
+L |
+L |split|p2
+L |-heal|p2a: Garchomp|112/420|[from] Grassy Terrain
+L |-heal|p2a: Garchomp|27/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1b: Arboliva|252/360|[from] Grassy Terrain
+L |-heal|p1b: Arboliva|70/100|[from] Grassy Terrain
+L |split|p2
+L |-heal|p2b: Pincurchin|126/300|[from] Grassy Terrain
+L |-heal|p2b: Pincurchin|42/100|[from] Grassy Terrain
+L |upkeep
+L |turn|3
+C p1 move 3, move 3
+C p2 move 3, move 2
+B 4 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1a: Rillaboom|Swords Dance|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|atk|2
+L |move|p1b: Arboliva|Swords Dance|p1b: Arboliva
+L |-boost|p1b: Arboliva|atk|2
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|2
+L |
+L |split|p2
+L |-heal|p2a: Garchomp|138/420|[from] Grassy Terrain
+L |-heal|p2a: Garchomp|33/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1b: Arboliva|274/360|[from] Grassy Terrain
+L |-heal|p1b: Arboliva|77/100|[from] Grassy Terrain
+L |split|p2
+L |-heal|p2b: Pincurchin|144/300|[from] Grassy Terrain
+L |-heal|p2b: Pincurchin|48/100|[from] Grassy Terrain
+L |upkeep
+L |turn|4
+C p1 move 3, move 3
+C p2 move 3, move 2
+B 5 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1a: Rillaboom|Swords Dance|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|atk|2
+L |move|p1b: Arboliva|Swords Dance|p1b: Arboliva
+L |-boost|p1b: Arboliva|atk|2
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|2
+L |
+L |split|p2
+L |-heal|p2a: Garchomp|164/420|[from] Grassy Terrain
+L |-heal|p2a: Garchomp|40/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1b: Arboliva|296/360|[from] Grassy Terrain
+L |-heal|p1b: Arboliva|83/100|[from] Grassy Terrain
+L |split|p2
+L |-heal|p2b: Pincurchin|162/300|[from] Grassy Terrain
+L |-heal|p2b: Pincurchin|54/100|[from] Grassy Terrain
+L |upkeep
+L |turn|5
+C p1 move 3, move 3
+C p2 move 3, move 2
+B 6 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|2
+L |move|p1a: Rillaboom|Swords Dance|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|atk|2
+L |move|p1b: Arboliva|Swords Dance|p1b: Arboliva
+L |-boost|p1b: Arboliva|atk|2
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|0
+L |
+L |split|p2
+L |-heal|p2a: Garchomp|190/420|[from] Grassy Terrain
+L |-heal|p2a: Garchomp|46/100|[from] Grassy Terrain
+L |split|p1
+L |-heal|p1b: Arboliva|318/360|[from] Grassy Terrain
+L |-heal|p1b: Arboliva|89/100|[from] Grassy Terrain
+L |split|p2
+L |-heal|p2b: Pincurchin|180/300|[from] Grassy Terrain
+L |-heal|p2b: Pincurchin|60/100|[from] Grassy Terrain
+L |-fieldend|move: Grassy Terrain
+L |upkeep
+L |turn|6
+C p1 move 3, move 3
+C p2 move 3, move 2
+B 7 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|0
+L |move|p1a: Rillaboom|Swords Dance|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|atk|0
+L |move|p1b: Arboliva|Swords Dance|p1b: Arboliva
+L |-boost|p1b: Arboliva|atk|0
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|0
+L |
+L |upkeep
+L |turn|7
+C p1 move 3, move 3
+C p2 move 3, move 2
+B 8 39265,50100,42711,47619
+L |
+L |t:|
+L |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+L |-boost|p2a: Garchomp|atk|0
+L |move|p1a: Rillaboom|Swords Dance|p1a: Rillaboom
+L |-boost|p1a: Rillaboom|atk|0
+L |move|p1b: Arboliva|Swords Dance|p1b: Arboliva
+L |-boost|p1b: Arboliva|atk|0
+L |move|p2b: Pincurchin|Swords Dance|p2b: Pincurchin
+L |-boost|p2b: Pincurchin|atk|0
+L |
+L |upkeep
+L |turn|8
+E running
+S psychic_terrain
+SEED 3,1,4,1
+T1 |Indeedee||Psychic Surge|expandingforce,swordsdance,protect,extremespeed|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Corviknight||Unaware|swordsdance,protect,quickattack,ironhead|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Dragonite||Unaware|extremespeed,swordsdance,protect,quickattack|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Snorlax||Unaware|quickattack,swordsdance,protect,bodyslam|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 3,1,4,1
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Indeedee|Indeedee, M|324/324
+L |switch|p1a: Indeedee|Indeedee, M|100/100
+L |split|p1
+L |switch|p1b: Corviknight|Corviknight, M|400/400
+L |switch|p1b: Corviknight|Corviknight, M|100/100
+L |split|p2
+L |switch|p2a: Dragonite|Dragonite, M|386/386
+L |switch|p2a: Dragonite|Dragonite, M|100/100
+L |split|p2
+L |switch|p2b: Snorlax|Snorlax, M|524/524
+L |switch|p2b: Snorlax|Snorlax, M|100/100
+L |-fieldstart|move: Psychic Terrain|[from] ability: Psychic Surge|[of] p1a: Indeedee
+L |turn|1
+C p1 move 1 1, move 1
+C p2 move 1 1, move 1 2
+B 2 54011,3141,25939,3906
+L |
+L |t:|
+L |move|p2a: Dragonite|Extreme Speed|p1a: Indeedee
+L |-activate|p1a: Indeedee|move: Psychic Terrain
+L |move|p2b: Snorlax|Quick Attack|p1b: Corviknight
+L |-hint|Psychic Terrain doesn't affect airborne Pokémon.
+L |-resisted|p1b: Corviknight
+L |split|p1
+L |-damage|p1b: Corviknight|379/400
+L |-damage|p1b: Corviknight|95/100
+L |move|p1a: Indeedee|Expanding Force|p2b: Snorlax|[spread] p2a,p2b
+L |split|p2
+L |-damage|p2a: Dragonite|268/386
+L |-damage|p2a: Dragonite|70/100
+L |split|p2
+L |-damage|p2b: Snorlax|415/524
+L |-damage|p2b: Snorlax|80/100
+L |move|p1b: Corviknight|Swords Dance|p1b: Corviknight
+L |-boost|p1b: Corviknight|atk|2
+L |
+L |upkeep
+L |turn|2
+C p1 move 4 1, move 3 2
+C p2 move 4 1, move 1 2
+B 3 38448,7148,39603,64760
+L |
+L |t:|
+L |move|p1a: Indeedee|Extreme Speed|p2a: Dragonite
+L |-hint|Psychic Terrain doesn't affect airborne Pokémon.
+L |split|p2
+L |-damage|p2a: Dragonite|205/386
+L |-damage|p2a: Dragonite|54/100
+L |move|p2a: Dragonite|Quick Attack|p1a: Indeedee
+L |-activate|p1a: Indeedee|move: Psychic Terrain
+L |move|p1b: Corviknight|Quick Attack|p2b: Snorlax
+L |-activate|p2b: Snorlax|move: Psychic Terrain
+L |move|p2b: Snorlax|Quick Attack|p1b: Corviknight
+L |-hint|Psychic Terrain doesn't affect airborne Pokémon.
+L |-resisted|p1b: Corviknight
+L |split|p1
+L |-damage|p1b: Corviknight|358/400
+L |-damage|p1b: Corviknight|90/100
+L |
+L |upkeep
+L |turn|3
+C p1 move 1 1, move 4 2
+C p2 move 2, move 4 1
+B 4 5560,18540,7305,64968
+L |
+L |t:|
+L |move|p1a: Indeedee|Expanding Force|p2a: Dragonite|[spread] p2a,p2b
+L |split|p2
+L |-damage|p2a: Dragonite|75/386
+L |-damage|p2a: Dragonite|20/100
+L |split|p2
+L |-damage|p2b: Snorlax|291/524
+L |-damage|p2b: Snorlax|56/100
+L |move|p2a: Dragonite|Swords Dance|p2a: Dragonite
+L |-boost|p2a: Dragonite|atk|2
+L |move|p1b: Corviknight|Iron Head|p2b: Snorlax
+L |split|p2
+L |-damage|p2b: Snorlax|189/524
+L |-damage|p2b: Snorlax|37/100
+L |move|p2b: Snorlax|Body Slam|p1a: Indeedee
+L |split|p1
+L |-damage|p1a: Indeedee|189/324
+L |-damage|p1a: Indeedee|59/100
+L |-status|p1a: Indeedee|par
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 1
+C p2 move 2, move 2
+B 5 56178,9387,27615,50859
+L |
+L |t:|
+L |move|p2a: Dragonite|Swords Dance|p2a: Dragonite
+L |-boost|p2a: Dragonite|atk|2
+L |move|p1b: Corviknight|Swords Dance|p1b: Corviknight
+L |-boost|p1b: Corviknight|atk|2
+L |move|p1a: Indeedee|Swords Dance|p1a: Indeedee
+L |-boost|p1a: Indeedee|atk|2
+L |move|p2b: Snorlax|Swords Dance|p2b: Snorlax
+L |-boost|p2b: Snorlax|atk|2
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 1
+C p2 move 2, move 2
+B 6 30154,51649,58222,33594
+L |
+L |t:|
+L |move|p2a: Dragonite|Swords Dance|p2a: Dragonite
+L |-boost|p2a: Dragonite|atk|2
+L |move|p1b: Corviknight|Swords Dance|p1b: Corviknight
+L |-boost|p1b: Corviknight|atk|2
+L |move|p1a: Indeedee|Swords Dance|p1a: Indeedee
+L |-boost|p1a: Indeedee|atk|2
+L |move|p2b: Snorlax|Swords Dance|p2b: Snorlax
+L |-boost|p2b: Snorlax|atk|2
+L |
+L |-fieldend|move: Psychic Terrain
+L |upkeep
+L |turn|6
+C p1 move 2, move 1
+C p2 move 2, move 2
+B 7 14596,30584,60816,28325
+L |
+L |t:|
+L |move|p2a: Dragonite|Swords Dance|p2a: Dragonite
+L |-boost|p2a: Dragonite|atk|0
+L |move|p1b: Corviknight|Swords Dance|p1b: Corviknight
+L |-boost|p1b: Corviknight|atk|0
+L |cant|p1a: Indeedee|par
+L |move|p2b: Snorlax|Swords Dance|p2b: Snorlax
+L |-boost|p2b: Snorlax|atk|2
+L |
+L |upkeep
+L |turn|7
+E running
