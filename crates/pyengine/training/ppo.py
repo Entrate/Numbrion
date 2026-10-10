@@ -75,16 +75,28 @@ class Adam:
             target.copy_(source.to(target.device))
 
 
-def clip_gradients(parameters, max_norm: float) -> float:
-    """Global-norm clipping from a scalar reduction (DirectML lacks the fused foreach/linalg kernels)."""
+_CLIP_CONSTANTS: dict = {}
+
+
+def clip_gradients(parameters, max_norm: float) -> torch.Tensor:
+    """Global-norm clipping from a scalar reduction (DirectML lacks the fused foreach/linalg kernels).
+
+    Stays on the device (no CPU sync per minibatch; the caller reads the returned norms once per update). A
+    non-finite norm zeroes the gradients, so the step leaves the weights unchanged, and the returned norm lets the
+    caller raise afterwards. Constants are cached device tensors: DirectML keeps host memory for every op given a
+    Python scalar (see Adam).
+    """
     grads = [p.grad for p in parameters if p.grad is not None]
-    norm = float(sum(g.square().sum() for g in grads).sqrt().cpu())
-    if not np.isfinite(norm):
-        raise RuntimeError("Non-finite gradient norm")
-    if norm > max_norm:
-        for g in grads:
-            g.mul_(max_norm / (norm + 1e-6))
-    return norm
+    norm = torch.stack([g.square().sum() for g in grads]).sum().sqrt()
+    key = (norm.device, float(max_norm))
+    if key not in _CLIP_CONSTANTS:
+        _CLIP_CONSTANTS[key] = tuple(torch.full((), x, device=norm.device) for x in (max_norm, 1e-6, 1.0, 0.0))
+    limit, eps, one, zero = _CLIP_CONSTANTS[key]
+    scale = torch.minimum(one, limit / (norm + eps))
+    scale = torch.where(torch.isfinite(norm), scale, zero)
+    for g in grads:
+        g.mul_(scale)
+    return norm.detach()
 
 
 class EntropyController:

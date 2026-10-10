@@ -288,7 +288,13 @@ first-run Adam:
 More actors only slow the learner through CPU contention, and more battles only make each update bigger:
 192 battles with four actors took 6.2 s per update for 10,600 samples, with 12% fewer samples/s than 128
 battles in the same session. Lower actor priority did not speed up the learner. With pool battles, four
-actors need 2.3-2.6 s per rollout against 3.1-3.3 s of training. Two learner speedups are not applied yet:
-the per-minibatch `.cpu()` syncs for statistics and gradient clipping cost ~10% of the update (3.46 s vs
-3.09 s), and 2,048-sample minibatches would save another ~8%. With a faster learner, five actors would
-keep the rollouts shorter than the update.
+actors need 2.3-2.6 s per rollout against 3.1-3.3 s of training. The per-minibatch `.cpu()` syncs for
+statistics and gradient clipping cost ~10% of the update (3.46 s vs 3.09 s); they are removed (statistics and
+the clipping scale stay on the device and are read once per update). 2,048-sample minibatches would save
+another ~8% but are not applied. With a faster learner, five actors would keep the rollouts shorter than
+the update.
+
+Integrated smoke run (`second-run` with the league, smart opponents, entropy controller and the sync removal;
+four actors, 128 battles, 4 minutes): 70 updates, 14,800 battles, 1,821 trained samples/s and 64 battles/s
+from update 3 on, a 3.2 s cycle with rollouts of 2.7 s. The trainer's memory still grew by about 3.5 MB per
+update (pool not yet at its cap), so `rss_mb` should be watched in long runs.

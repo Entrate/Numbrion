@@ -103,6 +103,10 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     mask0_all, mask1_all = data["mask0"].reshape(-1, N_ACTIONS), data["mask1"].reshape(-1, N_ACTIONS)
     logp_all, returns_all = data["logp"].reshape(-1), returns.reshape(-1)
     stats = {k: [] for k in ("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac", "grad_norm")}
+    # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
+    # memory for every op given a new Python scalar (see training.ppo.Adam).
+    value_coef, entropy_weight, aux_coef = (torch.full((), float(x), device=device)
+                                            for x in (args.value_coef, entropy_coef, args.aux_coef))
 
     def up(array):
         return torch.from_numpy(np.ascontiguousarray(array)).to(device)
@@ -129,19 +133,22 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
             value_loss = (value - up(returns_all[index].astype(np.float32))).square().mean()
             entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
             aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
-            loss = policy_loss + args.value_coef * value_loss - entropy_coef * entropy + args.aux_coef * aux_loss
+            loss = policy_loss + value_coef * value_loss - entropy_weight * entropy + aux_coef * aux_loss
             optimizer.zero_grad()
             loss.backward()
             stats["grad_norm"].append(clip_gradients(optimizer.parameters, args.max_grad_norm))
             optimizer.step()
+            # Statistics stay on the device and are read back once per update (a .cpu() per value per minibatch
+            # stalls the DirectML queue, ~10% of the update).
             with torch.no_grad():
-                stats["kl"].append(float(((ratio - 1) - (new_logp - old_logp)).mean().cpu()))
-                stats["clipfrac"].append(float(((ratio - 1).abs() > args.clip).float().mean().cpu()))
+                stats["kl"].append(((ratio - 1) - (new_logp - old_logp)).mean())
+                stats["clipfrac"].append(((ratio - 1).abs() > args.clip).float().mean())
             for key, item in (("policy_loss", policy_loss), ("value_loss", value_loss), ("entropy", entropy),
                               ("aux_loss", aux_loss)):
-                stats[key].append(float(item.detach().cpu()))
-    if not np.isfinite(stats["policy_loss"]).all():
-        raise RuntimeError("Non-finite PPO loss")
+                stats[key].append(item.detach())
+    stats = {k: torch.stack(v).cpu().numpy() if v else np.zeros(1) for k, v in stats.items()}
+    if not np.isfinite(stats["policy_loss"]).all() or not np.isfinite(stats["grad_norm"]).all():
+        raise RuntimeError("Non-finite PPO loss or gradient norm (that step's update was skipped)")
     values, rets = data["value"].reshape(-1)[selected], returns_all[selected]
     summary = {k: round(float(np.mean(v)), 4) for k, v in stats.items()}
     summary["explained_variance"] = round(float(1 - np.var(rets - values) / (np.var(rets) + 1e-8)), 3)
