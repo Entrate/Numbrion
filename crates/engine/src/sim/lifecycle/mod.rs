@@ -8,6 +8,8 @@ pub mod turn;
 mod util;
 
 #[cfg(test)]
+mod flow_tests;
+#[cfg(test)]
 mod tests;
 
 pub use queue::{ActionChoice, QueueHandle, ResolvedActions};

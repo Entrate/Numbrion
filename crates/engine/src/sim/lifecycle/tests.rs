@@ -10,7 +10,7 @@ use crate::{
     state::choices::{Action, ActionKind},
 };
 
-fn kind_name(kind: ActionKind) -> &'static str {
+pub(super) fn kind_name(kind: ActionKind) -> &'static str {
     match kind {
         ActionKind::None => "none",
         ActionKind::Start => "start",
@@ -29,7 +29,7 @@ fn kind_name(kind: ActionKind) -> &'static str {
     }
 }
 
-fn mon_index(m: MonId) -> String {
+pub(super) fn mon_index(m: MonId) -> String {
     if m == MonId::NONE {
         "-".into()
     } else {
@@ -37,7 +37,7 @@ fn mon_index(m: MonId) -> String {
     }
 }
 
-fn num(n: f64) -> String {
+pub(super) fn num(n: f64) -> String {
     if n == n.trunc() {
         format!("{}", n as i64)
     } else {
@@ -46,7 +46,7 @@ fn num(n: f64) -> String {
 }
 
 /// `choice:pokemon:order:priority:speed` joined by '/', matching tools/probes/lifecycle/common.mjs.
-fn action_summary(a: &Action) -> String {
+pub(super) fn action_summary(a: &Action) -> String {
     format!(
         "{}:{}:{}:{}:{}",
         kind_name(a.kind),
@@ -57,7 +57,7 @@ fn action_summary(a: &Action) -> String {
     )
 }
 
-fn queue_summary(b: &Battle<NoLog>) -> String {
+pub(super) fn queue_summary(b: &Battle<NoLog>) -> String {
     let q = &b.state.queue;
     if q.len == 0 {
         return "-".into();
@@ -69,7 +69,7 @@ fn queue_summary(b: &Battle<NoLog>) -> String {
         .join("/")
 }
 
-fn seed_words(b: &Battle<NoLog>) -> String {
+pub(super) fn seed_words(b: &Battle<NoLog>) -> String {
     b.seed()
         .iter()
         .map(u16::to_string)
@@ -77,21 +77,21 @@ fn seed_words(b: &Battle<NoLog>) -> String {
         .join(",")
 }
 
-fn parse_seed(text: &str) -> [u16; 4] {
+pub(super) fn parse_seed(text: &str) -> [u16; 4] {
     let v: Vec<u16> = text.split(',').map(|s| s.parse().unwrap()).collect();
     [v[0], v[1], v[2], v[3]]
 }
 
 /// The state columns of start.tsv / queue.tsv (everything after the action summary).
-struct StateSummary {
-    active: String,
-    party: String,
-    speeds: String,
-    orders: String,
-    speed_order: String,
+pub(super) struct StateSummary {
+    pub(super) active: String,
+    pub(super) party: String,
+    pub(super) speeds: String,
+    pub(super) orders: String,
+    pub(super) speed_order: String,
 }
 
-fn state_summary(b: &Battle<NoLog>) -> StateSummary {
+pub(super) fn state_summary(b: &Battle<NoLog>) -> StateSummary {
     let mut active = vec![];
     let mut party = vec![];
     let mut speeds = vec![];
@@ -133,7 +133,7 @@ fn state_summary(b: &Battle<NoLog>) -> StateSummary {
 /// Showdown's `start()` up to the point where the queue holds the `start` action. Rule
 /// Begin hooks, the opening log and the flush need other owners' code and are covered by
 /// the ignored `start_*` integration tests.
-fn battle_with_start_queued(seed: [u16; 4], p1: &str, p2: &str) -> Battle<NoLog> {
+pub(super) fn battle_with_start_queued(seed: [u16; 4], p1: &str, p2: &str) -> Battle<NoLog> {
     let mut b = Battle::new(seed, p1, p2).expect("teams");
     b.state.started = true;
     b.queue_add_choice(super::queue::ActionChoice::new(ActionKind::Start));
@@ -199,7 +199,7 @@ fn start_action_and_initial_switch_ins_match_pinned_showdown() {
 }
 
 /// Run every queued action to completion without endTurn (what the probes observe).
-fn drain_queue(b: &mut Battle<NoLog>) {
+pub(super) fn drain_queue(b: &mut Battle<NoLog>) {
     while let Some(action) = b.queue_shift() {
         b.run_action(action);
     }

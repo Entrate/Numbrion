@@ -26,7 +26,11 @@ const scope = JSON.parse(fs.readFileSync(path.join(root, 'data/scope.json'), 'ut
 export const INERT_ABILITIES = scope.abilities.filter(a => a.fnCount === 0 && !(a.handlers || []).length).map(a => a.id);
 export const INERT_MOVES = scope.moves.filter(m => m.fnCount === 0).map(m => m.id);
 const SKIP_SPECIES = /^(arceus|zacian|zamazenta)/;
-export const SPECIES = scope.species.filter(s => s.inTeams && !SKIP_SPECIES.test(s.id)).map(s => ({id: s.id, name: s.name}));
+export let SPECIES = scope.species.filter(s => s.inTeams && !SKIP_SPECIES.test(s.id)).map(s => ({id: s.id, name: s.name}));
+/** Drop species whose Terastallization or faint needs forme changes (owner D's formeChange). */
+export function withoutFormeTera() {
+	SPECIES = SPECIES.filter(s => !/^(ogerpon|terapagos|morpeko)/.test(s.id));
+}
 export const TYPES = ['Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark', 'Fairy', 'Stellar'];
 
 export function pick(r, list) {
@@ -80,6 +84,8 @@ export function seedWords(b) {
 }
 
 export const STOP = Symbol('stop');
+/** The pinned, un-intercepted endTurn. */
+export const realEndTurn = sim.Battle.prototype.endTurn;
 
 /** A Battle whose second setPlayer runs the real start() until the first endTurn, then stops. */
 export function startBattle(seed, packed, hooks = {}) {
