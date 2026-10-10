@@ -1,41 +1,29 @@
 //! Flow vectors (tools/probes/lifecycle/flow-vectors.mjs). They exercise switch/instaswitch,
 //! terastallize, forced replacement requests, drags, Revival Blessing, residual, endTurn and
 //! the win checks against the pinned Showdown, so they need owners C (make_request /
-//! clear_request), D (clear_volatile, set_hp, remove_slot_condition, faint bookkeeping) and
-//! T (hint) to be present; until then the test is ignored.
+//! clear_request / all_choices_done) and T (hint) to be present; until then the test is
+//! ignored.
 
 use super::queue::ActionChoice;
 use super::tests::{
     battle_with_start_queued, drain_queue, parse_seed, queue_summary, seed_words, state_summary,
 };
 use crate::{
-    Battle, dex,
-    ids::{EffectId, EffectToken, MonId, TypeId},
+    Battle,
+    actions::Attribution,
+    dex,
+    ids::{MonId, TypeId},
     log::NoLog,
     state::{
-        FaintEntry, Status,
+        Status,
         choices::{ActionKind, ActionQueue, RequestKind},
         mon_flags,
     },
 };
 
-/// `Pokemon.faint(null, null)` (pokemon.ts:1581-1593) as a state edit.
-fn faint_mon(b: &mut Battle<NoLog>, m: MonId) {
-    let p = &mut b.state.pokemon[m.0 as usize];
-    if p.flags & (mon_flags::FAINTED | mon_flags::FAINT_QUEUED) != 0 {
-        return;
-    }
-    p.hp = 0;
-    p.flags &= !mon_flags::SWITCH_REQUESTED;
-    p.switch_flag = EffectId::NONE;
-    p.flags |= mon_flags::FAINT_QUEUED;
-    let i = b.state.faint_queue_len as usize;
-    b.state.faint_queue[i] = FaintEntry {
-        target: m,
-        source: MonId::NONE,
-        effect: EffectToken::NONE,
-    };
-    b.state.faint_queue_len += 1;
+/// `pokemon.faint()` with the default null source and effect (pokemon.ts:1581-1593).
+pub(super) fn faint_mon(b: &mut Battle<NoLog>, m: MonId) {
+    b.faint_pokemon(m, Attribution::NONE);
 }
 
 /// `battle.turnLoop()` minus the final endTurn.
@@ -159,7 +147,7 @@ fn run_flow_op(b: &mut Battle<NoLog>, held: &mut ActionQueue, op: &str) -> Strin
 }
 
 #[test]
-#[ignore = "needs C (make_request/clear_request), D (clear_volatile/set_hp/remove_slot_condition) and T (hint)"]
+#[ignore = "needs C (make_request/clear_request/all_choices_done) and T (hint)"]
 fn lifecycle_flows_match_pinned_showdown() {
     let mut rows = 0;
     let mut current_case = String::new();

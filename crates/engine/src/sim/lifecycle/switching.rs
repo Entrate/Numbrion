@@ -15,7 +15,7 @@ use crate::{
 
 use super::{
     queue::ActionChoice,
-    util::{SLOT_USED, TYPE_FIRE, TYPE_GRASS, TYPE_ROCK, TYPE_WATER, mon_arg},
+    util::{SLOT_USED, USED_ITEM_THIS_TURN, TYPE_FIRE, TYPE_GRASS, TYPE_ROCK, TYPE_WATER, mon_arg},
 };
 
 /// Fixed, insertion-ordered traversal result; sim/battle.ts:1361-1379,1579-1590.
@@ -152,6 +152,7 @@ impl<L: LogSink> Battle<L> {
         }
         if old_active != MonId::NONE {
             self.lc_set_flag(old_active, mon_flags::ACTIVE, false);
+            self.lc_set_flag(old_active, USED_ITEM_THIS_TURN, false);
             self.lc_set_flag(old_active, mon_flags::STATS_RAISED, false);
             self.lc_set_flag(old_active, mon_flags::STATS_LOWERED, false);
             let incoming_position = self.lc_mon(pokemon).position;

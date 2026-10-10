@@ -1,6 +1,7 @@
 // Shared helpers for the lifecycle (owner L) oracle probes.
 import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
 import path from 'node:path';
 import {loadSim, FORMAT_ID} from '../../oracle/lib/common.mjs';
 
@@ -8,6 +9,7 @@ export const here = path.dirname(fileURLToPath(import.meta.url));
 export const root = path.resolve(here, '../../..');
 export const sim = loadSim(process.argv[2] || `${process.env.HOME}/src/pokemon-showdown`);
 export {FORMAT_ID};
+export const Dex = createRequire(sim.root + '/package.json')('./dist/sim').Dex;
 
 /** mulberry32: a tiny deterministic generator for choosing cases (not the battle PRNG). */
 export function rng(seed) {

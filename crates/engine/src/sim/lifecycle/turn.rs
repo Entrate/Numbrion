@@ -16,7 +16,7 @@ use crate::{
 
 use super::queue::ActionChoice;
 use super::switching::PURSUIT_FAINT;
-use super::util::{SLOT_DISABLED, SLOT_HIDDEN, dex_effect, mon_arg};
+use super::util::{SLOT_DISABLED, SLOT_HIDDEN, USED_ITEM_THIS_TURN, dex_effect, mon_arg};
 
 /// HP captures used after the residual action; battle.ts:2671,2819,2860-2863.
 /// PRNG: capture draws nothing; EmergencyExit events may draw afterwards.
@@ -490,7 +490,9 @@ impl<L: LogSink> Battle<L> {
             p.move_last_turn_result = p.move_this_turn_result;
             p.move_this_turn_result = ResultFlag::Undefined;
             if turn != 1 {
-                p.flags &= !(mon_flags::STATS_RAISED | mon_flags::STATS_LOWERED);
+                p.flags &= !(USED_ITEM_THIS_TURN
+                    | mon_flags::STATS_RAISED
+                    | mon_flags::STATS_LOWERED);
             }
             p.flags &= !(mon_flags::MAYBE_DISABLED | mon_flags::MAYBE_LOCKED);
         }

@@ -12,11 +12,12 @@ use crate::{
     state::{CellRef, Pokemon, mon_flags},
 };
 
-/// MoveSlot flag bits, identical to owner D's `actions::mutators::pokemon::SLOT_*`
-/// (true disable, hidden disable, used).
-pub(super) const SLOT_DISABLED: u8 = 1;
-pub(super) const SLOT_HIDDEN: u8 = 2;
-pub(super) const SLOT_USED: u8 = 4;
+// MoveSlot flag bits (true disable, hidden disable, used, virtual) and the per-turn item flag
+// are owned by D; lifecycle clears them at the TS reset points.
+pub(super) use crate::actions::mutators::{
+    common::USED_ITEM_THIS_TURN,
+    pokemon::{SLOT_DISABLED, SLOT_HIDDEN, SLOT_USED},
+};
 
 pub(super) const TYPE_ROCK: TypeId = TypeId(6);
 pub(super) const TYPE_FIRE: TypeId = TypeId(10);

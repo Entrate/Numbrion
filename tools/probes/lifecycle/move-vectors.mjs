@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
 	root, rng, pick, randomTeams, pack, startBattle, queueSummary, seedWords, monIndex, withoutFormeTera, realEndTurn,
-	stateString, sim,
+	stateString, Dex,
 } from './common.mjs';
 
 withoutFormeTera();
@@ -67,6 +67,7 @@ function run(b, op) {
 		pendingFaint = null;
 		return `${a.choice}${a.pokemon ? ':' + monIndex(a.pokemon) : ''}`;
 	}
+	case 'clearrequest': b.requestState = ''; return '-';
 	case 'endturn':
 		realEndTurn.call(b);
 		b.midTurn = false;
@@ -78,7 +79,7 @@ function run(b, op) {
 
 const MOVES = new Map();
 function moveData(id) {
-	if (!MOVES.has(id)) MOVES.set(id, sim.Dex.moves.get(id));
+	if (!MOVES.has(id)) MOVES.set(id, Dex.moves.get(id));
 	return MOVES.get(id);
 }
 
@@ -155,7 +156,7 @@ for (let c = 0; c < CASES; c++) {
 				exec('commitsort');
 				exec('prelude');
 				let guard = 0;
-				while (b.queue.list.length && !b.ended && guard++ < 60) {
+				while ((b.queue.list.length || b.requestState === "switch") && !b.ended && guard++ < 60) {
 					if (b.requestState === 'switch') {
 						exec('updatespeed');
 						exec('stash');
@@ -171,7 +172,7 @@ for (let c = 0; c < CASES; c++) {
 							}
 						}
 						exec('commitsort');
-						b.requestState = '';
+						exec('clearrequest');
 						continue;
 					}
 					const next = b.queue.list[0];
