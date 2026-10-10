@@ -83,3 +83,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         _ => panic!("unexpected asoneglastrier hook"),
     }
 }
+
+#[cfg(test)]
+#[path = "identityabilities/tests.rs"]
+mod tests;

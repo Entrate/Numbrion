@@ -77,3 +77,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         _ => panic!("unexpected protosynthesis hook"),
     }
 }
+
+#[cfg(test)]
+#[path = "formestera/tests.rs"]
+pub(crate) mod tests;

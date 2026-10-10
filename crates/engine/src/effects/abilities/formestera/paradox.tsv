@@ -1,0 +1,40 @@
+protosynthesis	201,200,200,200,200	0	0	atk	5325,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisatk\n-end|m0|Protosynthesis
+protosynthesis	201,200,200,200,200	0	1	atk	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisatk\n-end|m0|Protosynthesis
+protosynthesis	201,200,200,200,200	1	0	atk	5325,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisatk\n-end|m0|Protosynthesis
+protosynthesis	201,200,200,200,200	1	1	atk	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisatk\n-end|m0|Protosynthesis
+protosynthesis	200,201,200,200,200	0	0	def	4096,5325,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisdef\n-end|m0|Protosynthesis
+protosynthesis	200,201,200,200,200	0	1	def	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisdef\n-end|m0|Protosynthesis
+protosynthesis	200,201,200,200,200	1	0	def	4096,5325,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisdef\n-end|m0|Protosynthesis
+protosynthesis	200,201,200,200,200	1	1	def	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisdef\n-end|m0|Protosynthesis
+protosynthesis	200,200,201,200,200	0	0	spa	4096,4096,5325,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspa\n-end|m0|Protosynthesis
+protosynthesis	200,200,201,200,200	0	1	spa	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspa\n-end|m0|Protosynthesis
+protosynthesis	200,200,201,200,200	1	0	spa	4096,4096,5325,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspa\n-end|m0|Protosynthesis
+protosynthesis	200,200,201,200,200	1	1	spa	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspa\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,201,200	0	0	spd	4096,4096,4096,5325,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspd\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,201,200	0	1	spd	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspd\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,201,200	1	0	spd	4096,4096,4096,5325,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspd\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,201,200	1	1	spd	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspd\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,200,201	0	0	spe	4096,4096,4096,4096,6144	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspe\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,200,201	0	1	spe	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis\n-start|m0|protosynthesisspe\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,200,201	1	0	spe	4096,4096,4096,4096,6144	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspe\n-end|m0|Protosynthesis
+protosynthesis	200,200,200,200,201	1	1	spe	4096,4096,4096,4096,4096	-activate|m0|ability: Protosynthesis|[fromitem]\n-start|m0|protosynthesisspe\n-end|m0|Protosynthesis
+quarkdrive	201,200,200,200,200	0	0	atk	5325,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdriveatk\n-end|m0|Quark Drive
+quarkdrive	201,200,200,200,200	0	1	atk	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdriveatk\n-end|m0|Quark Drive
+quarkdrive	201,200,200,200,200	1	0	atk	5325,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdriveatk\n-end|m0|Quark Drive
+quarkdrive	201,200,200,200,200	1	1	atk	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdriveatk\n-end|m0|Quark Drive
+quarkdrive	200,201,200,200,200	0	0	def	4096,5325,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivedef\n-end|m0|Quark Drive
+quarkdrive	200,201,200,200,200	0	1	def	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivedef\n-end|m0|Quark Drive
+quarkdrive	200,201,200,200,200	1	0	def	4096,5325,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivedef\n-end|m0|Quark Drive
+quarkdrive	200,201,200,200,200	1	1	def	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivedef\n-end|m0|Quark Drive
+quarkdrive	200,200,201,200,200	0	0	spa	4096,4096,5325,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespa\n-end|m0|Quark Drive
+quarkdrive	200,200,201,200,200	0	1	spa	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespa\n-end|m0|Quark Drive
+quarkdrive	200,200,201,200,200	1	0	spa	4096,4096,5325,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespa\n-end|m0|Quark Drive
+quarkdrive	200,200,201,200,200	1	1	spa	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespa\n-end|m0|Quark Drive
+quarkdrive	200,200,200,201,200	0	0	spd	4096,4096,4096,5325,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespd\n-end|m0|Quark Drive
+quarkdrive	200,200,200,201,200	0	1	spd	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespd\n-end|m0|Quark Drive
+quarkdrive	200,200,200,201,200	1	0	spd	4096,4096,4096,5325,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespd\n-end|m0|Quark Drive
+quarkdrive	200,200,200,201,200	1	1	spd	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespd\n-end|m0|Quark Drive
+quarkdrive	200,200,200,200,201	0	0	spe	4096,4096,4096,4096,6144	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespe\n-end|m0|Quark Drive
+quarkdrive	200,200,200,200,201	0	1	spe	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive\n-start|m0|quarkdrivespe\n-end|m0|Quark Drive
+quarkdrive	200,200,200,200,201	1	0	spe	4096,4096,4096,4096,6144	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespe\n-end|m0|Quark Drive
+quarkdrive	200,200,200,200,201	1	1	spe	4096,4096,4096,4096,4096	-activate|m0|ability: Quark Drive|[fromitem]\n-start|m0|quarkdrivespe\n-end|m0|Quark Drive
