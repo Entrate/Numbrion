@@ -1,7 +1,7 @@
-//! Ports data/moves.ts:3041-3103 (Court Change onHitField).
+//! Ports data/moves.ts:3041-3095 (Court Change onHitField).
 //! Payload: none. No PRNG draws and no events fire while the states move.
 //!
-//! The free-for-all branch (data/moves.ts:3048-3065, `this.gameType === 'freeforall'`) is outside
+//! The free-for-all branch (data/moves.ts:3046-3065, `this.gameType === 'freeforall'`) is outside
 //! gen9randomdoublesbattle (gameType `doubles`, battle.ts:218), so only the two-side swap is ported.
 use crate::effects::registry::conditions_reflect::support;
 use crate::{

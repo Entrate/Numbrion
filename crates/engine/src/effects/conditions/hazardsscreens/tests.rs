@@ -31,7 +31,7 @@ impl LogSink for Trace {
                 LogArg::Mon(m) => format!("mon{}", m.0),
                 LogArg::Side(s) => format!("side{}", s.0),
                 LogArg::Effect(EffectRef::Dex(id)) => dex::effect(*id).name.into(),
-                _ => panic!("unexpected trace arg {a:?}"),
+                other => format!("{other:?}"),
             }
         }
         let mut parts = vec![e.command.to_owned()];
@@ -40,7 +40,7 @@ impl LogSink for Trace {
             LogTag::From(EffectRef::Dex(id)) => format!("[from] {}", dex::effect(*id).name),
             LogTag::Of(m) => format!("[of] mon{}", m.0),
             LogTag::Bare(s) => format!("[{s}]"),
-            _ => panic!("unexpected trace tag {t:?}"),
+            other => format!("{other:?}"),
         }));
         self.0.push(parts.join("|"));
     }
@@ -764,4 +764,101 @@ fn aurora_veil_try_needs_snow() {
         assert_eq!(try_hook(&mut b), Relay::Bool(expected));
     }
     assert_eq!(b.seed(), [1, 2, 3, 4]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Entry hazards against the real mutators (needs the unfinished core)
+// ---------------------------------------------------------------------------------------------
+
+/// Switch-in order of the hazards on p2's side in scenario `hazards_layers_and_switchins`:
+/// Spikes (3 layers), Toxic Spikes (2), Stealth Rock, Sticky Web. HP checkpoints are the exact values
+/// the pinned Showdown logged for those switch-ins (`|-damage|..|118/157|[from] Spikes` etc.).
+#[test]
+#[ignore = "needs core"]
+fn entry_hazards_hurt_each_switch_in_like_showdown() {
+    use crate::actions::Attribution;
+    let sc = parse_scenarios(include_str!("scenarios.txt"))
+        .into_iter()
+        .find(|s| s.name == "hazards_layers_and_switchins")
+        .unwrap();
+    // (p2 team index, max HP, HP after Spikes, HP after Stealth Rock, Toxic Spikes absorbed,
+    //  Sticky Web applies)
+    let table = [
+        (0usize, 167u16, 167u16, 126u16, false, false), // Pelipper: Flying
+        (1, 167, 126, 106, true, true),                 // Gengar: Poison absorbs Toxic Spikes
+        (2, 0, 0, 0, false, false),                     // Garchomp: Heavy-Duty Boots
+        (3, 157, 118, 99, true, true),                  // Toxapex: Poison absorbs Toxic Spikes
+        (4, 177, 133, 111, false, true),                // Scizor: Steel, Toxic Spikes stay
+        (5, 196, 196, 172, false, false),               // Landorus-Therian: Flying
+    ];
+    for (idx, max_hp, after_spikes, after_rock, absorbs, web) in table {
+        let mut b = Battle::with_log(sc.seed, sc.teams[0], sc.teams[1], Trace::default()).unwrap();
+        let victim = MonId(6 + idx as u8);
+        b.state.sides[0].active = [MonId(0), MonId::NONE];
+        b.state.sides[1].active = [victim, MonId::NONE];
+        for m in [MonId(0), victim] {
+            b.state.pokemon[m.0 as usize].flags |= mon_flags::ACTIVE;
+        }
+        let attribution = Attribution {
+            source: mon(0),
+            effect: EffectRef::None,
+        };
+        for (id, times) in [
+            (dex::CONDITION_SPIKES, 3),
+            (dex::CONDITION_TOXICSPIKES, 2),
+            (dex::CONDITION_STEALTHROCK, 1),
+            (dex::CONDITION_STICKYWEB, 1),
+        ] {
+            for _ in 0..times {
+                b.add_side_condition(SideId(1), id, attribution);
+            }
+        }
+        // Fourth Spikes layer / third Toxic Spikes layer are refused.
+        assert_eq!(
+            b.add_side_condition(SideId(1), dex::CONDITION_SPIKES, attribution),
+            Relay::Bool(false)
+        );
+        let hp = |b: &Battle<Trace>| b.state.pokemon[victim.0 as usize].hp;
+        let max = hp(&b);
+        if max_hp != 0 {
+            assert_eq!(max, max_hp, "fixture HP for team slot {idx}");
+        } else {
+            b.state.pokemon[victim.0 as usize].item = dex::ITEM_HEAVYDUTYBOOTS;
+        }
+        let switch_in = |b: &mut Battle<Trace>, id: EffectId| {
+            let cell = b.get_side_condition_data(SideId(1), id);
+            let state = cell.map(|c| b.state.effects.capture(c));
+            b.single_event(
+                EventId::SwitchIn,
+                EffectRef::Dex(id),
+                state,
+                EventArg::Holder(Holder::mon(victim)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Undefined,
+                None,
+            );
+        };
+        switch_in(&mut b, dex::CONDITION_SPIKES);
+        assert_eq!(hp(&b), if max_hp == 0 { max } else { after_spikes }, "Spikes");
+        switch_in(&mut b, dex::CONDITION_TOXICSPIKES);
+        assert_eq!(
+            b.get_side_condition(SideId(1), dex::CONDITION_TOXICSPIKES)
+                .is_none(),
+            absorbs
+        );
+        assert_eq!(
+            b.state.pokemon[victim.0 as usize].status,
+            crate::state::Status::None
+        );
+        switch_in(&mut b, dex::CONDITION_STEALTHROCK);
+        assert_eq!(hp(&b), if max_hp == 0 { max } else { after_rock }, "Stealth Rock");
+        switch_in(&mut b, dex::CONDITION_STICKYWEB);
+        assert_eq!(
+            b.state.pokemon[victim.0 as usize].boosts[4],
+            if web { -1 } else { 0 },
+            "Sticky Web"
+        );
+        assert_eq!(b.seed(), sc.seed);
+    }
 }
