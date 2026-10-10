@@ -50,16 +50,17 @@ impl<L: LogSink> Battle<L> {
     pub fn restore_from(&mut self, other: &Battle<L>) {
         self.assert_boundary();
         other.assert_boundary();
-        assert_eq!(
-            self.teams, other.teams,
+        // Workers cloned from the root share these Arcs; compare contents otherwise.
+        assert!(
+            Arc::ptr_eq(&self.teams, &other.teams) || self.teams == other.teams,
             "restore requires matching resolved teams"
         );
-        assert_eq!(
-            self.parsed, other.parsed,
+        assert!(
+            Arc::ptr_eq(&self.parsed, &other.parsed) || self.parsed == other.parsed,
             "restore requires matching parsed teams"
         );
-        assert_eq!(
-            self.names, other.names,
+        assert!(
+            Arc::ptr_eq(&self.names, &other.names) || self.names == other.names,
             "restore requires matching player names"
         );
         self.state = other.state;
