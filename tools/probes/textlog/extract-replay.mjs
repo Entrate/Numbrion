@@ -102,7 +102,7 @@ for (const file of opts.files) {
 		log.push(...fx.end.log);
 		const names = fx.players.map(p => p.name);
 		const keys = new Set([...shapeKeys(log), ...featureKeys(fx.teams, log)]);
-		kept.push({ id: `${file.split('/').pop()}#${fx.index ?? idx}`, names, teams: fx.teams, log, keys });
+		kept.push({ id: `${file.split('/').pop()}#${idx}`, names, teams: fx.teams, log, keys });
 		idx++;
 		seen++;
 	}
