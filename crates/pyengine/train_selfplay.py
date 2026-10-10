@@ -1,4 +1,4 @@
-"""Time-budgeted PPO self-play with the transformer policy (docs/training/TIPS.md, first run).
+"""Time-budgeted PPO self-play with the transformer policy (docs/training/TIPS.md, docs/training/SELFPLAY.md).
 
 Run from the repository root:
 
@@ -7,6 +7,9 @@ Run from the repository root:
 * Observations: training.encoder (own request + player-view protocol only), damage features (training.damage).
 * Model: training.model (token transformer, per-action scoring, slot b conditioned on slot a, oracle critic,
   auxiliary hidden-information heads).
+* Rollouts: actor processes (training.actors) play the battles with CPU copies of the policy and fill one of two
+  shared-memory buffers while the GPU trains on the other, so each rollout is collected with the weights from one
+  update earlier. PPO's ratio uses the stored behaviour log-probs.
 * Opponents: the learner plays both sides of most battles; ``--pool-fraction`` of the battles put a random older
   snapshot (added every ``--pool-minutes``) on side 2 instead. Only the learner's own decisions are trained on.
 * Reward: +1 win, -1 loss, plus a KO-difference bonus that decays linearly to zero at half the run.
@@ -16,19 +19,21 @@ Run from the repository root:
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
 import os
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import torch
 
+from training.actors import Actors
 from training.device import training_device
 from training.dex import load_dex
 from training.model import Model
-from training.ppo import PASS, Adam, clip_gradients, gae, sample
-from training.vecenv import VecEnv
+from training.ppo import Adam, clip_gradients, gae
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -61,21 +66,89 @@ def cpu_state(model: torch.nn.Module) -> dict:
     return {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 
 
-class Rollout:
-    """[T, rows] storage for one rollout."""
+def memory_mb() -> dict:
+    """Working set and private bytes of this process (Windows), for leak checks."""
+    if sys.platform != "win32":
+        return {}
 
-    def __init__(self, steps: int, rows: int, arrays: dict):
-        self.obs = {k: np.zeros((steps, *arrays[k].shape), dtype=arrays[k].dtype) for k in OBS_KEYS}
-        shape = (steps, rows)
-        self.mask0 = np.zeros((*shape, N_ACTIONS), dtype=bool)
-        self.mask1 = np.zeros((*shape, N_ACTIONS), dtype=bool)
-        self.a0 = np.zeros(shape, dtype=np.int64)
-        self.a1 = np.zeros(shape, dtype=np.int64)
-        self.logp = np.zeros(shape, dtype=np.float32)
-        self.value = np.zeros(shape, dtype=np.float32)
-        self.reward = np.zeros(shape, dtype=np.float32)
-        self.done = np.zeros(shape, dtype=bool)
-        self.train = np.zeros(shape, dtype=bool)
+    class Counters(ctypes.Structure):
+        _fields_ = [("cb", ctypes.c_ulong), ("PageFaultCount", ctypes.c_ulong)] + [
+            (name, ctypes.c_size_t) for name in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
+                                                 "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
+                                                 "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage",
+                                                 "PrivateUsage")]
+
+    counters = Counters()
+    counters.cb = ctypes.sizeof(counters)
+    process = ctypes.windll.kernel32.GetCurrentProcess()
+    if not ctypes.windll.psapi.GetProcessMemoryInfo(process, ctypes.byref(counters), counters.cb):
+        return {}
+    return {"rss_mb": counters.WorkingSetSize >> 20, "private_mb": counters.PrivateUsage >> 20}
+
+
+def spread_mask(n: int, fraction: float) -> np.ndarray:
+    """``fraction`` of ``n`` entries set, evenly spread (so pool battles are shared across actors)."""
+    index = np.arange(n)
+    return np.floor((index + 1) * fraction) > np.floor(index * fraction)
+
+
+def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device) -> tuple[dict, int]:
+    """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays."""
+    steps, R = data["a0"].shape
+    partner = np.arange(R) ^ 1
+    advantages, returns = gae(data["reward"], data["value"], data["done"], data["bootstrap"], args.gamma, args.lam)
+    selected = np.flatnonzero(data["train"].reshape(-1))
+    flat = {k: data[k].reshape(-1, *data[k].shape[2:]) for k in OBS_KEYS}
+    partner_index = (np.arange(steps)[:, None] * R + partner[None, :]).reshape(-1)
+    adv = advantages.reshape(-1)[selected]
+    adv = (adv - adv.mean()) / (adv.std() + 1e-8)
+    a0_all, a1_all = data["a0"].reshape(-1), data["a1"].reshape(-1)
+    mask0_all, mask1_all = data["mask0"].reshape(-1, N_ACTIONS), data["mask1"].reshape(-1, N_ACTIONS)
+    logp_all, returns_all = data["logp"].reshape(-1), returns.reshape(-1)
+    stats = {k: [] for k in ("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac", "grad_norm")}
+
+    def up(array):
+        return torch.from_numpy(np.ascontiguousarray(array)).to(device)
+
+    for _ in range(args.epochs):
+        order = rng.permutation(len(selected))
+        for begin in range(0, len(order), args.minibatch):
+            pick = order[begin:begin + args.minibatch]
+            if len(pick) < args.minibatch // 4:
+                continue
+            index = selected[pick]
+            batch = upload(flat, index, device)
+            partner_ids, partner_floats = partner_view(flat, partner_index[index], device)
+            a0, a1 = up(a0_all[index]), up(a1_all[index])
+            state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
+            lp0, vectors0 = model.slot0(state, up(mask0_all[index]))
+            lp1 = model.slot1(state, vectors0, a0, up(mask1_all[index]))
+            new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
+            old_logp = up(logp_all[index])
+            ratio = (new_logp - old_logp).exp()
+            weight = up(adv[pick].astype(np.float32))
+            policy_loss = -torch.minimum(ratio * weight, ratio.clamp(1 - args.clip, 1 + args.clip) * weight).mean()
+            value = model.value(state, partner_ids, partner_floats)
+            value_loss = (value - up(returns_all[index].astype(np.float32))).square().mean()
+            entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
+            aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
+            loss = policy_loss + args.value_coef * value_loss - entropy_coef * entropy + args.aux_coef * aux_loss
+            optimizer.zero_grad()
+            loss.backward()
+            stats["grad_norm"].append(clip_gradients(optimizer.parameters, args.max_grad_norm))
+            optimizer.step()
+            with torch.no_grad():
+                stats["kl"].append(float(((ratio - 1) - (new_logp - old_logp)).mean().cpu()))
+                stats["clipfrac"].append(float(((ratio - 1).abs() > args.clip).float().mean().cpu()))
+            for key, item in (("policy_loss", policy_loss), ("value_loss", value_loss), ("entropy", entropy),
+                              ("aux_loss", aux_loss)):
+                stats[key].append(float(item.detach().cpu()))
+    if not np.isfinite(stats["policy_loss"]).all():
+        raise RuntimeError("Non-finite PPO loss")
+    values, rets = data["value"].reshape(-1)[selected], returns_all[selected]
+    summary = {k: round(float(np.mean(v)), 4) for k, v in stats.items()}
+    summary["explained_variance"] = round(float(1 - np.var(rets - values) / (np.var(rets) + 1e-8)), 3)
+    return summary, len(selected)
 
 
 def main():
@@ -85,7 +158,7 @@ def main():
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/train-s42-2000.txt")
     parser.add_argument("--envs", type=int, default=128)
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--workers", type=int, default=6, help="actor processes (leave a core for the learner)")
     parser.add_argument("--steps", type=int, default=32, help="decision boundaries per rollout")
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--minibatch", type=int, default=1024)
@@ -112,12 +185,11 @@ def main():
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
-    torch.set_num_threads(2)
+    torch.set_num_threads(1)
     rng = np.random.default_rng(args.seed)
     device, adapter = training_device(args.device, args.adapter)
     dex = load_dex()
     model = Model(dex, args.width, args.layers).to(device)
-    opponent = Model(dex, args.width, args.layers).to(device)
     optimizer = Adam(model.parameters(), lr=args.lr)
     pool: list[dict] = []
     elapsed_before = 0.0
@@ -134,19 +206,38 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
     print(json.dumps({"adapter": adapter, "device": str(device), "parameters": n_params}), flush=True)
 
-    E, R = args.envs, 2 * args.envs
-    partner = np.arange(R) ^ 1
-    pool_envs = np.arange(E) < int(round(args.pool_fraction * E))
-    opponent_rows = np.zeros(R, dtype=bool)
-    opponent_rows[1::2] = pool_envs  # side 2 of the pool battles
+    pool_envs = spread_mask(args.envs, args.pool_fraction)
     budget = args.minutes * 60
     next_pool = elapsed_before + args.pool_minutes * 60 if pool else 0.0
     next_snapshot = (int(elapsed_before // (args.snapshot_minutes * 60)) + (1 if elapsed_before else 0)) * args.snapshot_minutes * 60
 
-    with VecEnv(E, [args.pool], seed=args.seed + update, workers=args.workers) as env:
-        obs = env.reset()
-        rollout = Rollout(args.steps, R, obs)
+    def checkpoint(elapsed):
+        save(args.output / "latest.pt", {
+            "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool, "elapsed": elapsed,
+            "update": update, "battles": battles, "samples": samples_total, "numpy_rng": rng.bit_generator.state,
+            "width": args.width, "layers": args.layers})
+
+    def launch(actors, buffer: int, elapsed: float) -> dict:
+        """Hand the idle actors the current weights and an opponent, and start filling ``buffer``."""
+        nonlocal pool, next_pool
+        if elapsed >= next_pool:
+            pool.append(cpu_state(model))
+            pool = pool[-args.pool_size:]
+            next_pool = elapsed + args.pool_minutes * 60
+        progress = min(elapsed / budget, 1.0)
+        use_pool = len(pool) > 1
+        actors.set_weights("learner", cpu_state(model))
+        if use_pool:
+            actors.set_weights("opponent", pool[int(rng.integers(len(pool) - 1))])
+        ko_bonus = args.ko_bonus * max(0.0, 1 - 2 * progress)
+        actors.start(buffer, use_pool, pool_envs, ko_bonus)
+        return dict(use_pool=use_pool, ko_bonus=ko_bonus)
+
+    with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model) as actors:
         start = time.perf_counter() - elapsed_before
+        current = 0
+        info = launch(actors, current, elapsed_before)
+        rollout = actors.wait()
         while True:
             elapsed = time.perf_counter() - start
             if elapsed >= next_snapshot:
@@ -156,164 +247,39 @@ def main():
                 next_snapshot += args.snapshot_minutes * 60
             if elapsed >= budget:
                 break
-            if elapsed >= next_pool:
-                pool.append(cpu_state(model))
-                pool = pool[-args.pool_size:]
-                next_pool = elapsed + args.pool_minutes * 60
+            # The actors fill the other buffer with the current weights while the GPU trains on this one.
+            collected, collected_info = rollout, info
+            info = launch(actors, 1 - current, elapsed)
             progress = min(elapsed / budget, 1.0)
-            lr = args.lr * (1 - (1 - args.lr_final) * progress)
-            optimizer.lr = lr
+            optimizer.lr = args.lr * (1 - (1 - args.lr_final) * progress)
             entropy_coef = args.entropy + (args.entropy_final - args.entropy) * progress
-            ko_bonus = args.ko_bonus * max(0.0, 1 - 2 * progress)
-            # Opponent for this rollout: a random older snapshot (learner self-play until the pool has one).
-            use_pool = len(pool) > 1
-            if use_pool:
-                opponent.load_state_dict(pool[int(rng.integers(len(pool) - 1))])
-            opp_rows = opponent_rows if use_pool else np.zeros(R, dtype=bool)
-
-            # ---- rollout ----------------------------------------------------------------------------------------
-            t0 = time.perf_counter()
-            model.eval()
-            completed = turns = pool_games = pool_wins = 0
-            for t in range(args.steps):
-                for k in OBS_KEYS:
-                    rollout.obs[k][t] = obs[k]
-                active = obs["needs_action"].reshape(R).copy()
-                fainted_before = obs["fainted"].copy()
-                mask0 = obs["mask0"].reshape(R, N_ACTIONS).copy()
-                mask0[~active] = False
-                mask0[~active, PASS] = True
-                with torch.no_grad():
-                    batch = upload(obs, slice(None), device)
-                    state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
-                    value = model.value(state, *partner_view(obs, partner, device))
-                    lp0_t, vectors0 = model.slot0(state, torch.from_numpy(mask0).to(device))
-                    lp0 = lp0_t.cpu().numpy()
-                    if use_pool:
-                        rows = np.flatnonzero(opp_rows)
-                        sub = upload(obs, rows, device)
-                        opp_state = opponent.trunk(sub["ids"], sub["floats"], sub["field"], sub["action_features"], sub["token_features"])
-                        opp_lp0_t, opp_vectors0 = opponent.slot0(opp_state, torch.from_numpy(mask0[rows]).to(device))
-                        lp0[rows] = opp_lp0_t.cpu().numpy()
-                    a0 = sample(lp0, rng)
-                    requested = np.where(active, a0, -1).reshape(E, 2)
-                    mask1 = env.mask_slot1(requested).reshape(R, N_ACTIONS).copy()
-                    mask1[~active] = False
-                    mask1[~active, PASS] = True
-                    a0_t = torch.from_numpy(a0.astype(np.int64)).to(device)
-                    lp1 = model.slot1(state, vectors0, a0_t, torch.from_numpy(mask1).to(device)).cpu().numpy()
-                    if use_pool:
-                        opp_lp1 = opponent.slot1(opp_state, opp_vectors0, torch.from_numpy(a0[rows].astype(np.int64)).to(device),
-                                                 torch.from_numpy(mask1[rows]).to(device)).cpu().numpy()
-                        lp1[rows] = opp_lp1
-                    a1 = sample(lp1, rng)
-                    value = value.cpu().numpy()
-                actions = np.stack((a0, a1), -1).reshape(E, 2, 2)
-                actions[~obs["needs_action"]] = -1
-                rollout.mask0[t], rollout.mask1[t] = mask0, mask1
-                rollout.a0[t], rollout.a1[t] = a0, a1
-                rollout.logp[t] = lp0[np.arange(R), a0] + lp1[np.arange(R), a1]
-                rollout.value[t] = value
-                rollout.train[t] = active & ~opp_rows
-                obs = env.step(actions)
-                done = obs["done"]
-                reward = obs["reward"].reshape(R).copy()
-                if ko_bonus > 0:
-                    delta = obs["fainted"] - fainted_before  # own, foe fainted counts per row
-                    shaped = ko_bonus * (delta[:, 1] - delta[:, 0])
-                    reward += np.where(np.repeat(done, 2), 0.0, shaped)
-                rollout.reward[t] = reward
-                rollout.done[t] = np.repeat(done, 2)
-                completed += int(done.sum())
-                turns += int(obs["final_turns"][done].sum())
-                if use_pool:
-                    finished = done & pool_envs
-                    pool_games += int(finished.sum())
-                    pool_wins += int((obs["winner"][finished] == 0).sum())
-            with torch.no_grad():
-                batch = upload(obs, slice(None), device)
-                state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
-                bootstrap = model.value(state, *partner_view(obs, partner, device)).cpu().numpy()
-            rollout_seconds = time.perf_counter() - t0
-
-            # ---- PPO update -------------------------------------------------------------------------------------
             t1 = time.perf_counter()
             model.train()
-            advantages, returns = gae(rollout.reward, rollout.value, rollout.done, bootstrap, args.gamma, args.lam)
-            selected = np.flatnonzero(rollout.train.reshape(-1))
-            flat_obs = {k: v.reshape(-1, *v.shape[2:]) for k, v in rollout.obs.items()}
-            partner_index = (np.arange(args.steps)[:, None] * R + partner[None, :]).reshape(-1)
-            adv = advantages.reshape(-1)[selected]
-            adv = (adv - adv.mean()) / (adv.std() + 1e-8)
-            stats = {k: [] for k in ("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac", "grad_norm")}
-            for _ in range(args.epochs):
-                order = rng.permutation(len(selected))
-                for begin in range(0, len(order), args.minibatch):
-                    pick = order[begin:begin + args.minibatch]
-                    if len(pick) < args.minibatch // 4:
-                        continue
-                    index = selected[pick]
-                    batch = upload(flat_obs, index, device)
-                    partner_ids, partner_floats = partner_view(flat_obs, partner_index[index], device)
-                    a0 = torch.from_numpy(rollout.a0.reshape(-1)[index]).to(device)
-                    a1 = torch.from_numpy(rollout.a1.reshape(-1)[index]).to(device)
-                    mask0 = torch.from_numpy(rollout.mask0.reshape(-1, N_ACTIONS)[index]).to(device)
-                    mask1 = torch.from_numpy(rollout.mask1.reshape(-1, N_ACTIONS)[index]).to(device)
-                    state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
-                    lp0, vectors0 = model.slot0(state, mask0)
-                    lp1 = model.slot1(state, vectors0, a0, mask1)
-                    new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
-                    old_logp = torch.from_numpy(rollout.logp.reshape(-1)[index]).to(device)
-                    ratio = (new_logp - old_logp).exp()
-                    weight = torch.from_numpy(adv[pick].astype(np.float32)).to(device)
-                    policy_loss = -torch.minimum(ratio * weight, ratio.clamp(1 - args.clip, 1 + args.clip) * weight).mean()
-                    value = model.value(state, partner_ids, partner_floats)
-                    target = torch.from_numpy(returns.reshape(-1)[index].astype(np.float32)).to(device)
-                    value_loss = (value - target).square().mean()
-                    entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
-                    aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
-                    loss = policy_loss + args.value_coef * value_loss - entropy_coef * entropy + args.aux_coef * aux_loss
-                    optimizer.zero_grad()
-                    loss.backward()
-                    stats["grad_norm"].append(clip_gradients(optimizer.parameters, args.max_grad_norm))
-                    optimizer.step()
-                    with torch.no_grad():
-                        log_ratio = new_logp - old_logp
-                        stats["kl"].append(float(((ratio - 1) - log_ratio).mean().cpu()))
-                        stats["clipfrac"].append(float(((ratio - 1).abs() > args.clip).float().mean().cpu()))
-                    for key, item in (("policy_loss", policy_loss), ("value_loss", value_loss), ("entropy", entropy),
-                                      ("aux_loss", aux_loss)):
-                        stats[key].append(float(item.detach().cpu()))
-            if not np.isfinite(stats["policy_loss"]).all():
-                raise RuntimeError("Non-finite PPO loss")
+            stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device)
             train_seconds = time.perf_counter() - t1
+            rollout = actors.wait()
+            cycle = time.perf_counter() - t1
+            current = 1 - current
             update += 1
-            battles += completed
-            samples_total += len(selected)
-            values, rets = rollout.value.reshape(-1)[selected], returns.reshape(-1)[selected]
+            battles += collected["completed"]
+            samples_total += samples
             metrics = {
                 "update": update, "minutes": round((time.perf_counter() - start) / 60, 3), "battles": battles,
-                "samples": samples_total, "battles_per_s": round(completed / (rollout_seconds + train_seconds), 1),
-                "rollout_s": round(rollout_seconds, 2), "train_s": round(train_seconds, 2),
-                "mean_turns": round(turns / max(completed, 1), 1), "pool_games": pool_games,
-                "pool_win_rate": round(pool_wins / pool_games, 3) if pool_games else None,
-                "explained_variance": round(float(1 - np.var(rets - values) / (np.var(rets) + 1e-8)), 3),
-                "lr": lr, "entropy_coef": round(entropy_coef, 5), "ko_bonus": round(ko_bonus, 4), "pool_size": len(pool),
-                **{k: round(float(np.mean(v)), 4) for k, v in stats.items()},
+                "samples": samples_total, "battles_per_s": round(collected["completed"] / cycle, 1),
+                "cycle_s": round(cycle, 2), "train_s": round(train_seconds, 2), "wait_s": round(cycle - train_seconds, 2),
+                "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
+                "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
+                "pool_games": collected["pool_games"],
+                "pool_win_rate": round(collected["pool_wins"] / collected["pool_games"], 3) if collected["pool_games"] else None,
+                "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5), "ko_bonus": round(collected_info["ko_bonus"], 4),
+                "pool_size": len(pool), **stats, **memory_mb(),
             }
             print(json.dumps(metrics), flush=True)
             with (args.output / "metrics.jsonl").open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(metrics) + "\n")
             if update % 10 == 0:
-                save(args.output / "latest.pt", {
-                    "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool,
-                    "elapsed": time.perf_counter() - start, "update": update, "battles": battles,
-                    "samples": samples_total, "numpy_rng": rng.bit_generator.state, "width": args.width,
-                    "layers": args.layers})
-    save(args.output / "latest.pt", {
-        "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool,
-        "elapsed": time.perf_counter() - start, "update": update, "battles": battles, "samples": samples_total,
-        "numpy_rng": rng.bit_generator.state, "width": args.width, "layers": args.layers})
+                checkpoint(time.perf_counter() - start)
+    checkpoint(time.perf_counter() - start)
     print(f"Done: {update} updates, {battles} battles in {(time.perf_counter() - start) / 60:.1f} min", flush=True)
 
 

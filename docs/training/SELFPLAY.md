@@ -10,7 +10,8 @@ The older `train.py` MLP baseline is unchanged.
 | protocol tracker and token encoder | `training/encoder.py` |
 | damage-calc features | `training/damage.py` |
 | model | `training/model.py` |
-| battle workers (multiprocess) | `training/vecenv.py` |
+| actor processes (rollouts with CPU inference) | `training/actors.py` |
+| battle workers for evaluation | `training/vecenv.py` |
 | PPO helpers | `training/ppo.py` |
 | trainer | `train_selfplay.py` |
 | duplicate evaluation | `evaluate.py` |
@@ -52,10 +53,14 @@ Ability and item immunities enter the damage features as expected type multiplie
 
 **Damage-calc features.** For every move code of both actives: expected damage to the foes and to the own
 side (fraction of max HP, capped at current HP), KO chances, effectiveness, and whether the user moves
-first. For every Pokemon: expected damage and KO chance from each opposing active (the foe's revealed moves
-plus 80-power STAB attacks for its unknown ones), and whether it outspeeds each opposing active. Checked
-against 4,677 landed engine moves: median actual/predicted 1.00, interquartile range 0.95-1.32,
-correlation 0.76. The features are computed on the CPU workers and stored with the rollout.
+first. For every Pokemon: expected damage and KO chance from each opposing active, and whether it outspeeds
+each opposing active. An opponent's possible moves are its revealed moves (probability 1) and its ten most
+likely belief candidates with their inclusion probabilities, each with its real type, category, power,
+accuracy, hit count and spread reduction. Assuming the moves are present independently and the best one is
+used, threat is E[max damage] and KO chance is 1 - prod(1 - p KO). Generic 80-power STAB attacks stand in only
+when a foe has neither revealed moves nor a belief. Checked against 4,677 landed engine moves of our own:
+median actual/predicted 1.00, interquartile range 0.95-1.32, correlation 0.76. A test checks foe moves
+against our Pokemon the same way. The features are computed on the CPU actors and stored with the rollout.
 
 **Model.** A 3-layer, width-128 transformer over the 13 tokens without positional encoding, about 0.92M
 parameters. Actions are scored from their own features, DouZero style: user token, move representation,
@@ -67,11 +72,14 @@ the opponent row's own request. Auxiliary heads predict each revealed foe's hidd
 and moves. Both are training-only; the policy never reads them.
 
 **Training.** PPO with GAE (gamma 0.995, lambda 0.95), clip 0.2, two epochs of 1,024-sample minibatches per
-rollout of 128 battles x 32 decision boundaries. Rewards are +1/-1 at the end plus a KO-difference bonus of
-0.05 that decays linearly to zero at half the run. 20% of the battles put a random older snapshot
-(added every three minutes, last 12 kept) on side 2. Learning rate (3e-4 to 9e-5) and entropy bonus (0.01 to 0.003)
-anneal over the time budget. Adam and gradient clipping are written with elementwise ops because DirectML
-runs `lerp` and the fused kernels on the CPU.
+rollout of 128 battles x 32 decision boundaries. Rollouts and training overlap: six actor processes play
+the battles with CPU copies of the policy and fill one of two shared-memory buffers while the GPU trains on
+the other. Each rollout is therefore collected with the weights from one update earlier, and the PPO ratio
+uses the stored behaviour log-probs. Rewards are +1/-1 at the end plus a KO-difference bonus of 0.05 that
+decays linearly to zero at half the run. 20% of the battles, spread over the actors, put a random older
+snapshot (added every three minutes, last 12 kept) on side 2. Learning rate (3e-4 to 9e-5) and entropy bonus
+(0.01 to 0.003) anneal over the time budget. Adam and gradient clipping are written with elementwise ops
+because DirectML runs `lerp` and the fused kernels on the CPU. The metrics log the trainer's memory.
 
 **Evaluation.** Duplicate games on the held-out `eval-s43-200` teams: each matchup's second half replays the
 first half's teams and battle seeds with the sides swapped. Baselines: a random legal player (switch 10%,
@@ -96,5 +104,6 @@ Measured on the RX 5500 with torch-directml 0.2.5:
 - `gather` on expanded tensors fails, and `log_sigmoid` falls back to the CPU. One-hot products and an
   explicit softplus replace them.
 - The damage features take ~57 ms per 256 rows on DirectML but ~22 ms on one CPU thread, so they run in the
-  workers.
-- Python encoding (~190 us per row) is the main CPU cost, so four worker processes run it in parallel.
+  actors.
+- Python encoding (~190 us per row) and CPU inference are the actors' costs; they run in parallel with
+  training.

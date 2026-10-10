@@ -11,7 +11,7 @@ import torch
 
 import numbrion as nb
 from training.damage import DamageFeatures
-from training.dex import load_dex
+from training.dex import load_dex, to_id
 from training.encoder import FF, I_ABILITY, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, PF, Encoder
 from training.model import TARGET_TOKENS, Model, bag
 from training.ppo import PASS, gae, sample
@@ -217,3 +217,75 @@ def test_gae_stops_at_battle_end_and_bootstraps_truncation():
     values = np.zeros_like(rewards)
     _, returns = gae(rewards, values, np.array([[False], [True], [False]]), np.array([2.0], dtype=np.float32), 1.0, 1.0)
     np.testing.assert_allclose(returns, [[1.0], [1.0], [2.0]])
+
+
+def test_expected_max_and_any_ko_over_possible_moves():
+    from training.damage import any_ko, expected_max
+
+    dealt = torch.tensor([0.2, 0.6, 0.4]).view(1, 1, 3, 1)
+    probs = torch.tensor([1.0, 0.5, 0.5]).view(1, 1, 3)
+    # Sorted: 0.6 (p .5), 0.4 (p .5), 0.2 (p 1): .6*.5 + .4*.5*.5 + .2*1*.25
+    assert float(expected_max(dealt, probs)) == pytest.approx(0.3 + 0.1 + 0.05)
+    ko = torch.tensor([0.0, 1.0, 0.5]).view(1, 1, 3, 1)
+    assert float(any_ko(ko, probs)) == pytest.approx(1 - (1 - 0.5) * (1 - 0.25))
+    assert float(expected_max(dealt, torch.zeros(1, 1, 3))) == 0
+
+
+def test_foe_threat_tracks_engine_damage():
+    """Per-move damage of foe attacks on own Pokemon (revealed or belief-candidate moves) against the engine."""
+    dex = load_dex()
+    damage = DamageFeatures(dex)
+    env = nb.BatchEnv(16, [str(POOL)], seed=9, threads=2, log=True)
+    env.reset()
+    encoder = Encoder(32)
+    observations = [env.observe(e, s) for e in range(16) for s in (0, 1)]
+    ratios, candidates_used = [], 0
+    for _ in range(60):
+        b = encoder.encode_batch(observations)
+        ids, floats, field = (torch.from_numpy(x) for x in (b.ids, b.floats, b.field))
+        with torch.no_grad():
+            t = damage.tokens(ids, floats, field)
+            defenders = {k: v.reshape(len(ids), 1, 1, 12, *v.shape[2:]) for k, v in t.items()}
+            dealt, _, probs = damage.foe_attacks(ids, floats, t, defenders, field)
+        own_hp = b.floats[:, :6, PF["hp"]].copy()
+        result = env.step(env.random_actions(switch_prob=0.0, tera_prob=0.0))
+        observations = [env.observe(e, s) for e in range(16) for s in (0, 1)]
+        for e in range(16):
+            row = 2 * e
+            if result["done"][e]:
+                continue
+            lines = observations[row]["log"]
+            for i, line in enumerate(lines):
+                parts = line.split("|")
+                if len(parts) < 5 or parts[1] != "move" or not parts[2].startswith("p2") or "[" in line:
+                    continue
+                move = dex.move_index.get(to_id(parts[3]), 0)
+                if not move or dex.moves[move - 1]["category"] == "Status" or dex.move_accuracy[move] < 1:
+                    continue
+                if dex.moves[move - 1]["target"] not in ("normal", "any") or dex.move_special_power[move]:
+                    continue
+                slot = 0 if parts[2].startswith("p2a") else 1
+                options = list(b.ids[row, 6 + slot, I_MOVE0:I_MOVE0 + 4]) + list(b.ids[row, 6 + slot, 10:20])
+                if move not in options or not parts[4].startswith("p1"):
+                    continue
+                name = parts[4].split(": ", 1)[1]
+                own = encoder.own_names[row]
+                if name not in own:
+                    continue
+                token = own.index(name)
+                follow = lines[i + 1:i + 6]
+                hit = [f for f in follow if f.startswith(f"|-damage|{parts[4]}|") and "[from]" not in f]
+                if not hit or any(f.startswith(("|-crit", "|-activate", "|-immune")) for f in follow):
+                    continue
+                hp = hit[0].split("|")[3].split()[0]
+                if hp == "0":
+                    continue
+                now = int(hp.split("/")[0]) / int(hp.split("/")[1])
+                actual = own_hp[row, token] - now
+                m = options.index(move)
+                predicted = float(dealt[row, slot, m, token])
+                candidates_used += m >= 4
+                if actual > 0.02 and predicted > 0.02:
+                    ratios.append(actual / predicted)
+    assert len(ratios) > 40 and candidates_used > 0
+    assert 0.75 < float(np.median(ratios)) < 1.35

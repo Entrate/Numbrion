@@ -2,8 +2,10 @@
 
 Everything is vectorized over the batch so it runs on the training device. It is an estimate: the standard Gen 9
 formula with STAB (including Tera), type effectiveness, expected ability/item immunities, weather, burn, screens,
-stat stages, accuracy, multi-hit and a few variable-power moves. Opponent stats are estimated from base stats
-(encoder.estimated_stats); the opponent's unrevealed moves are approximated by 80-power STAB attacks.
+stat stages, accuracy, multi-hit, spread reduction and a few variable-power moves. Opponent stats are estimated from
+base stats (encoder.estimated_stats). An opponent's possible moves are its revealed moves (probability 1) plus the
+belief candidates of training.dex.Dex.belief with their inclusion probabilities; only when both are empty do
+80-power STAB attacks of its types stand in.
 
 Outputs:
 
@@ -11,7 +13,9 @@ Outputs:
   the foes and to the own side (fraction of max HP, capped at the target's current HP), KO chances, the main
   target's effectiveness and whether the user moves first.
 * ``token``: [B, 12, N_TOKEN_FEATURES] for every Pokemon: expected damage and KO chance from each opposing active,
-  and whether it outspeeds each opposing active.
+  and whether it outspeeds each opposing active. For damage from an opponent, each possible move is assumed present
+  independently with its probability and the opponent to use its best present move: the expected damage is
+  E[max] = sum_i d_i p_i prod_{j<i} (1 - p_j) over moves sorted by damage, and the KO chance 1 - prod (1 - p_m KO_m).
 """
 from __future__ import annotations
 
@@ -20,8 +24,8 @@ import torch
 from torch import nn
 
 from .dex import TARGETS, Dex
-from .encoder import (FF, I_ABILITY, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, I_TYPE1, N_ACTION_FEATURES,  # noqa: F401
-                      N_TOKEN_FEATURES, PF, STAT_SCALE)
+from .encoder import (FF, I_ABILITY, I_CAND_MOVES, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, I_TYPE1,  # noqa: F401
+                      K_MOVES, N_ACTION_FEATURES, N_TOKEN_FEATURES, PF, STAT_SCALE)
 
 ROLL = 0.925  # mean damage roll
 SPREAD = 0.75
@@ -46,6 +50,22 @@ def _hit_table() -> np.ndarray:
             elif name == "randomNormal":
                 table[c, s, 2, 6] = table[c, s, 2, 7] = 0.5
     return table
+
+
+def expected_max(dealt: torch.Tensor, probs: torch.Tensor) -> torch.Tensor:
+    """E[max over present moves] of ``dealt`` [B, A, M, D] when move m is present independently with ``probs``
+    [B, A, M]; absent moves deal nothing. Reduces the move axis."""
+    p = probs.clamp(0, 1).unsqueeze(-1).expand_as(dealt)
+    order = dealt.argsort(dim=2, descending=True)
+    d, q = dealt.gather(2, order), p.gather(2, order)
+    survive = torch.cumprod(1 - q, dim=2)
+    before = torch.cat((torch.ones_like(survive[:, :, :1]), survive[:, :, :-1]), 2)
+    return (d * q * before).sum(2)
+
+
+def any_ko(ko: torch.Tensor, probs: torch.Tensor) -> torch.Tensor:
+    """Chance that at least one present move KOs: 1 - prod_m (1 - p_m KO_m), reducing the move axis."""
+    return 1 - torch.prod(1 - probs.clamp(0, 1).unsqueeze(-1) * ko, dim=2)
 
 
 def stage(boost: torch.Tensor) -> torch.Tensor:
@@ -118,10 +138,10 @@ class DamageFeatures(nn.Module):
         )
 
     # ---- core formula --------------------------------------------------------------------------------------
-    def damage(self, att: dict, dfn: dict, mtype, category, power, accuracy, hits, special, field):
+    def damage(self, att: dict, dfn: dict, mtype, category, power, accuracy, hits, special, field, modifier=None):
         """att tensors are [B, A, 1, 1], move tensors [B, A, M, 1], dfn tensors [B, 1, 1, D]; returns
         expected dealt fraction of the defender's max HP (capped at its current HP), KO chance and effectiveness,
-        each [B, A, M, D]."""
+        each [B, A, M, D]. ``modifier`` [B, A, M, 1] scales the damage (spread moves)."""
         physical = category == 1
         attack = torch.where(physical, att["atk"] * att["item_phys"], att["spa"] * att["item_spec"])
         defense = torch.where(physical, dfn["dfn"], dfn["spd"]).clamp(min=1)
@@ -153,11 +173,42 @@ class DamageFeatures(nn.Module):
         damage = torch.where(special == 4, att["level"] * (eff > 0).float(), damage)  # Night Shade
         damage = torch.where(special == 5, dfn["hp"] / 2 * (eff > 0).float(), damage)  # Super Fang, Ruination
         damage = torch.where((special == 6) | (category == 0), torch.zeros_like(damage), damage)
+        if modifier is not None:
+            damage = damage * modifier
         top = damage / ROLL
         ko = ((top - dfn["hp"]) / (0.15 * top).clamp(min=1e-3)).clamp(0, 1) * accuracy
         dealt = torch.minimum(damage, dfn["hp"]) / dfn["max_hp"] * accuracy
         alive = dfn["alive"]
         return dealt * alive, ko * alive, eff * immune_mult
+
+    def foe_attacks(self, ids, floats, t, defenders, field):
+        """Damage of every possible move of both foe actives against every token, with the move probabilities.
+
+        Moves: the 4 revealed slots (probability 1 where revealed), the K_MOVES belief candidates (their inclusion
+        probabilities), then three 80-power STAB attacks with the better attacking stat (probability 1 only when the
+        revealed and belief moves are all empty, for example a species without random-battle data).
+        """
+        B = ids.shape[0]
+        foe_tokens = list(FOE_TOKENS)
+        foe = {k: v[:, foe_tokens].reshape(B, 2, 1, 1, *v.shape[2:]) for k, v in t.items()}
+        moves = torch.cat((ids[:, foe_tokens, I_MOVE0:I_MOVE0 + 4], ids[:, foe_tokens, I_CAND_MOVES:I_CAND_MOVES + K_MOVES]), -1)
+        probs = torch.cat((floats[:, foe_tokens, PF["move_known0"]:PF["move_known0"] + 4],
+                           floats[:, foe_tokens, PF["cand_move_p0"]:PF["cand_move_p0"] + K_MOVES]), -1) * (moves > 0)
+        stab_types = torch.cat((t["base_types"][:, foe_tokens], t["tera"][:, foe_tokens].unsqueeze(-1)
+                                * (t["terastallized"][:, foe_tokens] > 0.5).long().unsqueeze(-1)), -1)  # [B, 2, 3]
+        better = torch.where(t["atk"][:, foe_tokens] >= t["spa"][:, foe_tokens], 1, 2).unsqueeze(-1)
+        generic_cat = better.expand(-1, -1, 3) * (stab_types > 0).long()
+        fallback = (probs.sum(-1, keepdim=True) == 0).float() * (stab_types > 0).float()
+        target = self.move_target[moves]
+        spread = (target == TARGETS.index("allAdjacentFoes")) | (target == TARGETS.index("allAdjacent"))
+        ones = torch.ones_like(stab_types, dtype=torch.float32)
+        cat = lambda a, b: torch.cat((a, b), -1).unsqueeze(-1)
+        dealt, ko, _ = self.damage(
+            foe, defenders, cat(self.move_type[moves], stab_types), cat(self.move_category[moves], generic_cat),
+            cat(self.move_power[moves], 80 * ones), cat(self.move_accuracy[moves], ones),
+            cat(self.move_hits[moves], ones), cat(self.move_special[moves], torch.zeros_like(stab_types)), field,
+            modifier=cat(torch.where(spread, SPREAD, 1.0), ones))
+        return dealt, ko, torch.cat((probs, fallback), -1)
 
     def forward(self, ids: torch.Tensor, floats: torch.Tensor, field: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         B = ids.shape[0]
@@ -173,20 +224,7 @@ class DamageFeatures(nn.Module):
         own_dealt, own_ko, own_eff = self.damage(own, defenders, mv(self.move_type), mv(self.move_category),
                                                  mv(self.move_power), mv(self.move_accuracy), mv(self.move_hits),
                                                  mv(self.move_special), field)  # [B, 2, 4, 12]
-        # Foe actives: revealed moves plus 80-power STAB attacks of each type with their better attacking stat.
-        foe = {k: v[:, list(FOE_TOKENS)].reshape(B, 2, 1, 1, *v.shape[2:]) for k, v in t.items()}
-        foe_moves = ids[:, list(FOE_TOKENS), I_MOVE0:I_MOVE0 + 4]
-        stab_types = torch.cat((t["base_types"][:, list(FOE_TOKENS)], t["tera"][:, list(FOE_TOKENS)].unsqueeze(-1)
-                                * (t["terastallized"][:, list(FOE_TOKENS)] > 0.5).long().unsqueeze(-1)), -1)  # [B,2,3]
-        better = torch.where(t["atk"][:, list(FOE_TOKENS)] >= t["spa"][:, list(FOE_TOKENS)], 1, 2).unsqueeze(-1)
-        generic_cat = better.expand(-1, -1, 3) * (stab_types > 0).long()
-        f_type = torch.cat((self.move_type[foe_moves], stab_types), -1).unsqueeze(-1)
-        f_cat = torch.cat((self.move_category[foe_moves], generic_cat), -1).unsqueeze(-1)
-        f_pow = torch.cat((self.move_power[foe_moves], torch.full_like(stab_types, 80, dtype=torch.float32)), -1).unsqueeze(-1)
-        f_acc = torch.cat((self.move_accuracy[foe_moves], torch.ones_like(stab_types, dtype=torch.float32)), -1).unsqueeze(-1)
-        f_hits = torch.cat((self.move_hits[foe_moves], torch.ones_like(stab_types, dtype=torch.float32)), -1).unsqueeze(-1)
-        f_spec = torch.cat((self.move_special[foe_moves], torch.zeros_like(stab_types)), -1).unsqueeze(-1)
-        foe_dealt, foe_ko, _ = self.damage(foe, defenders, f_type, f_cat, f_pow, f_acc, f_hits, f_spec, field)  # [B,2,7,12]
+        foe_dealt, foe_ko, foe_probs = self.foe_attacks(ids, floats, t, defenders, field)  # [B, 2, M, 12], [B, 2, M]
 
         # Speed: does each token outspeed each opposing active (Trick Room flips).
         spe = t["spe"]
@@ -196,8 +234,8 @@ class DamageFeatures(nn.Module):
         faster_foe = torch.where(trick_room > 0.5, 1 - faster_foe, faster_foe)  # [B, 12, 2]
         faster_own = torch.where(trick_room > 0.5, 1 - faster_own, faster_own)
         is_own = (floats[..., PF["own"]] > 0.5).unsqueeze(-1)  # [B, 12, 1]
-        threat_from_foe = foe_dealt.amax(2).transpose(1, 2)  # [B, 12, 2]
-        ko_from_foe = foe_ko.amax(2).transpose(1, 2)
+        threat_from_foe = expected_max(foe_dealt, foe_probs).transpose(1, 2)  # [B, 12, 2]
+        ko_from_foe = any_ko(foe_ko, foe_probs).transpose(1, 2)
         threat_from_own = own_dealt.amax(2).transpose(1, 2)
         ko_from_own = own_ko.amax(2).transpose(1, 2)
         token = torch.cat((
