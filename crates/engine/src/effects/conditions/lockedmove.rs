@@ -69,7 +69,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let duration = b.state.prng.random_range(2, 4);
             let effect = match b.event_arg(cx, 2) {
                 EventArg::Effect(e) => e,
-                other => panic!("lockedmove Start without an effect: {other:?}"),
+                _ => panic!("lockedmove Start without an effect"),
             };
             let move_id = b.event_effect_id(effect);
             let c = b.hook_state_mut(cx);

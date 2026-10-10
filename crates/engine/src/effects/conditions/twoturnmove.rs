@@ -54,7 +54,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let mut defender = mon_arg(b, cx, 1);
             let effect = match b.event_arg(cx, 2) {
                 EventArg::Effect(e) => e,
-                other => panic!("twoturnmove Start without an effect: {other:?}"),
+                _ => panic!("twoturnmove Start without an effect"),
             };
             let move_id = b.event_effect_id(effect);
             // this.effectState.move = effect.id;
@@ -85,7 +85,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                     let i = b.state.prng.sample_index(foes.len as usize);
                     defender = match foes.entries[i] {
                         crate::actions::HitTarget::Pokemon(m) => m,
-                        other => panic!("foes() entry {other:?} is not a Pokemon"),
+                        _ => panic!("foes() entry is not a Pokemon"),
                     };
                 }
                 // moveTargetLoc = attacker.getLocOf(defender);

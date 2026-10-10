@@ -164,20 +164,20 @@ pub fn charge_try_move<L: LogSink>(
             false,
         );
     }
-    if let Some(weather) = skip_weather {
-        if b.effective_weather(attacker) == weather {
-            b.attr_last_move(MoveLineEdit::Still);
-            b.add_move(LogEntry::new(
-                "-anim",
-                &[
-                    LogArg::Mon(attacker),
-                    LogArg::Effect(effect),
-                    LogArg::Mon(defender),
-                ],
-                &[],
-            ));
-            return Relay::Undefined;
-        }
+    if let Some(weather) = skip_weather
+        && b.effective_weather(attacker) == weather
+    {
+        b.attr_last_move(MoveLineEdit::Still);
+        b.add_move(LogEntry::new(
+            "-anim",
+            &[
+                LogArg::Mon(attacker),
+                LogArg::Effect(effect),
+                LogArg::Mon(defender),
+            ],
+            &[],
+        ));
+        return Relay::Undefined;
     }
     if !b
         .prepare_charge_move(attacker, holder(defender), MoveHandle(mv))
