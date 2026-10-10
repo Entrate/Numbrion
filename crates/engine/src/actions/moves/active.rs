@@ -131,6 +131,17 @@ impl<L: LogSink> Battle<L> {
             self.scratch.active_pokemon = MonId::NONE;
             self.scratch.active_target = MonId::NONE;
         }
+        // Scope-completed moves no longer have a global reference. Reclaim them here
+        // so decision boundaries contain no abandoned move frames; still-owned outer
+        // moves retain their slots until their own creating scope ends.
+        for slot in &mut self.scratch.moves {
+            if slot
+                .as_ref()
+                .is_some_and(|m| m.runtime_flags & PENDING_RELEASE != 0)
+            {
+                *slot = None;
+            }
+        }
     }
 
     /// Ports sim/battle-actions.ts:410-442 (the body of useMoveInner between the
