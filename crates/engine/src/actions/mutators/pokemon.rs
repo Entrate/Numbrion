@@ -1,4 +1,4 @@
-//! Pokemon read/contact helpers ported from pinned Showdown; other mutators remain explicit stubs.
+//! Pokemon species, Transform, type and slot ports from pinned Showdown.
 #![allow(unused_variables, unused_imports)]
 use super::common::{mon_arg, number};
 use crate::{
@@ -80,18 +80,10 @@ impl<L: LogSink> Battle<L> {
         let illusion = self.state.pokemon[pokemon.0 as usize].illusion;
         if options.permanent {
             self.state.pokemon[pokemon.0 as usize].base_species = species;
-            self.add(LogEntry::new(
-                "detailschange",
-                &[
-                    LogArg::Mon(pokemon),
-                    LogArg::Details(if illusion == MonId::NONE {
-                        pokemon
-                    } else {
-                        illusion
-                    }),
-                ],
-                &[],
-            ));
+            let shown = if illusion == MonId::NONE { pokemon } else { illusion };
+            let tera = self.state.pokemon[pokemon.0 as usize].terastallized;
+            let parts = [LogArg::Details(shown), LogArg::Text(", tera:"), LogArg::Type(tera)];
+            self.add(LogEntry::new("detailschange", &[LogArg::Mon(pokemon), if tera == TypeId::NONE { LogArg::Details(shown) } else { LogArg::Parts(&parts) }], &[]));
             self.update_max_hp(pokemon);
             if source_effect == EffectRef::None {
                 self.state.pokemon[pokemon.0 as usize].flags |= mon_flags::FORME_REGRESSION;

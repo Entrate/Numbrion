@@ -48,7 +48,7 @@ fn key(id: EffectId) -> &'static str {
 fn result(r: Relay) -> String {
     match r {
         Relay::Undefined => "undefined".into(),
-        Relay::Null => "null".into(),
+        Relay::Null => "null".into(), Relay::NotFail => "".into(),
         Relay::Bool(b) => b.to_string(),
         Relay::Number(n) => n.to_string(),
         Relay::Effect(id) => key(id).into(),
@@ -197,5 +197,42 @@ fn state_mutations_match_pinned_real_methods_and_event_draws() {
             v[12],
             "{line}"
         );
+    }
+}
+
+#[test]
+fn species_transform_slots_and_condition_placement_match_pinned_methods() {
+    for line in include_str!("../../../../../tools/probes/mutators/pokemon.tsv").lines() {
+        let v: Vec<_> = line.split('\t').collect();
+        let mut b = fixture(); let mut p = MonId(0);
+        let r = match v[0] {
+            "forme" => { let (name,perm)=v[1].split_once(':').unwrap();let Some(s)=dex::lookup(EffectKind::Species,name) else { continue; }; b.state.pokemon[0].hp-=50; Relay::Bool(b.forme_change(p,s,EffectRef::Dex(dex::ABILITY_STATIC),FormeOptions{permanent:perm=="1",message:None})) },
+            "species" => b.set_species(p,id(EffectKind::Species,v[1]),EffectRef::None,false),
+            "transform" | "transformpp" | "clearvolatile" => { b.set_species(MonId(6),dex::SPECIES_CHARIZARD,EffectRef::None,false); b.state.pokemon[6].stored_stats[0]=234;b.state.pokemon[6].boosts[0]=3;b.state.pokemon[6].times_attacked=7;
+                let r=Relay::Bool(b.transform_into(p,MonId(6),EffectRef::Dex(dex::MOVE_TRANSFORM)));
+                if v[0]!="transform" { b.deduct_pp(p,dex::MOVE_THUNDERBOLT,Some(2.)); } if v[0]=="clearvolatile" { b.clear_volatile(p,true); } r },
+            "disable" | "pp" => { b.disable_move(p,dex::MOVE_THUNDERBOLT,v[1]=="1",EffectRef::Dex(dex::CONDITION_CONFUSION)); if v[0]=="pp" { b.deduct_pp(p,dex::MOVE_THUNDERBOLT,Some(999.)); } Relay::Bool(true) },
+            "type" | "addtype" => { let ts = if v[0]=="type" { v[1] } else { v[9] };let mut types=Types{values:[TypeId::NONE;3],len:0}; for s in ts.split(',') { types.values[types.len as usize]=dex::type_id(s).unwrap();types.len+=1; } let mut r=Relay::Bool(b.set_type(p,types,false)); if v[0]=="addtype" { r=Relay::Bool(b.add_type(p,dex::type_id(v[1]).unwrap())); } r },
+            "teratype" => { b.state.pokemon[0].terastallized=dex::type_id(v[1]).unwrap(); Relay::Bool(b.set_type(p,Types{values:[dex::type_id("Water").unwrap(),TypeId::NONE,TypeId::NONE],len:1},false)) },
+            "copy" => { b.add_volatile(p,dex::CONDITION_CONFUSION,Attribution::NONE,None);b.state.pokemon[0].boosts[0]=4;b.copy_volatile_from(MonId(1),p,EffectId::NONE);p=MonId(1);assert_eq!(b.state.pokemon[1].boosts[0],4);Relay::Bool(true) },
+            "side" => b.add_side_condition(SideId(0),id(EffectKind::Condition,v[1]),Attribution::from_move(p,EffectRef::None)),
+            "slot" => b.add_slot_condition(SlotId(0),id(EffectKind::Condition,v[1]),Attribution::from_move(p,EffectRef::None)),
+            "weather" => b.set_weather(id(EffectKind::Condition,v[1]),Attribution::from_move(p,EffectRef::None)),
+            "terrain" => Relay::Bool(b.set_terrain(id(EffectKind::Condition,v[1]),Attribution::from_move(p,EffectRef::None))),
+            "pseudo" => b.add_pseudo_weather(id(EffectKind::Condition,v[1]),Attribution::from_move(p,EffectRef::None)),
+            _ => panic!("{line}")
+        };
+        let r = if let Relay::Species(s)=r { key(s).to_string() } else { result(r) };assert_eq!(r,v[2],"{line}");
+        let m=&b.state.pokemon[p.0 as usize];
+        assert_eq!(key(m.species),v[3],"{line}");assert_eq!(key(m.base_species),v[4],"{line}");assert_eq!(m.hp.to_string(),v[5],"{line}");assert_eq!(m.max_hp.to_string(),v[6],"{line}");
+        let stats=|a:&[u16]|a.iter().map(|n|n.to_string()).collect::<Vec<_>>().join(",");assert_eq!(stats(&m.stored_stats),v[7],"{line}");assert_eq!(stats(&m.base_stored_stats),v[8],"{line}");
+        let types=|a:&[TypeId],sep:&str|a.iter().filter(|t|**t!=TypeId::NONE).map(|t|dex::TYPE_NAMES[(t.0-1) as usize]).collect::<Vec<_>>().join(sep);
+        assert_eq!(types(&m.types,","),v[9],"{line}");assert_eq!(types(&m.apparent_types,"/"),v[10],"{line}");assert_eq!(if m.added_type==TypeId::NONE { "-" } else { dex::TYPE_NAMES[(m.added_type.0-1) as usize] },v[11],"{line}");
+        assert_eq!(u8::from(m.flags&mon_flags::KNOWN_TYPE!=0).to_string(),v[12],"{line}");assert_eq!(u8::from(m.flags&mon_flags::TRANSFORMED!=0).to_string(),v[13],"{line}");
+        assert_eq!(key(m.ability),v[14],"{line}");assert_eq!(key(m.base_ability),v[15],"{line}");assert_eq!(m.weighthg.to_string(),v[16],"{line}");assert_eq!(m.speed.to_string(),v[17],"{line}");assert_eq!(b.state.effect_order.to_string(),v[18],"{line}");
+        assert_eq!(b.seed().iter().map(|n|n.to_string()).collect::<Vec<_>>().join(","),v[19],"{line}");
+        let slots=m.move_slots().iter().map(|s|format!("{}:{}:{}:{}:{}:{}",key(s.id),s.pp,s.max_pp,u8::from(s.flags&super::pokemon::SLOT_USED!=0),if s.flags&super::pokemon::SLOT_DISABLED!=0 { "true" } else if s.flags&super::pokemon::SLOT_HIDDEN!=0 { "hidden" } else { "false" },key(s.disabled_source))).collect::<Vec<_>>().join(",");assert_eq!(slots,v[20],"{line}");
+        assert_eq!(m.base_move_slots[..m.move_count as usize].iter().map(|s|s.pp.to_string()).collect::<Vec<_>>().join(","),v[21],"{line}");
+        let logs=b.log.0.join(",");assert_eq!(if logs.is_empty(){"-"}else{&logs},v[22],"{line}");
     }
 }

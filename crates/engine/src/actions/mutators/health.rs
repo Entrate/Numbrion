@@ -508,6 +508,7 @@ impl<L: LogSink> Battle<L> {
         }
         let h = self.stash_boosts(b);
         let r = self.mutation_event(EventId::AfterBoost, mon_arg(Some(t)), a, Relay::Boosts(h));
+        let b = *self.scratch_boosts(h);
         if r != Relay::Boosts(h) {
             self.release_relay(r);
         }
@@ -523,7 +524,7 @@ impl<L: LogSink> Battle<L> {
         }
         success
     }
-    /// Clamp requested stages; return total actual delta
+    /// Clamp requested stages; return the last actual delta
     /// Ports `sim/pokemon.ts:1221-1230`. PRNG: none.
     pub fn boost_by(&mut self, pokemon: MonId, boosts: OrderedBoosts) -> i8 {
         let b = self.get_capped_boost(pokemon, boosts);

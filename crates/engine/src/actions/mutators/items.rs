@@ -1,4 +1,4 @@
-//! Item/ability queries ported from pinned Showdown; lifecycle mutators remain explicit stubs.
+//! Item/ability queries and mutations ported from pinned Showdown.
 #![allow(unused_variables, unused_imports)]
 use super::common::{ATE_BERRY, USED_ITEM_THIS_TURN, mon_arg, number};
 use crate::{
@@ -418,7 +418,7 @@ impl<L: LogSink> Battle<L> {
             );
         }
         if old == EffectId::NONE {
-            Relay::Number(0.)
+            Relay::NotFail
         } else {
             Relay::Effect(old)
         }
