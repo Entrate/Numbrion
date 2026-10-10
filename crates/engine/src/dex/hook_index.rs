@@ -93,6 +93,49 @@ pub fn callback_relations(event: EventId) -> u8 {
     CALLBACK_RELS[event as usize]
 }
 
+/// Property-backed sources have typed ids. Arena-backed condition lists can
+/// contain ability/item/move conditions, so admit every raw id there. This
+/// deliberately trades some pruning for coverage of arbitrary condition installs.
+#[derive(Clone, Copy)]
+pub enum CallbackKind {
+    Ability,
+    Item,
+    Species,
+    Status,
+    Cells,
+}
+static KIND_CALLBACK_RELS: [[u8; EVENT_COUNT]; 5] = {
+    let mut masks = [[0; EVENT_COUNT]; 5];
+    let mut id = 0;
+    while id < MANIFESTS.len() {
+        let kind = match EffectId(id as u16).kind() {
+            Some(EffectKind::Ability) => Some(CallbackKind::Ability),
+            Some(EffectKind::Item) => Some(CallbackKind::Item),
+            Some(EffectKind::Species) => Some(CallbackKind::Species),
+            _ => None,
+        };
+        let mut event = 0;
+        while event < EVENT_COUNT {
+            let rels = EFFECT_CALLBACK_RELS[id][event];
+            if let Some(kind) = kind {
+                masks[kind as usize][event] |= rels;
+            }
+            if matches!(MANIFESTS[id].effect_type, EffectType::Status) {
+                masks[CallbackKind::Status as usize][event] |= rels;
+            }
+            masks[CallbackKind::Cells as usize][event] |= rels;
+            event += 1;
+        }
+        id += 1;
+    }
+    masks
+};
+
+#[inline]
+pub fn kind_callback_relations(kind: CallbackKind, event: EventId) -> u8 {
+    KIND_CALLBACK_RELS[kind as usize][event as usize]
+}
+
 #[inline]
 pub fn has_callback(event: EventId, rel: HookRel) -> bool {
     callback_relations(event) & (1 << rel as usize) != 0
@@ -107,6 +150,46 @@ pub fn event_hook(id: EffectId, event: EventId, rel: HookRel) -> Option<HookId> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn category_masks_cover_every_raw_id_and_hook() {
+        for id in 0..MANIFESTS.len() {
+            let id = EffectId(id as u16);
+            for h in HOOKS {
+                let rels = effect_callback_relations(id, h.event);
+                assert_eq!(
+                    rels & !kind_callback_relations(CallbackKind::Cells, h.event),
+                    0
+                );
+                let kind = match id.kind() {
+                    Some(EffectKind::Ability) => Some(CallbackKind::Ability),
+                    Some(EffectKind::Item) => Some(CallbackKind::Item),
+                    Some(EffectKind::Species) => Some(CallbackKind::Species),
+                    _ => None,
+                };
+                if let Some(kind) = kind {
+                    assert_eq!(rels & !kind_callback_relations(kind, h.event), 0);
+                }
+                if MANIFESTS[id.0 as usize].effect_type == EffectType::Status {
+                    assert_eq!(
+                        rels & !kind_callback_relations(CallbackKind::Status, h.event),
+                        0
+                    );
+                }
+            }
+        }
+        // Status property conversion is separate from arena cell identity.
+        for id in [
+            CONDITION_BRN,
+            CONDITION_PAR,
+            CONDITION_SLP,
+            CONDITION_FRZ,
+            CONDITION_PSN,
+            CONDITION_TOX,
+        ] {
+            assert_eq!(MANIFESTS[id.0 as usize].effect_type, EffectType::Status);
+        }
+    }
 
     #[test]
     fn callback_union_covers_exact_hooks_and_species_views() {

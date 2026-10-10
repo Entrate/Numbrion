@@ -15,7 +15,8 @@ pub use hooks_generated::*;
 pub use ids_generated::*;
 mod hook_index;
 pub use hook_index::{
-    callback_relations, effect_callback_relations, effect_has_callback, event_hook, has_callback,
+    CallbackKind, callback_relations, effect_callback_relations, effect_has_callback, event_hook,
+    has_callback, kind_callback_relations,
 };
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldId(pub u16);
