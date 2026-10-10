@@ -6,6 +6,8 @@ use crate::{
     teams::{Gender, TeamDef, TeamDefs, TeamError},
 };
 use std::sync::Arc;
+mod determinize;
+pub use determinize::HiddenSetError;
 /// Team definitions are immutable after initialization, shared separately from
 /// the Copy simulation snapshot. Battle::new deliberately stops before start().
 pub struct Battle<L: LogSink = NoLog> {

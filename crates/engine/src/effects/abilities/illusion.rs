@@ -45,6 +45,9 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                 let target = side.party[i];
                 let t = b.state.pokemon[target.0 as usize];
                 if t.flags & mon_flags::FAINTED == 0 {
+                    // Search bookkeeping, not Showdown: the target is displayed, or (while
+                    // terastallized) its species decides whether a disguise appears.
+                    b.mark_revealed(target);
                     if p.terastallized == TypeId::NONE
                         || !matches!(
                             dex::species(t.species).base_species,
