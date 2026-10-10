@@ -129,9 +129,6 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
             for e in np.flatnonzero(obs["done"]):
                 results[e].append(int(obs["winner"][e]))
         logs = env.finished_logs() if log_games else []
-    for item in logs:
-        if item["side"] == a_side[item["env"]]:
-            item["choices"] = choices.get((item["env"], item["battle"]), {})
     games = wins = ties = 0
     paired = []
     outcome = {}
@@ -142,6 +139,11 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
             wins += score == 1.0
             ties += score == 0.5
             outcome[(e, k + 1)] = score
+    # Reset starts battle 1; VecEnv logs the finished battle's ID (post-reset ID minus one).
+    logs = [item for item in logs if (item["env"], item["battle"]) in outcome]
+    for item in logs:
+        if item["side"] == a_side[item["env"]]:
+            item["choices"] = choices.get((item["env"], item["battle"]), {})
     for e in range(E):  # duplicate pairs: same teams and seed, sides swapped
         for k in range(min(rounds, len(results[e]), len(results[e + E]))):
             paired.append(outcome[(e, k + 1)] + outcome[(e + E, k + 1)])
@@ -183,8 +185,8 @@ def mistakes(logs: list, dex) -> dict:
         lines = item["log"]
         choices = item.get("choices")
         turn, moved = 0, False
-        protect_seen: dict = {}  # foe name -> first turn it used a Protect move
         protect_turn: dict = {}  # (side, name) -> last turn it used a Protect move
+        protect_before_turn: dict = {}  # history before any moves in the current turn
         fainted = set()  # own positions whose Pokemon fainted and was not replaced yet
         foe_down = set()  # foe positions that fainted this turn
         acted: dict = {}  # own slot -> target code of its single-target attack this turn
@@ -195,6 +197,7 @@ def mistakes(logs: list, dex) -> dict:
             event = parts[1]
             if event == "turn":
                 turn, moved = int(parts[2]), False
+                protect_before_turn = protect_turn.copy()
                 foe_down, acted = set(), {}
                 counts["turns"] += 1
                 continue
@@ -223,9 +226,7 @@ def mistakes(logs: list, dex) -> dict:
                 key = (parts[2][:2], name)
                 if parts[2].startswith(own):
                     counts["protects"] += 1
-                    counts["protect_repeats"] += protect_turn.get(key) == turn - 1
-                else:
-                    protect_seen.setdefault(name, turn)
+                    counts["protect_repeats"] += protect_before_turn.get(key) == turn - 1
                 protect_turn[key] = turn
             if not parts[2].startswith(own):
                 continue
@@ -250,7 +251,8 @@ def mistakes(logs: list, dex) -> dict:
             counts["into_protect"] += blocked
             if foe_target:
                 target = parts[4].split(": ", 1)[-1]
-                could = protect_seen.get(target, turn) < turn and protect_turn.get((foe, target)) != turn - 1
+                last_protect = protect_before_turn.get((foe, target))
+                could = last_protect is not None and last_protect < turn - 1
                 counts["attacks_vs_protector"] += could
                 counts["into_protect_vs_protector"] += could and blocked
             counts["ally_hits"] += any(f.startswith(f"|-damage|{own}") and "[from]" not in f and
