@@ -54,7 +54,21 @@ pub fn random_step(g: &mut Game, rng: &mut SplitMix, p: &SamplerParams) -> usize
 
 /// Like `random_step`, but with probability 0.9 uses the given move whenever it is legal.
 pub fn random_step_prefer(g: &mut Game, rng: &mut SplitMix, p: &SamplerParams, prefer: Option<EffectId>) -> usize {
-    let mut n = 0;
+    random_step_codes(g, rng, p, prefer).len()
+}
+
+/// Apply the same `(side, a0, a1)` decisions to another copy of the battle.
+pub fn apply_codes(g: &mut Game, codes: &[(usize, usize, usize)]) {
+    for &(s, a0, a1) in codes {
+        let acts = g.side_actions(s);
+        let ch = acts.choices(a0, a1, &g.party(s)).expect("same decision is legal in the copy");
+        g.choose_typed(s, &ch).unwrap_or_else(|e| panic!("copy rejected ({a0},{a1}): {e}"));
+    }
+}
+
+/// Like `random_step_prefer`, returning the decisions taken.
+pub fn random_step_codes(g: &mut Game, rng: &mut SplitMix, p: &SamplerParams, prefer: Option<EffectId>) -> Vec<(usize, usize, usize)> {
+    let mut n = Vec::new();
     let party = [g.party(0), g.party(1)];
     // Randomize which side submits first: it must not matter.
     let order = if rng.below(2) == 0 { [0, 1] } else { [1, 0] };
@@ -78,8 +92,8 @@ pub fn random_step_prefer(g: &mut Game, rng: &mut SplitMix, p: &SamplerParams, p
         };
         let ch = a.choices(a0, a1, &party[s]).expect("legal pair has engine choices");
         g.choose_typed(s, &ch).unwrap_or_else(|e| panic!("masked-legal ({a0},{a1}) rejected: {e}"));
-        n += 1;
+        n.push((s, a0, a1));
     }
-    assert!(n > 0, "no side had a pending request");
+    assert!(!n.is_empty(), "no side had a pending request");
     n
 }

@@ -61,6 +61,12 @@ struct EnvOut {
     mask1_any: [u64; 2],
 }
 
+impl EnvOut {
+    fn fresh() -> Self {
+        EnvOut { winner: -1, ..EnvOut::default() }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct EnvStats {
     pub battles: u64,
@@ -96,7 +102,7 @@ pub struct BatchEnv {
 }
 
 /// Flat, C-ordered result arrays (`n` = number of environments, `A` = `N_ACTIONS`).
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct StepOut {
     pub n: usize,
     /// `[n, 2]` the side must submit a choice now.
@@ -213,7 +219,7 @@ impl Env {
             battle_id: 0,
             acts: [SideActions::none(); 2],
             prev_log: [Vec::new(), Vec::new()],
-            out: EnvOut::default(),
+            out: EnvOut::fresh(),
             joint: if cfg.joint_mask { vec![0; 2 * N_ACTIONS * N_ACTIONS] } else { Vec::new() },
             stats: EnvStats::default(),
         };
@@ -244,7 +250,7 @@ impl Env {
         self.game = Self::new_game(&mut self.rng, shared)?;
         self.battle_id += 1;
         self.prev_log = [Vec::new(), Vec::new()];
-        self.out = EnvOut::default();
+        self.out = EnvOut::fresh();
         self.refresh(shared);
         Ok(())
     }
@@ -355,14 +361,8 @@ impl Env {
                     self.prev_log[s].extend(lines);
                 }
             }
-            let (reward, winner, final_turns, illegal) =
-                (self.out.reward, self.out.winner, self.out.final_turns, self.out.illegal);
             self.game = Self::new_game(&mut self.rng, shared)?;
             self.battle_id += 1;
-            self.out.reward = reward;
-            self.out.winner = winner;
-            self.out.final_turns = final_turns;
-            self.out.illegal = illegal;
             self.out.done = true;
         }
         self.refresh(shared);
