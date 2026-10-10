@@ -18,6 +18,8 @@ pub use hook_index::{
     CallbackKind, callback_relations, effect_callback_relations, effect_has_callback, event_hook,
     has_callback, kind_callback_relations,
 };
+mod field_index;
+pub use field_index::{data_duration, is_primal_orb, self_chance};
 mod keys;
 pub(crate) use keys::key_ids;
 pub use keys::{

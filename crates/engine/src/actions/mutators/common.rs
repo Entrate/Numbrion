@@ -163,12 +163,8 @@ impl<L: LogSink> Battle<L> {
         a: Attribution,
     ) {
         let id = self.event_effect_id(effect);
-        if id != EffectId::NONE {
-            if let Some(dex::DataValue::Number(n)) = dex::effect(id).data.get(dex::FIELD_DURATION) {
-                if n != 0. {
-                    self.state.effects.cells[cell.0 as usize].duration = n as i16;
-                }
-            }
+        if let Some(n) = dex::data_duration(id) {
+            self.state.effects.cells[cell.0 as usize].duration = n;
         }
         if let Some(h) = self.event_hook(effect, EventId::DurationCallback, HookRel::Direct) {
             let r = self.call_hook(

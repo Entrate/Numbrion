@@ -284,12 +284,9 @@ impl<L: LogSink> Battle<L> {
     /// Ports `sim/pokemon.ts:879-886`. PRNG: none.
     pub fn ignoring_item(&self, pokemon: MonId) -> bool {
         let mon = &self.state.pokemon[pokemon.0 as usize];
-        // pokemon.ts:880: Primal Orbs precede even the inactive check. Read the
-        // generated property because ItemData deliberately omits this rare field.
-        if mon.item != EffectId::NONE
-            && dex::effect(mon.item).data.get(dex::FIELD_ISPRIMALORB)
-                == Some(dex::DataValue::Bool(true))
-        {
+        // pokemon.ts:880: Primal Orbs precede even the inactive check. ItemData
+        // omits this rare generated property; a compile-time per-id table holds it.
+        if dex::is_primal_orb(mon.item) {
             return false;
         }
         if mon.flags & mon_flags::ACTIVE == 0 {
