@@ -59,8 +59,10 @@ likely belief candidates with their inclusion probabilities, each with its real 
 accuracy, hit count and spread reduction. Assuming the moves are present independently and the best one is
 used, threat is E[max damage] and KO chance is 1 - prod(1 - p KO). Generic 80-power STAB attacks stand in only
 when a foe has neither revealed moves nor a belief. Checked against 4,677 landed engine moves of our own:
-median actual/predicted 1.00, interquartile range 0.95-1.32, correlation 0.76. A test checks foe moves
-against our Pokemon the same way. The features are computed on the CPU actors and stored with the rollout.
+median actual/predicted 1.00, interquartile range 0.95-1.32, correlation 0.76. Foe moves against our
+Pokemon, revealed or belief candidates, match as well: 1,766 attacks over ten seeds, median 1.00,
+interquartile range 0.93-1.31, correlation 0.81 (a test checks one seed). The features are computed on the
+CPU actors and stored with the rollout.
 
 **Model.** A 3-layer, width-128 transformer over the 13 tokens without positional encoding, about 0.92M
 parameters. Actions are scored from their own features, DouZero style: user token, move representation,
@@ -72,14 +74,16 @@ the opponent row's own request. Auxiliary heads predict each revealed foe's hidd
 and moves. Both are training-only; the policy never reads them.
 
 **Training.** PPO with GAE (gamma 0.995, lambda 0.95), clip 0.2, two epochs of 1,024-sample minibatches per
-rollout of 128 battles x 32 decision boundaries. Rollouts and training overlap: six actor processes play
+rollout of 128 battles x 32 decision boundaries. Rollouts and training overlap: four actor processes play
 the battles with CPU copies of the policy and fill one of two shared-memory buffers while the GPU trains on
 the other. Each rollout is therefore collected with the weights from one update earlier, and the PPO ratio
-uses the stored behaviour log-probs. Rewards are +1/-1 at the end plus a KO-difference bonus of 0.05 that
+uses the stored behaviour log-probs. The PPO update is the bottleneck, so more actors or battles do not
+help (see the throughput notes). Rewards are +1/-1 at the end plus a KO-difference bonus of 0.05 that
 decays linearly to zero at half the run. 20% of the battles, spread over the actors, put a random older
 snapshot (added every three minutes, last 12 kept) on side 2. Learning rate (3e-4 to 9e-5) and entropy bonus
 (0.01 to 0.003) anneal over the time budget. Adam and gradient clipping are written with elementwise ops
-because DirectML runs `lerp` and the fused kernels on the CPU. The metrics log the trainer's memory.
+because DirectML runs `lerp` and the fused kernels on the CPU. The metrics log the memory of the trainer
+and of the largest actor.
 
 **Evaluation.** Duplicate games on the held-out `eval-s43-200` teams: each matchup's second half replays the
 first half's teams and battle seeds with the sides swapped. Baselines: a random legal player (switch 10%,
@@ -140,5 +144,39 @@ Measured on the RX 5500 with torch-directml 0.2.5:
   explicit softplus replace them.
 - The damage features take ~57 ms per 256 rows on DirectML but ~22 ms on one CPU thread, so they run in the
   actors.
-- Python encoding (~190 us per row) and CPU inference are the actors' costs; they run in parallel with
-  training.
+- DirectML keeps host memory for every call with an `alpha=`/`value=` argument or a new Python scalar per
+  step. The first run's Adam (`addcdiv_(..., value=-lr / c1)`, `v / c2`) lost ~3.6 MB per update this way:
+  the trainer grew from 850 MB to 1.37 GB in 18 minutes. Adam now takes these scalars as 0-dim device
+  tensors (the update is ~3% slower). The PPO update alone then grows 0.1 MB per update; the whole trainer
+  still grows ~1.2 MB per update with the opponent pool full (~1.3 GB per hour, cause not found). The
+  encoder's static-feature caches are capped at 50,000 entries each: foe reveal states never stopped
+  adding entries (~0.5 GB per actor per hour). `Dex.belief` is an LRU of 200,000 entries.
+
+## Throughput
+
+Measured on the Ryzen 5 3600 (6 cores, 12 threads) next to the RX 5500. One actor step on one thread takes
+36 ms for 16 battles (32 rows) with 20% pool battles: Python encoding 6.5 ms (~200 us per row), damage
+features 7.9 ms, CPU inference 20 ms (trunk 10.7, critic 2.3, policy heads 3.2, pool opponent 4.3 for its
+3 rows) and the engine step 1.2 ms. With 21 battles it takes 45 ms, so a 32-step rollout takes 1.2-1.4 s
+on an idle machine.
+
+The learner is the bottleneck. A PPO update takes ~0.5 ms per trained sample (two epochs, ~3.5 s for 7,000
+samples) on its own and 3.6-4.0 s while the actors run. The actors therefore wait for the learner at every
+worker count (wait 0 s in every run). Samples/s below is trained decisions per second of update cycle;
+battles/s depends on battle length, which changes as the policy learns. Three-minute runs, 128 battles,
+first-run Adam:
+
+| actors | samples/s | battles/s | cycle s | train s | rollout s | actor inference s |
+|---|---:|---:|---:|---:|---:|---:|
+| serial (first run, same 3 min) | 1,370 | 43.5 | 5.0 | 3.45 | 1.59 | in the update |
+| 4 | 1,927 | 51.0 | 3.62 | 3.62 | 2.23 | 1.22 |
+| 6 | 1,874 | 50.9 | 3.73 | 3.73 | 1.82 | 0.96 |
+| 8 | 1,770 | 47.6 | 3.92 | 3.92 | 1.77 | 0.92 |
+
+More actors only slow the learner through CPU contention, and more battles only make each update bigger:
+192 battles with four actors took 6.2 s per update for 10,600 samples, with 12% fewer samples/s than 128
+battles in the same session. Lower actor priority did not speed up the learner. With pool battles, four
+actors need 2.3-2.6 s per rollout against 3.1-3.3 s of training. Two learner speedups are not applied yet:
+the per-minibatch `.cpu()` syncs for statistics and gradient clipping cost ~10% of the update (3.46 s vs
+3.09 s), and 2,048-sample minibatches would save another ~8%. With a faster learner, five actors would
+keep the rollouts shorter than the update.

@@ -68,6 +68,7 @@ I_CAND_ABILITIES = I_CAND_MOVES + K_MOVES
 I_CAND_ITEMS = I_CAND_ABILITIES + K_ABILITIES
 N_IDS = I_CAND_ITEMS + K_ITEMS
 STAT_SCALE = 400.0
+CACHE_LIMIT = 50_000  # entries per static-feature cache (~60 MB); foe reveal states keep growing otherwise
 N_ACTION_FEATURES = 9
 N_TOKEN_FEATURES = 6
 
@@ -501,6 +502,8 @@ class Encoder:
         row[_P["tera_p0"] + ids[I_TERA]] = 1
         row[span("type_mult0", 20)] = dex.ability_type_mult[ids[I_ABILITY]] * dex.item_type_mult[ids[I_ITEM]]
         max_hp = float(estimated_stats(dex.species_base[sp], level)[0])
+        if len(self._own_cache) >= CACHE_LIMIT:
+            self._own_cache.clear()
         cached = self._own_cache[key] = (ids, row[N_DYNAMIC:].copy(), max_hp)
         return cached
 
@@ -554,6 +557,8 @@ class Encoder:
             total = sum(p for _, p in abilities)
             mult *= sum(p * dex.ability_type_mult[a] for a, p in abilities) / total
         row[span("type_mult0", 20)] = mult
+        if len(self._foe_cache) >= CACHE_LIMIT:
+            self._foe_cache.clear()
         cached = self._foe_cache[key] = (ids, row[N_DYNAMIC:].copy(), float(stats[0]))
         return cached
 

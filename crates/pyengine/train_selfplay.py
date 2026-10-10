@@ -136,7 +136,7 @@ def main():
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/train-s42-2000.txt")
     parser.add_argument("--envs", type=int, default=128)
-    parser.add_argument("--workers", type=int, default=6, help="actor processes (leave a core for the learner)")
+    parser.add_argument("--workers", type=int, default=4, help="actor processes (the learner is the bottleneck; leave cores for it)")
     parser.add_argument("--steps", type=int, default=32, help="decision boundaries per rollout")
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--minibatch", type=int, default=1024)

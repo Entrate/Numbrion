@@ -28,8 +28,9 @@ def gae(rewards, values, dones, bootstrap, gamma: float, lam: float):
 class Adam:
     """Adam from elementwise ops; torch's Adam uses ``lerp``, which DirectML runs on the CPU.
 
-    The step size changes every step, so it is a 0-dim device tensor: DirectML keeps ~20 KB per call for ops like
-    ``addcdiv_(..., value=x)`` with a new Python scalar ``x``, which leaked ~3 MB of host memory per PPO update.
+    No ``alpha=``/``value=`` arguments and no per-step Python scalars: with those (``addcdiv_(..., value=-lr / c1)``,
+    ``add_(grad, alpha=1 - b1)``, ``v / c2``) DirectML kept host memory on every call, ~3.6 MB per PPO update. The
+    bias corrections and step size are 0-dim device tensors instead (0.1 MB per update, measured).
     """
 
     def __init__(self, parameters, lr: float, betas=(0.9, 0.999), eps: float = 1e-5):
@@ -45,13 +46,15 @@ class Adam:
         b1, b2 = self.betas
         correction1 = 1 - b1 ** self.step_count
         correction2 = 1 - b2 ** self.step_count
-        step_size = torch.full((), -self.lr / correction1, device=self.parameters[0].device)
+        device = self.parameters[0].device
+        inverse2 = torch.full((), 1 / correction2, device=device)
+        step_size = torch.full((), -self.lr / correction1, device=device)
         for p, m, v in zip(self.parameters, self.m, self.v):
             if p.grad is None:
                 continue
-            m.mul_(b1).add_(p.grad, alpha=1 - b1)
-            v.mul_(b2).addcmul_(p.grad, p.grad, value=1 - b2)
-            denominator = (v / correction2).sqrt_().add_(self.eps)
+            m.mul_(b1).add_(p.grad * (1 - b1))
+            v.mul_(b2).add_(p.grad.square().mul_(1 - b2))
+            denominator = (v * inverse2).sqrt_().add_(self.eps)
             p.add_(m.div(denominator).mul_(step_size))
 
     def zero_grad(self) -> None:

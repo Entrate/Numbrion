@@ -11,6 +11,7 @@ from __future__ import annotations
 import multiprocessing as mp
 import sys
 import time
+from functools import lru_cache
 from multiprocessing import shared_memory
 from pathlib import Path
 
@@ -65,10 +66,9 @@ class SharedArrays:
                 block.unlink()
 
 
-def memory_mb() -> dict:
-    """Working set and private bytes of this process (Windows), for leak checks."""
-    if sys.platform != "win32":
-        return {}
+@lru_cache(maxsize=1)
+def _process_memory_api():
+    """``K32GetProcessMemoryInfo`` set up once: ctypes caches a pointer type per Structure class forever."""
     import ctypes
     from ctypes import wintypes
 
@@ -82,6 +82,16 @@ def memory_mb() -> dict:
     kernel32 = ctypes.WinDLL("kernel32")
     kernel32.GetCurrentProcess.restype = wintypes.HANDLE  # the pseudo-handle -1 must not be truncated to 32 bits
     kernel32.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+    return kernel32, Counters
+
+
+def memory_mb() -> dict:
+    """Working set and private bytes of this process (Windows), for leak checks."""
+    if sys.platform != "win32":
+        return {}
+    import ctypes
+
+    kernel32, Counters = _process_memory_api()
     counters = Counters()
     counters.cb = ctypes.sizeof(counters)
     if not kernel32.K32GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
