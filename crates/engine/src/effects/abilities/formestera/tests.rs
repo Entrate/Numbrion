@@ -199,7 +199,6 @@ fn battle_scenario_teams_are_in_scope() {
 macro_rules! scenario {
     ($($name:ident),*) => {$ (
         #[test]
-        #[ignore = "needs core"]
         fn $name() { replay_scenario(include_str!("scenarios.tsv"), stringify!($name)); }
     )*};
 }

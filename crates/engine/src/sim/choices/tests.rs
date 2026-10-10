@@ -4,8 +4,8 @@
 //! re-sent requests, partial choices, hidden-information state, and a brute-force
 //! acceptance bit-vector with a hash of the accepted normalized choices.
 //!
-//! Lifecycle's `can_terastallize` is another owner's work; tests use a state-derived
-//! model (`LOCAL_TERA`) and a twin `#[ignore = "needs L"]` test runs the real one.
+//! Tests run both a state-derived model (`LOCAL_TERA`) and lifecycle's real
+//! `can_terastallize` implementation.
 
 use std::cell::Cell;
 use std::collections::BTreeSet;
@@ -835,7 +835,6 @@ fn vectors_match_showdown_with_local_tera_model() {
 }
 
 #[test]
-#[ignore = "needs L (Battle::can_terastallize)"]
 fn vectors_match_showdown_with_lifecycle_tera() {
     LOCAL_TERA.with(|c| c.set(false));
     run_vectors();

@@ -9,12 +9,10 @@ fn batch_scenario_teams_are_scoped() {
 }
 macro_rules! recursive { ($($name:ident),* $(,)?) => { $(
     #[test]
-    #[ignore = "needs core"]
     fn $name() { replay_scenario(include_str!("recursive_switch.tsv"),stringify!($name)); }
 )* }; }
 macro_rules! item { ($($name:ident),* $(,)?) => { $(
     #[test]
-    #[ignore = "needs core"]
     fn $name() { replay_scenario(include_str!("item_exchange.tsv"),stringify!($name)); }
 )* }; }
 recursive!(
