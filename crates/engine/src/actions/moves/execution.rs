@@ -197,6 +197,13 @@ impl<L: LogSink> Battle<L> {
         let mut mv = mv;
         if current != MoveHandle::NONE {
             mv = current;
+            // An inside caller can leave its completed frame globally active (Sleep
+            // Talk/Magic Bounce). The outside caller retains that object through
+            // AfterMove and Dancer, even if a callback clears the globals meanwhile.
+            if self.mflag(mv, PENDING_RELEASE) {
+                self.set_mflag(mv, PENDING_RELEASE, false);
+                owned.adopt(mv);
+            }
         }
         let effect = EffectRef::ActiveMove(mv.0);
         self.single_event(

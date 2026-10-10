@@ -48,7 +48,12 @@ pub static EMPTY_EFFECTS: dex::MoveEffects = dex::MoveEffects {
 #[inline]
 pub(super) fn js_round(x: f64) -> f64 {
     let f = x.floor();
-    if x - f >= 0.5 { f + 1.0 } else { f }
+    let rounded = if x - f >= 0.5 { f + 1.0 } else { f };
+    if rounded == 0.0 && x.is_sign_negative() {
+        -0.0
+    } else {
+        rounded
+    }
 }
 
 /// `clampIntRange(num, min, max)` (lib/utils.ts:320): floor first, then clamp.

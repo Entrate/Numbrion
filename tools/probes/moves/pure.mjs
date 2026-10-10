@@ -24,9 +24,9 @@ for (const l of values) {
 		out.push(['C', enc(l), enc(r), '-', enc(BattleActions.prototype.combineResults.call(b.actions, l, r))].join('\t'));
 	}
 }
-const rounds = [0, 0.4, 0.5, 0.6, 1.5, 2.5, 3.5, 0.49999999999999994, 4503599627370495.5, 4503599627370496, 123456.5, 61.25, 61.5,
+const rounds = [-0, -0.1, -0.5, -0.5000000000000001, -1.5, -2.5, -Number.MIN_VALUE, 0, 0.4, 0.5, 0.6, 1.5, 2.5, 3.5, 0.49999999999999994, 4503599627370495.5, 4503599627370496, 123456.5, 61.25, 61.5,
 	1e21, 7.499999999999999, 30.5, 8.5];
-for (const x of rounds) out.push(['J', `#${x}`, '-', '-', `#${Math.round(x)}`].join('\t'));
+for (const x of rounds) out.push(['J', enc(x), '-', '-', enc(Math.round(x))].join('\t'));
 const clampInputs = [0, 0.5, 1, 1.9, -0.5, -1, -6.5, 6.9, 7, 100, NaN, 3.0000001, -7];
 for (const x of clampInputs) {
 	for (const [min, max] of [[1, undefined], [-6, 6], [undefined, undefined], [0, 10]]) {

@@ -55,7 +55,11 @@ fn result_algebra_rounding_and_clamping_match_pinned_showdown() {
         let c: Vec<&str> = line.split('\t').collect();
         match c[0] {
             "C" => {
-                assert_eq!(encode(combine_results(decode(c[1]), decode(c[2]))), c[4], "{line}");
+                assert_eq!(
+                    encode(combine_results(decode(c[1]), decode(c[2]))),
+                    c[4],
+                    "{line}"
+                );
                 counts[0] += 1;
             }
             "J" => {
@@ -65,7 +69,10 @@ fn result_algebra_rounding_and_clamping_match_pinned_showdown() {
             "K" => {
                 let bound = |s: &str| (s != "-").then(|| s.parse::<f64>().unwrap());
                 assert!(
-                    same(clamp_int_range(num(c[1]), bound(c[2]), bound(c[3])), num(c[4])),
+                    same(
+                        clamp_int_range(num(c[1]), bound(c[2]), bound(c[3])),
+                        num(c[4])
+                    ),
                     "{line}"
                 );
                 counts[2] += 1;
@@ -73,7 +80,7 @@ fn result_algebra_rounding_and_clamping_match_pinned_showdown() {
             other => panic!("unknown vector {other}"),
         }
     }
-    assert_eq!(counts, [144, 17, 52]);
+    assert_eq!(counts, [144, 24, 52]);
 }
 
 #[test]
