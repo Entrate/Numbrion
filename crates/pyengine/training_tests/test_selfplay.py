@@ -69,6 +69,40 @@ def test_tracker_reads_public_protocol():
     assert b.floats[0, 6, PF["cand_move_p0"]] > 0
 
 
+def test_broken_illusion_moves_observations_to_the_real_pokemon():
+    dex = load_dex()
+    # Case 1: the disguise's species was never really seen, so its record is a phantom and must disappear.
+    encoder = Encoder(2)
+    phantom = ["|switch|p2a: Inteleon|Inteleon, L78|100/100", "|switch|p2b: Raichu|Raichu, L85|100/100", "|turn|1",
+               "|move|p2b: Raichu|Knock Off|p1a: Dipplin", "|-boost|p2b: Raichu|spa|1",
+               "|-damage|p2b: Raichu|60/100", "|-damage|p2b: Raichu|48/100|[from] item: Life Orb",
+               "|replace|p2b: Zoroark|Zoroark, L80, M",  # the engine's replace line carries no HP
+               "|-end|p2b: Zoroark|Illusion", "|turn|2"]
+    encoder.encode(0, {"battle_id": 1, "log": phantom, "request": request(), "turn": 2})
+    b = encoder.buffers
+    species = [int(x) for x in b.ids[0, 6:12, I_SPECIES]]
+    assert dex.species_index["raichu"] not in species
+    assert b.ids[0, 7, I_SPECIES] == dex.species_index["zoroark"]
+    assert b.floats[0, 7, PF["hp"]] == pytest.approx(0.48) and b.floats[0, 7, PF["boost_spa"]] == pytest.approx(1 / 6)
+    assert b.ids[0, 7, I_MOVE0] == dex.move_index["knockoff"]
+    assert b.ids[0, 7, I_ITEM] == dex.item_index["lifeorb"] and b.ids[0, 7, I_ABILITY] == dex.ability_index["illusion"]
+    assert b.floats[0, 6:12, PF["present"]].sum() == 2
+    # Case 2: the real Raichu was seen before, so its record returns to what was known before the disguise.
+    encoder = Encoder(2)
+    seen = ["|switch|p2a: Inteleon|Inteleon, L78|100/100", "|switch|p2b: Raichu|Raichu, L85|100/100", "|turn|1",
+            "|move|p2b: Raichu|Thunderbolt|p1a: Dipplin", "|-damage|p2b: Raichu|70/100",
+            "|switch|p2b: Garchomp|Garchomp, L80|100/100", "|turn|2",
+            "|switch|p2b: Raichu|Raichu, L85|70/100", "|move|p2b: Raichu|Night Daze|p1a: Dipplin",
+            "|move|p2b: Raichu|Thunderbolt|p1a: Dipplin",  # already known for Raichu: used by Zoroark too
+            "|-damage|p2b: Raichu|30/100", "|replace|p2b: Zoroark|Zoroark, L80, M", "|turn|3"]
+    encoder.encode(0, {"battle_id": 1, "log": seen, "request": request(), "turn": 3})
+    tracker = encoder.trackers[0]
+    raichu, zoroark = tracker.mons[("p2", "Raichu")], tracker.mons[("p2", "Zoroark")]
+    assert raichu.hp == pytest.approx(0.70) and raichu.moves == ["thunderbolt"]
+    assert zoroark.hp == pytest.approx(0.30) and zoroark.moves == ["nightdaze", "thunderbolt"]
+    assert tracker.active["p2b"] == ("p2", "Zoroark")
+
+
 def test_switch_resets_boosts_and_foe_slots():
     encoder = Encoder(2)
     lines = ["|switch|p2a: Inteleon|Inteleon, L78|100/100", "|switch|p2b: Skuntank|Skuntank, L85|100/100", "|turn|1",

@@ -238,6 +238,53 @@ Against smart, the 60-minute model's counters (187 logged battles) show:
 Smart itself protected 0.9 times per battle with no repeats, used Fake Out 0.2 times per battle with no failures, and
 terastallized 0.75 times per battle.
 
+## Engine from `main` (perf rounds 2-4)
+
+The training work is merged with `main` at `a5fee3d`. That brings the faster engine (typed ids, per-id dex
+tables, cheap `clone`/`restore_from`/`reset`, battle reuse on auto-reset) and the new search API
+(`GridExecutor`, hidden-set determinization). The textual merge was clean; the training code is Python
+only. Rebuild the extension after pulling:
+`maturin develop --release` in `crates/pyengine`.
+
+What the training code relies on was rechecked on the new engine:
+
+- `observe`: the finished battle's unread lines arrive in `prev_log`, and the new battle's log starts with its
+  switch-ins and `|turn|1`.
+- Team draws and battle seeds of the k-th battle per env do not depend on the actions, which duplicate
+  evaluation needs.
+- `battle_id` starts at 1 after `reset()`.
+- Step results, conditional masks and per-process `BatchEnv` thread pools are unchanged.
+
+These were checked with the engine's 27 Python API tests, the 67 training tests, direct reproductions and a
+GPT-6.1-Sol review.
+
+Speed (`bench.py`, Rust-driven random play; noisy, a review job ran at the same time):
+
+| | old engine | new engine |
+|---|---:|---:|
+| 1 thread | 949 battles/s | 1,303 battles/s (+37%) |
+| 6 threads | 4,623 battles/s | 5,608 battles/s (+21%) |
+
+Training barely changes, because the actors spend ~1.2 ms of a ~36 ms step in the engine and the GPU update is
+the bottleneck. A 3-minute smoke run gave 1,700 trained samples/s and 59 battles/s with no errors (shared CPU).
+
+Two caveats:
+
+- The engine's team pool keeps every parsed team for the pool's lifetime (`crates/pyengine/src/pool.rs`).
+  That is bounded for the 2,000-team training pool, but would grow in every actor with the 200k-team pools.
+- The review also found an older tracker bug that is now fixed. When Zoroark's Illusion broke (`|replace|`),
+  the disguise's record kept what was observed under the disguise, as a phantom benched Pokemon. The engine's
+  `replace` line carries no HP, so the revealed Zoroark also showed full health. Now the stint's HP, status,
+  boosts, timing, every move used, and any item, ability or Tera seen move to the real Pokemon, whose ability
+  becomes Illusion. The disguise's record is dropped if that was its only appearance, and otherwise returns to
+  what was known before. Checked on 40 Illusion breaks in engine battles: every revealed HP matched the
+  owner's request.
+- Still not handled (Illusion is limited to the two Zoroark formes):
+  - an earlier disguised stint that ended unrevealed;
+  - the real Pokemon and its disguise active at the same time;
+  - a disguised Pokemon fainting unrevealed;
+  - our own disguised Pokemon's boosts before the reveal.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.

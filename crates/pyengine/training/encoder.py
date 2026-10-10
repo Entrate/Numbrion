@@ -120,6 +120,16 @@ class Mon:
     ability: str | None = None
     tera: str = ""
     terastallized: bool = False
+    # Illusion bookkeeping: how often the name has switched in, what was known about it before the current switch-in,
+    # every move used during the stint, and the moves the stint added to ``moves`` (a broken disguise hands the
+    # stint's observations to the real Pokemon and gives the name back what it had).
+    appearances: int = 0
+    before_stint: dict | None = None
+    stint_moves: list = field(default_factory=list)
+    stint_added: list = field(default_factory=list)
+
+
+KNOWLEDGE = ("hp", "status", "item", "item_lost", "ability", "tera", "terastallized")
 
 
 class Tracker:
@@ -196,9 +206,15 @@ class Tracker:
 
     def _switch(self, parts):
         position = parts[2].split(":", 1)[0]
+        if parts[1] == "replace":
+            self._reveal_illusion(position[:3], parts[2])
         key_mon = self.mon(parts[2])
         if key_mon is None:
             return
+        if parts[1] != "replace":
+            key_mon.before_stint = {k: getattr(key_mon, k) for k in KNOWLEDGE}
+            key_mon.appearances += 1
+            key_mon.stint_moves, key_mon.stint_added = [], []
         species, level, tera = details(parts[3])
         key_mon.species, key_mon.level = species, level
         if tera:
@@ -210,6 +226,52 @@ class Tracker:
             key_mon.boosts, key_mon.volatiles = {}, {}
             key_mon.switch_turn, key_mon.moves_since_switch = self.turn, 0
         self.active[position[:3]] = (position[:2], parts[2].split(": ", 1)[1])
+
+    def _reveal_illusion(self, position: str, ident: str) -> None:
+        """``|replace|`` (Illusion broke): what was observed under the disguise belongs to the real Pokemon.
+
+        The real Pokemon gets the stint's HP, status, boosts, volatiles, timing, every move used, and any item, ability
+        or Tera observed during the stint (the ``replace`` line itself carries no HP); its ability is Illusion. The
+        disguise's record keeps none of it: it is dropped when that switch-in was its only appearance, otherwise what
+        was known before the switch-in returns.
+
+        Known limits (Illusion is rare: the two Zoroark formes): an earlier stint that was also disguised and ended
+        unrevealed stays attributed to the disguise; the real and disguised Pokemon active at the same time share one
+        record; a disguised Pokemon fainting unrevealed is counted on the disguise; and our own disguised Pokemon's
+        boosts are only matched to its request entry after the reveal.
+        """
+        old_key = self.active.get(position)
+        real = self.mon(ident)
+        new_key = (ident[:2], ident.split(": ", 1)[1])
+        if old_key is None or old_key == new_key or old_key not in self.mons or real is None:
+            return
+        disguise = self.mons[old_key]
+        before = disguise.before_stint or {k: getattr(Mon(), k) for k in KNOWLEDGE}
+        real.hp, real.status = disguise.hp, disguise.status
+        for key in KNOWLEDGE[2:]:  # item, ability and Tera knowledge gained during the stint
+            if getattr(disguise, key) != before[key]:
+                setattr(real, key, getattr(disguise, key))
+        real.ability = "illusion"
+        real.boosts, real.volatiles = disguise.boosts, disguise.volatiles
+        real.switch_turn, real.moves_since_switch = disguise.switch_turn, disguise.moves_since_switch
+        real.protect_turn = disguise.protect_turn
+        real.appearances += 1
+        real.before_stint = None
+        real.stint_moves, real.stint_added = list(disguise.stint_moves), []
+        for move in disguise.stint_moves:
+            if move not in real.moves and len(real.moves) < 4:
+                real.moves.append(move)
+                real.stint_added.append(move)
+        if disguise.appearances <= 1:
+            del self.mons[old_key]
+            if old_key in self.foe_order:
+                self.foe_order.remove(old_key)
+        else:
+            disguise.appearances -= 1
+            for key in KNOWLEDGE:
+                setattr(disguise, key, before[key])
+            disguise.moves = [m for m in disguise.moves if m not in disguise.stint_added]
+            disguise.boosts, disguise.volatiles, disguise.stint_moves, disguise.stint_added = {}, {}, [], []
 
     def _detailschange(self, parts):
         mon = self.mon(parts[2])
@@ -287,8 +349,13 @@ class Tracker:
         mon.moves_since_switch += 1
         if move in self.stalling:
             mon.protect_turn = self.turn
-        if move not in mon.moves and move != "struggle" and len(mon.moves) < 4 and "[from]" not in "".join(parts[4:]):
+        if move == "struggle" or "[from]" in "".join(parts[4:]):
+            return
+        if move not in mon.stint_moves:
+            mon.stint_moves.append(move)
+        if move not in mon.moves and len(mon.moves) < 4:
             mon.moves.append(move)
+            mon.stint_added.append(move)
 
     def _item(self, parts):
         mon = self.mon(parts[2])
