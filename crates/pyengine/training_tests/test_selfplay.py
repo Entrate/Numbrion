@@ -12,7 +12,7 @@ import torch
 import numbrion as nb
 from training.damage import DamageFeatures
 from training.dex import load_dex, to_id
-from training.encoder import FF, I_ABILITY, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, PF, Encoder
+from training.encoder import FF, I_ABILITY, I_CAND_MOVES, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, K_MOVES, PF, Encoder
 from training.model import TARGET_TOKENS, Model, bag
 from training.ppo import PASS, gae, sample
 
@@ -219,6 +219,23 @@ def test_gae_stops_at_battle_end_and_bootstraps_truncation():
     np.testing.assert_allclose(returns, [[1.0], [1.0], [2.0]])
 
 
+def test_adam_matches_torch_adam():
+    from training.ppo import Adam
+
+    torch.manual_seed(0)
+    ours = torch.randn(5, 3)
+    reference = ours.clone().requires_grad_()
+    ours.requires_grad_()
+    mine, theirs = Adam([ours], lr=1e-2), torch.optim.Adam([reference], lr=1e-2, eps=1e-5, foreach=False)
+    for step in range(20):
+        grad = torch.randn(5, 3)
+        ours.grad, reference.grad = grad.clone(), grad.clone()
+        mine.lr = theirs.param_groups[0]["lr"] = 1e-2 * (1 - step / 40)
+        mine.step()
+        theirs.step()
+    torch.testing.assert_close(ours.detach(), reference.detach())
+
+
 def test_expected_max_and_any_ko_over_possible_moves():
     from training.damage import any_ko, expected_max
 
@@ -229,6 +246,12 @@ def test_expected_max_and_any_ko_over_possible_moves():
     ko = torch.tensor([0.0, 1.0, 0.5]).view(1, 1, 3, 1)
     assert float(any_ko(ko, probs)) == pytest.approx(1 - (1 - 0.5) * (1 - 0.25))
     assert float(expected_max(dealt, torch.zeros(1, 1, 3))) == 0
+
+
+def fraction(condition: str) -> float:
+    """``"123/260 par"`` -> 123 / 260 (own side sees exact HP)."""
+    hp = condition.split()[0]
+    return 0.0 if hp == "0" else int(hp.split("/")[0]) / int(hp.split("/")[1])
 
 
 def test_foe_threat_tracks_engine_damage():
@@ -247,7 +270,6 @@ def test_foe_threat_tracks_engine_damage():
             t = damage.tokens(ids, floats, field)
             defenders = {k: v.reshape(len(ids), 1, 1, 12, *v.shape[2:]) for k, v in t.items()}
             dealt, _, probs = damage.foe_attacks(ids, floats, t, defenders, field)
-        own_hp = b.floats[:, :6, PF["hp"]].copy()
         result = env.step(env.random_actions(switch_prob=0.0, tera_prob=0.0))
         observations = [env.observe(e, s) for e in range(16) for s in (0, 1)]
         for e in range(16):
@@ -255,8 +277,12 @@ def test_foe_threat_tracks_engine_damage():
             if result["done"][e]:
                 continue
             lines = observations[row]["log"]
+            own = encoder.own_names[row]
+            hp_now = {name: float(b.floats[row, j, PF["hp"]]) for j, name in enumerate(own)}  # tracked through the turn
             for i, line in enumerate(lines):
                 parts = line.split("|")
+                if len(parts) >= 4 and parts[1] in ("-damage", "-heal", "-sethp") and parts[2][:2] == "p1" and ": " in parts[2]:
+                    hp_now[parts[2].split(": ", 1)[1]] = fraction(parts[3])
                 if len(parts) < 5 or parts[1] != "move" or not parts[2].startswith("p2") or "[" in line:
                     continue
                 move = dex.move_index.get(to_id(parts[3]), 0)
@@ -265,27 +291,29 @@ def test_foe_threat_tracks_engine_damage():
                 if dex.moves[move - 1]["target"] not in ("normal", "any") or dex.move_special_power[move]:
                     continue
                 slot = 0 if parts[2].startswith("p2a") else 1
-                options = list(b.ids[row, 6 + slot, I_MOVE0:I_MOVE0 + 4]) + list(b.ids[row, 6 + slot, 10:20])
+                options = (list(b.ids[row, 6 + slot, I_MOVE0:I_MOVE0 + 4])
+                           + list(b.ids[row, 6 + slot, I_CAND_MOVES:I_CAND_MOVES + K_MOVES]))
                 if move not in options or not parts[4].startswith("p1"):
                     continue
                 name = parts[4].split(": ", 1)[1]
-                own = encoder.own_names[row]
                 if name not in own:
                     continue
                 token = own.index(name)
                 follow = lines[i + 1:i + 6]
+                follow = follow[:next((k for k, f in enumerate(follow) if f.startswith("|move|")), len(follow))]
                 hit = [f for f in follow if f.startswith(f"|-damage|{parts[4]}|") and "[from]" not in f]
                 if not hit or any(f.startswith(("|-crit", "|-activate", "|-immune")) for f in follow):
                     continue
-                hp = hit[0].split("|")[3].split()[0]
-                if hp == "0":
+                now = fraction(hit[0].split("|")[3])
+                if now == 0:
                     continue
-                now = int(hp.split("/")[0]) / int(hp.split("/")[1])
-                actual = own_hp[row, token] - now
+                actual = hp_now[name] - now  # HP right before this move, not at the start of the turn
                 m = options.index(move)
                 predicted = float(dealt[row, slot, m, token])
                 candidates_used += m >= 4
                 if actual > 0.02 and predicted > 0.02:
                     ratios.append(actual / predicted)
+    # Measured over 20 seeds: per-seed median 0.98-1.03, quartiles 0.92-0.95 and 1.15-1.40.
     assert len(ratios) > 40 and candidates_used > 0
-    assert 0.75 < float(np.median(ratios)) < 1.35
+    q1, median, q3 = np.percentile(ratios, [25, 50, 75])
+    assert 0.8 < median < 1.25 and q1 > 0.85 and q3 < 1.5
