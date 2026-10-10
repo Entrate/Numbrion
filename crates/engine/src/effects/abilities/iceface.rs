@@ -37,9 +37,9 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:1973-1979. PRNG: forme events only.
+        // data/abilities.ts:1972-1978. PRNG: forme events only.
         dex::HOOK_ABILITY_ICEFACE_ONSTART => restore(b, cx),
-        // data/abilities.ts:2011-2020. PRNG: environment/forme events only.
+        // data/abilities.ts:2009-2018. PRNG: environment/forme events only.
         dex::HOOK_ABILITY_ICEFACE_ONWEATHERCHANGE => {
             let effect = effect_at(b, cx, 2);
             if b.event_effect_type(effect) == dex::EffectType::Ability
@@ -53,7 +53,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                 return Relay::Undefined;
             }
             restore(b, cx)
-        } // data/abilities.ts:1981-1987. PRNG: none; numeric zero absorbs a hit.
+        } // data/abilities.ts:1980-1986. PRNG: none; numeric zero absorbs a hit.
         // word0=busted, bit8=present (true on damage, false on Ice Face restoration).
         dex::HOOK_ABILITY_ICEFACE_ONDAMAGE => {
             let target = mon(b, cx, 1);
@@ -76,11 +76,11 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:1988-1995. PRNG: runImmunity events only.
+        // data/abilities.ts:1987-1993. PRNG: runImmunity events only.
         dex::HOOK_ABILITY_ICEFACE_ONCRITICALHIT => shield(b, cx, 2, false),
-        // data/abilities.ts:1996-2005. PRNG: runImmunity events only.
+        // data/abilities.ts:1994-2003. PRNG: runImmunity events only.
         dex::HOOK_ABILITY_ICEFACE_ONEFFECTIVENESS => shield(b, cx, 3, true),
-        // data/abilities.ts:2006-2010. PRNG: forme events only.
+        // data/abilities.ts:2004-2008. PRNG: forme events only.
         dex::HOOK_ABILITY_ICEFACE_ONUPDATE => {
             let m = mon(b, cx, 0);
             if b.state.pokemon[m.0 as usize].species == dex::SPECIES_EISCUE

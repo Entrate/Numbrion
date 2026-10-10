@@ -34,7 +34,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:3516. PRNG: nested WeatherChange event only.
+        // data/abilities.ts:3516-3518. PRNG: nested WeatherChange event only.
         dex::HOOK_ABILITY_PROTOSYNTHESIS_ONSTART => {
             b.single_event(
                 EventId::WeatherChange,
@@ -48,7 +48,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             );
             Relay::Undefined
         }
-        // data/abilities.ts:3519. PRNG: volatile Start/End and environment events only.
+        // data/abilities.ts:3519-3526. PRNG: volatile Start/End and environment events only.
         dex::HOOK_ABILITY_PROTOSYNTHESIS_ONWEATHERCHANGE => {
             let m = mon(b, cx, 0);
             if b.is_weather(&[dex::CONDITION_SUNNYDAY]) {
@@ -63,7 +63,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3527. PRNG: none. JS delete skips condition End, including at zero HP.
+        // data/abilities.ts:3527-3530. PRNG: none. JS delete skips condition End, including at zero HP.
         dex::HOOK_ABILITY_PROTOSYNTHESIS_ONEND => {
             let m = mon(b, cx, 0);
             b.erase_volatile(m, dex::CONDITION_PROTOSYNTHESIS);

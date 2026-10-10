@@ -33,7 +33,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:794-802. PRNG: none. Failure retains Null sentinel.
+        // data/moves.ts:792-800. PRNG: none. Failure retains Null sentinel.
         dex::HOOK_MOVE_AURAWHEEL_ONTRY => {
             let source = mon(b, cx, 0);
             if dex::species(b.state.pokemon[source.0 as usize].species).base_species
@@ -56,7 +56,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             );
             Relay::Null
         }
-        // data/moves.ts:803-809. PRNG: none. Current species, even after Transform.
+        // data/moves.ts:801-807. PRNG: none. Current species, even after Transform.
         dex::HOOK_MOVE_AURAWHEEL_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

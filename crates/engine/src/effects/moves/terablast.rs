@@ -35,7 +35,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:19209-19214. PRNG: none. Live basePower, not immutable dex fallback.
+        // data/moves.ts:19208-19213. PRNG: none. Live basePower, not immutable dex fallback.
         dex::HOOK_MOVE_TERABLAST_BASEPOWERCALLBACK => {
             let m = mon(b, cx, 0);
             let h = MoveHandle(move_arg(b, cx, 2));
@@ -47,7 +47,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                 },
             )
         }
-        // data/moves.ts:19220-19224. PRNG: none; uses original set teraType for animation.
+        // data/moves.ts:19219-19223. PRNG: none; uses original set teraType for animation.
         dex::HOOK_MOVE_TERABLAST_ONPREPAREHIT => {
             let source = mon(b, cx, 1);
             if b.state.pokemon[source.0 as usize].terastallized != TypeId::NONE {
@@ -61,7 +61,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/moves.ts:19225-19229. PRNG: none.
+        // data/moves.ts:19224-19228. PRNG: none.
         dex::HOOK_MOVE_TERABLAST_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);
@@ -71,7 +71,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/moves.ts:19230-19237. PRNG: unmodified getStat has ModifyBoost events, never stat modifier events.
+        // data/moves.ts:19229-19236. PRNG: unmodified getStat has ModifyBoost events, never stat modifier events.
         dex::HOOK_MOVE_TERABLAST_ONMODIFYMOVE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

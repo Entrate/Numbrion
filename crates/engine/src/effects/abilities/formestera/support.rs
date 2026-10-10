@@ -187,3 +187,59 @@ where
 {
     s.split(',').map(|v| v.parse().unwrap()).collect()
 }
+
+pub(crate) fn check_scenario_teams(table: &str) {
+    for row in table.lines().filter(|l| !l.starts_with('#')) {
+        let c: Vec<_> = row.split('\t').collect();
+        assert_eq!(c.len(), 7);
+        let seed = numbers::<u16>(c[1]).try_into().unwrap();
+        let b = Battle::new(seed, c[2], c[3]).unwrap();
+        assert_eq!(b.seed(), seed, "{}", c[0]);
+        assert!(c[6].contains("|start"));
+    }
+}
+
+pub(crate) fn replay_scenario(table: &str, name: &str) {
+    let row = table
+        .lines()
+        .find(|r| r.split('\t').next() == Some(name))
+        .unwrap();
+    let c: Vec<_> = row.split('\t').collect();
+    let mut b = Battle::from_players(
+        numbers::<u16>(c[1]).try_into().unwrap(),
+        ("Alice", c[2]),
+        ("Bob", c[3]),
+        TextLog::default(),
+    )
+    .unwrap();
+    b.start().unwrap();
+    for step in c[4].split(';').filter(|s| !s.is_empty()) {
+        b.choose(if &step[..2] == "p1" { 0 } else { 1 }, &step[3..])
+            .unwrap_or_else(|e| panic!("{name}: {step}: {e}"));
+    }
+    let mut log = Vec::new();
+    b.drain_log(&mut log);
+    for line in &mut log {
+        if line.starts_with("|t:|") {
+            *line = "|t:|".into();
+        }
+    }
+    let expected: Vec<_> = c[6].split("\\n").collect();
+    let mismatch = log
+        .iter()
+        .map(String::as_str)
+        .zip(&expected)
+        .position(|(a, e)| a != *e);
+    assert_eq!(
+        mismatch,
+        None,
+        "{name}: first mismatch: {:?}",
+        mismatch.map(|i| (i, &log[i], expected[i]))
+    );
+    assert_eq!(log.len(), expected.len(), "{name}: log length");
+    assert_eq!(
+        b.seed(),
+        numbers::<u16>(c[5]).as_slice(),
+        "{name}: final RNG seed"
+    );
+}

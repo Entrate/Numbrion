@@ -33,7 +33,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:1747-1759. PRNG: damage, boost/status and forme events only.
+        // data/abilities.ts:1747-1758. PRNG: damage, boost/status and forme events only.
         dex::HOOK_ABILITY_GULPMISSILE_ONDAMAGINGHIT => {
             let target = mon(b, cx, 1);
             let source = mon(b, cx, 2);
@@ -78,7 +78,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:1761-1766. PRNG: forme events only; damage hit may never occur.
+        // data/abilities.ts:1760-1765. PRNG: forme events only; damage hit may never occur.
         dex::HOOK_ABILITY_GULPMISSILE_ONSOURCETRYPRIMARYHIT => {
             let source = mon(b, cx, 1);
             let effect = effect_at(b, cx, 2);

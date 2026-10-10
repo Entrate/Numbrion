@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:14949-14954. PRNG: forme events only; secondary sleep draw belongs to move core.
+        // data/moves.ts:14947-14952. PRNG: forme events only; secondary sleep draw belongs to move core.
         dex::HOOK_MOVE_RELICSONG_ONAFTERMOVESECONDARYSELF => {
             let m = mon(b, cx, 0);
             let p = b.state.pokemon[m.0 as usize];

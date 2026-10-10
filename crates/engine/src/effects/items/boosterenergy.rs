@@ -34,7 +34,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/items.ts:628-631. PRNG: direct onUpdate uses the same effect/event/state.
+        // data/items.ts:629-632. PRNG: direct onUpdate uses the same effect/event/state.
         dex::HOOK_ITEM_BOOSTERENERGY_ONSTART => {
             b.hook_state_mut(cx).payload.words[0] = 1;
             b.hook_state_mut(cx).present |= 1 << 8;
@@ -52,7 +52,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             );
             Relay::Undefined
         }
-        // data/items.ts:632-641. PRNG: useItem and addVolatile nested events only.
+        // data/items.ts:633-642. PRNG: useItem and addVolatile nested events only.
         // word0=started, bit8=present. The second if is evaluated even after consuming the item.
         dex::HOOK_ITEM_BOOSTERENERGY_ONUPDATE => {
             let m = mon(b, cx, 0);
@@ -75,7 +75,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/items.ts:642-645. PRNG: none. Raw baseSpecies tags, no suppression checks.
+        // data/items.ts:643-646. PRNG: none. Raw baseSpecies tags, no suppression checks.
         dex::HOOK_ITEM_BOOSTERENERGY_ONTAKEITEM => {
             let m = mon(b, cx, 1);
             Relay::Bool(

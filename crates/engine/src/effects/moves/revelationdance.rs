@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:15044-15050. PRNG: getTypes events only. Bird cannot exist in scoped gen9 dex.
+        // data/moves.ts:15042-15048. PRNG: getTypes events only. Bird cannot exist in scoped gen9 dex.
         dex::HOOK_MOVE_REVELATIONDANCE_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

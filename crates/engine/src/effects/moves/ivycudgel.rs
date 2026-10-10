@@ -33,7 +33,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:9769-9773. PRNG: none; structured Parts keep one animation tag.
+        // data/moves.ts:9768-9772. PRNG: none; structured Parts keep one animation tag.
         dex::HOOK_MOVE_IVYCUDGEL_ONPREPAREHIT => {
             let h = MoveHandle(move_arg(b, cx, 2));
             let ty = b.active_move(h).move_type;
@@ -46,7 +46,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/moves.ts:9774-9787. PRNG: none. No default assignment for unrelated species.
+        // data/moves.ts:9773-9785. PRNG: none. No default assignment for unrelated species.
         dex::HOOK_MOVE_IVYCUDGEL_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

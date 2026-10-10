@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:9829-9835. PRNG: none. Suppression applies unlike Arceus's raw item read.
+        // data/moves.ts:9827-9833. PRNG: none. Suppression applies unlike Arceus's raw item read.
         dex::HOOK_MOVE_JUDGMENT_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

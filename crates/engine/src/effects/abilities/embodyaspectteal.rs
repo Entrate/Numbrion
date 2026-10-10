@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:1225-1232. PRNG: boost events only. word0=embodied, bit8=present.
+        // data/abilities.ts:1225-1231. PRNG: boost events only. word0=embodied, bit8=present.
         dex::HOOK_ABILITY_EMBODYASPECTTEAL_ONSTART => {
             let m = mon(b, cx, 0);
             let p = b.state.pokemon[m.0 as usize];

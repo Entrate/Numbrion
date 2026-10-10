@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:2320-2330. PRNG: type events only. word0=used, bit8=present.
+        // data/abilities.ts:2320-2329. PRNG: type events only. word0=used, bit8=present.
         dex::HOOK_ABILITY_LIBERO_ONPREPAREHIT => {
             if b.hook_state(cx).payload.words[0] != 0 {
                 return Relay::Undefined;

@@ -34,7 +34,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:3653. PRNG: nested TerrainChange event only.
+        // data/abilities.ts:3653-3655. PRNG: nested TerrainChange event only.
         dex::HOOK_ABILITY_QUARKDRIVE_ONSTART => {
             b.single_event(
                 EventId::TerrainChange,
@@ -48,7 +48,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             );
             Relay::Undefined
         }
-        // data/abilities.ts:3656. PRNG: volatile Start/End and environment events only.
+        // data/abilities.ts:3656-3662. PRNG: volatile Start/End and environment events only.
         dex::HOOK_ABILITY_QUARKDRIVE_ONTERRAINCHANGE => {
             let m = mon(b, cx, 0);
             if b.is_terrain(&[dex::CONDITION_ELECTRICTERRAIN], None) {
@@ -63,7 +63,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3664. PRNG: none. JS delete skips condition End, including at zero HP.
+        // data/abilities.ts:3663-3666. PRNG: none. JS delete skips condition End, including at zero HP.
         dex::HOOK_ABILITY_QUARKDRIVE_ONEND => {
             let m = mon(b, cx, 0);
             b.erase_volatile(m, dex::CONDITION_QUARKDRIVE);

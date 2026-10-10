@@ -38,7 +38,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:3671. PRNG: getBestStat(false,true) has no modified-stat event draws.
+        // data/abilities.ts:3669-3678. PRNG: getBestStat(false,true) has no modified-stat event draws.
         // word0=fromBooster (bit8=present); word1=bestStat as Stat (bit9=present).
         dex::HOOK_CONDITION_QUARKDRIVE_ONSTART => {
             let m = mon(b, cx, 0);
@@ -88,7 +88,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             ));
             Relay::Undefined
         }
-        // data/abilities.ts:3683. PRNG: none. Suppression is rechecked for each stat query.
+        // data/abilities.ts:3680-3684. PRNG: none. Suppression is rechecked for each stat query.
         dex::HOOK_CONDITION_QUARKDRIVE_ONMODIFYATK => {
             let m = mon(b, cx, 1);
             let state = b.hook_state(cx);
@@ -100,7 +100,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3689. PRNG: none. Suppression is rechecked for each stat query.
+        // data/abilities.ts:3686-3690. PRNG: none. Suppression is rechecked for each stat query.
         dex::HOOK_CONDITION_QUARKDRIVE_ONMODIFYDEF => {
             let m = mon(b, cx, 1);
             let state = b.hook_state(cx);
@@ -112,7 +112,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3695. PRNG: none. Suppression is rechecked for each stat query.
+        // data/abilities.ts:3692-3696. PRNG: none. Suppression is rechecked for each stat query.
         dex::HOOK_CONDITION_QUARKDRIVE_ONMODIFYSPA => {
             let m = mon(b, cx, 1);
             let state = b.hook_state(cx);
@@ -124,7 +124,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3701. PRNG: none. Suppression is rechecked for each stat query.
+        // data/abilities.ts:3698-3702. PRNG: none. Suppression is rechecked for each stat query.
         dex::HOOK_CONDITION_QUARKDRIVE_ONMODIFYSPD => {
             let m = mon(b, cx, 1);
             let state = b.hook_state(cx);
@@ -136,7 +136,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3707. PRNG: none. Suppression is rechecked for each stat query.
+        // data/abilities.ts:3703-3707. PRNG: none. Suppression is rechecked for each stat query.
         dex::HOOK_CONDITION_QUARKDRIVE_ONMODIFYSPE => {
             let m = mon(b, cx, 1);
             let state = b.hook_state(cx);
@@ -148,7 +148,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:3713. PRNG: none.
+        // data/abilities.ts:3708-3710. PRNG: none.
         dex::HOOK_CONDITION_QUARKDRIVE_ONEND => {
             let m = mon(b, cx, 0);
             b.add(LogEntry::new(

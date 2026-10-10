@@ -59,9 +59,9 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         }
         // data/abilities.ts:979-989. PRNG: runImmunity events only.
         dex::HOOK_ABILITY_DISGUISE_ONCRITICALHIT => shield(b, cx, 2, false),
-        // data/abilities.ts:990-1000. PRNG: runImmunity events only.
+        // data/abilities.ts:990-1001. PRNG: runImmunity events only.
         dex::HOOK_ABILITY_DISGUISE_ONEFFECTIVENESS => shield(b, cx, 3, true),
-        // data/abilities.ts:1001-1007. PRNG: forme/damage events only.
+        // data/abilities.ts:1002-1008. PRNG: forme/damage events only.
         dex::HOOK_ABILITY_DISGUISE_ONUPDATE => {
             let m = mon(b, cx, 0);
             if b.state.pokemon[m.0 as usize].species == dex::SPECIES_MIMIKYU

@@ -33,7 +33,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/moves.ts:19251-19258. PRNG: unmodified stat query events only.
+        // data/moves.ts:19249-19256. PRNG: unmodified stat query events only.
         dex::HOOK_MOVE_TERASTARSTORM_ONMODIFYTYPE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);
@@ -61,7 +61,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/moves.ts:19259-19263. PRNG: none. Applies by current species, not tera flag.
+        // data/moves.ts:19257-19261. PRNG: none. Applies by current species, not tera flag.
         dex::HOOK_MOVE_TERASTARSTORM_ONMODIFYMOVE => {
             let h = MoveHandle(move_arg(b, cx, 0));
             let m = mon(b, cx, 1);

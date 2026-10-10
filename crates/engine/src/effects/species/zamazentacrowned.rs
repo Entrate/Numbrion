@@ -30,7 +30,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/conditions.ts:912-939; sim/dex-species.ts:529-536 inherits base view.
+        // data/conditions.ts:912-938; sim/dex-species.ts:529-536 inherits base view.
         // PRNG: ModifySpecies/setAbility events only. Crowned views route the same body.
         dex::HOOK_SPECIES_ZAMAZENTACROWNED_ONBATTLESTART => {
             crate::effects::registry::species_zamazenta::on_start(b, cx)
