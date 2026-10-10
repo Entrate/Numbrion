@@ -42,11 +42,12 @@ maturin build --release                            # distributable wheel: ..\..\
 ```
 
 The wheel is abi3 (`pyo3/abi3-py39`), so one build serves Python 3.9-3.14+ on the same OS and architecture,
-and it needs no `python3.lib` at link time (PyO3 0.29 links the Python DLL through `raw-dylib`). The code does
-not depend on `-C target-cpu=native` (the repository's `.cargo/config.toml` may set it for this PC; build
-wheels for another machine without it: `RUSTFLAGS=` / `set RUSTFLAGS=` or remove that file). The Windows
-build was verified with `cargo check -p pyengine --features python --target x86_64-pc-windows-msvc` from
-Linux; it has not been run on Windows. Plain `cargo build/test -p pyengine` (no `python` feature) never needs
+and it needs no `python3.lib` at link time (PyO3 0.29 links the Python DLL through `raw-dylib`). Builds are
+portable by default (`.cargo/config.toml` no longer sets `target-cpu=native`; the throughput below is the
+portable build, the native one measured the same). For a build tuned to the local CPU use
+`RUSTFLAGS="-C target-cpu=native"`. The Windows build was verified with
+`cargo check -p pyengine --features python --target x86_64-pc-windows-msvc` from Linux; it has not been run
+on Windows. Plain `cargo build/test -p pyengine` (no `python` feature) never needs
 Python, and `cargo test --release -p pyengine` runs the Rust test-suite.
 
 ## Action space
@@ -262,8 +263,7 @@ in the engine yet.
 
 ## Performance
 
-Ryzen 5 3600 (6 cores / 12 threads), engine at `4f18b9c` (perf round 1 merged), release build with
-`target-cpu=native`, team pool = first 20,000 teams of `pool-s1-200k`, random legal self-play
+Ryzen 5 3600 (6 cores / 12 threads), engine at `df62d35` (perf round 1 merged), portable release build, team pool = first 20,000 teams of `pool-s1-200k`, random legal self-play
 (`crates/pyengine/bench.py --threads 1 6 12 --seconds 6 --log`, 16 environments per thread). A random-policy
 battle lasts ~19 turns and ~44 side decisions. "rust" is `BatchEnv.run_random` (no Python in the loop);
 "step" is a Python loop of `env.step(env.random_actions())`; "numpy" samples the actions in numpy from the
@@ -275,7 +275,7 @@ masks; "step+log" is "step" with `TextLog` battles.
 | step | 1 | 909 | 40,900 | 909 |
 | numpy | 1 | 904 | 38,200 | 904 |
 | step+log | 1 | 775 | 34,900 | 775 |
-| rust | 6 | 5,523 | 248,000 | 920 |
+| rust | 6 | 5,703 | 256,000 | 951 |
 | step | 6 | 4,032 | 181,000 | 672 |
 | numpy | 6 | 3,765 | 160,000 | 628 |
 | step+log | 6 | 3,145 | 141,000 | 524 |
@@ -301,7 +301,7 @@ about 7% of a battle; `Battle.clone()` pays the same.
   battles driven by `BatchEnv.step` with numpy-sampled actions.
 * `NUMBRION_TEST_BATTLES=N` scales the number of battles of every test; the figures below were produced with it.
 
-Large runs on this PC (engine `4f18b9c`), all green:
+Large runs on this PC (engine perf round 1), all green:
 
 | Check | Scale |
 |---|---|
