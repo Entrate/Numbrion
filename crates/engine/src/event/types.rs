@@ -63,16 +63,17 @@ pub enum CollectMode {
     Callback,
     Duration,
 }
-/// One fixed buffer per nested event; preserves duplicates and pins captured cells.
+/// One preallocated buffer per nested event; only collected entries are initialized.
+/// Capacity stays fixed, so collection allocates nothing. Duplicates are preserved.
 #[derive(Debug)]
 pub struct HandlerBuffer {
-    pub entries: Box<[Option<Listener>]>,
+    pub entries: Vec<Option<Listener>>,
     pub len: u16,
 }
 impl Default for HandlerBuffer {
     fn default() -> Self {
         Self {
-            entries: vec![None; HANDLER_CAPACITY].into_boxed_slice(),
+            entries: Vec::with_capacity(HANDLER_CAPACITY),
             len: 0,
         }
     }

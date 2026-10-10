@@ -427,16 +427,14 @@ impl<L: LogSink> Battle<L> {
             assert_eq!(pin, r);
             listener.state = Some(pin);
         }
-        b.entries[b.len as usize] = Some(listener);
+        b.entries.push(Some(listener));
         b.len += 1;
     }
     pub fn release_handlers(&mut self, buffer: u8) {
         let b = &mut self.scratch.handlers[buffer as usize];
-        for e in &mut b.entries[..b.len as usize] {
-            if let Some(h) = e.take() {
-                if let Some(r) = h.state {
-                    self.state.effects.unpin(r);
-                }
+        for h in b.entries.drain(..).flatten() {
+            if let Some(r) = h.state {
+                self.state.effects.unpin(r);
             }
         }
         b.len = 0;
