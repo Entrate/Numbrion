@@ -34,8 +34,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     }
     let m = &dex::MOVES[(p.last_move.0 - dex::MOVE_START) as usize];
     if m.flags & (dex::FLAG_FAILINSTRUCT | dex::FLAG_CHARGE | dex::FLAG_RECHARGE) != 0
-        || dex::effect(m.id).data.get(dex::FIELD_ISZ).is_some()
-        || dex::effect(m.id).data.get(dex::FIELD_ISMAX).is_some()
+        || matches!(dex::effect(m.id).data.get(dex::FIELD_ISZ), Some(dex::DataValue::Text(s)) if !s.is_empty())
+        || dex::effect(m.id).data.get(dex::FIELD_ISMAX) == Some(dex::DataValue::Bool(true))
         || volatile(b, t, "beakblast")
         || volatile(b, t, "focuspunch")
         || volatile(b, t, "shelltrap")

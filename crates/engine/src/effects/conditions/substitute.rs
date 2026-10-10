@@ -98,11 +98,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             b.hook_state_mut(cx).payload.words[0] -= damage as u32;
             // source.lastDamage is a dead store in scoped gen9; attack records are owned by hit execution.
             if b.hook_state(cx).payload.words[0] == 0 {
-                if false
-                /* OHKO moves are absent from the pinned gen9 random doubles closure */
-                {
-                    b.add(LogEntry::new("-ohko", &[], &[]));
-                }
+                // data/scope.json excludes OHKO moves; no -ohko branch is reachable.
                 b.remove_volatile(t, ID);
             } else {
                 b.add(LogEntry::new(
