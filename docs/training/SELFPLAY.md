@@ -122,6 +122,52 @@ equally often.
 Outputs (git-ignored): `scratch/training/first-run/` with `metrics.jsonl`, `snapshots/`,
 `evaluation.json` and four HTML replays in `replays/`.
 
+## Learning setup after the first run
+
+The first run committed early: entropy fell to 1.5 within six minutes while the KO bonus paid for aggression,
+and pure self-play never punished the one all-out style. The changes below replace the entropy, opponent and
+reward defaults described under "Training" above. `train_selfplay.py --help` lists the options.
+
+- **Exploration floor** (`training/ppo.py`, `EntropyController`). After every update the entropy coefficient
+  adapts so that the logged entropy follows a target that falls linearly from 2.5 to 1.5 over the run. The logged
+  entropy is slot a plus slot b, averaged over trained rows, with forced decisions counting as zero. The update is
+  `log(coef) += 0.2 * (target - entropy)`, with the error clipped to +/-1 nat. The coefficient starts at 0.01
+  and is clamped to [0.001, 0.05]. For comparison, the first run reached 1.5 at minutes 3-6 and ended at 0.72.
+  `--entropy-target 0` restores the fixed 0.01 -> 0.003 schedule. The controller state is saved in `latest.pt`.
+- **Opponents** (`training/league.py`, `training/scripted.py`). 30% of the envs (previously 20%) have a fixed
+  non-self opponent on side 2. A third of them (10% of the envs) play the strongest-attack heuristic, now shared
+  with `evaluate.py`. It attacks predictably, so Protect, switching and support moves pay off against it. The rest
+  play a snapshot, chosen per rollout by prioritized fictitious self-play:
+  - Weight: `(1 - s)^2`, where `s` is an EMA (rate 0.02 per game) of the learner's score against that snapshot.
+  - 10% of the weight is spread uniformly, so beaten snapshots stay in play. Unplayed snapshots start at 0.5.
+  - Only games that began during the rollout are credited, so a snapshot change in mid-battle does not blur the
+    estimates. The actors report per-env results, and the trainer attributes them to the opponent it assigned.
+- **KO shaping** (`training/ppo.py`, `ko_shaping`). The bonus is now potential-based:
+  `reward += Phi(after) - Phi(before)` with `Phi = bonus * (foe KOs - own KOs)`, and `Phi = 0` once the battle
+  ends. It sums to zero over a battle. It still gives credit for KOs early, but no longer pays for the KO margin.
+  Under the old bonus, the margin was worth up to +/-0.25 on top of the +/-1 result. The default is 0.02
+  (previously 0.05). It decays to zero at 25% of the run (previously 50%).
+- **Diagnostics** (`training/diagnostics.py`). Every metrics line now includes:
+  - games, score and mean battle turns per opponent kind (`self_*`, `pool_*` for snapshots only, `scripted_*`).
+    `self_turns` is comparable with the first run's 9.5.
+  - `opponent_minutes` and the PFSP table `pfsp` ([minutes, learner score EMA, games] per snapshot).
+  - `entropy_target` and `entropy_coef`.
+  - Action usage over the learner's slot decisions on move turns (forced switches and PASS excluded):
+    `use_tera`, `use_tera_when_legal`, `use_switch` (voluntary), `use_protect` (Protect, Spiky Shield, Baneful
+    Bunker, Burning Bulwark), `use_status` (other status moves) and `use_fake_out`.
+  - `choice_slots`: slots per row with two or more legal codes, which shows how much forced decisions dilute
+    the entropy.
+- **Evaluation temperature.** `evaluate.py --temperature T` samples the snapshots at temperature T (default 1,
+  unchanged; 0 = the most likely legal code). With a higher entropy floor, comparing T = 1 with T = 0.5 separates
+  exploration noise from strength.
+
+Tests: `training_tests/test_league.py`. In the next run, watch for:
+
+- `entropy_coef` stuck at 0.05: the target is out of reach, so raise the cap or lower the target.
+- Whether `use_protect`, `use_switch` and `use_status` rise above the first run's near-zero levels.
+- `scripted_win_rate` rising together with `pool_win_rate` rather than at its expense.
+- Snapshots whose `pfsp` score stays below 0.5: strategies the learner has not learned to beat.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.

@@ -9,6 +9,9 @@ battle seeds with the sides swapped, so team luck mostly cancels. Opponents:
 * ``heuristic``: "always use the strongest attack" from the damage-calc features (no switching or Tera),
 * earlier snapshots of the same run.
 
+The scripted players live in training.scripted (the trainer also uses the heuristic as an opponent). Snapshots
+sample from their policy; ``--temperature`` below 1 sharpens it (0 = always the most likely legal code).
+
 Also reported for the final snapshot: mistake counters from its player-view logs, value calibration of the
 (oracle) critic, and a few Showdown HTML replays.
 """
@@ -27,6 +30,7 @@ from training.device import training_device
 from training.dex import load_dex, to_id
 from training.model import Model
 from training.ppo import PASS, sample
+from training.scripted import HeuristicAgent, RandomAgent, legal_random  # noqa: F401 (re-exported)
 from training.vecenv import VecEnv
 
 HERE = Path(__file__).resolve().parent
@@ -35,69 +39,20 @@ OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 N_ACTIONS = 47
 
 
-def legal_random(mask: np.ndarray, rng, switch_prob=0.1, tera_prob=0.15) -> np.ndarray:
-    """Per row: a switch with ``switch_prob`` if one is legal, else a uniform legal non-Tera move code (Tera with
-    ``tera_prob`` when legal), else any legal code."""
-    out = np.full(len(mask), PASS, dtype=np.int32)
-    codes = np.arange(N_ACTIONS)
-    for i, m in enumerate(mask):
-        moves = codes[:40][m[:40]]
-        switches = codes[40:46][m[40:46]]
-        plain = moves[moves % 2 == 0]
-        tera = moves[moves % 2 == 1]
-        if len(switches) and (rng.random() < switch_prob or not len(moves)):
-            out[i] = rng.choice(switches)
-        elif len(tera) and rng.random() < tera_prob:
-            out[i] = rng.choice(tera)
-        elif len(plain):
-            out[i] = rng.choice(plain)
-        elif m.any():
-            out[i] = rng.choice(codes[m])
-    return out
-
-
-class RandomAgent:
-    name = "random"
-
-    def __init__(self, rng):
-        self.rng = rng
-
-    def first(self, arrays, rows, mask0):
-        return legal_random(mask0, self.rng)
-
-    def second(self, rows, mask1):
-        return legal_random(mask1, self.rng)
-
-
-class HeuristicAgent:
-    """Always the strongest attack: highest expected damage to foes minus damage to its own side, no Tera."""
-
-    name = "heuristic"
-
-    def __init__(self, rng):
-        self.rng = rng
-
-    def _pick(self, mask, features, slot):
-        out = legal_random(mask, self.rng, switch_prob=0.0, tera_prob=0.0)
-        score = features[:, slot, :, 0] - features[:, slot, :, 1]  # [rows, 40]
-        legal = mask[:, :40] & (np.arange(40) % 2 == 0)
-        score = np.where(legal, score, -np.inf)
-        best = score.argmax(-1)
-        good = np.isfinite(score.max(-1)) & (score.max(-1) > 0)
-        return np.where(good, best, out).astype(np.int32)
-
-    def first(self, arrays, rows, mask0):
-        self.features = arrays["action_features"][rows]
-        return self._pick(mask0, self.features, 0)
-
-    def second(self, rows, mask1):
-        return self._pick(mask1, self.features, 1)
+def tempered(logprobs: np.ndarray, temperature: float) -> np.ndarray:
+    """Log-probs for sampling at ``temperature`` (1 = the policy itself, 0 = its most likely legal code)."""
+    if temperature == 1.0:
+        return logprobs
+    if temperature <= 0:
+        return np.where(logprobs == logprobs.max(-1, keepdims=True), 0.0, -1e9).astype(np.float32)
+    return logprobs / temperature
 
 
 class PolicyAgent:
-    def __init__(self, model, device, rng, name, record_values=False):
+    def __init__(self, model, device, rng, name, record_values=False, temperature=1.0):
         self.model, self.device, self.rng, self.name = model, device, rng, name
         self.record_values = record_values
+        self.temperature = temperature
         self.values: list = []
 
     def first(self, arrays, rows, mask0):
@@ -111,22 +66,22 @@ class PolicyAgent:
                 partner = rows ^ 1
                 self.last_values = self.model.value(self.state, up(arrays["ids"][partner]),
                                                     up(arrays["floats"][partner, 0:6])).cpu().numpy()
-        self.a0 = sample(lp0.cpu().numpy(), self.rng)
+        self.a0 = sample(tempered(lp0.cpu().numpy(), self.temperature), self.rng)
         return self.a0
 
     def second(self, rows, mask1):
         with torch.no_grad():
             a0 = torch.from_numpy(self.a0.astype(np.int64)).to(self.device)
             lp1 = self.model.slot1(self.state, self.vectors0, a0, torch.from_numpy(mask1).to(self.device))
-        return sample(lp1.cpu().numpy(), self.rng)
+        return sample(tempered(lp1.cpu().numpy(), self.temperature), self.rng)
 
 
-def load_policy(path: Path, dex, device, rng, name=None, record_values=False) -> PolicyAgent:
+def load_policy(path: Path, dex, device, rng, name=None, record_values=False, temperature=1.0) -> PolicyAgent:
     state = torch.load(path, map_location="cpu", weights_only=False)
     model = Model(dex, state.get("width", 128), state.get("layers", 3)).to(device)
     model.load_state_dict(state["model"])
     model.eval()
-    return PolicyAgent(model, device, rng, name or path.stem, record_values)
+    return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature)
 
 
 def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: int, log_games=False):
@@ -300,6 +255,8 @@ def main():
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--replays", type=int, default=4)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--temperature", type=float, default=1.0,
+                        help="policy sampling temperature (1 = as trained, 0 = most likely legal code)")
     args = parser.parse_args()
     torch.set_num_threads(2)
     device, _ = training_device(args.device)
@@ -308,7 +265,8 @@ def main():
     snapshots = sorted((args.run / "snapshots").glob("m*.pt"))
     final = snapshots[-1]
     chosen = [s for s in snapshots if int(s.stem[1:]) % args.every == 0 and s != final] + [final]
-    out = dict(run=str(args.run), pool=str(args.pool), matchups=[], started=time.strftime("%Y-%m-%d %H:%M:%S"))
+    out = dict(run=str(args.run), pool=str(args.pool), temperature=args.temperature, matchups=[],
+               started=time.strftime("%Y-%m-%d %H:%M:%S"))
     output = args.run / "evaluation.json"
 
     def record(result):
@@ -322,7 +280,7 @@ def main():
     result, *_ = play(heuristic, random_agent, args.pool, args.envs, args.rounds, seed, args.workers)
     record(result)
     for snapshot in chosen:
-        policy = load_policy(snapshot, dex, device, rng)
+        policy = load_policy(snapshot, dex, device, rng, temperature=args.temperature)
         rounds = args.final_rounds if snapshot == final else args.rounds
         for opponent in (random_agent, heuristic):
             seed += 1
@@ -340,10 +298,10 @@ def main():
                 out["calibration"] = calibration_table(values)
                 out["replays"] = write_replays(logs, a_side, args.run / "replays", "final-vs-heuristic",
                                                f"{final.stem} vs strongest-attack heuristic", args.replays)
-    final_policy = load_policy(final, dex, device, rng, name=final.stem)
+    final_policy = load_policy(final, dex, device, rng, name=final.stem, temperature=args.temperature)
     for snapshot in chosen[:-1]:
         seed += 1
-        older = load_policy(snapshot, dex, device, rng)
+        older = load_policy(snapshot, dex, device, rng, temperature=args.temperature)
         result, *_ = play(final_policy, older, args.pool, args.envs, args.rounds, seed, args.workers)
         result["minutes"] = int(snapshot.stem[1:])
         record(result)

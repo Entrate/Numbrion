@@ -1,5 +1,8 @@
-"""PPO pieces that work on DirectML: masked sampling, GAE, a plain Adam and gradient clipping."""
+"""PPO pieces that work on DirectML: masked sampling, GAE, a plain Adam and gradient clipping, plus the adaptive
+entropy coefficient and the potential-based KO shaping of the self-play trainer."""
 from __future__ import annotations
+
+import math
 
 import numpy as np
 import torch
@@ -74,3 +77,52 @@ def clip_gradients(parameters, max_norm: float) -> float:
         for g in grads:
             g.mul_(max_norm / (norm + 1e-6))
     return norm
+
+
+class EntropyController:
+    """Entropy-bonus coefficient that keeps the policy entropy near a target schedule (an exploration floor).
+
+    The entropy is the batch mean of the slot-a plus slot-b masked policy entropies, as logged by the trainer
+    (forced decisions such as PASS count as zero). The target falls linearly from ``start`` to ``final`` over the
+    run. After every update, ``log(coef)`` moves by ``rate * (target - entropy)`` (the error clipped to +-1 nat), so
+    the coefficient grows by up to ~22% per update while the entropy is below target and shrinks while it is above;
+    it stays within ``[low, high]``.
+    """
+
+    def __init__(self, coef: float, start: float, final: float, rate: float = 0.2, low: float = 1e-3,
+                 high: float = 0.05):
+        self.start, self.final, self.rate = start, final, rate
+        self.low, self.high = low, high
+        self.log_coef = math.log(min(max(coef, low), high))
+
+    @property
+    def coef(self) -> float:
+        return math.exp(self.log_coef)
+
+    def target(self, progress: float) -> float:
+        return self.start + (self.final - self.start) * min(max(progress, 0.0), 1.0)
+
+    def update(self, entropy: float, progress: float) -> float:
+        """Adapt to the entropy measured with the current coefficient; returns the coefficient for the next update."""
+        if np.isfinite(entropy):
+            error = min(max(self.target(progress) - entropy, -1.0), 1.0)
+            self.log_coef = min(max(self.log_coef + self.rate * error, math.log(self.low)), math.log(self.high))
+        return self.coef
+
+    def state_dict(self) -> dict:
+        return {"log_coef": self.log_coef}
+
+    def load_state_dict(self, state: dict) -> None:
+        self.log_coef = min(max(float(state["log_coef"]), math.log(self.low)), math.log(self.high))
+
+
+def ko_shaping(fainted_before: np.ndarray, fainted_after: np.ndarray, done: np.ndarray, bonus: float) -> np.ndarray:
+    """Potential-based KO shaping per row: ``Phi(after) - Phi(before)`` with ``Phi = bonus * (foe KOs - own KOs)``.
+
+    ``fainted_*`` are [rows, 2] (own, foe) KO counts; ``done`` [rows] marks rows whose battle just ended, where the
+    potential is zero. Over a battle the bonus therefore sums to zero: it only moves credit for KOs earlier and no
+    longer pays for the KO margin of a win or loss (the old bonus did, which favoured all-out trading). gamma is
+    taken as 1 (0.995 in PPO; the difference is below 1e-3 per step).
+    """
+    after = np.where(done[:, None], 0.0, fainted_after)
+    return (bonus * ((after[:, 1] - after[:, 0]) - (fainted_before[:, 1] - fainted_before[:, 0]))).astype(np.float32)

@@ -10,11 +10,20 @@ Run from the repository root:
 * Rollouts: actor processes (training.actors) play the battles with CPU copies of the policy and fill one of two
   shared-memory buffers while the GPU trains on the other, so each rollout is collected with the weights from one
   update earlier. PPO's ratio uses the stored behaviour log-probs.
-* Opponents: the learner plays both sides of most battles; ``--pool-fraction`` of the battles put a random older
-  snapshot (added every ``--pool-minutes``) on side 2 instead. Only the learner's own decisions are trained on.
-* Reward: +1 win, -1 loss, plus a KO-difference bonus that decays linearly to zero at half the run.
-* Schedule: learning rate and entropy bonus anneal over the time budget; snapshots every ``--snapshot-minutes``
-  feed evaluate.py. ``latest.pt`` (with optimizer state) supports ``--resume``.
+* Opponents (training.league): the learner plays both sides of most battles; ``--pool-fraction`` of the battles
+  (fixed envs) put another player on side 2: ``--scripted-share`` of them the "always use the strongest attack"
+  heuristic, the rest an older snapshot (added every ``--pool-minutes``) chosen per rollout by prioritized
+  fictitious self-play from the learner's results against each snapshot. Only the learner's own decisions are
+  trained on.
+* Reward: +1 win, -1 loss, plus a potential-based KO-difference bonus (sums to zero over a battle) that decays
+  linearly to zero at ``--ko-bonus-end`` of the run.
+* Exploration: the entropy-bonus coefficient adapts so the summed slot-a + slot-b policy entropy tracks a target
+  that falls linearly from ``--entropy-target`` to ``--entropy-target-final`` (``--entropy-target 0``: the fixed
+  ``--entropy`` -> ``--entropy-final`` schedule instead).
+* Schedule: the learning rate anneals over the time budget; snapshots every ``--snapshot-minutes`` feed
+  evaluate.py. ``latest.pt`` (with optimizer, opponent-pool and entropy-controller state) supports ``--resume``.
+* Metrics: besides the losses, win rates against snapshots and against the heuristic, the PFSP table, and the
+  learner's action usage (Tera, switches, Protect, status moves, Fake Out; training.diagnostics).
 """
 from __future__ import annotations
 
@@ -31,9 +40,11 @@ import torch
 
 from training.actors import Actors
 from training.device import training_device
+from training.diagnostics import ActionUsage
 from training.dex import load_dex
+from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
-from training.ppo import Adam, clip_gradients, gae
+from training.ppo import Adam, EntropyController, clip_gradients, gae
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -86,10 +97,18 @@ def memory_mb() -> dict:
     return {"rss_mb": counters.WorkingSetSize >> 20, "private_mb": counters.PrivateUsage >> 20}
 
 
-def spread_mask(n: int, fraction: float) -> np.ndarray:
-    """``fraction`` of ``n`` entries set, evenly spread (so pool battles are shared across actors)."""
-    index = np.arange(n)
-    return np.floor((index + 1) * fraction) > np.floor(index * fraction)
+def opponent_results(collected: dict, info: dict) -> dict:
+    """Finished games, the learner's score (not for self-play) and mean battle turns by opponent kind for one
+    rollout, over all games that finished in the envs of that kind."""
+    out = {}
+    for kind, name in ((SELF, "self"), (SNAPSHOT, "pool"), (HEURISTIC, "scripted")):
+        envs = info["opponents"] == kind
+        games = float(collected["games"][envs].sum())
+        out[f"{name}_games"] = int(games)
+        if kind != SELF:
+            out[f"{name}_win_rate"] = round(float(collected["score"][envs].sum()) / games, 3) if games else None
+        out[f"{name}_turns"] = round(float(collected["battle_turns"][envs].sum()) / games, 1) if games else None
+    return out
 
 
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device) -> tuple[dict, int]:
@@ -169,15 +188,34 @@ def main():
     parser.add_argument("--gamma", type=float, default=0.995)
     parser.add_argument("--lam", type=float, default=0.95)
     parser.add_argument("--clip", type=float, default=0.2)
-    parser.add_argument("--entropy", type=float, default=0.01)
-    parser.add_argument("--entropy-final", type=float, default=0.003)
+    parser.add_argument("--entropy", type=float, default=0.01,
+                        help="entropy-bonus coefficient (the starting value of the adaptive coefficient)")
+    parser.add_argument("--entropy-final", type=float, default=0.003,
+                        help="final coefficient of the fixed linear schedule (only with --entropy-target 0)")
+    parser.add_argument("--entropy-target", type=float, default=2.5,
+                        help="target for the summed slot-a + slot-b entropy at the start (0: fixed schedule)")
+    parser.add_argument("--entropy-target-final", type=float, default=1.5, help="entropy target at the end of the run")
+    parser.add_argument("--entropy-rate", type=float, default=0.2,
+                        help="change of log(coefficient) per update and nat of entropy error")
+    parser.add_argument("--entropy-coef-min", type=float, default=0.001)
+    parser.add_argument("--entropy-coef-max", type=float, default=0.05)
     parser.add_argument("--value-coef", type=float, default=0.5)
     parser.add_argument("--aux-coef", type=float, default=0.03)
     parser.add_argument("--max-grad-norm", type=float, default=0.5)
-    parser.add_argument("--ko-bonus", type=float, default=0.05, help="per KO difference; decays to 0 at half the run")
-    parser.add_argument("--pool-fraction", type=float, default=0.2)
+    parser.add_argument("--ko-bonus", type=float, default=0.02,
+                        help="potential-based bonus per KO difference (sums to zero over a battle)")
+    parser.add_argument("--ko-bonus-end", type=float, default=0.25,
+                        help="fraction of the run at which the KO bonus has decayed linearly to zero")
+    parser.add_argument("--pool-fraction", type=float, default=0.3,
+                        help="share of battles against a snapshot or the heuristic instead of pure self-play")
+    parser.add_argument("--scripted-share", type=float, default=0.33,
+                        help="share of those battles against the strongest-attack heuristic")
     parser.add_argument("--pool-minutes", type=float, default=3.0)
     parser.add_argument("--pool-size", type=int, default=12)
+    parser.add_argument("--pfsp-power", type=float, default=2.0,
+                        help="PFSP: snapshot weight (1 - learner score EMA) ** power")
+    parser.add_argument("--pfsp-floor", type=float, default=0.1, help="PFSP: uniform share mixed into the weights")
+    parser.add_argument("--pfsp-alpha", type=float, default=0.02, help="PFSP: per-game EMA rate of the learner score")
     parser.add_argument("--snapshot-minutes", type=float, default=5.0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=REPO / "scratch/training/selfplay")
@@ -191,14 +229,19 @@ def main():
     dex = load_dex()
     model = Model(dex, args.width, args.layers).to(device)
     optimizer = Adam(model.parameters(), lr=args.lr)
-    pool: list[dict] = []
+    pool = SnapshotPool(args.pool_size, args.pfsp_power, args.pfsp_floor, args.pfsp_alpha)
+    controller = (EntropyController(args.entropy, args.entropy_target, args.entropy_target_final, args.entropy_rate,
+                                    args.entropy_coef_min, args.entropy_coef_max) if args.entropy_target > 0 else None)
+    usage = ActionUsage(dex)
     elapsed_before = 0.0
     update = battles = samples_total = 0
     if args.resume:
         state = torch.load(args.resume, map_location="cpu", weights_only=False)
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
-        pool = state["pool"]
+        pool.load_state_dict(state["pool"])
+        if controller is not None and state.get("entropy_controller"):
+            controller.load_state_dict(state["entropy_controller"])
         elapsed_before, update, battles, samples_total = state["elapsed"], state["update"], state["battles"], state["samples"]
         rng.bit_generator.state = state["numpy_rng"]
     args.output.mkdir(parents=True, exist_ok=True)
@@ -206,32 +249,36 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
     print(json.dumps({"adapter": adapter, "device": str(device), "parameters": n_params}), flush=True)
 
-    pool_envs = spread_mask(args.envs, args.pool_fraction)
+    kinds = opponent_kinds(args.envs, args.pool_fraction, args.scripted_share)  # fixed per env for the whole run
     budget = args.minutes * 60
-    next_pool = elapsed_before + args.pool_minutes * 60 if pool else 0.0
+    next_pool = elapsed_before + args.pool_minutes * 60 if len(pool) else 0.0
     next_snapshot = (int(elapsed_before // (args.snapshot_minutes * 60)) + (1 if elapsed_before else 0)) * args.snapshot_minutes * 60
+    loaded = {"snapshot": None}  # id of the snapshot in the actors' opponent weights
 
     def checkpoint(elapsed):
         save(args.output / "latest.pt", {
-            "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool, "elapsed": elapsed,
+            "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool.state_dict(),
+            "entropy_controller": controller.state_dict() if controller is not None else None, "elapsed": elapsed,
             "update": update, "battles": battles, "samples": samples_total, "numpy_rng": rng.bit_generator.state,
             "width": args.width, "layers": args.layers})
 
     def launch(actors, buffer: int, elapsed: float) -> dict:
-        """Hand the idle actors the current weights and an opponent, and start filling ``buffer``."""
-        nonlocal pool, next_pool
+        """Hand the idle actors the current weights and opponents, and start filling ``buffer``."""
+        nonlocal next_pool
         if elapsed >= next_pool:
-            pool.append(cpu_state(model))
-            pool = pool[-args.pool_size:]
+            pool.add(cpu_state(model), elapsed / 60)
             next_pool = elapsed + args.pool_minutes * 60
         progress = min(elapsed / budget, 1.0)
-        use_pool = len(pool) > 1
         actors.set_weights("learner", cpu_state(model))
-        if use_pool:
-            actors.set_weights("opponent", pool[int(rng.integers(len(pool) - 1))])
-        ko_bonus = args.ko_bonus * max(0.0, 1 - 2 * progress)
-        actors.start(buffer, use_pool, pool_envs, ko_bonus)
-        return dict(use_pool=use_pool, ko_bonus=ko_bonus)
+        snapshot = pool.sample(rng)  # PFSP; None until there are two snapshots
+        if snapshot is not None and snapshot["id"] != loaded["snapshot"]:
+            actors.set_weights("opponent", snapshot["state"])
+            loaded["snapshot"] = snapshot["id"]
+        opponents = np.where((kinds == SNAPSHOT) & (snapshot is None), SELF, kinds).astype(np.int8)
+        ko_bonus = args.ko_bonus * max(0.0, 1 - progress / args.ko_bonus_end) if args.ko_bonus_end > 0 else 0.0
+        actors.start(buffer, opponents, ko_bonus)
+        return dict(opponents=opponents, ko_bonus=ko_bonus, snapshot=None if snapshot is None else snapshot["id"],
+                    snapshot_minutes=None if snapshot is None else snapshot["minutes"])
 
     with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model) as actors:
         start = time.perf_counter() - elapsed_before
@@ -249,14 +296,23 @@ def main():
                 break
             # The actors fill the other buffer with the current weights while the GPU trains on this one.
             collected, collected_info = rollout, info
+            snapshot_envs = collected_info["opponents"] == SNAPSHOT  # PFSP: credit games begun against the snapshot
+            pool.record(collected_info["snapshot"], float(collected["clean_games"][snapshot_envs].sum()),
+                        float(collected["clean_score"][snapshot_envs].sum()))
             info = launch(actors, 1 - current, elapsed)
             progress = min(elapsed / budget, 1.0)
             optimizer.lr = args.lr * (1 - (1 - args.lr_final) * progress)
-            entropy_coef = args.entropy + (args.entropy_final - args.entropy) * progress
+            if controller is not None:
+                entropy_coef = controller.coef
+            else:
+                entropy_coef = args.entropy + (args.entropy_final - args.entropy) * progress
             t1 = time.perf_counter()
             model.train()
             stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device)
             train_seconds = time.perf_counter() - t1
+            if controller is not None:
+                controller.update(stats["entropy"], progress)
+            behaviour = usage(actors.buffers[current].arrays)  # the actors are filling the other buffer
             rollout = actors.wait()
             cycle = time.perf_counter() - t1
             current = 1 - current
@@ -269,10 +325,11 @@ def main():
                 "cycle_s": round(cycle, 2), "train_s": round(train_seconds, 2), "wait_s": round(cycle - train_seconds, 2),
                 "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
-                "pool_games": collected["pool_games"],
-                "pool_win_rate": round(collected["pool_wins"] / collected["pool_games"], 3) if collected["pool_games"] else None,
-                "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5), "ko_bonus": round(collected_info["ko_bonus"], 4),
-                "pool_size": len(pool), **stats, **memory_mb(),
+                **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
+                "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5),
+                "entropy_target": round(controller.target(progress), 3) if controller is not None else None,
+                "ko_bonus": round(collected_info["ko_bonus"], 4), "pool_size": len(pool), **stats, **behaviour,
+                "pfsp": pool.summary(), **memory_mb(),
             }
             print(json.dumps(metrics), flush=True)
             with (args.output / "metrics.jsonl").open("a", encoding="utf-8") as stream:

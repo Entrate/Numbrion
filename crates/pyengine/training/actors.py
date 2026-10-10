@@ -5,6 +5,8 @@ It plays ``steps`` decision boundaries with the weights it was handed and writes
 behaviour log-probs, values, rewards and done flags into one of two shared-memory rollout buffers. The learner
 trains on buffer ``k`` while the actors fill buffer ``1 - k``; PPO's ratio uses the stored behaviour log-probs, so
 the data being one update old is accounted for. Weights travel through shared memory after every update.
+Side 2 of each env is played by the learner, the pool snapshot or the scripted heuristic (training.league); the
+actors report per-env results so the trainer can attribute them to the opponent it assigned.
 """
 from __future__ import annotations
 
@@ -21,6 +23,7 @@ from .encoder import N_ACTION_FEATURES, N_FIELD_FLOATS, N_IDS, N_POKEMON_FLOATS,
 N_ACTIONS = 47
 PASS = 46
 OBS_KEYS = ("ids", "floats", "field", "foe_match", "action_features", "token_features")
+RESULT_KEYS = ("games", "score", "clean_games", "clean_score", "battle_turns")  # per-env opponent results
 
 
 def buffer_layout(steps: int, rows: int) -> dict:
@@ -94,8 +97,10 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     import numbrion as nb
     from training.dex import load_dex
     from training.encoder import Encoder
+    from training.league import SELF, SNAPSHOT
     from training.model import Model
-    from training.ppo import sample
+    from training.ppo import ko_shaping, sample
+    from training.scripted import HeuristicAgent, forced_logprobs
 
     torch.set_num_threads(1)
     R = 2 * n_envs
@@ -111,6 +116,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     env = nb.BatchEnv(count, [str(p) for p in pools], seed=seed, threads=1, log=True)
     encoder = Encoder(2 * count)
     rng = np.random.default_rng(seed)
+    heuristic = HeuristicAgent(rng)
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
 
@@ -136,12 +142,21 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 if argument[key + "_version"] != versions[key]:
                     model.load_state_dict(read_weights(weights.arrays[key], layout))
                     versions[key] = argument[key + "_version"]
-            opp_rows = np.zeros(2 * count, dtype=bool)
-            if argument["use_pool"]:
-                opp_rows[1::2] = np.asarray(argument["pool_envs"][begin:end])
-            opp_index = np.flatnonzero(opp_rows)
+            # ---- opponent assignment (training.league): side 2 of each env is the learner, a snapshot or scripted.
+            kinds = np.asarray(argument["opponents"][begin:end], dtype=np.int8)
+            opp_rows = np.zeros(2 * count, dtype=bool)  # side-2 rows not played (and not trained) by the learner
+            opp_rows[1::2] = kinds != SELF
+            snapshot_rows = np.zeros(2 * count, dtype=bool)
+            snapshot_rows[1::2] = kinds == SNAPSHOT
+            opp_index = np.flatnonzero(snapshot_rows)  # rows the opponent snapshot plays
+            scripted_index = np.flatnonzero(opp_rows & ~snapshot_rows)  # rows the heuristic plays
+            # Per-env finished games, side-1 score (win 1, tie 0.5) and battle turns; "clean" games began during
+            # this rollout, so they were played entirely against this rollout's opponent.
+            results = {k: np.zeros(count) for k in RESULT_KEYS}
+            began_here = np.zeros(count, dtype=bool)
+            # ---- end opponent assignment
             ko_bonus = argument["ko_bonus"]
-            stats = dict(completed=0, turns=0, pool_games=0, pool_wins=0)
+            stats = dict(completed=0, turns=0)
             inference = 0.0
             for t in range(steps):
                 for k in OBS_KEYS:
@@ -163,6 +178,9 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                         opp_state = opponent.trunk(y["ids"], y["floats"], y["field"], y["action_features"], y["token_features"])
                         opp_lp0, opp_vectors0 = opponent.slot0(opp_state, torch.from_numpy(mask0[opp_index]))
                         lp0[opp_index] = opp_lp0.numpy()
+                    if len(scripted_index):  # opponent selection: the heuristic's codes as one-hot log-probs
+                        lp0[scripted_index] = forced_logprobs(heuristic.first(
+                            {"action_features": b.action_features}, scripted_index, mask0[scripted_index]))
                     a0 = sample(lp0, rng)
                     mask1 = env.mask_slot1(np.where(active, a0, -1).reshape(count, 2).astype(np.int32)).reshape(-1, N_ACTIONS).copy()
                     mask1[~active] = False
@@ -171,6 +189,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     if len(opp_index):
                         lp1[opp_index] = opponent.slot1(opp_state, opp_vectors0, torch.from_numpy(a0[opp_index].astype(np.int64)),
                                                         torch.from_numpy(mask1[opp_index])).numpy()
+                    if len(scripted_index):
+                        lp1[scripted_index] = forced_logprobs(heuristic.second(scripted_index, mask1[scripted_index]))
                     a1 = sample(lp1, rng)
                 inference += time.perf_counter() - t0
                 actions = np.stack((a0, a1), -1).reshape(count, 2, 2).astype(np.int32)
@@ -186,23 +206,28 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 b = observe(result)
                 done = result["done"]
                 reward = result["reward"].reshape(-1).astype(np.float32)
-                if ko_bonus > 0:
-                    delta = b.fainted - fainted_before
-                    reward = reward + np.where(np.repeat(done, 2), 0.0, ko_bonus * (delta[:, 1] - delta[:, 0]))
+                if ko_bonus > 0:  # potential-based, sums to zero over a battle (training.ppo.ko_shaping)
+                    reward = reward + ko_shaping(fainted_before, b.fainted, np.repeat(done, 2), ko_bonus)
                 out["reward"][t, rows] = reward
                 out["done"][t, rows] = np.repeat(done, 2)
                 stats["completed"] += int(done.sum())
                 stats["turns"] += int(result["final_turns"][done].sum())
-                if argument["use_pool"]:
-                    finished = done & opp_rows[1::2]
-                    stats["pool_games"] += int(finished.sum())
-                    stats["pool_wins"] += int((result["winner"][finished] == 0).sum())
+                # ---- opponent results (training.league)
+                score = np.where(result["winner"] < 0, 0.5, (result["winner"] == 0).astype(float))
+                clean = done & began_here
+                results["games"] += done
+                results["score"] += np.where(done, score, 0.0)
+                results["clean_games"] += clean
+                results["clean_score"] += np.where(clean, score, 0.0)
+                results["battle_turns"] += np.where(done, result["final_turns"], 0)
+                began_here |= done
             with torch.no_grad():
                 x = tensors(b)
                 state = learner.trunk(x["ids"], x["floats"], x["field"], x["action_features"], x["token_features"])
                 out["bootstrap"][rows] = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
             stats["seconds"] = time.perf_counter() - started
             stats["inference_seconds"] = inference
+            stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
             connection.send(stats)
     except Exception:
         import traceback
@@ -245,8 +270,9 @@ class Actors:
         write_weights(self.weights.arrays[key], self.layout, state)
         self.versions[key] += 1
 
-    def start(self, buffer: int, use_pool: bool, pool_envs: np.ndarray, ko_bonus: float) -> None:
-        argument = dict(buffer=buffer, use_pool=use_pool, pool_envs=pool_envs.tolist(), ko_bonus=ko_bonus,
+    def start(self, buffer: int, opponents: np.ndarray, ko_bonus: float) -> None:
+        """``opponents``: per-env opponent kind (training.league SELF / SNAPSHOT / HEURISTIC) for this rollout."""
+        argument = dict(buffer=buffer, opponents=np.asarray(opponents).tolist(), ko_bonus=ko_bonus,
                         learner_version=self.versions["learner"], opponent_version=self.versions["opponent"])
         for connection in self.connections:
             connection.send(("collect", argument))
@@ -258,9 +284,12 @@ class Actors:
         for reply in replies:
             if isinstance(reply, tuple) and reply and reply[0] == "error":
                 raise RuntimeError("actor failed:\n" + reply[1])
-        totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns", "pool_games", "pool_wins")}
+        totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns")}
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
+        # Per-env opponent results (actors own consecutive env slices, in order).
+        for key in RESULT_KEYS:
+            totals[key] = np.concatenate([np.asarray(r[key], dtype=np.float64) for r in replies])
         return totals
 
     def close(self) -> None:
