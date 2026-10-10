@@ -75,3 +75,7 @@ fn on_end<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     );
     Relay::Undefined
 }
+
+#[cfg(test)]
+#[path = "rulesstatus/tests.rs"]
+mod scenario_tests;

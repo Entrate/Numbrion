@@ -1,0 +1,1175 @@
+scenario yawn_sleep_clause
+seed 11,22,33,44
+p1 Latios|||Levitate|Yawn,Recover,Surf,DazzlingGleam|Serious|252,,128,,128,|M||||]Clefable|||MagicGuard|Yawn,Moonblast,Recover,CalmMind|Serious|252,,128,,128,|M||||]Scizor|||Technician|BulletPunch,SwordsDance,CloseCombat,QuickAttack|Serious|252,,128,,128,|M||||]Gengar|||Levitate|Yawn,ShadowBall,SludgeBomb,CalmMind|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|SoftBoiled,Toxic,CalmMind,ThunderWave|Serious|252,,128,,128,|F||||]Snorlax|||ThickFat|BodySlam,CalmMind,SwordsDance,Toxic|Serious|252,,128,,128,|M|||50|]Garchomp|||RoughSkin|BodySlam,DragonClaw,EarthPower,SwordsDance|Serious||M|||50|]Gengar|||Levitate|ShadowBall,SludgeBomb,Thunderbolt,Hypnosis|Serious||M|||50|
+step start		
+seed_after 11,22,33,44
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Latios|Latios, M|364/364
+log |switch|p1a: Latios|Latios, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|394/394
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, L50, M|267/267
+log |switch|p2b: Snorlax|Snorlax, L50, M|100/100
+log |turn|1
+step turn1	move 1 1, move 1 2	move 4 1, move 3
+seed_after 13127,45333,18295,15391
+log |
+log |t:|
+log |move|p1a: Latios|Yawn|p2a: Blissey
+log |-start|p2a: Blissey|move: Yawn|[of] p1a: Latios
+log |move|p1b: Clefable|Yawn|p2b: Snorlax
+log |-start|p2b: Snorlax|move: Yawn|[of] p1b: Clefable
+log |move|p2a: Blissey|Thunder Wave|p1a: Latios
+log |-status|p1a: Latios|par
+log |move|p2b: Snorlax|Swords Dance|p2b: Snorlax
+log |-boost|p2b: Snorlax|atk|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2, move 3	move 1, move 1 1
+seed_after 38085,56695,39077,36349
+log |
+log |t:|
+log |move|p1b: Clefable|Recover||[still]
+log |-fail|p1b: Clefable|heal
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Recover||[still]
+log |-fail|p1a: Latios|heal
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|304/364 par
+log |-damage|p1a: Latios|84/100 par
+log |
+log |-end|p2a: Blissey|move: Yawn|[silent]
+log |-status|p2a: Blissey|slp
+log |-end|p2b: Snorlax|move: Yawn|[silent]
+log |-message|Sleep Clause Mod activated.
+log |-hint|Sleep Clause Mod prevents players from putting more than one of their opponent's Pokémon to sleep at a time
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 1, move 1 1
+seed_after 13227,40747,44602,26856
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn|p2b: Snorlax
+log |-start|p2b: Snorlax|move: Yawn|[of] p1b: Clefable
+log |cant|p2a: Blissey|slp
+log |move|p1a: Latios|Yawn||[still]
+log |-fail|p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|246/364 par
+log |-damage|p1a: Latios|68/100 par
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 1, move 1 1
+seed_after 28285,12736,28027,46383
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn||[still]
+log |-fail|p1b: Clefable
+log |cant|p2a: Blissey|slp
+log |move|p1a: Latios|Yawn||[still]
+log |-fail|p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|183/364 par
+log |-damage|p1a: Latios|51/100 par
+log |
+log |-end|p2b: Snorlax|move: Yawn|[silent]
+log |-message|Sleep Clause Mod activated.
+log |-hint|Sleep Clause Mod prevents players from putting more than one of their opponent's Pokémon to sleep at a time
+log |upkeep
+log |turn|5
+step turn5	move 2, move 3	move 1, move 1 1
+seed_after 4829,14473,24888,6658
+log |
+log |t:|
+log |move|p1b: Clefable|Recover||[still]
+log |-fail|p1b: Clefable|heal
+log |-curestatus|p2a: Blissey|slp|[msg]
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Recover|p1a: Latios
+log |split|p1
+log |-heal|p1a: Latios|364/364 par
+log |-heal|p1a: Latios|100/100 par
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|301/364 par
+log |-damage|p1a: Latios|83/100 par
+log |
+log |upkeep
+log |turn|6
+step turn6	move 1 1, move 1 2	move 1, move 1 1
+seed_after 45995,51150,44819,15953
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn|p2b: Snorlax
+log |-start|p2b: Snorlax|move: Yawn|[of] p1b: Clefable
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Yawn|p2a: Blissey
+log |-start|p2a: Blissey|move: Yawn|[of] p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|240/364 par
+log |-damage|p1a: Latios|66/100 par
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 1 2	move 1, move 1 1
+seed_after 3389,10658,39534,51775
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Yawn||[still]
+log |-fail|p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|185/364 par
+log |-damage|p1a: Latios|51/100 par
+log |
+log |-end|p2a: Blissey|move: Yawn|[silent]
+log |-status|p2a: Blissey|slp
+log |-end|p2b: Snorlax|move: Yawn|[silent]
+log |-message|Sleep Clause Mod activated.
+log |-hint|Sleep Clause Mod prevents players from putting more than one of their opponent's Pokémon to sleep at a time
+log |upkeep
+log |turn|8
+step turn8	move 2, move 3	move 1, move 1 1
+seed_after 41566,53897,13750,9298
+log |
+log |t:|
+log |move|p1b: Clefable|Recover||[still]
+log |-fail|p1b: Clefable|heal
+log |cant|p2a: Blissey|slp
+log |cant|p1a: Latios|par
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|119/364 par
+log |-damage|p1a: Latios|33/100 par
+log |
+log |upkeep
+log |turn|9
+step turn9	move 1 2, move 1 1	move 1, move 1 1
+seed_after 16432,1625,37777,42721
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn||[still]
+log |-fail|p1b: Clefable
+log |-curestatus|p2a: Blissey|slp|[msg]
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Yawn|p2b: Snorlax
+log |-start|p2b: Snorlax|move: Yawn|[of] p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|59/364 par
+log |-damage|p1a: Latios|17/100 par
+log |
+log |upkeep
+log |turn|10
+step turn10	move 1 1, move 1 2	move 1, move 1 1
+seed_after 43698,5661,1969,31567
+log |
+log |t:|
+log |move|p1b: Clefable|Yawn||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1a: Latios|Yawn|p2a: Blissey
+log |-start|p2a: Blissey|move: Yawn|[of] p1a: Latios
+log |move|p2b: Snorlax|Body Slam|p1a: Latios
+log |split|p1
+log |-damage|p1a: Latios|0 fnt
+log |-damage|p1a: Latios|0 fnt
+log |faint|p1a: Latios
+log |
+log |-end|p2b: Snorlax|move: Yawn|[silent]
+log |-status|p2b: Snorlax|slp
+log |upkeep
+step forced1	switch 3, pass	
+seed_after 43698,5661,1969,31567
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Scizor|Scizor, M|344/344
+log |switch|p1a: Scizor|Scizor, M|100/100
+log |turn|11
+scenario yawn_blockers
+seed 101,202,303,404
+p1 Clefable|||MagicGuard|Yawn,Recover,CalmMind,ThunderWave|Serious|252,,128,,128,|M||||]Latios|||Levitate|Yawn,Recover,CalmMind,ThunderWave|Serious|252,,128,,128,|M||||]Gengar|||Levitate|Yawn,Recover,CalmMind,ThunderWave|Serious|252,,128,,128,|M||||]Scizor|||Technician|Yawn,Recover,CalmMind,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Pincurchin|||ElectricSurge|CalmMind,Recover,SwordsDance,ThunderWave|Serious|252,,128,,128,|M||||]Hypno|||Insomnia|CalmMind,Recover,SwordsDance,ThunderWave|Serious|252,,128,,128,|M||||]Komala|||Comatose|CalmMind,Recover,SwordsDance,ThunderWave|Serious|252,,128,,128,|M||||]Vigoroth|||VitalSpirit|CalmMind,Recover,SwordsDance,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 101,202,303,404
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Clefable|Clefable, M|394/394
+log |switch|p1a: Clefable|Clefable, M|100/100
+log |split|p1
+log |switch|p1b: Latios|Latios, M|364/364
+log |switch|p1b: Latios|Latios, M|100/100
+log |split|p2
+log |switch|p2a: Pincurchin|Pincurchin, M|300/300
+log |switch|p2a: Pincurchin|Pincurchin, M|100/100
+log |split|p2
+log |switch|p2b: Hypno|Hypno, M|374/374
+log |switch|p2b: Hypno|Hypno, M|100/100
+log |-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p2a: Pincurchin
+log |turn|1
+step turn1	move 1 1, move 1 2	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2b: Hypno
+log |-immune|p2b: Hypno|[from] ability: Insomnia
+log |move|p2b: Hypno|Swords Dance|p2b: Hypno
+log |-boost|p2b: Hypno|atk|2
+log |move|p1a: Clefable|Yawn|p2a: Pincurchin
+log |-activate|p2a: Pincurchin|move: Electric Terrain
+log |move|p2a: Pincurchin|Swords Dance|p2a: Pincurchin
+log |-boost|p2a: Pincurchin|atk|2
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 2, move 1 1	move 2, move 2
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2a: Pincurchin
+log |-activate|p2a: Pincurchin|move: Electric Terrain
+log |move|p2b: Hypno|Recover||[still]
+log |-fail|p2b: Hypno|heal
+log |move|p1a: Clefable|Yawn|p2b: Hypno
+log |-immune|p2b: Hypno|[from] ability: Insomnia
+log |move|p2a: Pincurchin|Recover||[still]
+log |-fail|p2a: Pincurchin|heal
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	switch 3, switch 4
+seed_after 101,202,303,404
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Vigoroth|Vigoroth, M|364/364
+log |switch|p2b: Vigoroth|Vigoroth, M|100/100
+log |split|p2
+log |switch|p2a: Komala|Komala, M|334/334
+log |switch|p2a: Komala|Komala, M|100/100
+log |-ability|p2a: Komala|Comatose
+log |move|p1b: Latios|Yawn|p2b: Vigoroth
+log |-immune|p2b: Vigoroth|[from] ability: Vital Spirit
+log |move|p1a: Clefable|Yawn|p2a: Komala
+log |-activate|p2a: Komala|move: Electric Terrain
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 1 2	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2b: Vigoroth
+log |-immune|p2b: Vigoroth|[from] ability: Vital Spirit
+log |move|p2b: Vigoroth|Swords Dance|p2b: Vigoroth
+log |-boost|p2b: Vigoroth|atk|2
+log |move|p2a: Komala|Swords Dance|p2a: Komala
+log |-boost|p2a: Komala|atk|2
+log |move|p1a: Clefable|Yawn|p2a: Komala
+log |-activate|p2a: Komala|move: Electric Terrain
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 1 2	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2b: Vigoroth
+log |-immune|p2b: Vigoroth|[from] ability: Vital Spirit
+log |move|p2b: Vigoroth|Swords Dance|p2b: Vigoroth
+log |-boost|p2b: Vigoroth|atk|2
+log |move|p2a: Komala|Swords Dance|p2a: Komala
+log |-boost|p2a: Komala|atk|2
+log |move|p1a: Clefable|Yawn|p2a: Komala
+log |-activate|p2a: Komala|move: Electric Terrain
+log |
+log |-fieldend|move: Electric Terrain
+log |upkeep
+log |turn|6
+step turn6	move 1 1, move 1 2	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2b: Vigoroth
+log |-immune|p2b: Vigoroth|[from] ability: Vital Spirit
+log |move|p2b: Vigoroth|Swords Dance|p2b: Vigoroth
+log |-boost|p2b: Vigoroth|atk|2
+log |move|p2a: Komala|Swords Dance|p2a: Komala
+log |-boost|p2a: Komala|atk|2
+log |move|p1a: Clefable|Yawn|p2a: Komala
+log |-start|p2a: Komala|move: Yawn|[of] p1a: Clefable
+log |
+log |upkeep
+log |turn|7
+step turn7	move 3, move 3	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Calm Mind|p1b: Latios
+log |-boost|p1b: Latios|spa|1
+log |-boost|p1b: Latios|spd|1
+log |move|p2b: Vigoroth|Swords Dance|p2b: Vigoroth
+log |-boost|p2b: Vigoroth|atk|0
+log |move|p2a: Komala|Swords Dance|p2a: Komala
+log |-boost|p2a: Komala|atk|0
+log |move|p1a: Clefable|Calm Mind|p1a: Clefable
+log |-boost|p1a: Clefable|spa|1
+log |-boost|p1a: Clefable|spd|1
+log |
+log |-end|p2a: Komala|move: Yawn|[silent]
+log |upkeep
+log |turn|8
+step turn8	move 1 1, move 1 2	move 3, move 3
+seed_after 101,202,303,404
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2b: Vigoroth
+log |-immune|p2b: Vigoroth|[from] ability: Vital Spirit
+log |move|p2b: Vigoroth|Swords Dance|p2b: Vigoroth
+log |-boost|p2b: Vigoroth|atk|0
+log |move|p2a: Komala|Swords Dance|p2a: Komala
+log |-boost|p2a: Komala|atk|0
+log |move|p1a: Clefable|Yawn|p2a: Komala
+log |-start|p2a: Komala|move: Yawn|[of] p1a: Clefable
+log |
+log |upkeep
+log |turn|9
+step turn9	move 3, move 3	switch 3, switch 4
+seed_after 101,202,303,404
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Hypno|Hypno, M|374/374
+log |switch|p2b: Hypno|Hypno, M|100/100
+log |split|p2
+log |switch|p2a: Pincurchin|Pincurchin, M|300/300
+log |switch|p2a: Pincurchin|Pincurchin, M|100/100
+log |-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p2a: Pincurchin
+log |move|p1b: Latios|Calm Mind|p1b: Latios
+log |-boost|p1b: Latios|spa|1
+log |-boost|p1b: Latios|spd|1
+log |move|p1a: Clefable|Calm Mind|p1a: Clefable
+log |-boost|p1a: Clefable|spa|1
+log |-boost|p1a: Clefable|spd|1
+log |
+log |upkeep
+log |turn|10
+step turn10	move 4 2, move 1 1	move 3, move 3
+seed_after 49042,17068,6806,29223
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2a: Pincurchin
+log |-activate|p2a: Pincurchin|move: Electric Terrain
+log |move|p2b: Hypno|Swords Dance|p2b: Hypno
+log |-boost|p2b: Hypno|atk|2
+log |move|p1a: Clefable|Thunder Wave|p2b: Hypno
+log |-status|p2b: Hypno|par
+log |move|p2a: Pincurchin|Swords Dance|p2a: Pincurchin
+log |-boost|p2a: Pincurchin|atk|2
+log |
+log |upkeep
+log |turn|11
+step turn11	move 1 2, move 1 1	move 3, move 3
+seed_after 56844,53449,37801,34598
+log |
+log |t:|
+log |move|p1b: Latios|Yawn|p2a: Pincurchin
+log |-activate|p2a: Pincurchin|move: Electric Terrain
+log |move|p1a: Clefable|Yawn||[still]
+log |-fail|p1a: Clefable
+log |move|p2b: Hypno|Swords Dance|p2b: Hypno
+log |-boost|p2b: Hypno|atk|2
+log |move|p2a: Pincurchin|Swords Dance|p2a: Pincurchin
+log |-boost|p2a: Pincurchin|atk|2
+log |
+log |upkeep
+log |turn|12
+step turn12	move 3, move 3	move 3, move 3
+seed_after 51180,49713,46438,18113
+log |
+log |t:|
+log |move|p1b: Latios|Calm Mind|p1b: Latios
+log |-boost|p1b: Latios|spa|1
+log |-boost|p1b: Latios|spd|1
+log |move|p1a: Clefable|Calm Mind|p1a: Clefable
+log |-boost|p1a: Clefable|spa|1
+log |-boost|p1a: Clefable|spd|1
+log |move|p2b: Hypno|Swords Dance|p2b: Hypno
+log |-boost|p2b: Hypno|atk|2
+log |move|p2a: Pincurchin|Swords Dance|p2a: Pincurchin
+log |-boost|p2a: Pincurchin|atk|2
+log |
+log |upkeep
+log |turn|13
+scenario rest_branches
+seed 7,8,9,10
+p1 Snorlax|||ThickFat|Rest,CalmMind,SwordsDance,BodySlam|Serious|252,,128,,128,|M||||]Hypno|||Insomnia|Rest,CalmMind,SwordsDance,BodySlam|Serious|252,,128,,128,|M||||]Dodrio|||EarlyBird|Rest,CalmMind,SwordsDance,BodySlam|Serious|252,,128,,128,|M||||]Vigoroth|||VitalSpirit|Rest,CalmMind,SwordsDance,BodySlam|Serious|252,,128,,128,|M||||]Komala|||Comatose|Rest,CalmMind,SwordsDance,BodySlam|Serious|252,,128,,128,|M||||
+p2 Garchomp|||RoughSkin|BodySlam,WillOWisp,SwordsDance,CalmMind|Serious||M|||50|]Gengar|||Levitate|BodySlam,WillOWisp,SwordsDance,CalmMind|Serious||M|||50|]Arcanine|||Intimidate|BodySlam,WillOWisp,SwordsDance,CalmMind|Serious||M|||50|]Scizor|||Technician|BodySlam,WillOWisp,SwordsDance,CalmMind|Serious||M|||50|
+step start		
+seed_after 7,8,9,10
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|5
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Snorlax|Snorlax, M|524/524
+log |switch|p1a: Snorlax|Snorlax, M|100/100
+log |split|p1
+log |switch|p1b: Hypno|Hypno, M|374/374
+log |switch|p1b: Hypno|Hypno, M|100/100
+log |split|p2
+log |switch|p2a: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|135/135
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |turn|1
+step turn1	move 1, move 1	move 3, move 3
+seed_after 7,8,9,10
+log |
+log |t:|
+log |move|p1b: Hypno|Rest|p1b: Hypno
+log |-fail|p1b: Hypno|heal
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|2
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|2
+log |move|p1a: Snorlax|Rest|p1a: Snorlax
+log |-fail|p1a: Snorlax|heal
+log |
+log |upkeep
+log |turn|2
+step turn2	move 3, move 3	move 1 1, move 1 2
+seed_after 48350,19547,22671,17074
+log |
+log |t:|
+log |move|p1b: Hypno|Swords Dance|p1b: Hypno
+log |-boost|p1b: Hypno|atk|2
+log |move|p2b: Gengar|Body Slam|p1b: Hypno
+log |split|p1
+log |-damage|p1b: Hypno|346/374
+log |-damage|p1b: Hypno|93/100
+log |move|p2a: Garchomp|Body Slam|p1a: Snorlax
+log |split|p1
+log |-damage|p1a: Snorlax|475/524
+log |-damage|p1a: Snorlax|91/100
+log |move|p1a: Snorlax|Swords Dance|p1a: Snorlax
+log |-boost|p1a: Snorlax|atk|2
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 1	move 3, move 3
+seed_after 27480,54454,34363,12541
+log |
+log |t:|
+log |move|p1b: Hypno|Rest|p1b: Hypno
+log |-fail|p1b: Hypno|[from] ability: Insomnia|[of] p1b: Hypno
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|2
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|2
+log |move|p1a: Snorlax|Rest|p1a: Snorlax
+log |-status|p1a: Snorlax|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1a: Snorlax|524/524 slp|[silent]
+log |-heal|p1a: Snorlax|100/100 slp|[silent]
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1, switch 3	move 1 1, move 1 2
+seed_after 62618,37847,2158,50245
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Dodrio|Dodrio, M|324/324
+log |switch|p1b: Dodrio|Dodrio, M|100/100
+log |move|p2b: Gengar|Body Slam|p1b: Dodrio
+log |split|p1
+log |-damage|p1b: Dodrio|285/324
+log |-damage|p1b: Dodrio|88/100
+log |-status|p1b: Dodrio|par
+log |move|p2a: Garchomp|Body Slam|p1a: Snorlax
+log |split|p1
+log |-damage|p1a: Snorlax|439/524 slp
+log |-damage|p1a: Snorlax|84/100 slp
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1, move 1	move 3, move 3
+seed_after 16903,45697,21111,32815
+log |
+log |t:|
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|2
+log |move|p1b: Dodrio|Rest|p1b: Dodrio
+log |-status|p1b: Dodrio|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1b: Dodrio|324/324 slp|[silent]
+log |-heal|p1b: Dodrio|100/100 slp|[silent]
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|2
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|6
+step turn6	move 1, move 1	move 1 1, move 1 2
+seed_after 52560,43485,6065,9846
+log |
+log |t:|
+log |cant|p1b: Dodrio|slp
+log |move|p2b: Gengar|Body Slam|p1b: Dodrio
+log |split|p1
+log |-damage|p1b: Dodrio|262/324 slp
+log |-damage|p1b: Dodrio|81/100 slp
+log |move|p2a: Garchomp|Body Slam|p1a: Snorlax
+log |split|p1
+log |-damage|p1a: Snorlax|328/524 slp
+log |-damage|p1a: Snorlax|63/100 slp
+log |-curestatus|p1a: Snorlax|slp|[msg]
+log |move|p1a: Snorlax|Rest|p1a: Snorlax
+log |-status|p1a: Snorlax|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1a: Snorlax|524/524 slp|[silent]
+log |-heal|p1a: Snorlax|100/100 slp|[silent]
+log |
+log |upkeep
+log |turn|7
+step turn7	move 3, move 3	move 1 1, move 1 2
+seed_after 387,54023,17063,30622
+log |
+log |t:|
+log |-curestatus|p1b: Dodrio|slp|[msg]
+log |move|p1b: Dodrio|Swords Dance|p1b: Dodrio
+log |-boost|p1b: Dodrio|atk|2
+log |move|p2b: Gengar|Body Slam|p1b: Dodrio
+log |split|p1
+log |-damage|p1b: Dodrio|207/324
+log |-damage|p1b: Dodrio|64/100
+log |-status|p1b: Dodrio|par
+log |move|p2a: Garchomp|Body Slam|p1a: Snorlax
+log |split|p1
+log |-damage|p1a: Snorlax|422/524 slp
+log |-damage|p1a: Snorlax|81/100 slp
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|8
+step turn8	move 3, move 3	move 2 1, move 2 2
+seed_after 63739,58226,10699,47331
+log |
+log |t:|
+log |move|p2b: Gengar|Will-O-Wisp||[still]
+log |-fail|p2b: Gengar
+log |move|p1b: Dodrio|Swords Dance|p1b: Dodrio
+log |-boost|p1b: Dodrio|atk|2
+log |move|p2a: Garchomp|Will-O-Wisp|p1a: Snorlax|[miss]
+log |-miss|p2a: Garchomp|p1a: Snorlax
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|9
+step turn9	move 1, move 1	move 3, move 3
+seed_after 61643,59625,30131,1844
+log |
+log |t:|
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p1b: Dodrio|Rest|p1b: Dodrio
+log |-status|p1b: Dodrio|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1b: Dodrio|324/324 slp|[silent]
+log |-heal|p1b: Dodrio|100/100 slp|[silent]
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |-curestatus|p1a: Snorlax|slp|[msg]
+log |move|p1a: Snorlax|Rest|p1a: Snorlax
+log |-status|p1a: Snorlax|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1a: Snorlax|524/524 slp|[silent]
+log |-heal|p1a: Snorlax|100/100 slp|[silent]
+log |
+log |upkeep
+log |turn|10
+step turn10	move 1, move 1	move 3, move 3
+seed_after 61643,59625,30131,1844
+log |
+log |t:|
+log |cant|p1b: Dodrio|slp
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|11
+step turn11	move 1, move 1	move 3, move 3
+seed_after 61643,59625,30131,1844
+log |
+log |t:|
+log |-curestatus|p1b: Dodrio|slp|[msg]
+log |move|p1b: Dodrio|Rest|p1b: Dodrio
+log |-fail|p1b: Dodrio|heal
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |cant|p1a: Snorlax|slp
+log |
+log |upkeep
+log |turn|12
+step turn12	switch 5, switch 4	move 1 1, move 1 2
+seed_after 4514,14526,343,54940
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Vigoroth|Vigoroth, M|364/364
+log |switch|p1b: Vigoroth|Vigoroth, M|100/100
+log |split|p1
+log |switch|p1a: Komala|Komala, M|334/334
+log |switch|p1a: Komala|Komala, M|100/100
+log |-ability|p1a: Komala|Comatose
+log |move|p2b: Gengar|Body Slam|p1b: Vigoroth
+log |split|p1
+log |-damage|p1b: Vigoroth|311/364
+log |-damage|p1b: Vigoroth|86/100
+log |move|p2a: Garchomp|Body Slam|p1a: Komala
+log |split|p1
+log |-damage|p1a: Komala|236/334
+log |-damage|p1a: Komala|71/100
+log |
+log |upkeep
+log |turn|13
+step turn13	move 1, move 1	move 3, move 3
+seed_after 4514,14526,343,54940
+log |
+log |t:|
+log |move|p1b: Vigoroth|Rest|p1b: Vigoroth
+log |-fail|p1b: Vigoroth|[from] ability: Vital Spirit|[of] p1b: Vigoroth
+log |move|p1a: Komala|Rest||[still]
+log |-fail|p1a: Komala
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |
+log |upkeep
+log |turn|14
+step turn14	move 1, move 1	move 3, move 3
+seed_after 4514,14526,343,54940
+log |
+log |t:|
+log |move|p1b: Vigoroth|Rest|p1b: Vigoroth
+log |-fail|p1b: Vigoroth|[from] ability: Vital Spirit|[of] p1b: Vigoroth
+log |move|p1a: Komala|Rest||[still]
+log |-fail|p1a: Komala
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |
+log |upkeep
+log |turn|15
+step turn15	switch 3, switch 4	move 1 1, move 2 2
+seed_after 39564,64198,43663,14579
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Dodrio|Dodrio, M|324/324
+log |switch|p1b: Dodrio|Dodrio, M|100/100
+log |split|p1
+log |switch|p1a: Hypno|Hypno, M|346/374
+log |switch|p1a: Hypno|Hypno, M|93/100
+log |move|p2b: Gengar|Will-O-Wisp|p1b: Dodrio
+log |-status|p1b: Dodrio|brn
+log |move|p2a: Garchomp|Body Slam|p1a: Hypno
+log |split|p1
+log |-damage|p1a: Hypno|243/374
+log |-damage|p1a: Hypno|65/100
+log |
+log |split|p1
+log |-damage|p1b: Dodrio|304/324 brn|[from] brn
+log |-damage|p1b: Dodrio|94/100 brn|[from] brn
+log |upkeep
+log |turn|16
+step turn16	move 1, move 1	move 3, move 3
+seed_after 43,49272,711,8610
+log |
+log |t:|
+log |move|p1b: Dodrio|Rest|p1b: Dodrio
+log |-status|p1b: Dodrio|slp|[from] move: Rest
+log |split|p1
+log |-heal|p1b: Dodrio|324/324 slp|[silent]
+log |-heal|p1b: Dodrio|100/100 slp|[silent]
+log |move|p1a: Hypno|Rest|p1a: Hypno
+log |-fail|p1a: Hypno|[from] ability: Insomnia|[of] p1a: Hypno
+log |move|p2b: Gengar|Swords Dance|p2b: Gengar
+log |-boost|p2b: Gengar|atk|0
+log |move|p2a: Garchomp|Swords Dance|p2a: Garchomp
+log |-boost|p2a: Garchomp|atk|0
+log |
+log |upkeep
+log |turn|17
+scenario status_lotteries
+seed 91,92,93,94
+p1 Blissey|||SereneGrace|DireClaw,TriAttack,CalmMind,Recover|Serious||F|||50|]Jirachi|||SereneGrace|DireClaw,TriAttack,CalmMind,Recover|Serious||N|||50|]Snorlax|||ThickFat|DireClaw,TriAttack,CalmMind,Recover|Serious||M|||50|]Scizor|||Technician|DireClaw,TriAttack,CalmMind,Recover|Serious||M|||50|
+p2 Gengar|||Levitate|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||]Charizard|||SolarPower|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||]Glalie|||InnerFocus|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||]Jolteon|||VoltAbsorb|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||]Venomoth|||ShieldDust|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||]Dugtrio|||Sturdy|CalmMind,Recover,Toxic,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 91,92,93,94
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|6
+log |start
+log |split|p1
+log |switch|p1a: Blissey|Blissey, L50, F|330/330
+log |switch|p1a: Blissey|Blissey, L50, F|100/100
+log |split|p1
+log |switch|p1b: Jirachi|Jirachi, L50|175/175
+log |switch|p1b: Jirachi|Jirachi, L50|100/100
+log |split|p2
+log |switch|p2a: Gengar|Gengar, M|324/324
+log |switch|p2a: Gengar|Gengar, M|100/100
+log |split|p2
+log |switch|p2b: Charizard|Charizard, M|360/360
+log |switch|p2b: Charizard|Charizard, M|100/100
+log |turn|1
+step turn1	move 2 1, move 2 2	move 2, move 2
+seed_after 51456,10203,45769,34834
+log |
+log |t:|
+log |move|p2a: Gengar|Recover||[still]
+log |-fail|p2a: Gengar|heal
+log |move|p2b: Charizard|Recover||[still]
+log |-fail|p2b: Charizard|heal
+log |move|p1b: Jirachi|Tri Attack|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|342/360
+log |-damage|p2b: Charizard|95/100
+log |move|p1a: Blissey|Tri Attack|p2a: Gengar
+log |-immune|p2a: Gengar
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 2, move 2 1	move 2, move 2
+seed_after 40637,41793,23292,7302
+log |
+log |t:|
+log |move|p2a: Gengar|Recover||[still]
+log |-fail|p2a: Gengar|heal
+log |move|p2b: Charizard|Recover|p2b: Charizard
+log |split|p2
+log |-heal|p2b: Charizard|360/360
+log |-heal|p2b: Charizard|100/100
+log |move|p1b: Jirachi|Tri Attack|p2a: Gengar
+log |-immune|p2a: Gengar
+log |move|p1a: Blissey|Tri Attack|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|341/360
+log |-damage|p2b: Charizard|95/100
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 1, move 1 2	move 2, move 2
+seed_after 53321,36760,29553,26291
+log |
+log |t:|
+log |move|p2a: Gengar|Recover||[still]
+log |-fail|p2a: Gengar|heal
+log |move|p2b: Charizard|Recover|p2b: Charizard
+log |split|p2
+log |-heal|p2b: Charizard|360/360
+log |-heal|p2b: Charizard|100/100
+log |move|p1b: Jirachi|Dire Claw|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|343/360
+log |-damage|p2b: Charizard|96/100
+log |-status|p2b: Charizard|psn
+log |move|p1a: Blissey|Dire Claw|p2a: Gengar
+log |-resisted|p2a: Gengar
+log |split|p2
+log |-damage|p2a: Gengar|323/324
+log |-damage|p2a: Gengar|99/100
+log |-status|p2a: Gengar|slp
+log |
+log |split|p2
+log |-damage|p2b: Charizard|298/360 psn|[from] psn
+log |-damage|p2b: Charizard|83/100 psn|[from] psn
+log |upkeep
+log |turn|4
+step turn4	move 1 2, move 1 1	move 2, move 2
+seed_after 37977,62086,61550,21173
+log |
+log |t:|
+log |cant|p2a: Gengar|slp
+log |move|p2b: Charizard|Recover|p2b: Charizard
+log |split|p2
+log |-heal|p2b: Charizard|360/360 psn
+log |-heal|p2b: Charizard|100/100 psn
+log |move|p1b: Jirachi|Dire Claw|p2a: Gengar
+log |-resisted|p2a: Gengar
+log |split|p2
+log |-damage|p2a: Gengar|318/324 slp
+log |-damage|p2a: Gengar|99/100 slp
+log |move|p1a: Blissey|Dire Claw|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|355/360 psn
+log |-damage|p2b: Charizard|99/100 psn
+log |
+log |split|p2
+log |-damage|p2b: Charizard|310/360 psn|[from] psn
+log |-damage|p2b: Charizard|87/100 psn|[from] psn
+log |upkeep
+log |turn|5
+step turn5	move 2 1, move 2 2	switch 3, switch 4
+seed_after 44958,19126,446,34196
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Glalie|Glalie, M|364/364
+log |switch|p2a: Glalie|Glalie, M|100/100
+log |split|p2
+log |switch|p2b: Jolteon|Jolteon, M|334/334
+log |switch|p2b: Jolteon|Jolteon, M|100/100
+log |move|p1b: Jirachi|Tri Attack|p2b: Jolteon
+log |split|p2
+log |-damage|p2b: Jolteon|319/334
+log |-damage|p2b: Jolteon|96/100
+log |-status|p2b: Jolteon|frz
+log |move|p1a: Blissey|Tri Attack|p2a: Glalie
+log |split|p2
+log |-damage|p2a: Glalie|342/364
+log |-damage|p2a: Glalie|94/100
+log |
+log |upkeep
+log |turn|6
+step turn6	move 2 1, move 2 2	move 2, move 2
+seed_after 57059,22052,49415,58927
+log |
+log |t:|
+log |cant|p2b: Jolteon|frz
+log |move|p2a: Glalie|Recover|p2a: Glalie
+log |split|p2
+log |-heal|p2a: Glalie|364/364
+log |-heal|p2a: Glalie|100/100
+log |move|p1b: Jirachi|Tri Attack|p2b: Jolteon
+log |split|p2
+log |-damage|p2b: Jolteon|304/334 frz
+log |-damage|p2b: Jolteon|92/100 frz
+log |move|p1a: Blissey|Tri Attack|p2a: Glalie
+log |-crit|p2a: Glalie
+log |split|p2
+log |-damage|p2a: Glalie|333/364
+log |-damage|p2a: Glalie|92/100
+log |
+log |upkeep
+log |turn|7
+step turn7	move 1 1, move 1 2	move 2, move 2
+seed_after 48697,46715,41058,64184
+log |
+log |t:|
+log |-curestatus|p2b: Jolteon|frz|[msg]
+log |move|p2b: Jolteon|Recover|p2b: Jolteon
+log |split|p2
+log |-heal|p2b: Jolteon|334/334
+log |-heal|p2b: Jolteon|100/100
+log |move|p2a: Glalie|Recover|p2a: Glalie
+log |split|p2
+log |-heal|p2a: Glalie|364/364
+log |-heal|p2a: Glalie|100/100
+log |move|p1b: Jirachi|Dire Claw|p2b: Jolteon
+log |split|p2
+log |-damage|p2b: Jolteon|312/334
+log |-damage|p2b: Jolteon|94/100
+log |-status|p2b: Jolteon|psn
+log |move|p1a: Blissey|Dire Claw|p2a: Glalie
+log |split|p2
+log |-damage|p2a: Glalie|359/364
+log |-damage|p2a: Glalie|99/100
+log |-message|Sleep Clause Mod activated.
+log |-hint|Sleep Clause Mod prevents players from putting more than one of their opponent's Pokémon to sleep at a time
+log |
+log |split|p2
+log |-damage|p2b: Jolteon|271/334 psn|[from] psn
+log |-damage|p2b: Jolteon|82/100 psn|[from] psn
+log |upkeep
+log |turn|8
+step turn8	move 2 1, move 2 2	switch 5, switch 6
+seed_after 46657,4,34445,11680
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Dugtrio|Dugtrio, M|274/274
+log |switch|p2b: Dugtrio|Dugtrio, M|100/100
+log |split|p2
+log |switch|p2a: Venomoth|Venomoth, M|344/344
+log |switch|p2a: Venomoth|Venomoth, M|100/100
+log |move|p1b: Jirachi|Tri Attack|p2b: Dugtrio
+log |split|p2
+log |-damage|p2b: Dugtrio|253/274
+log |-damage|p2b: Dugtrio|93/100
+log |-status|p2b: Dugtrio|par
+log |move|p1a: Blissey|Tri Attack|p2a: Venomoth
+log |split|p2
+log |-damage|p2a: Venomoth|322/344
+log |-damage|p2a: Venomoth|94/100
+log |
+log |upkeep
+log |turn|9
+step turn9	move 2 1, move 2 2	move 2, move 2
+seed_after 33101,29259,34744,62315
+log |
+log |t:|
+log |move|p2a: Venomoth|Recover|p2a: Venomoth
+log |split|p2
+log |-heal|p2a: Venomoth|344/344
+log |-heal|p2a: Venomoth|100/100
+log |cant|p2b: Dugtrio|par
+log |move|p1b: Jirachi|Tri Attack|p2b: Dugtrio
+log |split|p2
+log |-damage|p2b: Dugtrio|232/274 par
+log |-damage|p2b: Dugtrio|85/100 par
+log |move|p1a: Blissey|Tri Attack|p2a: Venomoth
+log |split|p2
+log |-damage|p2a: Venomoth|322/344
+log |-damage|p2a: Venomoth|94/100
+log |
+log |upkeep
+log |turn|10
+step turn10	move 1 1, move 1 2	move 2, move 2
+seed_after 36991,40058,43926,32674
+log |
+log |t:|
+log |move|p2a: Venomoth|Recover|p2a: Venomoth
+log |split|p2
+log |-heal|p2a: Venomoth|344/344
+log |-heal|p2a: Venomoth|100/100
+log |move|p2b: Dugtrio|Recover|p2b: Dugtrio
+log |split|p2
+log |-heal|p2b: Dugtrio|274/274 par
+log |-heal|p2b: Dugtrio|100/100 par
+log |move|p1b: Jirachi|Dire Claw|p2b: Dugtrio
+log |-resisted|p2b: Dugtrio
+log |split|p2
+log |-damage|p2b: Dugtrio|262/274 par
+log |-damage|p2b: Dugtrio|96/100 par
+log |move|p1a: Blissey|Dire Claw|p2a: Venomoth
+log |-resisted|p2a: Venomoth
+log |split|p2
+log |-damage|p2a: Venomoth|341/344
+log |-damage|p2a: Venomoth|99/100
+log |
+log |upkeep
+log |turn|11
+step turn11	move 2 2, move 2 1	switch 3, switch 4
+seed_after 33571,47527,57107,15126
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Gengar|Gengar, M|318/324 slp
+log |switch|p2a: Gengar|Gengar, M|99/100 slp
+log |split|p2
+log |switch|p2b: Charizard|Charizard, M|310/360 psn
+log |switch|p2b: Charizard|Charizard, M|87/100 psn
+log |move|p1b: Jirachi|Tri Attack|p2a: Gengar
+log |-immune|p2a: Gengar
+log |move|p1a: Blissey|Tri Attack|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|289/360 psn
+log |-damage|p2b: Charizard|81/100 psn
+log |
+log |split|p2
+log |-damage|p2b: Charizard|244/360 psn|[from] psn
+log |-damage|p2b: Charizard|68/100 psn|[from] psn
+log |upkeep
+log |turn|12
+step turn12	move 1 2, move 1 1	move 2, move 2
+seed_after 9345,44430,48108,59200
+log |
+log |t:|
+log |cant|p2a: Gengar|slp
+log |move|p2b: Charizard|Recover|p2b: Charizard
+log |split|p2
+log |-heal|p2b: Charizard|360/360 psn
+log |-heal|p2b: Charizard|100/100 psn
+log |move|p1b: Jirachi|Dire Claw|p2a: Gengar
+log |-resisted|p2a: Gengar
+log |split|p2
+log |-damage|p2a: Gengar|313/324 slp
+log |-damage|p2a: Gengar|97/100 slp
+log |move|p1a: Blissey|Dire Claw|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|355/360 psn
+log |-damage|p2b: Charizard|99/100 psn
+log |
+log |split|p2
+log |-damage|p2b: Charizard|310/360 psn|[from] psn
+log |-damage|p2b: Charizard|87/100 psn|[from] psn
+log |upkeep
+log |turn|13
+step turn13	move 2 1, move 2 2	switch 5, switch 6
+seed_after 35029,61381,5430,60299
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Glalie|Glalie, M|359/364
+log |switch|p2a: Glalie|Glalie, M|99/100
+log |split|p2
+log |switch|p2b: Jolteon|Jolteon, M|271/334 psn
+log |switch|p2b: Jolteon|Jolteon, M|82/100 psn
+log |move|p1b: Jirachi|Tri Attack|p2b: Jolteon
+log |split|p2
+log |-damage|p2b: Jolteon|255/334 psn
+log |-damage|p2b: Jolteon|77/100 psn
+log |move|p1a: Blissey|Tri Attack|p2a: Glalie
+log |split|p2
+log |-damage|p2a: Glalie|340/364
+log |-damage|p2a: Glalie|94/100
+log |
+log |split|p2
+log |-damage|p2b: Jolteon|214/334 psn|[from] psn
+log |-damage|p2b: Jolteon|65/100 psn|[from] psn
+log |upkeep
+log |turn|14
+step turn14	move 1 1, move 1 2	switch 3, switch 4
+seed_after 22819,14243,12099,54035
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Dugtrio|Dugtrio, M|262/274 par
+log |switch|p2b: Dugtrio|Dugtrio, M|96/100 par
+log |split|p2
+log |switch|p2a: Venomoth|Venomoth, M|341/344
+log |switch|p2a: Venomoth|Venomoth, M|99/100
+log |move|p1b: Jirachi|Dire Claw|p2b: Dugtrio
+log |-resisted|p2b: Dugtrio
+log |split|p2
+log |-damage|p2b: Dugtrio|249/274 par
+log |-damage|p2b: Dugtrio|91/100 par
+log |move|p1a: Blissey|Dire Claw|p2a: Venomoth
+log |-resisted|p2a: Venomoth
+log |split|p2
+log |-damage|p2a: Venomoth|338/344
+log |-damage|p2a: Venomoth|99/100
+log |
+log |upkeep
+log |turn|15
+step turn15	move 2 1, move 2 2	switch 5, switch 6
+seed_after 60322,44773,53733,41335
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Gengar|Gengar, M|313/324 slp
+log |switch|p2a: Gengar|Gengar, M|97/100 slp
+log |split|p2
+log |switch|p2b: Charizard|Charizard, M|310/360 psn
+log |switch|p2b: Charizard|Charizard, M|87/100 psn
+log |move|p1b: Jirachi|Tri Attack|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|293/360 psn
+log |-damage|p2b: Charizard|82/100 psn
+log |move|p1a: Blissey|Tri Attack|p2a: Gengar
+log |-immune|p2a: Gengar
+log |
+log |split|p2
+log |-damage|p2b: Charizard|248/360 psn|[from] psn
+log |-damage|p2b: Charizard|69/100 psn|[from] psn
+log |upkeep
+log |turn|16
+step turn16	move 1 1, move 1 2	move 2, move 2
+seed_after 35287,30109,24506,22105
+log |
+log |t:|
+log |cant|p2a: Gengar|slp
+log |move|p2b: Charizard|Recover|p2b: Charizard
+log |split|p2
+log |-heal|p2b: Charizard|360/360 psn
+log |-heal|p2b: Charizard|100/100 psn
+log |move|p1b: Jirachi|Dire Claw|p2b: Charizard
+log |split|p2
+log |-damage|p2b: Charizard|342/360 psn
+log |-damage|p2b: Charizard|95/100 psn
+log |move|p1a: Blissey|Dire Claw|p2a: Gengar
+log |-resisted|p2a: Gengar
+log |split|p2
+log |-damage|p2a: Gengar|312/324 slp
+log |-damage|p2a: Gengar|97/100 slp
+log |
+log |split|p2
+log |-damage|p2b: Charizard|297/360 psn|[from] psn
+log |-damage|p2b: Charizard|83/100 psn|[from] psn
+log |upkeep
+log |turn|17

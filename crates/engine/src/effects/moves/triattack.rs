@@ -43,11 +43,15 @@ fn on_hit<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
         .state
         .prng
         .sample(&[dex::CONDITION_BRN, dex::CONDITION_PAR, dex::CONDITION_FRZ]);
-    // sourceEffect is left unset so setStatus defaults it to the running effect (battle.effect).
+    // sourceEffect defaults to battle.effect, which inside `singleEvent("Hit", secondary, ...)` is the
+    // plain secondary object (no id / effectType / status), so it must not be the live move: the
+    // Sleep onStart would otherwise print `[from] move: Dire Claw`. Dex(NONE) is the core's
+    // truthy "empty effect" view of exactly such an object. The core currently passes the live
+    // move as the effect of secondary onHit events (see report).
     b.try_set_status(
         target,
         status,
-        Attribution::from_move(source, EffectRef::None),
+        Attribution::from_move(source, EffectRef::Dex(EffectId::NONE)),
     );
     Relay::Undefined
 }
