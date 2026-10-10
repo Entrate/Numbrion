@@ -14,6 +14,19 @@ use crate::{
     },
 };
 impl<L: LogSink> Battle<L> {
+    /// Ports `sim/battle.ts:2378-2383` for the scoped gen9 packed-team API.
+    /// PP Ups are 0..3; scoped PP counts remain integral. PRNG: none.
+    pub fn calculate_pp(&self, move_id: EffectId, pp_ups: u8) -> u8 {
+        assert!(pp_ups <= 3, "invalid PP Ups");
+        let mv = dex::move_data(move_id);
+        if mv.no_pp_boosts {
+            mv.pp
+        } else {
+            u8::try_from(u16::from(mv.pp) * (5 + u16::from(pp_ups)) / 5)
+                .expect("scoped move PP overflow")
+        }
+    }
+
     /// ModifySpecies relay, recalculated stats/types/weight and baseMaxhp
     /// Ports `sim/pokemon.ts:1387-1425`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
     pub fn set_species(
@@ -80,27 +93,11 @@ impl<L: LogSink> Battle<L> {
         let illusion = self.state.pokemon[pokemon.0 as usize].illusion;
         if options.permanent {
             self.state.pokemon[pokemon.0 as usize].base_species = species;
-            let shown = if illusion == MonId::NONE {
-                pokemon
-            } else {
-                illusion
-            };
-            let tera = self.state.pokemon[pokemon.0 as usize].terastallized;
-            let parts = [
-                LogArg::Details(shown),
-                LogArg::Text(", tera:"),
-                LogArg::Type(tera),
-            ];
+            // Details formats the illusion view and the real mon's Tera suffix.
+            // Appending another suffix here duplicated it after a permanent forme change.
             self.add(LogEntry::new(
                 "detailschange",
-                &[
-                    LogArg::Mon(pokemon),
-                    if tera == TypeId::NONE {
-                        LogArg::Details(shown)
-                    } else {
-                        LogArg::Parts(&parts)
-                    },
-                ],
+                &[LogArg::Mon(pokemon), LogArg::Details(pokemon)],
                 &[],
             ));
             self.update_max_hp(pokemon);

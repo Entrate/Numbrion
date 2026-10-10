@@ -1,0 +1,49 @@
+aurawheel	Morpeko		100	100	Normal		0	67	Electric	Electric	Physical	normal	67	
+aurawheel	Morpeko-Hangry		100	100	Normal		0	67	Electric	Dark	Physical	normal	67	
+aurawheel	Pikachu		100	100	Normal		0	67	Electric	Electric	Physical	normal	67	
+ivycudgel	Ogerpon		100	100	Normal		0	67	Electric	Electric	Physical	normal	67	
+ivycudgel	Ogerpon-Teal-Tera		100	100	Normal		0	67	Electric	Electric	Physical	normal	67	
+ivycudgel	Ogerpon-Wellspring		100	100	Normal		0	67	Electric	Water	Physical	normal	67	
+ivycudgel	Ogerpon-Wellspring-Tera		100	100	Normal		0	67	Electric	Water	Physical	normal	67	
+ivycudgel	Ogerpon-Hearthflame		100	100	Normal		0	67	Electric	Fire	Physical	normal	67	
+ivycudgel	Ogerpon-Hearthflame-Tera		100	100	Normal		0	67	Electric	Fire	Physical	normal	67	
+ivycudgel	Ogerpon-Cornerstone		100	100	Normal		0	67	Electric	Rock	Physical	normal	67	
+ivycudgel	Ogerpon-Cornerstone-Tera		100	100	Normal		0	67	Electric	Rock	Physical	normal	67	
+ivycudgel	Pikachu		100	100	Normal		0	67	Electric	Electric	Physical	normal	67	
+judgment	Arceus-Psychic		100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+judgment	Arceus-Psychic		100	100	Normal	Mind Plate	0	67	Normal	Psychic	Special	normal	67	
+judgment	Arceus-Psychic		100	100	Normal		1	67	Normal	Normal	Special	normal	67	
+judgment	Arceus-Psychic		100	100	Normal	Mind Plate	1	67	Normal	Normal	Special	normal	67	
+revelationdance	Oricorio		100	100	Fire,Flying		0	67	Normal	Fire	Special	normal	67	
+revelationdance	Oricorio	Water	100	100	Fire,Flying		0	67	Normal	Water	Special	normal	67	
+revelationdance	Oricorio	Stellar	100	100	Fire,Flying		0	67	Normal	Fire	Special	normal	67	
+revelationdance	Oricorio		100	100	???,Flying		0	67	Normal	Flying	Special	normal	67	
+revelationdance	Oricorio	Water	100	100	???,Flying		0	67	Normal	Water	Special	normal	67	
+revelationdance	Oricorio	Stellar	100	100	???,Flying		0	67	Normal	Flying	Special	normal	67	
+revelationdance	Oricorio		100	100	???		0	67	Normal	???	Special	normal	67	
+revelationdance	Oricorio	Water	100	100	???		0	67	Normal	Water	Special	normal	67	
+revelationdance	Oricorio	Stellar	100	100	???		0	67	Normal	???	Special	normal	67	
+revelationdance	Oricorio		100	100	Grass		0	67	Normal	Grass	Special	normal	67	
+revelationdance	Oricorio	Water	100	100	Grass		0	67	Normal	Water	Special	normal	67	
+revelationdance	Oricorio	Stellar	100	100	Grass		0	67	Normal	Grass	Special	normal	67	
+terablast	Pikachu		99	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terablast	Pikachu		100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terablast	Pikachu		101	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terablast	Pikachu	Fire	99	100	Normal		0	67	Normal	Fire	Special	normal	67	
+terablast	Pikachu	Fire	100	100	Normal		0	67	Normal	Fire	Special	normal	67	
+terablast	Pikachu	Fire	101	100	Normal		0	67	Normal	Fire	Physical	normal	67	
+terablast	Pikachu	Stellar	99	100	Normal		0	67	Normal	Stellar	Special	normal	100	atk:-1,spa:-1
+terablast	Pikachu	Stellar	100	100	Normal		0	67	Normal	Stellar	Special	normal	100	atk:-1,spa:-1
+terablast	Pikachu	Stellar	101	100	Normal		0	67	Normal	Stellar	Physical	normal	100	atk:-1,spa:-1
+terastarstorm	Terapagos		100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos		101	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos	Stellar	100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos	Stellar	101	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos-Terastal		100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos-Terastal		101	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos-Terastal	Stellar	100	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos-Terastal	Stellar	101	100	Normal		0	67	Normal	Normal	Special	normal	67	
+terastarstorm	Terapagos-Stellar		100	100	Normal		0	67	Normal	Stellar	Special	allAdjacentFoes	67	
+terastarstorm	Terapagos-Stellar		101	100	Normal		0	67	Normal	Stellar	Special	allAdjacentFoes	67	
+terastarstorm	Terapagos-Stellar	Stellar	100	100	Normal		0	67	Normal	Stellar	Special	allAdjacentFoes	67	
+terastarstorm	Terapagos-Stellar	Stellar	101	100	Normal		0	67	Normal	Stellar	Physical	allAdjacentFoes	67	
