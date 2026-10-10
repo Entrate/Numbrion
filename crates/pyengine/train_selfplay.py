@@ -42,7 +42,7 @@ from training.diagnostics import ActionUsage
 from training.dex import load_dex
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
-from training.ppo import Adam, EntropyController, clip_gradients, gae
+from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -112,11 +112,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
         return torch.from_numpy(np.ascontiguousarray(array)).to(device)
 
     for _ in range(args.epochs):
-        order = rng.permutation(len(selected))
-        for begin in range(0, len(order), args.minibatch):
-            pick = order[begin:begin + args.minibatch]
-            if len(pick) < args.minibatch // 4:
-                continue
+        for pick in minibatches(rng.permutation(len(selected)), args.minibatch):
             index = selected[pick]
             batch = upload(flat, index, device)
             partner_ids, partner_floats = partner_view(flat, partner_index[index], device)

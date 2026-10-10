@@ -253,6 +253,18 @@ def test_gae_stops_at_battle_end_and_bootstraps_truncation():
     np.testing.assert_allclose(returns, [[1.0], [1.0], [2.0]])
 
 
+def test_minibatches_use_few_sizes_and_no_row_twice():
+    from training.ppo import minibatches
+
+    sizes = set()
+    for n in range(5000, 7200):
+        picks = list(minibatches(np.random.default_rng(n).permutation(n), 1024))
+        rows = np.concatenate(picks)
+        assert len(np.unique(rows)) == len(rows) and n - len(rows) < 256
+        sizes.update(len(p) for p in picks)
+    assert sizes == {256, 384, 512, 640, 768, 896, 1024}
+
+
 def test_adam_matches_torch_adam():
     from training.ppo import Adam
 

@@ -306,9 +306,19 @@ Measured on the RX 5500 with torch-directml 0.2.5:
 - DirectML keeps host memory for every call with an `alpha=`/`value=` argument or a new Python scalar per
   step. The first run's Adam (`addcdiv_(..., value=-lr / c1)`, `v / c2`) lost ~3.6 MB per update this way:
   the trainer grew from 850 MB to 1.37 GB in 18 minutes. Adam now takes these scalars as 0-dim device
-  tensors (the update is ~3% slower). The PPO update alone then grows 0.1 MB per update; the whole trainer
-  still grows ~1.2 MB per update with the opponent pool full (~1.3 GB per hour, cause not found). The
-  encoder's static-feature caches are capped at 50,000 entries each: foe reveal states never stopped
+  tensors (the update is ~3% slower).
+- DirectML also compiles kernels for every new input shape and never frees them, ~4.4 MB per minibatch size.
+  The trained-row count changes every rollout, so the last minibatch had a new length almost every update:
+  the trainer grew ~3.8 MB per update (~4 GB per hour). `training.ppo.minibatches` cuts the last minibatch to
+  a multiple of 128 rows (and still drops it below 256), so a run sees at most seven sizes. Measured with
+  `ppo_update` alone on one saved rollout: 3.3 MB per update with a varying row count, 0.06-0.1 MB with a
+  fixed one, and with four sizes in turn growth only on each size's first use. In an 8-minute run with the
+  fix, the trainer grew 0.4 MB per update while the opponent pool filled (each snapshot ~3.7 MB) and
+  0.1 +- 0.15 MB per update over the 39 updates after it was full. The next-run benches skipped most last
+  minibatches (below 256 rows), which is why they grew less than the second-run smoke run. Their remaining
+  ~1.2 MB per update with a full pool does not show on `second-run`; its cause was not pinned down (next-run's
+  `ppo_update` with a fixed row count is flat on its own).
+- The encoder's static-feature caches are capped at 50,000 entries each: foe reveal states never stopped
   adding entries (~0.5 GB per actor per hour). `Dex.belief` is an LRU of 200,000 entries.
 
 ## Throughput
@@ -343,5 +353,5 @@ the update.
 
 Integrated smoke run (`second-run` with the league, smart opponents, entropy controller and the sync removal;
 four actors, 128 battles, 4 minutes): 70 updates, 14,800 battles, 1,821 trained samples/s and 64 battles/s
-from update 3 on, a 3.2 s cycle with rollouts of 2.7 s. The trainer's memory still grew by about 3.5 MB per
-update (pool not yet at its cap), so `rss_mb` should be watched in long runs.
+from update 3 on, a 3.2 s cycle with rollouts of 2.7 s. The trainer's memory grew by about 3.8 MB per
+update there; that was the varying last-minibatch size (see the DirectML notes above), now fixed.

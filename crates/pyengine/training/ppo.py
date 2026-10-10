@@ -28,6 +28,22 @@ def gae(rewards, values, dones, bootstrap, gamma: float, lam: float):
     return advantages, advantages + values
 
 
+def minibatches(order: np.ndarray, size: int):
+    """``order`` in minibatches of ``size``; the last one is cut to a multiple of ``size // 8`` and dropped below
+    ``size // 4``.
+
+    DirectML compiles kernels for every new input shape and never frees them (~4.4 MB per minibatch size). The
+    trained-row count changes every rollout, so a last minibatch of any length added a new shape almost every update
+    (~3.8 MB per update, measured); this way a run sees at most seven sizes.
+    """
+    granule = max(size // 8, 1)
+    for begin in range(0, len(order), size):
+        pick = order[begin:begin + size]
+        pick = pick[:len(pick) - len(pick) % granule]
+        if len(pick) >= size // 4:
+            yield pick
+
+
 class Adam:
     """Adam from elementwise ops; torch's Adam uses ``lerp``, which DirectML runs on the CPU.
 
