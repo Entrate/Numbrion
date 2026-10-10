@@ -20,6 +20,40 @@ static INDEX: [[[u16; REL_COUNT]; EVENT_COUNT]; MANIFESTS.len()] = {
     index
 };
 
+// A conservative, immutable union across all effects. False proves collection
+// is empty; true still requires the normal holder and effect lookup.
+static CALLBACK_RELS: [u8; EVENT_COUNT] = {
+    let mut masks = [0; EVENT_COUNT];
+    let mut i = 0;
+    while i < HOOKS.len() {
+        let h = &HOOKS[i];
+        if h.site.is_empty() && !matches!(h.value, HookValue::Absent) {
+            masks[h.event as usize] |= 1 << h.rel as usize;
+            if h.event as usize == EventId::Start as usize
+                && h.rel as usize == HookRel::On as usize
+                && matches!(
+                    MANIFESTS[h.effect.0 as usize].effect_type,
+                    EffectType::Ability | EffectType::Item
+                )
+            {
+                masks[EventId::SwitchIn as usize] |= 1 << HookRel::On as usize;
+            }
+        }
+        i += 1;
+    }
+    masks
+};
+
+#[inline]
+pub fn callback_relations(event: EventId) -> u8 {
+    CALLBACK_RELS[event as usize]
+}
+
+#[inline]
+pub fn has_callback(event: EventId, rel: HookRel) -> bool {
+    callback_relations(event) & (1 << rel as usize) != 0
+}
+
 #[inline]
 pub fn event_hook(id: EffectId, event: EventId, rel: HookRel) -> Option<HookId> {
     let h = INDEX[id.0 as usize][event as usize][rel as usize];
@@ -29,6 +63,23 @@ pub fn event_hook(id: EffectId, event: EventId, rel: HookRel) -> Option<HookId> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn callback_union_covers_exact_hooks_and_species_views() {
+        for h in HOOKS.iter().filter(|h| h.site.is_empty()) {
+            if !matches!(h.value, HookValue::Absent) {
+                assert!(has_callback(h.event, h.rel));
+            }
+        }
+        for view in SPECIES_CONDITION_VIEWS {
+            for id in view.hooks {
+                let h = &HOOKS[id.0 as usize];
+                if !matches!(h.value, HookValue::Absent) {
+                    assert!(has_callback(h.event, h.rel));
+                }
+            }
+        }
+    }
 
     #[test]
     fn index_matches_manifest_scan() {

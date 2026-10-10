@@ -15,6 +15,11 @@ impl<L: LogSink> Battle<L> {
         source: Option<MonId>,
         buffer: u8,
     ) {
+        if matches!(selector.mode, CollectMode::Callback)
+            && dex::callback_relations(selector.event) == 0
+        {
+            return;
+        }
         if let EventTarget::Spread(ts) = target {
             for i in 0..ts.len as usize {
                 let start = self.scratch.handlers[buffer as usize].len;
@@ -59,6 +64,12 @@ impl<L: LogSink> Battle<L> {
                     (m.side(), HookRel::Ally),
                     (SideId(1 - m.side().0), HookRel::Foe),
                 ] {
+                    if matches!(selector.mode, CollectMode::Callback)
+                        && !dex::has_callback(selector.event, rel)
+                        && !dex::has_callback(selector.event, HookRel::Any)
+                    {
+                        continue;
+                    }
                     let (mons, len) = self.living_actives(side);
                     for a in mons[..len].iter().copied() {
                         // side.ts:390-403: allies()/foes() also drop hp-0 Pokemon that are
@@ -187,7 +198,10 @@ impl<L: LogSink> Battle<L> {
         selector: HookSelector,
         buffer: u8,
     ) {
-        if pokemon == MonId::NONE {
+        if pokemon == MonId::NONE
+            || (matches!(selector.mode, CollectMode::Callback)
+                && !dex::has_callback(selector.event, selector.rel))
+        {
             return;
         }
         let p = self.state.pokemon[pokemon.0 as usize];
@@ -261,6 +275,11 @@ impl<L: LogSink> Battle<L> {
         custom_holder: Option<MonId>,
         buffer: u8,
     ) {
+        if matches!(selector.mode, CollectMode::Callback)
+            && !dex::has_callback(selector.event, selector.rel)
+        {
+            return;
+        }
         self.collect_cell(
             EffectRef::Synthetic(SyntheticEffect::Format),
             self.state.format_state,
@@ -277,6 +296,11 @@ impl<L: LogSink> Battle<L> {
         custom_holder: Option<MonId>,
         buffer: u8,
     ) {
+        if matches!(selector.mode, CollectMode::Callback)
+            && !dex::has_callback(selector.event, selector.rel)
+        {
+            return;
+        }
         let holder = custom_holder.map_or(Holder::FIELD, Holder::mon);
         let field = self.state.field;
         for c in field.pseudo_weather.as_slice().iter().copied() {
@@ -314,6 +338,11 @@ impl<L: LogSink> Battle<L> {
         custom_holder: Option<MonId>,
         buffer: u8,
     ) {
+        if matches!(selector.mode, CollectMode::Callback)
+            && !dex::has_callback(selector.event, selector.rel)
+        {
+            return;
+        }
         let list = self.state.sides[side.0 as usize].conditions;
         for c in list.as_slice().iter().copied() {
             let id = self.state.effects.cells[c.0 as usize].id;
