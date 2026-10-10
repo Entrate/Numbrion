@@ -23,7 +23,8 @@ impl TeamPool {
         pool
     }
 
-    fn push_line(&mut self, line: &str) {
+    /// Append one packed team (blank lines are ignored).
+    pub fn push_line(&mut self, line: &str) {
         let t = line.trim();
         if !t.is_empty() {
             self.teams.push(Arc::from(t));
