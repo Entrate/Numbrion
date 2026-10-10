@@ -15,7 +15,8 @@ The older `train.py` MLP baseline is unchanged.
 | PPO helpers | `training/ppo.py` |
 | trainer | `train_selfplay.py` |
 | duplicate evaluation | `evaluate.py` |
-| tests | `training_tests/test_selfplay.py` |
+| scripted "smart" baseline | `training/smart.py` |
+| tests | `training_tests/test_selfplay.py`, `training_tests/test_smart.py` |
 
 Paths are relative to `crates/pyengine` except the tools and data.
 
@@ -135,8 +136,10 @@ reward defaults described under "Training" above. `train_selfplay.py --help` lis
   and is clamped to [0.001, 0.05]. For comparison, the first run reached 1.5 at minutes 3-6 and ended at 0.72.
   `--entropy-target 0` restores the fixed 0.01 -> 0.003 schedule. The controller state is saved in `latest.pt`.
 - **Opponents** (`training/league.py`, `training/scripted.py`). 30% of the envs (previously 20%) have a fixed
-  non-self opponent on side 2. A third of them (10% of the envs) play the strongest-attack heuristic, now shared
-  with `evaluate.py`. It attacks predictably, so Protect, switching and support moves pay off against it. The rest
+  non-self opponent on side 2. A third of them (10% of the envs) play a scripted player: by default the smart
+  baseline below with temperature 0.05 (`--scripted heuristic` selects the strongest-attack heuristic, now shared
+  with `evaluate.py`). Both attack predictably, so Protect, switching and support moves pay off; smart also
+  protects, uses Fake Out and focus fire, and beat the first run's final model. The rest
   play a snapshot, chosen per rollout by prioritized fictitious self-play:
   - Weight: `(1 - s)^2`, where `s` is an EMA (rate 0.02 per game) of the learner's score against that snapshot.
   - 10% of the weight is spread uniformly, so beaten snapshots stay in play. Unplayed snapshots start at 0.5.
@@ -167,6 +170,67 @@ Tests: `training_tests/test_league.py`. In the next run, watch for:
 - Whether `use_protect`, `use_switch` and `use_status` rise above the first run's near-zero levels.
 - `scripted_win_rate` rising together with `pool_win_rate` rather than at its expense.
 - Snapshots whose `pfsp` score stays below 0.5: strategies the learner has not learned to beat.
+
+## Smart scripted baseline
+
+The strongest-attack heuristic never uses Protect, Fake Out, switching or focus fire, so it cannot show whether a bot
+handles them. `training/smart.py` (`SmartHeuristicAgent`, name `smart`) is a doubles-aware scripted player with the
+same interface as the other agents. It reads only the row's own observation arrays and the masks. It scores every
+pair of slot a and slot b codes with the damage-calc module:
+
+- Combined damage on a foe is capped at its HP. This gives focus fire without overkill.
+- A KO or Fake Out flinch before a foe acts removes that foe's damage for the turn.
+- Foes are assumed to aim where they do more damage. A foe that revealed Protect, or likely has it, may protect;
+  its Protect blocks both of our attacks.
+- Protect is credited with a random 55-85% of the damage it avoids. It is never used twice in a row and is left
+  out of 15% of decisions.
+- Tera is used only when it changes a KO chance (a foe's or the user's) by 25+ points, and it still pays a cost.
+- Voluntary switches happen only out of a 50%+ KO threat into a much safer Pokemon. Replacements pick the best
+  matchup.
+- Damage to the partner counts 1.5x.
+- Fake Out is used on a Pokemon's first turn out unless another attack likely KOs.
+- Common status moves get small fixed values.
+
+Slot a is planned with an estimate of slot b's options, then slot b is re-picked over its exact mask. It costs about
+1 ms per row on one CPU thread. `temperature` adds Gumbel noise to the pair values, for use as a training opponent.
+
+`evaluate.py` adds:
+
+- `smart vs heuristic` and `smart vs random` sanity rows.
+- Every evaluated snapshot against smart. These matchups use their own seeds, so the older matchups keep theirs.
+- Logged final-vs-smart games (`final_mistakes_vs_smart`, `smart_replays`), and `smart_mistakes` from smart's games
+  against the heuristic.
+
+New mistake counters:
+
+- Attacks at a foe that could Protect (it protected in an earlier turn, but not the turn before), and how many were
+  blocked.
+- Own Protect uses, blocks and consecutive-turn repeats.
+- Fake Out uses per battle.
+- Switches, split into switch actions, pivots (U-turn, Eject Button) and replacements after faints.
+- Focus fire and overkill, from the action codes that `play` records per turn for the evaluated player. Overkill
+  means an attack chosen at a foe that had already fainted that turn, which then retargets or fails with
+  `[notarget]`.
+
+Light check (duplicate games on `eval-s43-200`, 2 workers, 160 games per matchup; full-size runs pending):
+
+| Matchup | Score |
+|---|---:|
+| smart vs random | 99.4% |
+| smart vs strongest-attack heuristic | 81.3% (lost both games of 2 of 80 pairs) |
+| first run's final model (60 min) vs smart | 38.1% (about -84 Elo) |
+
+Against smart, the 60-minute model's counters (187 logged battles) show:
+
+- 8.8% of its attacks hit a Protect, and 38% of its attacks at foes that could Protect were blocked.
+- 93 of its 190 Protects came right after a Protect by the same Pokemon. Such a repeat fails two times out of
+  three.
+- It used Fake Out once and terastallized in every battle.
+- 5.4% of its chosen single-target attacks went at a foe that had already fainted that turn (smart: 1.6% against
+  the heuristic).
+
+Smart itself protected 0.9 times per battle with no repeats, used Fake Out 0.2 times per battle with no failures, and
+terastallized 0.75 times per battle.
 
 ## Not implemented yet
 

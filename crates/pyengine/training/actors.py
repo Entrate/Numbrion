@@ -116,7 +116,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     env = nb.BatchEnv(count, [str(p) for p in pools], seed=seed, threads=1, log=True)
     encoder = Encoder(2 * count)
     rng = np.random.default_rng(seed)
-    heuristic = HeuristicAgent(rng)
+    if model_config.get("scripted", "heuristic") == "smart":
+        from training.smart import SmartHeuristicAgent
+
+        heuristic = SmartHeuristicAgent(rng, dex, temperature=model_config.get("scripted_temperature", 0.0))
+    else:
+        heuristic = HeuristicAgent(rng)
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
 
@@ -180,7 +185,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                         lp0[opp_index] = opp_lp0.numpy()
                     if len(scripted_index):  # opponent selection: the heuristic's codes as one-hot log-probs
                         lp0[scripted_index] = forced_logprobs(heuristic.first(
-                            {"action_features": b.action_features}, scripted_index, mask0[scripted_index]))
+                            b.arrays(), scripted_index, mask0[scripted_index]))
                     a0 = sample(lp0, rng)
                     mask1 = env.mask_slot1(np.where(active, a0, -1).reshape(count, 2).astype(np.int32)).reshape(-1, N_ACTIONS).copy()
                     mask1[~active] = False
@@ -242,14 +247,16 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
 class Actors:
     """``n_envs`` battles over ``workers`` actor processes, two rollout buffers of ``steps`` boundaries."""
 
-    def __init__(self, n_envs: int, steps: int, pools: list[Path], seed: int, workers: int, model):
+    def __init__(self, n_envs: int, steps: int, pools: list[Path], seed: int, workers: int, model,
+                 scripted: str = "heuristic", scripted_temperature: float = 0.0):
         self.n_envs, self.steps = n_envs, steps
         self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs)) for _ in range(2)]
         self.layout = weight_layout(model)
         size = sum(int(np.prod(shape)) for _, shape, _ in self.layout)
         self.weights = SharedArrays({"learner": ((size,), np.float32), "opponent": ((size,), np.float32)})
         self.versions = {"learner": 0, "opponent": 0}
-        config = dict(size=size, width=model.width, layers=len(model.blocks))
+        config = dict(size=size, width=model.width, layers=len(model.blocks), scripted=scripted,
+                      scripted_temperature=scripted_temperature)
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])

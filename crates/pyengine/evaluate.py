@@ -7,13 +7,14 @@ battle seeds with the sides swapped, so team luck mostly cancels. Opponents:
 
 * ``random``: a random legal player (switch 10%, Tera 15%, otherwise a uniform legal move),
 * ``heuristic``: "always use the strongest attack" from the damage-calc features (no switching or Tera),
+* ``smart``: the doubles-aware scripted player of training.smart (Fake Out, focus fire, Protect, Tera, switching),
 * earlier snapshots of the same run.
 
-The scripted players live in training.scripted (the trainer also uses the heuristic as an opponent). Snapshots
-sample from their policy; ``--temperature`` below 1 sharpens it (0 = always the most likely legal code).
+The scripted players live in training.scripted and training.smart (the trainer also uses them as opponents).
+Snapshots sample from their policy; ``--temperature`` below 1 sharpens it (0 = always the most likely legal code).
 
-Also reported for the final snapshot: mistake counters from its player-view logs, value calibration of the
-(oracle) critic, and a few Showdown HTML replays.
+Also reported for the final snapshot: mistake counters from its player-view logs (against the heuristic and against
+smart), value calibration of the (oracle) critic, and a few Showdown HTML replays.
 """
 from __future__ import annotations
 
@@ -31,6 +32,7 @@ from training.dex import load_dex, to_id
 from training.model import Model
 from training.ppo import PASS, sample
 from training.scripted import HeuristicAgent, RandomAgent, legal_random  # noqa: F401 (re-exported)
+from training.smart import PROTECT_MOVES, SmartHeuristicAgent
 from training.vecenv import VecEnv
 
 HERE = Path(__file__).resolve().parent
@@ -93,6 +95,7 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
     b_rows = 2 * np.arange(n) + 1 - a_side
     results = [[] for _ in range(n)]  # winner (0/1/-1) of each finished battle, in order
     calibration = []  # (env, battle id, a's value)
+    choices = {}  # with log_games: (env, battle id) -> {turn: (a0, a1)} of a's first move decision per turn
     with VecEnv(n, [pool], seed=seed, workers=workers, log_games=log_games, mirror=True) as env:
         obs = env.reset()
         steps = 0
@@ -117,10 +120,18 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
             a1[b_rows] = b.second(b_rows, mask1[b_rows])
             actions = np.stack((a0, a1), -1).reshape(n, 2, 2)
             actions[~obs["needs_action"]] = -1
+            if log_games:
+                for env_index, row in enumerate(a_rows):
+                    if needs[row] and min(a0[row], a1[row]) < 40:
+                        turns = choices.setdefault((env_index, int(obs["battle_id"][env_index])), {})
+                        turns.setdefault(int(obs["turn"][env_index]), (int(a0[row]), int(a1[row])))
             obs = env.step(actions)
             for e in np.flatnonzero(obs["done"]):
                 results[e].append(int(obs["winner"][e]))
         logs = env.finished_logs() if log_games else []
+    for item in logs:
+        if item["side"] == a_side[item["env"]]:
+            item["choices"] = choices.get((item["env"], item["battle"]), {})
     games = wins = ties = 0
     paired = []
     outcome = {}
@@ -149,24 +160,75 @@ def elo(score: float, games: int) -> tuple[float, float]:
 
 
 def mistakes(logs: list, dex) -> dict:
-    """Counters over the evaluated player's own decisions in its player-view logs."""
+    """Counters over the evaluated player's own decisions in its player-view logs.
+
+    Besides the basic counters: attacks at a foe that could Protect (it used a Protect move in an earlier turn and
+    not in the turn before) and how many of them were blocked; own Protect uses, blocks and consecutive-turn
+    repeats; switches split into switch actions at the start of a turn, pivots (after a move in the same turn:
+    U-turn, Eject Button) and replacements of fainted Pokemon. Logs with the player's action codes per turn
+    (``choices``, recorded by ``play``) also give focus fire (both slots chose single-target attacks at the same
+    foe) and overkill (an attack chosen at a foe that had already fainted that turn, which then retargets or fails
+    with ``[notarget]``).
+    """
     counts = dict(moves=0, attacks=0, into_protect=0, fake_out=0, fake_out_failed=0, no_target=0, ally_hits=0,
-                  tera=0, switches=0, battles=len(logs))
+                  tera=0, switches=0, battles=len(logs), turns=0, attacks_vs_protector=0,
+                  into_protect_vs_protector=0, protects=0, protect_blocks=0, protect_repeats=0, switch_actions=0,
+                  pivots=0, replacements=0, chosen_attacks=0, focus_fire=0, overkill=0, overkill_retarget=0,
+                  overkill_notarget=0)
     damaging = {m["id"] for m in dex.moves if m["category"] != "Status"}
+    protecting = set(PROTECT_MOVES)
     for item in logs:
         own = f"p{item['side'] + 1}"
+        foe = "p2" if own == "p1" else "p1"
         lines = item["log"]
+        choices = item.get("choices")
+        turn, moved = 0, False
+        protect_seen: dict = {}  # foe name -> first turn it used a Protect move
+        protect_turn: dict = {}  # (side, name) -> last turn it used a Protect move
+        fainted = set()  # own positions whose Pokemon fainted and was not replaced yet
+        foe_down = set()  # foe positions that fainted this turn
+        acted: dict = {}  # own slot -> target code of its single-target attack this turn
         for i, line in enumerate(lines):
             parts = line.split("|")
             if len(parts) < 3:
                 continue
-            if parts[1] == "-terastallize" and parts[2].startswith(own):
-                counts["tera"] += 1
-            if parts[1] == "switch" and parts[2].startswith(own) and i > 30:
-                counts["switches"] += 1
-            if parts[1] != "move" or not parts[2].startswith(own):
+            event = parts[1]
+            if event == "turn":
+                turn, moved = int(parts[2]), False
+                foe_down, acted = set(), {}
+                counts["turns"] += 1
                 continue
+            if event == "-terastallize" and parts[2].startswith(own):
+                counts["tera"] += 1
+            if event == "faint":
+                (fainted if parts[2].startswith(own) else foe_down).add(parts[2][:3])
+            if event == "-activate" and parts[2].startswith(own) and line.endswith("|move: Protect"):
+                counts["protect_blocks"] += 1
+            if event in ("switch", "drag") and parts[2].startswith(own):
+                counts["switches"] += event == "switch" and i > 30
+                position = parts[2][:3]
+                if turn == 0:
+                    pass  # leads
+                elif position in fainted:
+                    counts["replacements"] += 1
+                elif event == "switch":
+                    counts["pivots" if moved else "switch_actions"] += 1
+                fainted.discard(position)
+            if event != "move":
+                continue
+            moved = True
             move = to_id(parts[3])
+            name = parts[2].split(": ", 1)[-1]
+            if move in protecting:
+                key = (parts[2][:2], name)
+                if parts[2].startswith(own):
+                    counts["protects"] += 1
+                    counts["protect_repeats"] += protect_turn.get(key) == turn - 1
+                else:
+                    protect_seen.setdefault(name, turn)
+                protect_turn[key] = turn
+            if not parts[2].startswith(own):
+                continue
             counts["moves"] += 1
             follow = []
             for later in lines[i + 1:i + 12]:
@@ -178,21 +240,51 @@ def mistakes(logs: list, dex) -> dict:
             if move == "fakeout":
                 counts["fake_out"] += 1
                 counts["fake_out_failed"] += any(f.startswith("|-fail|") for f in follow)
-            if move in damaging:
-                foe_target = len(parts) > 4 and parts[4][:2] not in ("", own)
-                counts["attacks"] += foe_target
-                counts["into_protect"] += foe_target and any(
-                    f.startswith("|-activate|") and "move: Protect" in f and not f.split("|")[2].startswith(own)
-                    for f in follow)
-                counts["ally_hits"] += any(f.startswith(f"|-damage|{own}") and "[from]" not in f and
-                                           f.split("|")[2] != parts[2] for f in follow)
+            if move not in damaging:
+                continue
+            foe_target = len(parts) > 4 and parts[4][:2] not in ("", own)
+            blocked = foe_target and any(
+                f.startswith("|-activate|") and "move: Protect" in f and not f.split("|")[2].startswith(own)
+                for f in follow)
+            counts["attacks"] += foe_target
+            counts["into_protect"] += blocked
+            if foe_target:
+                target = parts[4].split(": ", 1)[-1]
+                could = protect_seen.get(target, turn) < turn and protect_turn.get((foe, target)) != turn - 1
+                counts["attacks_vs_protector"] += could
+                counts["into_protect_vs_protector"] += could and blocked
+            counts["ally_hits"] += any(f.startswith(f"|-damage|{own}") and "[from]" not in f and
+                                       f.split("|")[2] != parts[2] for f in follow)
+            choice = choices.get(turn) if choices else None
+            slot = "ab".find(parts[2][2:3])
+            if choice is None or slot < 0 or slot in acted or "[from]" in line or choice[slot] >= 40:
+                continue
+            target_code = (choice[slot] % 10) // 2
+            if target_code not in (3, 4):
+                continue
+            acted[slot] = target_code
+            counts["chosen_attacks"] += 1
+            counts["focus_fire"] += acted.get(1 - slot) == target_code
+            if foe + "ab"[target_code - 3] in foe_down:
+                counts["overkill"] += 1
+                counts["overkill_notarget" if "[notarget]" in line else "overkill_retarget"] += 1
+    battles = max(counts["battles"], 1)
     rates = dict(
         into_protect_per_attack=counts["into_protect"] / max(counts["attacks"], 1),
+        into_protect_per_attack_vs_protector=(counts["into_protect_vs_protector"]
+                                              / max(counts["attacks_vs_protector"], 1)),
         fake_out_fail_rate=counts["fake_out_failed"] / max(counts["fake_out"], 1),
         no_target_per_move=counts["no_target"] / max(counts["moves"], 1),
         ally_hits_per_move=counts["ally_hits"] / max(counts["moves"], 1),
-        tera_per_battle=counts["tera"] / max(counts["battles"], 1),
-        switches_per_battle=counts["switches"] / max(counts["battles"], 1),
+        tera_per_battle=counts["tera"] / battles,
+        switches_per_battle=counts["switches"] / battles,
+        protects_per_battle=counts["protects"] / battles,
+        fake_outs_per_battle=counts["fake_out"] / battles,
+        switch_actions_per_battle=counts["switch_actions"] / battles,
+        pivots_per_battle=counts["pivots"] / battles,
+        replacements_per_battle=counts["replacements"] / battles,
+        overkill_per_chosen_attack=counts["overkill"] / max(counts["chosen_attacks"], 1),
+        focus_fire_per_chosen_attack=counts["focus_fire"] / max(counts["chosen_attacks"], 1),
     )
     return {**counts, **{k: round(v, 4) for k, v in rates.items()}}
 
@@ -276,23 +368,41 @@ def main():
         output.write_text(json.dumps(out, indent=1))
 
     seed = args.seed
+    smart_seed = args.seed + 500  # the smart matchups have their own seeds, so the older ones keep theirs
     random_agent, heuristic = RandomAgent(rng), HeuristicAgent(rng)
+    smart = SmartHeuristicAgent(rng, dex)
     result, *_ = play(heuristic, random_agent, args.pool, args.envs, args.rounds, seed, args.workers)
     record(result)
+    for opponent in (heuristic, random_agent):  # sanity rows for the smart baseline
+        smart_seed += 1
+        result, _, logs, a_side = play(smart, opponent, args.pool, args.envs, args.rounds, smart_seed, args.workers,
+                                       log_games=opponent is heuristic)
+        record(result)
+        if logs:
+            out["smart_mistakes"] = mistakes([x for x in logs if x["side"] == a_side[x["env"]]], dex)
     for snapshot in chosen:
         policy = load_policy(snapshot, dex, device, rng, temperature=args.temperature)
         rounds = args.final_rounds if snapshot == final else args.rounds
-        for opponent in (random_agent, heuristic):
-            seed += 1
-            is_final = snapshot == final and opponent is heuristic
-            policy.record_values = is_final
-            result, values, logs, a_side = play(policy, opponent, args.pool, args.envs, rounds, seed, args.workers,
+        for opponent in (random_agent, heuristic, smart):
+            if opponent is smart:
+                smart_seed += 1
+            else:
+                seed += 1
+            is_final = snapshot == final and opponent is not random_agent
+            policy.record_values = snapshot == final and opponent is heuristic
+            result, values, logs, a_side = play(policy, opponent, args.pool, args.envs, rounds,
+                                                smart_seed if opponent is smart else seed, args.workers,
                                                 log_games=is_final)
             result["minutes"] = int(snapshot.stem[1:])
             record(result)
             if is_final:
                 own_logs = [x for x in logs if x["side"] == a_side[x["env"]]]
                 foe_logs = [x for x in logs if x["side"] != a_side[x["env"]]]
+                if opponent is smart:
+                    out["final_mistakes_vs_smart"] = mistakes(own_logs, dex)
+                    out["smart_replays"] = write_replays(logs, a_side, args.run / "replays", "final-vs-smart",
+                                                         f"{final.stem} vs smart heuristic", args.replays)
+                    continue
                 out["final_mistakes"] = mistakes(own_logs, dex)
                 out["heuristic_mistakes"] = mistakes(foe_logs, dex)
                 out["calibration"] = calibration_table(values)

@@ -11,8 +11,8 @@ Run from the repository root:
   shared-memory buffers while the GPU trains on the other, so each rollout is collected with the weights from one
   update earlier. PPO's ratio uses the stored behaviour log-probs.
 * Opponents (training.league): the learner plays both sides of most battles; ``--pool-fraction`` of the battles
-  (fixed envs) put another player on side 2: ``--scripted-share`` of them the "always use the strongest attack"
-  heuristic, the rest an older snapshot (added every ``--pool-minutes``) chosen per rollout by prioritized
+  (fixed envs) put another player on side 2: ``--scripted-share`` of them a scripted player (``--scripted``: the
+  doubles-aware smart player by default, or the strongest-attack heuristic), the rest an older snapshot (added every ``--pool-minutes``) chosen per rollout by prioritized
   fictitious self-play from the learner's results against each snapshot. Only the learner's own decisions are
   trained on.
 * Reward: +1 win, -1 loss, plus a potential-based KO-difference bonus (sums to zero over a battle) that decays
@@ -209,7 +209,12 @@ def main():
     parser.add_argument("--pool-fraction", type=float, default=0.3,
                         help="share of battles against a snapshot or the heuristic instead of pure self-play")
     parser.add_argument("--scripted-share", type=float, default=0.33,
-                        help="share of those battles against the strongest-attack heuristic")
+                        help="share of those battles against the scripted player")
+    parser.add_argument("--scripted", choices=["smart", "heuristic"], default="smart",
+                        help="scripted opponent: the doubles-aware smart player (training.smart) or the "
+                             "strongest-attack heuristic")
+    parser.add_argument("--scripted-temperature", type=float, default=0.05,
+                        help="Gumbel noise on the smart player's pair values, so it cannot be memorized")
     parser.add_argument("--pool-minutes", type=float, default=3.0)
     parser.add_argument("--pool-size", type=int, default=12)
     parser.add_argument("--pfsp-power", type=float, default=2.0,
@@ -280,7 +285,8 @@ def main():
         return dict(opponents=opponents, ko_bonus=ko_bonus, snapshot=None if snapshot is None else snapshot["id"],
                     snapshot_minutes=None if snapshot is None else snapshot["minutes"])
 
-    with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model) as actors:
+    with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model,
+                scripted=args.scripted, scripted_temperature=args.scripted_temperature) as actors:
         start = time.perf_counter() - elapsed_before
         current = 0
         info = launch(actors, current, elapsed_before)
