@@ -5,6 +5,16 @@ pub mod faint;
 pub mod queue;
 pub mod switching;
 pub mod turn;
+mod util;
+
+#[cfg(test)]
+mod flow_tests;
+#[cfg(test)]
+mod boundary_tests;
+#[cfg(test)]
+mod move_tests;
+#[cfg(test)]
+mod tests;
 
 pub use queue::{ActionChoice, QueueHandle, ResolvedActions};
 pub use switching::PokemonList;
