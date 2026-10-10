@@ -1,0 +1,144 @@
+arceus	multitype		0	Normal,Flying	Normal
+arceus	multitype		1	Normal,Flying	Normal,Flying
+arceus	multitype	Mind Plate	0	Normal,Flying	Psychic
+arceus	multitype	Mind Plate	1	Normal,Flying	Normal,Flying
+arceus	static		0	Normal,Flying	Normal,Flying
+arceus	static		1	Normal,Flying	Normal,Flying
+arceus	static	Mind Plate	0	Normal,Flying	Normal,Flying
+arceus	static	Mind Plate	1	Normal,Flying	Normal,Flying
+arceusbug	multitype		0	Bug,Flying	Normal
+arceusbug	multitype		1	Bug,Flying	Bug,Flying
+arceusbug	multitype	Mind Plate	0	Bug,Flying	Psychic
+arceusbug	multitype	Mind Plate	1	Bug,Flying	Bug,Flying
+arceusbug	static		0	Bug,Flying	Bug,Flying
+arceusbug	static		1	Bug,Flying	Bug,Flying
+arceusbug	static	Mind Plate	0	Bug,Flying	Bug,Flying
+arceusbug	static	Mind Plate	1	Bug,Flying	Bug,Flying
+arceusdark	multitype		0	Dark,Flying	Normal
+arceusdark	multitype		1	Dark,Flying	Dark,Flying
+arceusdark	multitype	Mind Plate	0	Dark,Flying	Psychic
+arceusdark	multitype	Mind Plate	1	Dark,Flying	Dark,Flying
+arceusdark	static		0	Dark,Flying	Dark,Flying
+arceusdark	static		1	Dark,Flying	Dark,Flying
+arceusdark	static	Mind Plate	0	Dark,Flying	Dark,Flying
+arceusdark	static	Mind Plate	1	Dark,Flying	Dark,Flying
+arceusdragon	multitype		0	Dragon,Flying	Normal
+arceusdragon	multitype		1	Dragon,Flying	Dragon,Flying
+arceusdragon	multitype	Mind Plate	0	Dragon,Flying	Psychic
+arceusdragon	multitype	Mind Plate	1	Dragon,Flying	Dragon,Flying
+arceusdragon	static		0	Dragon,Flying	Dragon,Flying
+arceusdragon	static		1	Dragon,Flying	Dragon,Flying
+arceusdragon	static	Mind Plate	0	Dragon,Flying	Dragon,Flying
+arceusdragon	static	Mind Plate	1	Dragon,Flying	Dragon,Flying
+arceuselectric	multitype		0	Electric,Flying	Normal
+arceuselectric	multitype		1	Electric,Flying	Electric,Flying
+arceuselectric	multitype	Mind Plate	0	Electric,Flying	Psychic
+arceuselectric	multitype	Mind Plate	1	Electric,Flying	Electric,Flying
+arceuselectric	static		0	Electric,Flying	Electric,Flying
+arceuselectric	static		1	Electric,Flying	Electric,Flying
+arceuselectric	static	Mind Plate	0	Electric,Flying	Electric,Flying
+arceuselectric	static	Mind Plate	1	Electric,Flying	Electric,Flying
+arceusfairy	multitype		0	Fairy,Flying	Normal
+arceusfairy	multitype		1	Fairy,Flying	Fairy,Flying
+arceusfairy	multitype	Mind Plate	0	Fairy,Flying	Psychic
+arceusfairy	multitype	Mind Plate	1	Fairy,Flying	Fairy,Flying
+arceusfairy	static		0	Fairy,Flying	Fairy,Flying
+arceusfairy	static		1	Fairy,Flying	Fairy,Flying
+arceusfairy	static	Mind Plate	0	Fairy,Flying	Fairy,Flying
+arceusfairy	static	Mind Plate	1	Fairy,Flying	Fairy,Flying
+arceusfighting	multitype		0	Fighting,Flying	Normal
+arceusfighting	multitype		1	Fighting,Flying	Fighting,Flying
+arceusfighting	multitype	Mind Plate	0	Fighting,Flying	Psychic
+arceusfighting	multitype	Mind Plate	1	Fighting,Flying	Fighting,Flying
+arceusfighting	static		0	Fighting,Flying	Fighting,Flying
+arceusfighting	static		1	Fighting,Flying	Fighting,Flying
+arceusfighting	static	Mind Plate	0	Fighting,Flying	Fighting,Flying
+arceusfighting	static	Mind Plate	1	Fighting,Flying	Fighting,Flying
+arceusfire	multitype		0	Fire,Flying	Normal
+arceusfire	multitype		1	Fire,Flying	Fire,Flying
+arceusfire	multitype	Mind Plate	0	Fire,Flying	Psychic
+arceusfire	multitype	Mind Plate	1	Fire,Flying	Fire,Flying
+arceusfire	static		0	Fire,Flying	Fire,Flying
+arceusfire	static		1	Fire,Flying	Fire,Flying
+arceusfire	static	Mind Plate	0	Fire,Flying	Fire,Flying
+arceusfire	static	Mind Plate	1	Fire,Flying	Fire,Flying
+arceusflying	multitype		0	Flying,Flying	Normal
+arceusflying	multitype		1	Flying,Flying	Flying,Flying
+arceusflying	multitype	Mind Plate	0	Flying,Flying	Psychic
+arceusflying	multitype	Mind Plate	1	Flying,Flying	Flying,Flying
+arceusflying	static		0	Flying,Flying	Flying,Flying
+arceusflying	static		1	Flying,Flying	Flying,Flying
+arceusflying	static	Mind Plate	0	Flying,Flying	Flying,Flying
+arceusflying	static	Mind Plate	1	Flying,Flying	Flying,Flying
+arceusghost	multitype		0	Ghost,Flying	Normal
+arceusghost	multitype		1	Ghost,Flying	Ghost,Flying
+arceusghost	multitype	Mind Plate	0	Ghost,Flying	Psychic
+arceusghost	multitype	Mind Plate	1	Ghost,Flying	Ghost,Flying
+arceusghost	static		0	Ghost,Flying	Ghost,Flying
+arceusghost	static		1	Ghost,Flying	Ghost,Flying
+arceusghost	static	Mind Plate	0	Ghost,Flying	Ghost,Flying
+arceusghost	static	Mind Plate	1	Ghost,Flying	Ghost,Flying
+arceusgrass	multitype		0	Grass,Flying	Normal
+arceusgrass	multitype		1	Grass,Flying	Grass,Flying
+arceusgrass	multitype	Mind Plate	0	Grass,Flying	Psychic
+arceusgrass	multitype	Mind Plate	1	Grass,Flying	Grass,Flying
+arceusgrass	static		0	Grass,Flying	Grass,Flying
+arceusgrass	static		1	Grass,Flying	Grass,Flying
+arceusgrass	static	Mind Plate	0	Grass,Flying	Grass,Flying
+arceusgrass	static	Mind Plate	1	Grass,Flying	Grass,Flying
+arceusground	multitype		0	Ground,Flying	Normal
+arceusground	multitype		1	Ground,Flying	Ground,Flying
+arceusground	multitype	Mind Plate	0	Ground,Flying	Psychic
+arceusground	multitype	Mind Plate	1	Ground,Flying	Ground,Flying
+arceusground	static		0	Ground,Flying	Ground,Flying
+arceusground	static		1	Ground,Flying	Ground,Flying
+arceusground	static	Mind Plate	0	Ground,Flying	Ground,Flying
+arceusground	static	Mind Plate	1	Ground,Flying	Ground,Flying
+arceusice	multitype		0	Ice,Flying	Normal
+arceusice	multitype		1	Ice,Flying	Ice,Flying
+arceusice	multitype	Mind Plate	0	Ice,Flying	Psychic
+arceusice	multitype	Mind Plate	1	Ice,Flying	Ice,Flying
+arceusice	static		0	Ice,Flying	Ice,Flying
+arceusice	static		1	Ice,Flying	Ice,Flying
+arceusice	static	Mind Plate	0	Ice,Flying	Ice,Flying
+arceusice	static	Mind Plate	1	Ice,Flying	Ice,Flying
+arceuspoison	multitype		0	Poison,Flying	Normal
+arceuspoison	multitype		1	Poison,Flying	Poison,Flying
+arceuspoison	multitype	Mind Plate	0	Poison,Flying	Psychic
+arceuspoison	multitype	Mind Plate	1	Poison,Flying	Poison,Flying
+arceuspoison	static		0	Poison,Flying	Poison,Flying
+arceuspoison	static		1	Poison,Flying	Poison,Flying
+arceuspoison	static	Mind Plate	0	Poison,Flying	Poison,Flying
+arceuspoison	static	Mind Plate	1	Poison,Flying	Poison,Flying
+arceuspsychic	multitype		0	Psychic,Flying	Normal
+arceuspsychic	multitype		1	Psychic,Flying	Psychic,Flying
+arceuspsychic	multitype	Mind Plate	0	Psychic,Flying	Psychic
+arceuspsychic	multitype	Mind Plate	1	Psychic,Flying	Psychic,Flying
+arceuspsychic	static		0	Psychic,Flying	Psychic,Flying
+arceuspsychic	static		1	Psychic,Flying	Psychic,Flying
+arceuspsychic	static	Mind Plate	0	Psychic,Flying	Psychic,Flying
+arceuspsychic	static	Mind Plate	1	Psychic,Flying	Psychic,Flying
+arceusrock	multitype		0	Rock,Flying	Normal
+arceusrock	multitype		1	Rock,Flying	Rock,Flying
+arceusrock	multitype	Mind Plate	0	Rock,Flying	Psychic
+arceusrock	multitype	Mind Plate	1	Rock,Flying	Rock,Flying
+arceusrock	static		0	Rock,Flying	Rock,Flying
+arceusrock	static		1	Rock,Flying	Rock,Flying
+arceusrock	static	Mind Plate	0	Rock,Flying	Rock,Flying
+arceusrock	static	Mind Plate	1	Rock,Flying	Rock,Flying
+arceussteel	multitype		0	Steel,Flying	Normal
+arceussteel	multitype		1	Steel,Flying	Steel,Flying
+arceussteel	multitype	Mind Plate	0	Steel,Flying	Psychic
+arceussteel	multitype	Mind Plate	1	Steel,Flying	Steel,Flying
+arceussteel	static		0	Steel,Flying	Steel,Flying
+arceussteel	static		1	Steel,Flying	Steel,Flying
+arceussteel	static	Mind Plate	0	Steel,Flying	Steel,Flying
+arceussteel	static	Mind Plate	1	Steel,Flying	Steel,Flying
+arceuswater	multitype		0	Water,Flying	Normal
+arceuswater	multitype		1	Water,Flying	Water,Flying
+arceuswater	multitype	Mind Plate	0	Water,Flying	Psychic
+arceuswater	multitype	Mind Plate	1	Water,Flying	Water,Flying
+arceuswater	static		0	Water,Flying	Water,Flying
+arceuswater	static		1	Water,Flying	Water,Flying
+arceuswater	static	Mind Plate	0	Water,Flying	Water,Flying
+arceuswater	static	Mind Plate	1	Water,Flying	Water,Flying

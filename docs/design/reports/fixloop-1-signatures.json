@@ -1,0 +1,6225 @@
+{
+  "date": "2026-10-10",
+  "base": "f4d334c",
+  "branch": "gpt/fix1",
+  "oracle": "7332b60e22b9e8194bb53549549eba241d73cc9a",
+  "corpora": {
+    "random": {
+      "before": {
+        "total": 2000,
+        "passed": 0,
+        "expected_pending_panics": 1996,
+        "eligible_battles": 4,
+        "eligible_pass_rate": 0.0,
+        "steps_matched": 748,
+        "steps_total": 50740,
+        "log_lines_matched": 72912,
+        "pending_batches": {
+          "protect_redirection": 1043,
+          "charge_priority_multihit": 392,
+          "disable_lock_trap": 483,
+          "move_callbacks": 78
+        },
+        "unexpected_failures": [
+          {
+            "pos": 523,
+            "category": "request",
+            "signature": "request.active[].maybeTrapped (missing)"
+          },
+          {
+            "pos": 586,
+            "category": "request",
+            "signature": "request.active[].maybeTrapped (missing)"
+          },
+          {
+            "pos": 846,
+            "category": "request",
+            "signature": "request.active[].maybeTrapped (missing)"
+          },
+          {
+            "pos": 1434,
+            "category": "log",
+            "signature": "log extra |-ability|"
+          }
+        ],
+        "signatures": [
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:protect onPrepareHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 717,
+            "examples": [
+              {
+                "pos": 4,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 5,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 8,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 9,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 10,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:protect",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 120,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:choicelock onStart site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 380,
+            "examples": [
+              {
+                "pos": 2,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 14,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 25,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 27,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 32,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:choicelock",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 654,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:prankster onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 154,
+            "examples": [
+              {
+                "pos": 28,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 33,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 37,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 48,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 56,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:prankster",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 365,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:helpinghand onTryHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 92,
+            "examples": [
+              {
+                "pos": 7,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 36,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 43,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 54,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 73,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:helpinghand",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 86,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fakeout onTry site=\"\"; Stage NB initial effec...",
+            "category": "panic",
+            "count": 67,
+            "examples": [
+              {
+                "pos": 1,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 41,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 80,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 101,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 113,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fakeout",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 67,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:lightningrod onAnyRedirectTarget site=\"\";...",
+            "category": "panic",
+            "count": 44,
+            "examples": [
+              {
+                "pos": 6,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 97,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 165,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 168,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 170,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:lightningrod",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 321,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:magnetpull onFoeTrapPokemon site=\"\"; Stag...",
+            "category": "panic",
+            "count": 43,
+            "examples": [
+              {
+                "pos": 61,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 132,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 134,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 146,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 211,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:magnetpull",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 327,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stormdrain onAnyRedirectTarget site=\"\"; S...",
+            "category": "panic",
+            "count": 39,
+            "examples": [
+              {
+                "pos": 16,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 20,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 39,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 121,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 153,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stormdrain",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 449,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: items:loadeddice onModifyMove site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 37,
+            "examples": [
+              {
+                "pos": 47,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 59,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 157,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 344,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 365,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "items:loadeddice",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 583,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:suckerpunch onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 31,
+            "examples": [
+              {
+                "pos": 135,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 337,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 341,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 359,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 381,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:suckerpunch",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 161,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:truant onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 25,
+            "examples": [
+              {
+                "pos": 250,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 336,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 433,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 441,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 568,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:truant",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 486,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:followme onTry site=\"\"; Stage NB initial effe...",
+            "category": "panic",
+            "count": 23,
+            "examples": [
+              {
+                "pos": 468,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 600,
+                "step": 3,
+                "turn": 2
+              },
+              {
+                "pos": 686,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 877,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 893,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:followme",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 72,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:spikyshield onPrepareHit site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 22,
+            "examples": [
+              {
+                "pos": 0,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 26,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 105,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 123,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 265,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:spikyshield",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 150,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:encore onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 21,
+            "examples": [
+              {
+                "pos": 3,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 40,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 51,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 99,
+                "step": 4,
+                "turn": 5
+              },
+              {
+                "pos": 214,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:encore",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 674,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:pollenpuff onTryMove site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 18,
+            "examples": [
+              {
+                "pos": 67,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 87,
+                "step": 6,
+                "turn": 5
+              },
+              {
+                "pos": 107,
+                "step": 5,
+                "turn": 5
+              },
+              {
+                "pos": 291,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 318,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:pollenpuff",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 116,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:armortail onFoeTryMove site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 17,
+            "examples": [
+              {
+                "pos": 84,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 364,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 514,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 838,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1085,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:armortail",
+            "callback": "onFoeTryMove",
+            "site": "",
+            "hook_id": 196,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:galewings onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 14,
+            "examples": [
+              {
+                "pos": 144,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 222,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 245,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 429,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 507,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:galewings",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 266,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:propellertail onModifyMove site=\"\"; Stage...",
+            "category": "panic",
+            "count": 14,
+            "examples": [
+              {
+                "pos": 111,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 275,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 296,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 390,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 626,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:propellertail",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 369,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stalwart onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 13,
+            "examples": [
+              {
+                "pos": 180,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 399,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 529,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 549,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 796,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stalwart",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 443,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:taunt onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 13,
+            "examples": [
+              {
+                "pos": 198,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 269,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 388,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 547,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 679,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:taunt",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 832,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:myceliummight onFractionalPriority site=\"...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 92,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 361,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 844,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 902,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1125,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:myceliummight",
+            "callback": "onFractionalPriority",
+            "site": "",
+            "hook_id": 338,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:triage onModifyPriority site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 75,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 370,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 408,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 725,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1027,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:triage",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 485,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heatcrash onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 11,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 116,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 611,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 625,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 720,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heatcrash",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 83,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:meteorbeam onTryMove site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 93,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 295,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 327,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 768,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 832,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:meteorbeam",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 106,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:wideguard onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 11,
+            "examples": [
+              {
+                "pos": 226,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 440,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 543,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1151,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1175,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:wideguard",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 185,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:queenlymajesty onFoeTryMove site=\"\"; Stag...",
+            "category": "panic",
+            "count": 10,
+            "examples": [
+              {
+                "pos": 15,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 188,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 303,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 961,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1010,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:queenlymajesty",
+            "callback": "onFoeTryMove",
+            "site": "",
+            "hook_id": 387,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragepowder onTry site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 10,
+            "examples": [
+              {
+                "pos": 127,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 224,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 407,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 944,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1081,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragepowder",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 126,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heavyslam onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 9,
+            "examples": [
+              {
+                "pos": 138,
+                "step": 4,
+                "turn": 5
+              },
+              {
+                "pos": 284,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 445,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 678,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1111,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heavyslam",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 85,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:facade onBasePower site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 65,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 100,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 206,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 510,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 557,
+                "step": 2,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:facade",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 66,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:throatchop onHit site=\"secondaries.N\"; Stage ...",
+            "category": "panic",
+            "count": 6,
+            "examples": [
+              {
+                "pos": 321,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 451,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1104,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 1473,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1549,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:throatchop",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 172,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:tripleaxel basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 6,
+            "examples": [
+              {
+                "pos": 131,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 239,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 345,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 761,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1164,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:tripleaxel",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 181,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:skilllink onModifyMove site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 12,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 215,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 990,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1558,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1863,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:skilllink",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 426,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:freezedry onEffectiveness site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 593,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 884,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 998,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1396,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 1935,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:freezedry",
+            "callback": "onEffectiveness",
+            "site": "",
+            "hook_id": 73,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:superfang damageCallback site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 155,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 735,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1905,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1946,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1975,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:superfang",
+            "callback": "damageCallback",
+            "site": "",
+            "hook_id": 162,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:powerspot onAllyBasePower site=\"\"; Stage ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 114,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 366,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 758,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1219,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:powerspot",
+            "callback": "onAllyBasePower",
+            "site": "",
+            "hook_id": 364,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:charge onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 358,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 559,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 562,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 623,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:charge",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 648,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:disable onStart site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 524,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 960,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 1052,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1190,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:disable",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 662,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:roost onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 78,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 363,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 474,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 645,
+                "step": 3,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:roost",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 780,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:burningbulwark onPrepareHit site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 319,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 492,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1305,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1802,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:burningbulwark",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 38,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:disable onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 34,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 314,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1531,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1547,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:disable",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 55,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:endeavor onTryImmunity site=\"\"; Stage NB init...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 1532,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1614,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1616,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1969,
+                "step": 3,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:endeavor",
+            "callback": "onTryImmunity",
+            "site": "",
+            "hook_id": 62,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:grassknot onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 612,
+                "step": 1,
+                "turn": 1
+              },
+              {
+                "pos": 688,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 845,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1855,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:grassknot",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 77,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:noretreat onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 258,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 294,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 383,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1795,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:noretreat",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 111,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:photongeyser onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 17,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 421,
+                "step": 6,
+                "turn": 7
+              },
+              {
+                "pos": 1286,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1873,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:photongeyser",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 114,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:friendguard onAnyModifyDamage site=\"\"; St...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 1274,
+                "step": 6,
+                "turn": 4
+              },
+              {
+                "pos": 1663,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1881,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:friendguard",
+            "callback": "onAnyModifyDamage",
+            "site": "",
+            "hook_id": 262,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:partiallytrapped durationCallback site=\"...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 1612,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1691,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1769,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:partiallytrapped",
+            "callback": "durationCallback",
+            "site": "",
+            "hook_id": 737,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:acrobatics basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 696,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1001,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1147,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:acrobatics",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 22,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:avalanche basePowerCallback site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 368,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 495,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 808,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:avalanche",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 28,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:bellydrum onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 355,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1627,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 1774,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:bellydrum",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 33,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:electroshot onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 309,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1118,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1453,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:electroshot",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 60,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:firstimpression onTry site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 487,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1460,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1608,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:firstimpression",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 70,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:shadowforce onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 647,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 949,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1347,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:shadowforce",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 139,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:stompingtantrum basePowerCallback site=\"\"; St...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 30,
+                "step": 1,
+                "turn": 1
+              },
+              {
+                "pos": 74,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 1747,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:stompingtantrum",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 154,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:thunderclap onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 192,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 331,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 338,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:thunderclap",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 174,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "request.active[].maybeTrapped (missing)",
+            "category": "request",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 523,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 586,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 846,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": false
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:steelyspirit onAllyBasePower site=\"\"; Sta...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 496,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 624,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:steelyspirit",
+            "callback": "onAllyBasePower",
+            "site": "",
+            "hook_id": 446,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:alluringvoice onHit site=\"secondaries.N\"; Sta...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 581,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1967,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:alluringvoice",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 24,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:curse onModifyMove site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 913,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1812,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:curse",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 50,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:electrodrift onBasePower site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 213,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 677,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:electrodrift",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 59,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragefist basePowerCallback site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 824,
+                "step": 3,
+                "turn": 2
+              },
+              {
+                "pos": 1615,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragefist",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 125,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "log extra |-ability|",
+            "category": "log",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1434,
+                "step": 1,
+                "turn": 1
+              }
+            ],
+            "expected_pending": false
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:arenatrap onFoeTrapPokemon site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 595,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:arenatrap",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 194,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:shadowtag onFoeTrapPokemon site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 717,
+                "step": 1,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:shadowtag",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 413,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:imprison onStart site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 786,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:imprison",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 713,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clangoroussoul onTry site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 322,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clangoroussoul",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 44,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clearsmog onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 680,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clearsmog",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 47,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:doubleshock onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1765,
+                "step": 3,
+                "turn": 4
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:doubleshock",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 56,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fusionflare onBasePower site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 919,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fusionflare",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 75,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:gravapple onBasePower site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 728,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:gravapple",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 79,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lowkick onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1345,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lowkick",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 104,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:solarbeam onTryMove site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1489,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:solarbeam",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 148,
+            "batch": "charge_priority_multihit"
+          }
+        ]
+      },
+      "after": {
+        "total": 2000,
+        "passed": 0,
+        "expected_pending_panics": 2000,
+        "eligible_battles": 0,
+        "eligible_pass_rate": null,
+        "steps_matched": 786,
+        "steps_total": 50740,
+        "log_lines_matched": 74876,
+        "pending_batches": {
+          "protect_redirection": 1069,
+          "charge_priority_multihit": 401,
+          "disable_lock_trap": 450,
+          "move_callbacks": 80
+        },
+        "unexpected_failures": [],
+        "signatures": [
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:protect onPrepareHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 737,
+            "examples": [
+              {
+                "pos": 4,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 5,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 8,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 9,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 10,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:protect",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 120,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:choicelock onStart site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 392,
+            "examples": [
+              {
+                "pos": 2,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 14,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 25,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 27,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 32,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:choicelock",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 654,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:prankster onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 155,
+            "examples": [
+              {
+                "pos": 28,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 33,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 37,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 48,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 56,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:prankster",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 365,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:helpinghand onTryHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 95,
+            "examples": [
+              {
+                "pos": 7,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 36,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 43,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 54,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 73,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:helpinghand",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 86,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fakeout onTry site=\"\"; Stage NB initial effec...",
+            "category": "panic",
+            "count": 70,
+            "examples": [
+              {
+                "pos": 1,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 41,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 80,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 101,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 113,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fakeout",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 67,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:lightningrod onAnyRedirectTarget site=\"\";...",
+            "category": "panic",
+            "count": 45,
+            "examples": [
+              {
+                "pos": 6,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 97,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 165,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 168,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 170,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:lightningrod",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 321,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stormdrain onAnyRedirectTarget site=\"\"; S...",
+            "category": "panic",
+            "count": 40,
+            "examples": [
+              {
+                "pos": 16,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 20,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 39,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 121,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 153,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stormdrain",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 449,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: items:loadeddice onModifyMove site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 39,
+            "examples": [
+              {
+                "pos": 47,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 59,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 157,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 344,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 362,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "items:loadeddice",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 583,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:suckerpunch onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 32,
+            "examples": [
+              {
+                "pos": 135,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 337,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 341,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 359,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 381,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:suckerpunch",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 161,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:truant onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 25,
+            "examples": [
+              {
+                "pos": 250,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 336,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 433,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 441,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 568,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:truant",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 486,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:followme onTry site=\"\"; Stage NB initial effe...",
+            "category": "panic",
+            "count": 23,
+            "examples": [
+              {
+                "pos": 468,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 600,
+                "step": 3,
+                "turn": 2
+              },
+              {
+                "pos": 686,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 877,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 893,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:followme",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 72,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:spikyshield onPrepareHit site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 22,
+            "examples": [
+              {
+                "pos": 0,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 26,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 105,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 123,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 265,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:spikyshield",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 150,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:encore onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 21,
+            "examples": [
+              {
+                "pos": 3,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 40,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 51,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 99,
+                "step": 4,
+                "turn": 5
+              },
+              {
+                "pos": 214,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:encore",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 674,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:pollenpuff onTryMove site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 19,
+            "examples": [
+              {
+                "pos": 67,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 87,
+                "step": 6,
+                "turn": 5
+              },
+              {
+                "pos": 107,
+                "step": 5,
+                "turn": 5
+              },
+              {
+                "pos": 291,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 318,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:pollenpuff",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 116,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:armortail onFoeTryMove site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 17,
+            "examples": [
+              {
+                "pos": 84,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 364,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 514,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 838,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1085,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:armortail",
+            "callback": "onFoeTryMove",
+            "site": "",
+            "hook_id": 196,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:galewings onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 14,
+            "examples": [
+              {
+                "pos": 144,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 222,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 245,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 429,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 507,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:galewings",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 266,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:propellertail onModifyMove site=\"\"; Stage...",
+            "category": "panic",
+            "count": 14,
+            "examples": [
+              {
+                "pos": 111,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 275,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 296,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 390,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 626,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:propellertail",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 369,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stalwart onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 13,
+            "examples": [
+              {
+                "pos": 180,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 399,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 529,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 549,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 796,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stalwart",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 443,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:taunt onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 13,
+            "examples": [
+              {
+                "pos": 198,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 269,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 388,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 547,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 679,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:taunt",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 832,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:myceliummight onFractionalPriority site=\"...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 92,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 361,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 844,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 902,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1125,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:myceliummight",
+            "callback": "onFractionalPriority",
+            "site": "",
+            "hook_id": 338,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:triage onModifyPriority site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 75,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 370,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 408,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 725,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1027,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:triage",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 485,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heatcrash onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 11,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 116,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 611,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 625,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 720,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heatcrash",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 83,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:meteorbeam onTryMove site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 12,
+            "examples": [
+              {
+                "pos": 93,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 295,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 327,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 768,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 832,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:meteorbeam",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 106,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:wideguard onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 11,
+            "examples": [
+              {
+                "pos": 226,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 440,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 543,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1151,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1175,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:wideguard",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 185,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:queenlymajesty onFoeTryMove site=\"\"; Stag...",
+            "category": "panic",
+            "count": 10,
+            "examples": [
+              {
+                "pos": 15,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 188,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 303,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 961,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1010,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:queenlymajesty",
+            "callback": "onFoeTryMove",
+            "site": "",
+            "hook_id": 387,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragepowder onTry site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 10,
+            "examples": [
+              {
+                "pos": 127,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 224,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 407,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 944,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1081,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragepowder",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 126,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heavyslam onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 9,
+            "examples": [
+              {
+                "pos": 138,
+                "step": 4,
+                "turn": 5
+              },
+              {
+                "pos": 284,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 445,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 678,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1111,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heavyslam",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 85,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:facade onBasePower site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 65,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 100,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 206,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 510,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 557,
+                "step": 2,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:facade",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 66,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:throatchop onHit site=\"secondaries.N\"; Stage ...",
+            "category": "panic",
+            "count": 6,
+            "examples": [
+              {
+                "pos": 321,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 451,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1104,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 1473,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1549,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:throatchop",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 172,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:tripleaxel basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 6,
+            "examples": [
+              {
+                "pos": 131,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 239,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 345,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 761,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1164,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:tripleaxel",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 181,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:skilllink onModifyMove site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 12,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 215,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 990,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1558,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1863,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:skilllink",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 426,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:bellydrum onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 355,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 473,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 781,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1627,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 1774,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:bellydrum",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 33,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:freezedry onEffectiveness site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 593,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 884,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 998,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1396,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 1935,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:freezedry",
+            "callback": "onEffectiveness",
+            "site": "",
+            "hook_id": 73,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:superfang damageCallback site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 155,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 735,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1905,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1946,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1975,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:superfang",
+            "callback": "damageCallback",
+            "site": "",
+            "hook_id": 162,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:powerspot onAllyBasePower site=\"\"; Stage ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 114,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 366,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 758,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1219,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:powerspot",
+            "callback": "onAllyBasePower",
+            "site": "",
+            "hook_id": 364,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:charge onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 358,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 559,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 562,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 623,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:charge",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 648,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:disable onStart site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 524,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 960,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 1052,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1190,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:disable",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 662,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:roost onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 78,
+                "step": 2,
+                "turn": 2
+              },
+              {
+                "pos": 363,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 474,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 645,
+                "step": 3,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:roost",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 780,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:burningbulwark onPrepareHit site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 319,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 492,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1305,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1802,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:burningbulwark",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 38,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:disable onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 34,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 314,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1531,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1547,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:disable",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 55,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:endeavor onTryImmunity site=\"\"; Stage NB init...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 1532,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1614,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1616,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1969,
+                "step": 3,
+                "turn": 3
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:endeavor",
+            "callback": "onTryImmunity",
+            "site": "",
+            "hook_id": 62,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:firstimpression onTry site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 487,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 846,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1460,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1608,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:firstimpression",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 70,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:grassknot onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 612,
+                "step": 1,
+                "turn": 1
+              },
+              {
+                "pos": 688,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 845,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1855,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:grassknot",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 77,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:noretreat onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 258,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 294,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 383,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 1795,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:noretreat",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 111,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:photongeyser onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 17,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 421,
+                "step": 6,
+                "turn": 7
+              },
+              {
+                "pos": 1286,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1873,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:photongeyser",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 114,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:thunderclap onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 132,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 192,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 331,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 338,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:thunderclap",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 174,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:friendguard onAnyModifyDamage site=\"\"; St...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 1274,
+                "step": 6,
+                "turn": 4
+              },
+              {
+                "pos": 1663,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1881,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:friendguard",
+            "callback": "onAnyModifyDamage",
+            "site": "",
+            "hook_id": 262,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:partiallytrapped durationCallback site=\"...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 1612,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1691,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1769,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:partiallytrapped",
+            "callback": "durationCallback",
+            "site": "",
+            "hook_id": 737,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:acrobatics basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 696,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1001,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1147,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:acrobatics",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 22,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:avalanche basePowerCallback site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 368,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 495,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 808,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:avalanche",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 28,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:electroshot onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 309,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1118,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1453,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:electroshot",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 60,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:shadowforce onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 647,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 949,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1347,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:shadowforce",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 139,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:stompingtantrum basePowerCallback site=\"\"; St...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 30,
+                "step": 1,
+                "turn": 1
+              },
+              {
+                "pos": 74,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 1747,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:stompingtantrum",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 154,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:steelyspirit onAllyBasePower site=\"\"; Sta...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 496,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 624,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:steelyspirit",
+            "callback": "onAllyBasePower",
+            "site": "",
+            "hook_id": 446,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:alluringvoice onHit site=\"secondaries.N\"; Sta...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 581,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1967,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:alluringvoice",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 24,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:curse onModifyMove site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 913,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 1812,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:curse",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 50,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:electrodrift onBasePower site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 213,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 677,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:electrodrift",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 59,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragefist basePowerCallback site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 824,
+                "step": 3,
+                "turn": 2
+              },
+              {
+                "pos": 1615,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragefist",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 125,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:imprison onStart site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 786,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:imprison",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 713,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clangoroussoul onTry site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 322,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clangoroussoul",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 44,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clearsmog onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 680,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clearsmog",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 47,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:doubleshock onTryMove site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1765,
+                "step": 3,
+                "turn": 4
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:doubleshock",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 56,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fusionflare onBasePower site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 919,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fusionflare",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 75,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:gravapple onBasePower site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 728,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:gravapple",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 79,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lowkick onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1345,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lowkick",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 104,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:solarbeam onTryMove site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 1489,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:solarbeam",
+            "callback": "onTryMove",
+            "site": "",
+            "hook_id": 148,
+            "batch": "charge_priority_multihit"
+          }
+        ]
+      }
+    },
+    "smoke": {
+      "before": {
+        "total": 384,
+        "passed": 284,
+        "expected_pending_panics": 99,
+        "eligible_battles": 285,
+        "eligible_pass_rate": 0.9964912280701754,
+        "steps_matched": 7758,
+        "steps_total": 10232,
+        "log_lines_matched": 154488,
+        "pending_batches": {
+          "disable_lock_trap": 42,
+          "protect_redirection": 18,
+          "charge_priority_multihit": 23,
+          "move_callbacks": 16
+        },
+        "unexpected_failures": [
+          {
+            "pos": 176,
+            "category": "request",
+            "signature": "request.active[].maybeTrapped (missing)"
+          }
+        ],
+        "signatures": [
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:choicelock onStart site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 21,
+            "examples": [
+              {
+                "pos": 48,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 49,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 50,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 51,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 52,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:choicelock",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 654,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:prankster onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 129,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 130,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 132,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 133,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 141,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:prankster",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 365,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:charge onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 208,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 211,
+                "step": 12,
+                "turn": 9
+              },
+              {
+                "pos": 212,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 213,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 217,
+                "step": 6,
+                "turn": 5
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:charge",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 648,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:shadowtag onFoeTrapPokemon site=\"\"; Stage...",
+            "category": "panic",
+            "count": 6,
+            "examples": [
+              {
+                "pos": 114,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 118,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 121,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 123,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 124,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:shadowtag",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 413,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:lightningrod onAnyRedirectTarget site=\"\";...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 99,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 102,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 105,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 107,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 108,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:lightningrod",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 321,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:disable onStart site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 214,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 215,
+                "step": 6,
+                "turn": 5
+              },
+              {
+                "pos": 216,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 220,
+                "step": 24,
+                "turn": 18
+              },
+              {
+                "pos": 221,
+                "step": 3,
+                "turn": 4
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:disable",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 662,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stormdrain onAnyRedirectTarget site=\"\"; S...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 96,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 100,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 101,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 103,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stormdrain",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 449,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:truant onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 128,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 131,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 135,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 140,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:truant",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 486,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:disable onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 116,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 117,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 119,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 120,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:disable",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 55,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:protect onPrepareHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 61,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 63,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 98,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 104,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:protect",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 120,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:magnetpull onFoeTrapPokemon site=\"\"; Stag...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 113,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 126,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 127,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:magnetpull",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 327,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:triage onModifyPriority site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 137,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 138,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:triage",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 485,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:freezedry onEffectiveness site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 341,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 345,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:freezedry",
+            "callback": "onEffectiveness",
+            "site": "",
+            "hook_id": 73,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fusionbolt onBasePower site=\"\"; Stage NB init...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 342,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 351,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fusionbolt",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 74,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:noretreat onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 112,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 115,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:noretreat",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 111,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:arenatrap onFoeTrapPokemon site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 122,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:arenatrap",
+            "callback": "onFoeTrapPokemon",
+            "site": "",
+            "hook_id": 194,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:myceliummight onFractionalPriority site=\"...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 134,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:myceliummight",
+            "callback": "onFractionalPriority",
+            "site": "",
+            "hook_id": 338,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:propellertail onModifyMove site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 111,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:propellertail",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 369,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stalwart onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 97,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stalwart",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 443,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:alluringvoice onHit site=\"secondaries.N\"; Sta...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 338,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:alluringvoice",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 24,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:burningjealousy onHit site=\"secondaries.N\"; S...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 339,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:burningjealousy",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 41,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clearsmog onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 347,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clearsmog",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 47,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:dragonenergy basePowerCallback site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 340,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:dragonenergy",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 58,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:eruption basePowerCallback site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 337,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:eruption",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 63,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:gravapple onBasePower site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 336,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:gravapple",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 79,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heavyslam onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 348,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heavyslam",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 85,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:helpinghand onTryHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 106,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:helpinghand",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 86,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:hyperspacefury onTry site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 343,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:hyperspacefury",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 89,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lastrespects basePowerCallback site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 346,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lastrespects",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 101,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lowkick onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 350,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lowkick",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 104,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragepowder onTry site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 109,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragepowder",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 126,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:suckerpunch onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 136,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:suckerpunch",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 161,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:superfang damageCallback site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 349,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:superfang",
+            "callback": "damageCallback",
+            "site": "",
+            "hook_id": 162,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:thunderclap onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 139,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:thunderclap",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 174,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:waterspout basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 344,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:waterspout",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 182,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:wideguard onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 110,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:wideguard",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 185,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "request.active[].maybeTrapped (missing)",
+            "category": "request",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 176,
+                "step": 1,
+                "turn": 2
+              }
+            ],
+            "expected_pending": false
+          }
+        ]
+      },
+      "after": {
+        "total": 384,
+        "passed": 285,
+        "expected_pending_panics": 99,
+        "eligible_battles": 285,
+        "eligible_pass_rate": 1.0,
+        "steps_matched": 7787,
+        "steps_total": 10232,
+        "log_lines_matched": 155277,
+        "pending_batches": {
+          "disable_lock_trap": 42,
+          "protect_redirection": 18,
+          "charge_priority_multihit": 23,
+          "move_callbacks": 16
+        },
+        "unexpected_failures": [],
+        "signatures": [
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:choicelock onStart site=\"\"; Stage NB ini...",
+            "category": "panic",
+            "count": 21,
+            "examples": [
+              {
+                "pos": 48,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 49,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 50,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 51,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 52,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:choicelock",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 654,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:prankster onModifyPriority site=\"\"; Stage...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 129,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 130,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 132,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 133,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 141,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:prankster",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 365,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:charge onStart site=\"\"; Stage NB initial...",
+            "category": "panic",
+            "count": 7,
+            "examples": [
+              {
+                "pos": 208,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 211,
+                "step": 12,
+                "turn": 9
+              },
+              {
+                "pos": 212,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 213,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 217,
+                "step": 6,
+                "turn": 5
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:charge",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 648,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:lightningrod onAnyRedirectTarget site=\"\";...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 99,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 102,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 105,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 107,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 108,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:lightningrod",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 321,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: conditions:disable onStart site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 214,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 215,
+                "step": 6,
+                "turn": 5
+              },
+              {
+                "pos": 216,
+                "step": 3,
+                "turn": 3
+              },
+              {
+                "pos": 220,
+                "step": 24,
+                "turn": 18
+              },
+              {
+                "pos": 221,
+                "step": 3,
+                "turn": 4
+              }
+            ],
+            "expected_pending": true,
+            "effect": "conditions:disable",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 662,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:noretreat onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 5,
+            "examples": [
+              {
+                "pos": 112,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 113,
+                "step": 4,
+                "turn": 4
+              },
+              {
+                "pos": 115,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 125,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 127,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:noretreat",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 111,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stormdrain onAnyRedirectTarget site=\"\"; S...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 96,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 100,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 101,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 103,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stormdrain",
+            "callback": "onAnyRedirectTarget",
+            "site": "",
+            "hook_id": 449,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:truant onStart site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 128,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 131,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 135,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 140,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:truant",
+            "callback": "onStart",
+            "site": "",
+            "hook_id": 486,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:disable onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 116,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 117,
+                "step": 1,
+                "turn": 2
+              },
+              {
+                "pos": 119,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 120,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:disable",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 55,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:protect onPrepareHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 4,
+            "examples": [
+              {
+                "pos": 61,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 63,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 98,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 104,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:protect",
+            "callback": "onPrepareHit",
+            "site": "",
+            "hook_id": 120,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:spiritshackle onHit site=\"secondaries.N\"; Sta...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 114,
+                "step": 2,
+                "turn": 3
+              },
+              {
+                "pos": 122,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 124,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:spiritshackle",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 153,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:throatchop onHit site=\"secondaries.N\"; Stage ...",
+            "category": "panic",
+            "count": 3,
+            "examples": [
+              {
+                "pos": 118,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 121,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 126,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:throatchop",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 172,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:triage onModifyPriority site=\"\"; Stage NB...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 137,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 138,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:triage",
+            "callback": "onModifyPriority",
+            "site": "",
+            "hook_id": 485,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:freezedry onEffectiveness site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 341,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 345,
+                "step": 2,
+                "turn": 2
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:freezedry",
+            "callback": "onEffectiveness",
+            "site": "",
+            "hook_id": 73,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:fusionbolt onBasePower site=\"\"; Stage NB init...",
+            "category": "panic",
+            "count": 2,
+            "examples": [
+              {
+                "pos": 342,
+                "step": 0,
+                "turn": 1
+              },
+              {
+                "pos": 351,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:fusionbolt",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 74,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:myceliummight onFractionalPriority site=\"...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 134,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:myceliummight",
+            "callback": "onFractionalPriority",
+            "site": "",
+            "hook_id": 338,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:propellertail onModifyMove site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 111,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:propellertail",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 369,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: abilities:stalwart onModifyMove site=\"\"; Stage NB i...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 97,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "abilities:stalwart",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 443,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:alluringvoice onHit site=\"secondaries.N\"; Sta...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 338,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:alluringvoice",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 24,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:burningjealousy onHit site=\"secondaries.N\"; S...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 339,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:burningjealousy",
+            "callback": "onHit",
+            "site": "secondaries.0",
+            "hook_id": 41,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:clearsmog onHit site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 347,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:clearsmog",
+            "callback": "onHit",
+            "site": "",
+            "hook_id": 47,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:curse onModifyMove site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 123,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:curse",
+            "callback": "onModifyMove",
+            "site": "",
+            "hook_id": 50,
+            "batch": "disable_lock_trap"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:dragonenergy basePowerCallback site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 340,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:dragonenergy",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 58,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:eruption basePowerCallback site=\"\"; Stage NB ...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 337,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:eruption",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 63,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:gravapple onBasePower site=\"\"; Stage NB initi...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 336,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:gravapple",
+            "callback": "onBasePower",
+            "site": "",
+            "hook_id": 79,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:heavyslam onTryHit site=\"\"; Stage NB initial ...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 348,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:heavyslam",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 85,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:helpinghand onTryHit site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 106,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:helpinghand",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 86,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:hyperspacefury onTry site=\"\"; Stage NB initia...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 343,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:hyperspacefury",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 89,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lastrespects basePowerCallback site=\"\"; Stage...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 346,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lastrespects",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 101,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:lowkick onTryHit site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 350,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:lowkick",
+            "callback": "onTryHit",
+            "site": "",
+            "hook_id": 104,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:ragepowder onTry site=\"\"; Stage NB initial ef...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 109,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:ragepowder",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 126,
+            "batch": "protect_redirection"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:suckerpunch onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 136,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:suckerpunch",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 161,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:superfang damageCallback site=\"\"; Stage NB in...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 349,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:superfang",
+            "callback": "damageCallback",
+            "site": "",
+            "hook_id": 162,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:thunderclap onTry site=\"\"; Stage NB initial e...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 139,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:thunderclap",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 174,
+            "batch": "charge_priority_multihit"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:waterspout basePowerCallback site=\"\"; Stage N...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 344,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:waterspout",
+            "callback": "basePowerCallback",
+            "site": "",
+            "hook_id": 182,
+            "batch": "move_callbacks"
+          },
+          {
+            "signature": "panic @crates/engine/src/effects/registry.rs:97: unimplemented effect hook N: moves:wideguard onTry site=\"\"; Stage NB initial eff...",
+            "category": "panic",
+            "count": 1,
+            "examples": [
+              {
+                "pos": 110,
+                "step": 0,
+                "turn": 1
+              }
+            ],
+            "expected_pending": true,
+            "effect": "moves:wideguard",
+            "callback": "onTry",
+            "site": "",
+            "hook_id": 185,
+            "batch": "protect_redirection"
+          }
+        ]
+      }
+    }
+  }
+}

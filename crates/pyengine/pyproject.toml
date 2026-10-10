@@ -1,0 +1,23 @@
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "numbrion"
+version = "0.1.0"
+description = "Training interface for the numbrion gen9randomdoublesbattle engine"
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.22"]
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.maturin]
+# One abi3 wheel per platform covers every Python >= 3.9 (Linux, Windows, macOS).
+python-source = "python"
+module-name = "numbrion._numbrion"
+features = ["python"]
+
+[tool.pytest.ini_options]
+testpaths = ["pytests"]

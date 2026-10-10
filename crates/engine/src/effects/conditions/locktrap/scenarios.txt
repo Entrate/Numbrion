@@ -1,0 +1,1474 @@
+scenario choicelock_dancer_encore_disable_struggle
+seed 1101,1102,1103,1104
+p1 Oricorio||ChoiceScarf|Dancer|Hurricane,RevelationDance,QuiverDance,Roost|Serious||M|||50|]Garchomp||ChoiceBand|RoughSkin|BodySlam,DragonClaw,SwordsDance,RockSlide|Serious||M|||50|]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|Taunt,Encore,Disable,SoftBoiled|Serious|252,,128,,128,|F||||]Dragonite|||Multiscale|DragonDance,ExtremeSpeed,Roost,FirePunch|Serious|252,,128,,128,|M||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1101,1102,1103,1104
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Oricorio|Oricorio, L50, M|150/150
+log |switch|p1a: Oricorio|Oricorio, L50, M|100/100
+log |split|p1
+log |switch|p1b: Garchomp|Garchomp, L50, M|183/183
+log |switch|p1b: Garchomp|Garchomp, L50, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Dragonite|Dragonite, M|386/386
+log |switch|p2b: Dragonite|Dragonite, M|100/100
+log |turn|1
+step turn1	move 1 2, move 1 2	move 1 2, move 1
+seed_after 12937,48590,10481,49654
+log |
+log |t:|
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance|p1a: Oricorio|[from] ability: Dancer
+log |-boost|p1a: Oricorio|atk|1
+log |-boost|p1a: Oricorio|spe|1
+log |move|p1a: Oricorio|Hurricane||[still]
+log |-fail|p1a: Oricorio
+log |move|p2a: Blissey|Taunt|p1b: Garchomp
+log |-start|p1b: Garchomp|move: Taunt
+log |move|p1b: Garchomp|Body Slam|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|370/386
+log |-damage|p2b: Dragonite|96/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 2, move 1 2	move 2 2, move 1
+seed_after 34108,52707,56656,55999
+log |
+log |t:|
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance|p1a: Oricorio|[from] ability: Dancer
+log |-boost|p1a: Oricorio|atk|1
+log |-boost|p1a: Oricorio|spe|1
+log |move|p1a: Oricorio|Hurricane||[still]
+log |-fail|p1a: Oricorio
+log |move|p2a: Blissey|Encore|p1b: Garchomp
+log |-start|p1b: Garchomp|Encore
+log |move|p1b: Garchomp|Body Slam|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|340/386
+log |-damage|p2b: Dragonite|89/100
+log |-status|p2b: Dragonite|par
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1 2, move 1 2	move 3 2, move 1
+seed_after 24139,56390,7297,8135
+log |
+log |t:|
+log |move|p1a: Oricorio|Hurricane|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|310/386 par
+log |-damage|p2b: Dragonite|81/100 par
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance||[still]
+log |-fail|p1a: Oricorio
+log |move|p2a: Blissey|Disable|p1b: Garchomp
+log |-start|p1b: Garchomp|Disable|Body Slam
+log |cant|p1b: Garchomp|Disable|Body Slam
+log |
+log |-end|p1b: Garchomp|move: Taunt
+log |upkeep
+log |turn|4
+step turn4	move 1 2, move 1	move 4, move 1
+seed_after 11627,46047,19098,39062
+log |
+log |t:|
+log |move|p1a: Oricorio|Hurricane|p2b: Dragonite
+log |-crit|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|265/386 par
+log |-damage|p2b: Dragonite|69/100 par
+log |-start|p2b: Dragonite|confusion
+log |-activate|p2b: Dragonite|confusion
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance||[still]
+log |-fail|p1a: Oricorio
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |-activate|p1b: Garchomp|move: Struggle
+log |move|p1b: Garchomp|Struggle|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|656/714
+log |-damage|p2a: Blissey|92/100
+log |split|p1
+log |-damage|p1b: Garchomp|137/183|[from] recoil
+log |-damage|p1b: Garchomp|75/100|[from] recoil
+log |
+log |-end|p1b: Garchomp|Encore
+log |upkeep
+log |turn|5
+step turn5	move 1 2, move 1	move 4, move 1
+seed_after 45632,9428,22433,14194
+log |
+log |t:|
+log |move|p1a: Oricorio|Hurricane|p2b: Dragonite|[miss]
+log |-miss|p1a: Oricorio|p2b: Dragonite
+log |-end|p2b: Dragonite|confusion
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance||[still]
+log |-fail|p1a: Oricorio
+log |move|p2a: Blissey|Soft-Boiled|p2a: Blissey
+log |split|p2
+log |-heal|p2a: Blissey|714/714
+log |-heal|p2a: Blissey|100/100
+log |-activate|p1b: Garchomp|move: Struggle
+log |move|p1b: Garchomp|Struggle|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|246/386 par
+log |-damage|p2b: Dragonite|64/100 par
+log |split|p1
+log |-damage|p1b: Garchomp|91/183|[from] recoil
+log |-damage|p1b: Garchomp|50/100|[from] recoil
+log |
+log |upkeep
+log |turn|6
+step turn6	move 1 2, move 1	move 4, move 1
+seed_after 39513,53159,61626,63376
+log |
+log |t:|
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|1
+log |-boost|p2b: Dragonite|spe|1
+log |-activate|p1a: Oricorio|ability: Dancer
+log |move|p1a: Oricorio|Dragon Dance||[still]
+log |-fail|p1a: Oricorio
+log |move|p1a: Oricorio|Hurricane|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|213/386 par
+log |-damage|p2b: Dragonite|56/100 par
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |-activate|p1b: Garchomp|move: Struggle
+log |move|p1b: Garchomp|Struggle|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|194/386 par
+log |-damage|p2b: Dragonite|51/100 par
+log |split|p1
+log |-damage|p1b: Garchomp|45/183|[from] recoil
+log |-damage|p1b: Garchomp|25/100|[from] recoil
+log |
+log |-end|p1b: Garchomp|Disable
+log |upkeep
+log |turn|7
+step turn7	move 1 2, move 1 2	move 4, move 1
+seed_after 47448,50824,3749,2331
+log |
+log |t:|
+log |move|p2b: Dragonite|Dragon Dance|p2b: Dragonite
+log |-boost|p2b: Dragonite|atk|0
+log |-boost|p2b: Dragonite|spe|0
+log |move|p1a: Oricorio|Hurricane|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|161/386 par
+log |-damage|p2b: Dragonite|42/100 par
+log |move|p2a: Blissey|Soft-Boiled||[still]
+log |-fail|p2a: Blissey|heal
+log |move|p1b: Garchomp|Body Slam|p2b: Dragonite
+log |split|p2
+log |-damage|p2b: Dragonite|127/386 par
+log |-damage|p2b: Dragonite|33/100 par
+log |
+log |upkeep
+log |turn|8
+scenario healblock_pollenpuff
+seed 1201,1202,1203,1204
+p1 Mesprit|||Levitate|PsychicNoise,DazzlingGleam,CalmMind,Recover|Serious||N||||]Clefable|||MagicGuard|Moonblast,CalmMind,ThunderWave,CalmMind|Serious||M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Vikavolt|||Levitate|PollenPuff,GigaDrain,CalmMind,Thunderbolt|Serious|252,,128,,128,|M|||70|]Blissey|||SereneGrace|SoftBoiled,ThunderWave,CalmMind,Reflect|Serious|252,,128,,128,|F||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1201,1202,1203,1204
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Mesprit|Mesprit|301/301
+log |switch|p1a: Mesprit|Mesprit|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|331/331
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Vikavolt|Vikavolt, L70, M|253/253
+log |switch|p2a: Vikavolt|Vikavolt, L70, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |turn|1
+step turn1	move 1 2, move 1 2	move 1 -2, move 1
+seed_after 22890,54707,52877,22991
+log |
+log |t:|
+log |move|p1a: Mesprit|Psychic Noise|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|645/714
+log |-damage|p2b: Blissey|91/100
+log |-start|p2b: Blissey|move: Heal Block
+log |move|p1b: Clefable|Moonblast|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|575/714
+log |-damage|p2b: Blissey|81/100
+log |-unboost|p2b: Blissey|spa|1
+log |cant|p2b: Blissey|move: Heal Block|Soft-Boiled
+log |move|p2a: Vikavolt|Pollen Puff||[still]
+log |cant|p2a: Vikavolt|move: Heal Block|Pollen Puff
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 2, move 2	move 1 -2, move 2 1
+seed_after 36162,50404,39376,42285
+log |
+log |t:|
+log |move|p1a: Mesprit|Psychic Noise|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|515/714
+log |-damage|p2b: Blissey|73/100
+log |move|p1b: Clefable|Calm Mind|p1b: Clefable
+log |-boost|p1b: Clefable|spa|1
+log |-boost|p1b: Clefable|spd|1
+log |move|p2b: Blissey|Thunder Wave|p1a: Mesprit
+log |-status|p1a: Mesprit|par
+log |move|p2a: Vikavolt|Pollen Puff||[still]
+log |cant|p2a: Vikavolt|move: Heal Block|Pollen Puff
+log |
+log |-end|p2b: Blissey|move: Heal Block
+log |upkeep
+log |turn|3
+step turn3	move 2, move 1 2	move 1 -2, move 1
+seed_after 62591,41731,57940,3769
+log |
+log |t:|
+log |move|p1b: Clefable|Moonblast|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|401/714
+log |-damage|p2b: Blissey|57/100
+log |-unboost|p2b: Blissey|spa|1
+log |move|p2b: Blissey|Soft-Boiled|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |cant|p1a: Mesprit|par
+log |move|p2a: Vikavolt|Pollen Puff|p2b: Blissey
+log |
+log |upkeep
+log |turn|4
+step turn4	move 1 1, move 2	move 1 -2, move 1
+seed_after 31459,25135,65047,4227
+log |
+log |t:|
+log |move|p1b: Clefable|Calm Mind|p1b: Clefable
+log |-boost|p1b: Clefable|spa|1
+log |-boost|p1b: Clefable|spd|1
+log |move|p2b: Blissey|Soft-Boiled||[still]
+log |-fail|p2b: Blissey|heal
+log |cant|p1a: Mesprit|par
+log |move|p2a: Vikavolt|Pollen Puff|p2b: Blissey
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2, move 2	move 1 -2, move 1
+seed_after 57099,10638,31007,3401
+log |
+log |t:|
+log |move|p1b: Clefable|Calm Mind|p1b: Clefable
+log |-boost|p1b: Clefable|spa|1
+log |-boost|p1b: Clefable|spd|1
+log |move|p2b: Blissey|Soft-Boiled||[still]
+log |-fail|p2b: Blissey|heal
+log |move|p1a: Mesprit|Dazzling Gleam|p2a: Vikavolt|[spread] p2a,p2b
+log |split|p2
+log |-damage|p2a: Vikavolt|182/253
+log |-damage|p2a: Vikavolt|72/100
+log |split|p2
+log |-damage|p2b: Blissey|680/714
+log |-damage|p2b: Blissey|96/100
+log |move|p2a: Vikavolt|Pollen Puff|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |
+log |upkeep
+log |turn|6
+step turn6	move 2, move 2	move 1 -2, move 1
+seed_after 22754,48139,60647,21265
+log |
+log |t:|
+log |move|p1b: Clefable|Calm Mind|p1b: Clefable
+log |-boost|p1b: Clefable|spa|1
+log |-boost|p1b: Clefable|spd|1
+log |move|p2b: Blissey|Soft-Boiled||[still]
+log |-fail|p2b: Blissey|heal
+log |cant|p1a: Mesprit|par
+log |move|p2a: Vikavolt|Pollen Puff|p2b: Blissey
+log |
+log |upkeep
+log |turn|7
+scenario healblock_grassy_terrain
+seed 1211,1212,1213,1214
+p1 Mesprit|||Levitate|PsychicNoise,DazzlingGleam,CalmMind,Recover|Serious||N||||]Clefable|||MagicGuard|Moonblast,CalmMind,ThunderWave,Reflect|Serious||M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Rillaboom|||GrassySurge|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Blissey|||SereneGrace|SoftBoiled,ThunderWave,CalmMind,Reflect|Serious|252,,128,,128,|F||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Cresselia|||Levitate|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||
+step start		
+seed_after 1211,1212,1213,1214
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Mesprit|Mesprit|301/301
+log |switch|p1a: Mesprit|Mesprit|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|331/331
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Rillaboom|Rillaboom, M|404/404
+log |switch|p2a: Rillaboom|Rillaboom, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |-fieldstart|move: Grassy Terrain|[from] ability: Grassy Surge|[of] p2a: Rillaboom
+log |turn|1
+step turn1	move 1 2, move 1 2	move 1, move 1
+seed_after 3338,10726,53415,29926
+log |
+log |t:|
+log |move|p2a: Rillaboom|Calm Mind|p2a: Rillaboom
+log |-boost|p2a: Rillaboom|spa|1
+log |-boost|p2a: Rillaboom|spd|1
+log |move|p1a: Mesprit|Psychic Noise|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|653/714
+log |-damage|p2b: Blissey|92/100
+log |-start|p2b: Blissey|move: Heal Block
+log |move|p1b: Clefable|Moonblast|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|577/714
+log |-damage|p2b: Blissey|81/100
+log |-unboost|p2b: Blissey|spa|1
+log |cant|p2b: Blissey|move: Heal Block|Soft-Boiled
+log |
+log |upkeep
+log |turn|2
+step turn2	move 3, move 1 2	move 1, move 4
+seed_after 31723,43301,10137,1050
+log |
+log |t:|
+log |move|p2a: Rillaboom|Calm Mind|p2a: Rillaboom
+log |-boost|p2a: Rillaboom|spa|1
+log |-boost|p2a: Rillaboom|spd|1
+log |move|p1a: Mesprit|Calm Mind|p1a: Mesprit
+log |-boost|p1a: Mesprit|spa|1
+log |-boost|p1a: Mesprit|spd|1
+log |move|p1b: Clefable|Moonblast|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|502/714
+log |-damage|p2b: Blissey|71/100
+log |move|p2b: Blissey|Reflect|p2b: Blissey
+log |-sidestart|p2: Bob|Reflect
+log |
+log |-end|p2b: Blissey|move: Heal Block
+log |upkeep
+log |turn|3
+step turn3	move 3, move 1 2	move 1, move 4
+seed_after 36638,65260,43611,10254
+log |
+log |t:|
+log |move|p2a: Rillaboom|Calm Mind|p2a: Rillaboom
+log |-boost|p2a: Rillaboom|spa|1
+log |-boost|p2a: Rillaboom|spd|1
+log |move|p1a: Mesprit|Calm Mind|p1a: Mesprit
+log |-boost|p1a: Mesprit|spa|1
+log |-boost|p1a: Mesprit|spd|1
+log |move|p1b: Clefable|Moonblast|p2b: Blissey
+log |split|p2
+log |-damage|p2b: Blissey|423/714
+log |-damage|p2b: Blissey|60/100
+log |move|p2b: Blissey|Reflect||[still]
+log |-fail|p2b: Blissey
+log |
+log |split|p2
+log |-heal|p2b: Blissey|467/714|[from] Grassy Terrain
+log |-heal|p2b: Blissey|66/100|[from] Grassy Terrain
+log |upkeep
+log |turn|4
+step turn4	move 3, move 2	move 1, move 1
+seed_after 36638,65260,43611,10254
+log |
+log |t:|
+log |move|p2a: Rillaboom|Calm Mind|p2a: Rillaboom
+log |-boost|p2a: Rillaboom|spa|1
+log |-boost|p2a: Rillaboom|spd|1
+log |move|p1a: Mesprit|Calm Mind|p1a: Mesprit
+log |-boost|p1a: Mesprit|spa|1
+log |-boost|p1a: Mesprit|spd|1
+log |move|p1b: Clefable|Calm Mind|p1b: Clefable
+log |-boost|p1b: Clefable|spa|1
+log |-boost|p1b: Clefable|spd|1
+log |move|p2b: Blissey|Soft-Boiled|p2b: Blissey
+log |split|p2
+log |-heal|p2b: Blissey|714/714
+log |-heal|p2b: Blissey|100/100
+log |
+log |upkeep
+log |turn|5
+scenario taunt_encore_disable_imprison_flow
+seed 1301,1302,1303,1304
+p1 Gengar|||CursedBody|Taunt,Encore,Disable,Imprison|Serious||M||||]Clefable|||MagicGuard|Imprison,Taunt,ThunderWave,Disable|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|ThunderWave,SoftBoiled,Reflect,LightScreen|Serious|252,,128,,128,|F||||]Garchomp|||RoughSkin|BodySlam,DragonClaw,RockSlide,SwordsDance|Serious||M|||50|]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1301,1302,1303,1304
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Gengar|Gengar, M|261/261
+log |switch|p1a: Gengar|Gengar, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|394/394
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Garchomp|Garchomp, L50, M|183/183
+log |switch|p2b: Garchomp|Garchomp, L50, M|100/100
+log |turn|1
+step turn1	move 1 1, move 4 2	move 1 1, move 2 1
+seed_after 56102,54903,42812,27390
+log |
+log |t:|
+log |move|p1a: Gengar|Taunt|p2a: Blissey
+log |-start|p2a: Blissey|move: Taunt
+log |move|p1b: Clefable|Disable||[still]
+log |-fail|p1b: Clefable
+log |cant|p2a: Blissey|move: Taunt|Thunder Wave
+log |move|p2b: Garchomp|Dragon Claw|p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|210/261
+log |-damage|p1a: Gengar|81/100
+log |
+log |upkeep
+log |turn|2
+step turn2	move 2 2, move 3 1	move 1, move 2 1
+seed_after 27836,18556,35856,32334
+log |
+log |t:|
+log |move|p1a: Gengar|Encore|p2b: Garchomp
+log |-start|p2b: Garchomp|Encore
+log |move|p1b: Clefable|Thunder Wave|p2a: Blissey
+log |-status|p2a: Blissey|par
+log |move|p2b: Garchomp|Dragon Claw|p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|159/261
+log |-damage|p1a: Gengar|61/100
+log |-activate|p2a: Blissey|move: Struggle
+log |move|p2a: Blissey|Struggle|p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|144/261
+log |-damage|p1a: Gengar|56/100
+log |split|p2
+log |-damage|p2a: Blissey|535/714 par|[from] recoil
+log |-damage|p2a: Blissey|75/100 par|[from] recoil
+log |
+log |upkeep
+log |turn|3
+step turn3	move 3 2, move 2 2	move 1, move 2 1
+seed_after 65019,2129,12488,18636
+log |
+log |t:|
+log |move|p1a: Gengar|Disable|p2b: Garchomp
+log |-start|p2b: Garchomp|Disable|Dragon Claw
+log |move|p1b: Clefable|Taunt|p2b: Garchomp
+log |-start|p2b: Garchomp|move: Taunt
+log |cant|p2b: Garchomp|Disable|Dragon Claw
+log |-activate|p2a: Blissey|move: Struggle
+log |move|p2a: Blissey|Struggle|p1b: Clefable
+log |split|p1
+log |-damage|p1b: Clefable|383/394
+log |-damage|p1b: Clefable|98/100
+log |split|p2
+log |-damage|p2a: Blissey|356/714 par|[from] recoil
+log |-damage|p2a: Blissey|50/100 par|[from] recoil
+log |
+log |-end|p2a: Blissey|move: Taunt
+log |upkeep
+log |turn|4
+step turn4	move 4, move 1	move 1 1, move 1
+seed_after 49095,5099,55426,14407
+log |
+log |t:|
+log |move|p1a: Gengar|Imprison|p1a: Gengar
+log |-start|p1a: Gengar|move: Imprison
+log |move|p1b: Clefable|Imprison|p1b: Clefable
+log |-start|p1b: Clefable|move: Imprison
+log |-activate|p2b: Garchomp|move: Struggle
+log |move|p2b: Garchomp|Struggle|p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|125/261
+log |-damage|p1a: Gengar|48/100
+log |split|p2
+log |-damage|p2b: Garchomp|137/183|[from] recoil
+log |-damage|p2b: Garchomp|75/100|[from] recoil
+log |cant|p2a: Blissey|move: Imprison|Thunder Wave
+log |
+log |-end|p2b: Garchomp|Encore
+log |upkeep
+log |turn|5
+step turn5	move 1 1, move 4 2	move 2, move 3
+seed_after 12326,33687,13556,55127
+log |
+log |t:|
+log |move|p1a: Gengar|Taunt|p2a: Blissey
+log |-start|p2a: Blissey|move: Taunt
+log |move|p1b: Clefable|Disable||[still]
+log |-fail|p1b: Clefable
+log |move|p2b: Garchomp|Rock Slide|p1a: Gengar|[spread] p1a,p1b
+log |split|p1
+log |-damage|p1a: Gengar|102/261
+log |-damage|p1a: Gengar|40/100
+log |split|p1
+log |-damage|p1b: Clefable|366/394
+log |-damage|p1b: Clefable|93/100
+log |cant|p2a: Blissey|move: Taunt|Soft-Boiled
+log |
+log |-end|p2b: Garchomp|move: Taunt
+log |upkeep
+log |turn|6
+step turn6	move 2 2, move 3 1	move 1, move 3
+seed_after 14936,62152,36366,43631
+log |
+log |t:|
+log |move|p1a: Gengar|Encore|p2b: Garchomp
+log |-start|p2b: Garchomp|Encore
+log |move|p1b: Clefable|Thunder Wave|p2a: Blissey
+log |-fail|p2a: Blissey|par
+log |move|p2b: Garchomp|Rock Slide|p1b: Clefable|[spread] p1a,p1b
+log |split|p1
+log |-damage|p1a: Gengar|81/261
+log |-damage|p1a: Gengar|32/100
+log |split|p1
+log |-damage|p1b: Clefable|350/394
+log |-damage|p1b: Clefable|89/100
+log |cant|p2a: Blissey|par
+log |
+log |-end|p2b: Garchomp|Disable
+log |upkeep
+log |turn|7
+step turn7	move 3 1, move 4 2	move 1, move 3
+seed_after 53029,52589,37556,63712
+log |
+log |t:|
+log |move|p1a: Gengar|Disable||[still]
+log |-fail|p1a: Gengar
+log |move|p1b: Clefable|Disable|p2b: Garchomp
+log |-start|p2b: Garchomp|Disable|Rock Slide
+log |cant|p2b: Garchomp|Disable|Rock Slide
+log |-activate|p2a: Blissey|move: Struggle
+log |move|p2a: Blissey|Struggle|p1b: Clefable
+log |split|p1
+log |-damage|p1b: Clefable|339/394
+log |-damage|p1b: Clefable|87/100
+log |split|p2
+log |-damage|p2a: Blissey|177/714 par|[from] recoil
+log |-damage|p2a: Blissey|25/100 par|[from] recoil
+log |
+log |-end|p2a: Blissey|move: Taunt
+log |upkeep
+log |turn|8
+step turn8	move 4, move 2 1	move 2, move 1
+seed_after 25441,45647,44216,39851
+log |
+log |t:|
+log |move|p1a: Gengar|Imprison||[still]
+log |-fail|p1a: Gengar
+log |move|p1b: Clefable|Taunt|p2a: Blissey
+log |-start|p2a: Blissey|move: Taunt
+log |-activate|p2b: Garchomp|move: Struggle
+log |move|p2b: Garchomp|Struggle|p1b: Clefable
+log |split|p1
+log |-damage|p1b: Clefable|324/394
+log |-damage|p1b: Clefable|83/100
+log |split|p2
+log |-damage|p2b: Garchomp|91/183|[from] recoil
+log |-damage|p2b: Garchomp|50/100|[from] recoil
+log |cant|p2a: Blissey|move: Taunt|Soft-Boiled
+log |
+log |-end|p2b: Garchomp|Encore
+log |upkeep
+log |turn|9
+scenario infestation_trap_expiry
+seed 1401,1402,1403,1404
+p1 Vikavolt|||Levitate|Infestation,CalmMind,Thunderbolt,Uturn|Serious|252,,128,,128,|M||||]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||]Gengar|||CursedBody|CalmMind,Reflect,LightScreen,ShadowBall|Serious|252,,128,,128,|M|||50|]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1401,1402,1403,1404
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Vikavolt|Vikavolt, M|358/358
+log |switch|p1a: Vikavolt|Vikavolt, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|394/394
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |turn|1
+step turn1	move 1 1, move 2	move 2, move 2
+seed_after 12149,25292,26209,49026
+log |
+log |t:|
+log |move|p1b: Clefable|Reflect|p1b: Clefable
+log |-sidestart|p1: Alice|Reflect
+log |move|p2a: Blissey|Reflect|p2a: Blissey
+log |-sidestart|p2: Bob|Reflect
+log |move|p2b: Gengar|Reflect||[still]
+log |-fail|p2b: Gengar
+log |move|p1a: Vikavolt|Infestation|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|690/714
+log |-damage|p2a: Blissey|97/100
+log |-activate|p2a: Blissey|move: Infestation|[of] p1a: Vikavolt
+log |
+log |split|p2
+log |-damage|p2a: Blissey|601/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|85/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|2
+step turn2	move 1 2, move 2	switch 3, switch 4 || move 2, move 2
+seed_after 12497,8162,49566,2011
+log |
+log |t:|
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p2b: Gengar|Reflect||[still]
+log |-fail|p2b: Gengar
+log |move|p1a: Vikavolt|Infestation|p2b: Gengar
+log |-resisted|p2b: Gengar
+log |split|p2
+log |-damage|p2b: Gengar|149/167
+log |-damage|p2b: Gengar|90/100
+log |-activate|p2b: Gengar|move: Infestation|[of] p1a: Vikavolt
+log |
+log |split|p2
+log |-damage|p2a: Blissey|512/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|72/100|[from] move: Infestation|[partiallytrapped]
+log |split|p2
+log |-damage|p2b: Gengar|129/167|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2b: Gengar|78/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	switch 3, switch 4 || move 2, switch 4
+seed_after 10584,59165,37040,60202
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Skarmory|Skarmory, M|334/334
+log |switch|p2b: Skarmory|Skarmory, M|100/100
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|423/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|60/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|4
+step turn4	move 2, move 2	move 2, move 2
+seed_after 60552,11958,59890,57429
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|334/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|47/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|5
+step turn5	move 2, move 2	move 2, move 2
+seed_after 53061,54830,17753,40268
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |-end|p2a: Blissey|Infestation|[partiallytrapped]
+log |-sideend|p1: Alice|Reflect
+log |-sideend|p2: Bob|Reflect
+log |upkeep
+log |turn|6
+step turn6	move 2, move 2	move 2, move 2
+seed_after 14741,18985,44739,22975
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect|p2b: Skarmory
+log |-sidestart|p2: Bob|Reflect
+log |move|p1b: Clefable|Reflect|p1b: Clefable
+log |-sidestart|p1: Alice|Reflect
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |upkeep
+log |turn|7
+step turn7	move 2, move 2	move 2, move 2
+seed_after 31465,57223,34425,15902
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |upkeep
+log |turn|8
+step turn8	move 2, move 2	move 2, move 2
+seed_after 4916,22218,19212,11929
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |
+log |upkeep
+log |turn|9
+step turn9	move 2, move 2	move 2, move 2
+seed_after 8189,9811,62227,57888
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|0
+log |-boost|p1a: Vikavolt|spd|0
+log |
+log |upkeep
+log |turn|10
+step turn10	move 2, move 2	move 2, move 2
+seed_after 40154,43973,14817,62819
+log |
+log |t:|
+log |move|p2b: Skarmory|Reflect||[still]
+log |-fail|p2b: Skarmory
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|0
+log |-boost|p1a: Vikavolt|spd|0
+log |
+log |-sideend|p2: Bob|Reflect
+log |-sideend|p1: Alice|Reflect
+log |upkeep
+log |turn|11
+scenario infestation_trapper_leaves
+seed 1501,1502,1503,1504
+p1 Vikavolt|||Levitate|Infestation,CalmMind,Thunderbolt,Uturn|Serious|252,,128,,128,|M||||]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Gengar|||CursedBody|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M|||50|
+step start		
+seed_after 1501,1502,1503,1504
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Vikavolt|Vikavolt, M|358/358
+log |switch|p1a: Vikavolt|Vikavolt, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|394/394
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, M|524/524
+log |switch|p2b: Snorlax|Snorlax, M|100/100
+log |turn|1
+step turn1	move 1 1, move 2	move 2, move 2
+seed_after 33731,61217,9607,5126
+log |
+log |t:|
+log |move|p1b: Clefable|Reflect|p1b: Clefable
+log |-sidestart|p1: Alice|Reflect
+log |move|p2a: Blissey|Reflect|p2a: Blissey
+log |-sidestart|p2: Bob|Reflect
+log |move|p1a: Vikavolt|Infestation|p2a: Blissey
+log |split|p2
+log |-damage|p2a: Blissey|692/714
+log |-damage|p2a: Blissey|97/100
+log |-activate|p2a: Blissey|move: Infestation|[of] p1a: Vikavolt
+log |move|p2b: Snorlax|Reflect||[still]
+log |-fail|p2b: Snorlax
+log |
+log |split|p2
+log |-damage|p2a: Blissey|603/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|85/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|2
+step turn2	move 2, move 2	move 2, move 2
+seed_after 37693,16555,11346,47905
+log |
+log |t:|
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p1a: Vikavolt|Calm Mind|p1a: Vikavolt
+log |-boost|p1a: Vikavolt|spa|1
+log |-boost|p1a: Vikavolt|spd|1
+log |move|p2b: Snorlax|Reflect||[still]
+log |-fail|p2b: Snorlax
+log |
+log |split|p2
+log |-damage|p2a: Blissey|514/714|[from] move: Infestation|[partiallytrapped]
+log |-damage|p2a: Blissey|72/100|[from] move: Infestation|[partiallytrapped]
+log |upkeep
+log |turn|3
+step turn3	switch 3, move 2	move 2, move 2
+seed_after 37565,64122,52438,7112
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p2b: Snorlax|Reflect||[still]
+log |-fail|p2b: Snorlax
+log |
+log |-end|p2a: Blissey|Infestation|[partiallytrapped]|[silent]
+log |upkeep
+log |turn|4
+step turn4	move 2, move 2	move 2, switch 4
+seed_after 32276,1420,34805,40107
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |move|p1a: Corviknight|Reflect||[still]
+log |-fail|p1a: Corviknight
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2, move 2	switch 3, switch 4
+seed_after 57041,25466,33169,61754
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Skarmory|Skarmory, M|334/334
+log |switch|p2a: Skarmory|Skarmory, M|100/100
+log |split|p2
+log |switch|p2b: Snorlax|Snorlax, M|524/524
+log |switch|p2b: Snorlax|Snorlax, M|100/100
+log |move|p1a: Corviknight|Reflect||[still]
+log |-fail|p1a: Corviknight
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |
+log |-sideend|p2: Bob|Reflect
+log |-sideend|p1: Alice|Reflect
+log |upkeep
+log |turn|6
+scenario spiritshackle_noretreat
+seed 1601,1602,1603,1604
+p1 Decidueye|||Overgrow|SpiritShackle,CalmMind,SwordsDance,LeafBlade|Serious||M||||]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Mesprit|||Levitate|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|N||||
+p2 Corviknight|||Pressure|NoRetreat,CalmMind,ThunderWave,Reflect|Serious|252,,128,,128,|M|||70|]Blissey|||SereneGrace|NoRetreat,SoftBoiled,Reflect,LightScreen|Serious|252,,128,,128,|F||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Snorlax|||ThickFat|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1601,1602,1603,1604
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Decidueye|Decidueye, M|297/297
+log |switch|p1a: Decidueye|Decidueye, M|100/100
+log |split|p1
+log |switch|p1b: Clefable|Clefable, M|394/394
+log |switch|p1b: Clefable|Clefable, M|100/100
+log |split|p2
+log |switch|p2a: Corviknight|Corviknight, L70, M|283/283
+log |switch|p2a: Corviknight|Corviknight, L70, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |-ability|p2a: Corviknight|Pressure
+log |turn|1
+step turn1	move 1 1, move 2	move 1, move 1
+seed_after 46751,23078,30769,27544
+log |
+log |t:|
+log |move|p1a: Decidueye|Spirit Shackle|p2a: Corviknight
+log |split|p2
+log |-damage|p2a: Corviknight|153/283
+log |-damage|p2a: Corviknight|55/100
+log |-activate|p2a: Corviknight|trapped
+log |move|p1b: Clefable|Reflect|p1b: Clefable
+log |-sidestart|p1: Alice|Reflect
+log |move|p2b: Blissey|No Retreat|p2b: Blissey
+log |-boost|p2b: Blissey|atk|1
+log |-boost|p2b: Blissey|def|1
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |-boost|p2b: Blissey|spe|1
+log |-start|p2b: Blissey|move: No Retreat
+log |move|p2a: Corviknight|No Retreat|p2a: Corviknight
+log |-boost|p2a: Corviknight|atk|1
+log |-boost|p2a: Corviknight|def|1
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |-boost|p2a: Corviknight|spe|1
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 2	move 1, move 1
+seed_after 47108,53157,124,17324
+log |
+log |t:|
+log |move|p2b: Blissey|No Retreat||[still]
+log |-fail|p2b: Blissey
+log |move|p2a: Corviknight|No Retreat|p2a: Corviknight
+log |-boost|p2a: Corviknight|atk|1
+log |-boost|p2a: Corviknight|def|1
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |-boost|p2a: Corviknight|spe|1
+log |move|p1a: Decidueye|Spirit Shackle|p2a: Corviknight
+log |split|p2
+log |-damage|p2a: Corviknight|89/283
+log |-damage|p2a: Corviknight|32/100
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |
+log |upkeep
+log |turn|3
+step turn3	move 2, move 2	switch 3, switch 4 || move 1, move 3
+seed_after 57249,49194,6936,23967
+log |
+log |t:|
+log |move|p2a: Corviknight|No Retreat|p2a: Corviknight
+log |-boost|p2a: Corviknight|atk|1
+log |-boost|p2a: Corviknight|def|1
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |-boost|p2a: Corviknight|spe|1
+log |move|p2b: Blissey|Reflect|p2b: Blissey
+log |-sidestart|p2: Bob|Reflect
+log |move|p1a: Decidueye|Calm Mind|p1a: Decidueye
+log |-boost|p1a: Decidueye|spa|1
+log |-boost|p1a: Decidueye|spd|1
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 3, move 2	switch 3, switch 4 || move 4, move 3
+seed_after 44118,41729,24118,42366
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Corviknight|Corviknight, M|400/400
+log |switch|p1a: Corviknight|Corviknight, M|100/100
+log |-ability|p1a: Corviknight|Pressure
+log |move|p2a: Corviknight|Reflect||[still]
+log |-fail|p2a: Corviknight
+log |move|p2b: Blissey|Reflect||[still]
+log |-fail|p2b: Blissey
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |
+log |upkeep
+log |turn|5
+step turn5	move 2, move 2	switch 3, switch 4 || switch 3, move 3
+seed_after 58605,24827,6328,22393
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Skarmory|Skarmory, M|334/334
+log |switch|p2a: Skarmory|Skarmory, M|100/100
+log |move|p2b: Blissey|Reflect||[still]
+log |-fail|p2b: Blissey
+log |move|p1a: Corviknight|Reflect||[still]
+log |-fail|p1a: Corviknight
+log |move|p1b: Clefable|Reflect||[still]
+log |-fail|p1b: Clefable
+log |
+log |-sideend|p1: Alice|Reflect
+log |upkeep
+log |turn|6
+scenario trap_abilities_switching
+seed 1701,1702,1703,1704
+p1 Dugtrio|||ArenaTrap|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Magnezone|||MagnetPull|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|N||||]Gothitelle|||ShadowTag|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Blissey|||SereneGrace|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||]Gengar|||CursedBody|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M|||50|]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+step start		
+seed_after 1701,1702,1703,1704
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Dugtrio|Dugtrio, M|274/274
+log |switch|p1a: Dugtrio|Dugtrio, M|100/100
+log |split|p1
+log |switch|p1b: Magnezone|Magnezone|344/344
+log |switch|p1b: Magnezone|Magnezone|100/100
+log |split|p2
+log |switch|p2a: Corviknight|Corviknight, M|400/400
+log |switch|p2a: Corviknight|Corviknight, M|100/100
+log |split|p2
+log |switch|p2b: Blissey|Blissey, F|714/714
+log |switch|p2b: Blissey|Blissey, F|100/100
+log |-ability|p2a: Corviknight|Pressure
+log |turn|1
+step turn1	move 1, move 1	switch 3, switch 4 || switch 3, move 1 || move 1, switch 4 || move 1, move 1
+seed_after 1701,1702,1703,1704
+log |
+log |t:|
+log |move|p1a: Dugtrio|Calm Mind|p1a: Dugtrio
+log |-boost|p1a: Dugtrio|spa|1
+log |-boost|p1a: Dugtrio|spd|1
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p1b: Magnezone|Calm Mind|p1b: Magnezone
+log |-boost|p1b: Magnezone|spa|1
+log |-boost|p1b: Magnezone|spd|1
+log |move|p2b: Blissey|Calm Mind|p2b: Blissey
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |
+log |upkeep
+log |turn|2
+step turn2	move 1, switch 3	switch 3, switch 4 || switch 3, move 1 || move 1, switch 4 || move 1, move 1
+seed_after 1701,1702,1703,1704
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Gothitelle|Gothitelle, M|344/344
+log |switch|p1b: Gothitelle|Gothitelle, M|100/100
+log |move|p1a: Dugtrio|Calm Mind|p1a: Dugtrio
+log |-boost|p1a: Dugtrio|spa|1
+log |-boost|p1a: Dugtrio|spd|1
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p2b: Blissey|Calm Mind|p2b: Blissey
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |
+log |upkeep
+log |turn|3
+step turn3	move 1, move 1	switch 3, switch 4 || switch 3, move 1 || move 1, switch 4 || move 1, move 1
+seed_after 1701,1702,1703,1704
+log |
+log |t:|
+log |move|p1a: Dugtrio|Calm Mind|p1a: Dugtrio
+log |-boost|p1a: Dugtrio|spa|1
+log |-boost|p1a: Dugtrio|spd|1
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p1b: Gothitelle|Calm Mind|p1b: Gothitelle
+log |-boost|p1b: Gothitelle|spa|1
+log |-boost|p1b: Gothitelle|spd|1
+log |move|p2b: Blissey|Calm Mind|p2b: Blissey
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |
+log |upkeep
+log |turn|4
+step turn4	switch 4, move 1	switch 3, switch 4 || switch 3, move 1 || move 1, switch 4 || move 1, move 1
+seed_after 1701,1702,1703,1704
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Clefable|Clefable, M|394/394
+log |switch|p1a: Clefable|Clefable, M|100/100
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p1b: Gothitelle|Calm Mind|p1b: Gothitelle
+log |-boost|p1b: Gothitelle|spa|1
+log |-boost|p1b: Gothitelle|spd|1
+log |move|p2b: Blissey|Calm Mind|p2b: Blissey
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |
+log |upkeep
+log |turn|5
+step turn5	move 1, switch 3	switch 3, switch 4 || switch 3, move 1 || move 1, move 1
+seed_after 56421,29153,42475,13559
+log |
+log |t:|
+log |split|p1
+log |switch|p1b: Magnezone|Magnezone|344/344
+log |switch|p1b: Magnezone|Magnezone|100/100
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p1a: Clefable|Calm Mind|p1a: Clefable
+log |-boost|p1a: Clefable|spa|1
+log |-boost|p1a: Clefable|spd|1
+log |move|p2b: Blissey|Calm Mind|p2b: Blissey
+log |-boost|p2b: Blissey|spa|1
+log |-boost|p2b: Blissey|spd|1
+log |
+log |upkeep
+log |turn|6
+step turn6	move 1, move 1	switch 3, switch 4 || move 1, switch 3
+seed_after 60034,56895,48925,40008
+log |
+log |t:|
+log |split|p2
+log |switch|p2b: Gengar|Gengar, L50, M|167/167
+log |switch|p2b: Gengar|Gengar, L50, M|100/100
+log |move|p2a: Corviknight|Calm Mind|p2a: Corviknight
+log |-boost|p2a: Corviknight|spa|1
+log |-boost|p2a: Corviknight|spd|1
+log |move|p1b: Magnezone|Calm Mind|p1b: Magnezone
+log |-boost|p1b: Magnezone|spa|1
+log |-boost|p1b: Magnezone|spd|1
+log |move|p1a: Clefable|Calm Mind|p1a: Clefable
+log |-boost|p1a: Clefable|spa|1
+log |-boost|p1a: Clefable|spd|1
+log |
+log |upkeep
+log |turn|7
+scenario curse_ghost_and_normal
+seed 1801,1802,1803,1804
+p1 Gengar|||CursedBody|Curse,ShadowBall,CalmMind,Taunt|Serious||M||||]Snorlax|||ThickFat|Curse,BodySlam,CalmMind,Reflect|Serious|252,,128,,128,|M||||]Clefable|||MagicGuard|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Corviknight|||Pressure|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||
+p2 Blissey|||SereneGrace|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||]Toxapex|||Regenerator|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Skarmory|||Sturdy|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|M||||]Cresselia|||Levitate|CalmMind,Reflect,LightScreen,ThunderWave|Serious|252,,128,,128,|F||||
+step start		
+seed_after 1801,1802,1803,1804
+log |t:|
+log |gametype|doubles
+log |player|p1|Alice||
+log |player|p2|Bob||
+log |gen|9
+log |tier|[Gen 9] Random Doubles Battle
+log |rule|Species Clause: Limit one of each Pokémon
+log |rule|HP Percentage Mod: HP is shown in percentages
+log |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+log |rule|Sleep Clause Mod: Limit one foe put to sleep
+log |
+log |t:|
+log |teamsize|p1|4
+log |teamsize|p2|4
+log |start
+log |split|p1
+log |switch|p1a: Gengar|Gengar, M|261/261
+log |switch|p1a: Gengar|Gengar, M|100/100
+log |split|p1
+log |switch|p1b: Snorlax|Snorlax, M|524/524
+log |switch|p1b: Snorlax|Snorlax, M|100/100
+log |split|p2
+log |switch|p2a: Blissey|Blissey, F|714/714
+log |switch|p2a: Blissey|Blissey, F|100/100
+log |split|p2
+log |switch|p2b: Toxapex|Toxapex, M|304/304
+log |switch|p2b: Toxapex|Toxapex, M|100/100
+log |turn|1
+step turn1	move 1 1, move 1	move 2, move 2
+seed_after 12356,47228,12021,41438
+log |
+log |t:|
+log |move|p1a: Gengar|Curse|p2a: Blissey
+log |-start|p2a: Blissey|Curse|[of] p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|131/261
+log |-damage|p1a: Gengar|51/100
+log |move|p2a: Blissey|Reflect|p2a: Blissey
+log |-sidestart|p2: Bob|Reflect
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Curse|p1b: Snorlax
+log |-unboost|p1b: Snorlax|spe|1
+log |-boost|p1b: Snorlax|atk|1
+log |-boost|p1b: Snorlax|def|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|536/714|[from] Curse
+log |-damage|p2a: Blissey|76/100|[from] Curse
+log |upkeep
+log |turn|2
+step turn2	move 1 1, move 1	move 2, move 2
+seed_after 10539,7423,13592,12256
+log |
+log |t:|
+log |move|p1a: Gengar|Curse||[still]
+log |-fail|p1a: Gengar
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Curse|p1b: Snorlax
+log |-unboost|p1b: Snorlax|spe|1
+log |-boost|p1b: Snorlax|atk|1
+log |-boost|p1b: Snorlax|def|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|358/714|[from] Curse
+log |-damage|p2a: Blissey|51/100|[from] Curse
+log |upkeep
+log |turn|3
+step turn3	move 1 -2, move 1	move 2, move 2
+seed_after 658,31225,26568,37748
+log |
+log |t:|
+log |move|p1a: Gengar|Curse||[still]
+log |-fail|p1a: Gengar
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Curse|p1b: Snorlax
+log |-unboost|p1b: Snorlax|spe|1
+log |-boost|p1b: Snorlax|atk|1
+log |-boost|p1b: Snorlax|def|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|180/714|[from] Curse
+log |-damage|p2a: Blissey|26/100|[from] Curse
+log |upkeep
+log |turn|4
+step turn4	move 1 2, move 1	move 2, move 2
+seed_after 18273,8719,6016,3590
+log |
+log |t:|
+log |move|p1a: Gengar|Curse|p2b: Toxapex
+log |-start|p2b: Toxapex|Curse|[of] p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|1/261
+log |-damage|p1a: Gengar|1/100
+log |move|p2a: Blissey|Reflect||[still]
+log |-fail|p2a: Blissey
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Curse|p1b: Snorlax
+log |-unboost|p1b: Snorlax|spe|1
+log |-boost|p1b: Snorlax|atk|1
+log |-boost|p1b: Snorlax|def|1
+log |
+log |split|p2
+log |-damage|p2a: Blissey|2/714|[from] Curse
+log |-damage|p2a: Blissey|1/100|[from] Curse
+log |split|p2
+log |-damage|p2b: Toxapex|228/304|[from] Curse
+log |-damage|p2b: Toxapex|75/100|[from] Curse
+log |upkeep
+log |turn|5
+step turn5	move 1 2, move 3	switch 3, move 2
+seed_after 18273,8719,6016,3590
+log |
+log |t:|
+log |split|p2
+log |switch|p2a: Skarmory|Skarmory, M|334/334
+log |switch|p2a: Skarmory|Skarmory, M|100/100
+log |move|p1a: Gengar|Curse||[still]
+log |-fail|p1a: Gengar
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Calm Mind|p1b: Snorlax
+log |-boost|p1b: Snorlax|spa|1
+log |-boost|p1b: Snorlax|spd|1
+log |
+log |split|p2
+log |-damage|p2b: Toxapex|152/304|[from] Curse
+log |-damage|p2b: Toxapex|50/100|[from] Curse
+log |-sideend|p2: Bob|Reflect
+log |upkeep
+log |turn|6
+step turn6	move 1 1, move 3	move 2, move 2
+seed_after 18273,8719,6016,3590
+log |
+log |t:|
+log |move|p1a: Gengar|Curse|p2a: Skarmory
+log |-start|p2a: Skarmory|Curse|[of] p1a: Gengar
+log |split|p1
+log |-damage|p1a: Gengar|0 fnt
+log |-damage|p1a: Gengar|0 fnt
+log |faint|p1a: Gengar
+log |move|p2a: Skarmory|Reflect|p2a: Skarmory
+log |-sidestart|p2: Bob|Reflect
+log |move|p2b: Toxapex|Reflect||[still]
+log |-fail|p2b: Toxapex
+log |move|p1b: Snorlax|Calm Mind|p1b: Snorlax
+log |-boost|p1b: Snorlax|spa|1
+log |-boost|p1b: Snorlax|spd|1
+log |
+log |split|p2
+log |-damage|p2a: Skarmory|251/334|[from] Curse
+log |-damage|p2a: Skarmory|76/100|[from] Curse
+log |split|p2
+log |-damage|p2b: Toxapex|76/304|[from] Curse
+log |-damage|p2b: Toxapex|25/100|[from] Curse
+log |upkeep
+step forced1	switch 3, pass	
+seed_after 18273,8719,6016,3590
+log |
+log |t:|
+log |split|p1
+log |switch|p1a: Clefable|Clefable, M|394/394
+log |switch|p1a: Clefable|Clefable, M|100/100
+log |turn|7

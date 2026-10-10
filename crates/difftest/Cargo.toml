@@ -21,6 +21,14 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "raw_value"] }
 flate2 = "1"
 
+[target.'cfg(unix)'.dependencies]
+pprof = { version = "0.14", default-features = false, features = ["flamegraph", "frame-pointer"] }
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+required-features = ["engine"]
+
 # Profiles are only read from a workspace root, so they must be repeated here.
 [profile.release]
 opt-level = 3

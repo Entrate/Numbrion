@@ -1,0 +1,3 @@
+# Code generation verifies these files byte-for-byte, including their hashes.
+/data/scope.json text eol=lf
+/crates/engine/src/dex/*_generated.rs text eol=lf
