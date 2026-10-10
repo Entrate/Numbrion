@@ -70,7 +70,7 @@ DEFENSIVE_SETUP = ("irondefense", "cosmicpower", "amnesia", "acidarmor", "cotton
 RECOVERY = ("recover", "roost", "slackoff", "synthesis", "moonlight", "morningsun", "softboiled", "shoreup",
             "milkdrink", "healorder", "strengthsap")
 TEAM_HEAL = ("lifedew", "lunarblessing", "junglehealing")
-ALLY_HEAL = ("healpulse", "floralhealing")
+ALLY_HEAL = ("healpulse", "floralhealing", "pollenpuff")
 HAZARDS = {"stealthrock": 0.05, "spikes": 0.035, "toxicspikes": 0.025, "stickyweb": 0.04}
 SCREENS = ("reflect", "lightscreen", "auroraveil")
 
@@ -111,6 +111,7 @@ class SmartHeuristicAgent:
         self.recoil = np.zeros(n, dtype=np.float32)
         self.self_destruct = np.zeros(n, dtype=bool)
         self.recharge = np.zeros(n, dtype=bool)
+        self.harmful_status = np.zeros(n, dtype=bool)
         self.status_kind = [""] * n
         for i, move in enumerate(dex.moves, start=1):
             self.recoil[i] = float(move.get("recoil") or 0)
@@ -118,11 +119,24 @@ class SmartHeuristicAgent:
             self.recharge[i] = "recharge" in (move.get("flags") or ())
             if move["category"] == "Status":
                 self.status_kind[i] = self._status_kind(move["id"])
-        self.has_status_value = np.array([bool(k) and k != "protect" for k in self.status_kind])
+                # Targeted status is hostile unless its effects or target class identify ally support.
+                boosts = move.get("boosts") or {}
+                harmful_effect = (bool(move.get("status")) or bool(move.get("forceSwitch"))
+                                  or any(v < 0 for v in boosts.values())
+                                  or move.get("volatileStatus") in ("confusion", "taunt", "encore", "disable",
+                                                                    "yawn", "leechseed", "curse"))
+                support = (move["id"] in ALLY_HEAL or "allyanim" in (move.get("flags") or ())
+                           or bool(boosts) and all(v >= 0 for v in boosts.values()))
+                self.harmful_status[i] = (move["target"] in ("normal", "any", "adjacentFoe")
+                                          and (harmful_effect or not support))
+            elif move["id"] == "pollenpuff":
+                self.status_kind[i] = "allyheal"
+        self.has_status_value = np.array([bool(k) and k != "protect" for k in self.status_kind]) | self.harmful_status
         self.ability = {name: dex.ability_index.get(name, -1) for name in
-                        FLINCH_BLOCK + PRIORITY_BLOCK + SLEEP_BLOCK}
+                        FLINCH_BLOCK + PRIORITY_BLOCK + SLEEP_BLOCK + ("levitate",)}
         self.covert_cloak = dex.item_index.get("covertcloak", -1)
-        self.type = {name: dex.type_idx(name) for name in ("Electric", "Ground", "Fire", "Grass", "Poison", "Steel")}
+        self.air_balloon = dex.item_index.get("airballoon", -1)
+        self.type = {name: dex.type_idx(name) for name in ("Electric", "Ground", "Fire", "Grass", "Poison", "Steel", "Flying")}
         self.hit = _hit_table()
         self.random_normal = TARGETS.index("randomNormal")
         self.spread_targets = (TARGETS.index("allAdjacentFoes"), TARGETS.index("allAdjacent"))
@@ -338,7 +352,13 @@ class SmartHeuristicAgent:
         out *= floats[:, 6:8, PF["substitute"]] < 0.5
         side_block = np.isin(ability, [self.ability[a] for a in PRIORITY_BLOCK]).any(-1)
         out *= ~side_block[:, None]
-        out *= (field[:, FF["psychicterrain"]] < 0.5)[:, None]
+        flying = np.stack([(self._types(ids, floats, 6 + f) == self.type["Flying"]).any(-1) for f in (0, 1)], -1)
+        levitate = ability == self.ability["levitate"]
+        believed_levitate = (cand_p * (cand_ids == self.ability["levitate"])).sum(-1)
+        airborne = np.where(ability > 0, levitate, np.clip(believed_levitate, 0, 1))
+        airborne = np.where(flying | (ids[:, 6:8, I_ITEM] == self.air_balloon), 1.0, airborne)
+        airborne = np.where((field[:, FF["gravity"]] > 0.5)[:, None], 0.0, airborne)
+        out *= np.where((field[:, FF["psychicterrain"]] > 0.5)[:, None], airborne, 1.0)
         return out
 
     def _types(self, ids, floats, token):
@@ -403,8 +423,7 @@ class SmartHeuristicAgent:
             elif kind == "revive":
                 value = 0.4 if field[b, FF["own_alive"]] < 0.99 else -0.5
             elif kind == "allyheal":
-                ally = 1 - s
-                value = 0.8 * min(0.5, 1 - hp[b, ally]) if own_on[b, ally] and hp[b, ally] < 0.5 else 0.0
+                pass  # Value depends on the selected own token, below.
             else:  # foe-targeted status
                 per_foe = np.zeros(2, dtype=np.float32)
                 for f in (0, 1):
@@ -437,12 +456,27 @@ class SmartHeuristicAgent:
                         per_foe[f] = accuracy * 0.1
             for code in range(m * 10, m * 10 + 10):
                 tcode = (code % 10) // 2
-                if per_foe is None:
+                if tcode in (0, 1) and self.harmful_status[move]:
+                    token = 1 - tcode  # code 0 = own b; code 1 = own a
+                    v = -ALLY_WEIGHT * own_on[b, token]
+                elif kind == "allyheal":
+                    v = 0.0
+                    if tcode in (0, 1):
+                        token = 1 - tcode
+                        if own_on[b, token] and hp[b, token] < 0.5:
+                            v = 0.8 * min(0.5, 1 - hp[b, token])
+                        if name == "pollenpuff":
+                            e["ally_d"][b, s, code] = e["ally_k"][b, s, code] = 0
+                    elif name != "pollenpuff" and tcode in (3, 4):
+                        v = -0.8 * min(0.5, 1 - hp[b, 6 + tcode - 3]) * foe_on[b, tcode - 3]
+                elif per_foe is None:
                     v = value
                 elif tcode in (3, 4):
                     v = 0.0 if immune[b, s, code] else float(per_foe[tcode - 3])
-                else:
+                elif tcode == 2:
                     v = float(per_foe.max())  # spread status moves
+                else:
+                    v = 0.0
                 e["act_bonus"][b, s, code] += v
 
     # ---- candidates and pair values -----------------------------------------------------------------------------

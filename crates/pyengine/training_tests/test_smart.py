@@ -1,5 +1,6 @@
 """Tests for the doubles-aware scripted baseline (training.smart)."""
 import sys
+from copy import copy
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -10,12 +11,115 @@ import torch
 
 import numbrion as nb
 from training.dex import load_dex
-from training.encoder import FF, I_MOVE0, PF, Encoder
+from training.encoder import (FF, I_ABILITY, I_CAND_ABILITIES, I_ITEM, I_MOVE0, I_TERA, I_TYPE1, PF,
+                              Buffers, Encoder)
 from training.smart import FAKE_OUT_KO, PROTECT_MOVES, SmartHeuristicAgent
 
 REPO = Path(__file__).resolve().parents[3]
 POOL = REPO / "data" / "teams" / "train-s42-2000.txt"
 PASS, N_ACTIONS = 46, 47
+
+
+def status_position(move, slot=0):
+    """Two healthy own actives, a paralyzed foe and an awake foe, with one selectable move."""
+    torch.set_num_threads(1)
+    dex = load_dex()
+    arrays = Buffers(1).arrays()
+    floats = arrays["floats"]
+    for token in (0, 1, 6, 7):
+        floats[0, token, PF["present"]] = floats[0, token, PF["hp"]] = 1
+        floats[0, token, PF["active_a" if token in (0, 6) else "active_b"]] = 1
+    floats[0, 6, PF["par"]] = 1
+    floats[0, slot, PF["pp0"]] = 1
+    arrays["ids"][0, slot, I_MOVE0] = dex.move_index[move]
+    arrays["field"][0, FF["request_move"]] = 1
+    return arrays
+
+
+@pytest.mark.parametrize("slot", (0, 1))
+def test_spore_never_targets_ally(slot):
+    arrays = status_position("spore", slot)
+    mask = np.zeros((1, N_ACTIONS), dtype=bool)
+    ally_code = 2 * slot  # target code 0 = own b; code 1 = own a
+    mask[0, [ally_code, 6, 8]] = True
+    for seed in range(20):  # includes the original reproductions, seeds 1 and 3
+        smart = SmartHeuristicAgent(np.random.default_rng(seed))
+        if slot == 0:
+            chosen = smart.first(arrays, np.array([0]), mask)
+        else:
+            mask0 = np.zeros_like(mask)
+            mask0[0, PASS] = True
+            smart.first(arrays, np.array([0]), mask0)
+            chosen = smart.second(np.array([0]), mask)
+        assert chosen[0] == 8, (slot, seed, chosen)  # the awake foe
+        assert smart.ctx["e"]["act_bonus"][0, slot, ally_code] <= -1
+
+
+@pytest.mark.parametrize("move", ("glare", "willowisp", "toxic", "taunt", "encore", "disable", "charm", "strengthsap"))
+def test_harmful_status_penalizes_both_own_target_codes(move):
+    smart = SmartHeuristicAgent(np.random.default_rng(0))
+    effects = smart._prepare(status_position(move))["e"]
+    assert (effects["act_bonus"][0, 0, :4] <= -1).all()
+
+
+@pytest.mark.parametrize("move", ("healpulse", "floralhealing", "pollenpuff", "coaching", "helpinghand"))
+def test_ally_support_keeps_its_value(move):
+    arrays = status_position(move)
+    arrays["floats"][0, 1, PF["hp"]] = 0.2
+    smart = SmartHeuristicAgent(np.random.default_rng(0))
+    effects = smart._prepare(arrays)["e"]
+    assert effects["act_bonus"][0, 0, 0] >= 0
+    if move in ("healpulse", "floralhealing", "pollenpuff"):
+        assert effects["act_bonus"][0, 0, 0] > 0
+        assert effects["act_bonus"][0, 0, 2] == 0  # full-HP own a
+        assert effects["ally_d"][0, 0, 0] == effects["ally_k"][0, 0, 0] == 0
+    if move == "helpinghand":
+        assert effects["helping"][0, 0, 0] == 1
+
+
+@pytest.mark.parametrize("airborne, probability", (
+    ("flying", 1), ("tera_flying", 1), ("tera_grounded", 0), ("stellar_flying", 1),
+    ("levitate", 1), ("believed_levitate", 0.35), ("known_overrides_belief", 0),
+    ("balloon", 1), ("grounded", 0), ("gravity", 0),
+))
+def test_psychic_terrain_fake_out_checks_each_targets_grounding(airborne, probability):
+    dex = load_dex()
+    if airborne == "balloon" and "airballoon" not in dex.item_index:
+        # The current exported random-doubles dex omits Balloon. Give it a valid item ID in a local dex.
+        dex = copy(dex)
+        dex.item_index = {**dex.item_index, "airballoon": dex.item_index["leftovers"]}
+    arrays = status_position("fakeout")
+    ids, floats, field = (arrays[k] for k in ("ids", "floats", "field"))
+    ids[0, 6:8, I_ABILITY] = dex.ability_index["prankster"]
+    ids[0, 6:8, I_TYPE1] = dex.type_idx("Normal")
+    if airborne in ("flying", "tera_grounded", "stellar_flying", "gravity"):
+        ids[0, 6, I_TYPE1 + 1] = dex.type_idx("Flying")
+    if airborne in ("tera_flying", "tera_grounded", "stellar_flying"):
+        floats[0, 6, PF["terastallized"]] = 1
+        ids[0, 6, I_TERA] = dex.type_idx({"tera_flying": "Flying", "tera_grounded": "Water",
+                                       "stellar_flying": "Stellar"}[airborne])
+    if airborne == "levitate":
+        ids[0, 6, I_ABILITY] = dex.ability_index["levitate"]
+    if airborne in ("believed_levitate", "known_overrides_belief"):
+        if airborne == "believed_levitate":
+            ids[0, 6, I_ABILITY] = 0
+        ids[0, 6, I_CAND_ABILITIES] = dex.ability_index["levitate"]
+        floats[0, 6, PF["cand_ability_p0"]] = 0.35
+        ids[0, 6, I_CAND_ABILITIES + 1] = dex.ability_index["prankster"]
+        floats[0, 6, PF["cand_ability_p0"] + 1] = 0.65
+    if airborne == "balloon":
+        ids[0, 6, I_ITEM] = dex.item_index["airballoon"]
+    if airborne == "gravity":
+        field[0, FF["gravity"]] = 1
+    smart = SmartHeuristicAgent(np.random.default_rng(0), dex)
+    np.testing.assert_allclose(smart._can_flinch(ids, floats, field), [[1, 1]])
+    field[0, FF["psychicterrain"]] = 1
+    np.testing.assert_allclose(smart._can_flinch(ids, floats, field), [[probability, 0]])
+    floats[0, 0, PF["fresh"]] = 1
+    arrays["action_features"][0, 0, :, 6:8] = 1
+    effects = smart._prepare(arrays)["e"]
+    assert effects["flinch"][0, 0, 6, 0] == pytest.approx(probability)
+    assert effects["flinch"][0, 0, 8, 1] == 0
 
 
 def slot1_masks(env, needs, a0_smart, other_a0):
