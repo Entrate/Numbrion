@@ -323,10 +323,18 @@ impl Game {
         }
     }
 
-    /// Both games were built from the same packed teams, names and seed (so team definitions agree).
+    /// Both games were built from the same packed teams, names and seed, use the same log mode, and
+    /// resolve to the same team definitions (a determinized world whose swap changed the gender draws
+    /// does not match a battle rebuilt from its packed text).
     pub fn same_origin(&self, other: &Game) -> bool {
-        self.seed0 == other.seed0 && self.packed == other.packed && self.names == other.names
-            && self.is_text() == other.is_text()
+        self.seed0 == other.seed0
+            && self.packed == other.packed
+            && self.names == other.names
+            && match (&self.sink, &other.sink) {
+                (Sink::No(a), Sink::No(b)) => a.shares_context(b),
+                (Sink::Text(a), Sink::Text(b)) => a.shares_context(b),
+                _ => false,
+            }
     }
 
     /// Replace the battle's PRNG state. The next draw is the first draw of the new stream.
@@ -406,5 +414,53 @@ mod tests {
         );
         assert_eq!(v.omni, raw);
         assert!(v.players[0].iter().all(|l| !l.is_empty()));
+    }
+
+    #[test]
+    fn grid_rejects_roots_with_irrevocable_choices() {
+        let packed: Arc<str> = Arc::from(
+            "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric]             Snorlax||leftovers|thickfat|bodyslam|Serious||M|||100|,,,,,Normal",
+        );
+        let names = ["A".to_string(), "B".to_string()];
+        let mut root = Game::new([1, 2, 3, 4], packed.clone(), packed, names, false, false).unwrap();
+        root.start().unwrap();
+        let mut ex = crate::search::GridExecutor::new(1).unwrap();
+        assert!(ex.stage_root(0, &root).is_ok());
+        // An accepted choice that cannot be undone (e.g. a switch while maybeTrapped) hides the
+        // side's actions from the mask; the root must still count as half-chosen.
+        let mut half = root.duplicate();
+        with_mut!(half, b => {
+            b.state.sides[0].choice.len = 2;
+            b.state.sides[0].choice.cant_undo = true;
+        });
+        assert!(!half.side_actions(0).needs_action());
+        let e = ex.stage_root(0, &half).unwrap_err().to_string();
+        assert!(e.contains("already chosen"), "{e}");
+    }
+
+    #[test]
+    fn copy_refuses_worlds_whose_gender_draws_changed() {
+        // Random-gender bench members: swapping one for an explicit gender shifts later draws.
+        let drawn = "Pikachu||lightball|static|thunderbolt|Serious|||||100|,,,,,Electric";
+        let team: Arc<str> = Arc::from(vec![drawn; 6].join("]"));
+        let fixed = "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric";
+        let names = ["A".to_string(), "B".to_string()];
+        let mut mismatches = 0;
+        for seed in 1..=24u16 {
+            let mut root = Game::new([seed, 2, 3, 4], team.clone(), team.clone(), names.clone(), false, false)
+                .unwrap();
+            root.start().unwrap();
+            let mut world = root.duplicate();
+            world.replace_hidden_set(0, 2, fixed).unwrap();
+            let [p1, p2] = world.packed_teams().clone();
+            let mut rebuilt = Game::new(world.initial_seed(), p1, p2, names.clone(), false, false).unwrap();
+            rebuilt.start().unwrap();
+            if world.same_origin(&rebuilt) {
+                rebuilt.copy_state_from(&world);
+            } else {
+                mismatches += 1;
+            }
+        }
+        assert!(mismatches > 0, "no seed changed the later gender draws");
     }
 }

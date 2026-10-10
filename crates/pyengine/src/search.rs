@@ -17,7 +17,7 @@ use crate::{
     game::Game,
     mask::{Req, SideActions},
 };
-use engine::ids::MonId;
+use engine::{ids::MonId, state::choices::RequestKind};
 use rayon::prelude::*;
 use std::sync::{Mutex, MutexGuard};
 
@@ -151,14 +151,15 @@ impl GridExecutor {
         }
         let acts = [root.side_actions(0), root.side_actions(1)];
         let party = [root.party(0), root.party(1)];
-        if !acts.iter().any(SideActions::needs_action) {
-            return Err(GridError::Input(format!("root of world {k} has no pending request")));
-        }
-        // A side that already chose (and may still re-choose) would let the other side's choice run the turn.
-        if let Some(s) = (0..2).find(|&s| acts[s].needs_action() && root.state().sides[s].choice.len >= 2) {
+        // A side that already chose would let the other side's choice run the turn. Judge this from the
+        // request itself: a choice that cannot be undone hides the side's actions from the mask.
+        if let Some(s) = (0..2).find(|&s| has_chosen(root, s)) {
             return Err(GridError::Input(format!(
                 "root of world {k}: side {s} has already chosen; roots must be taken before either side chooses"
             )));
+        }
+        if !acts.iter().any(SideActions::needs_action) {
+            return Err(GridError::Input(format!("root of world {k} has no pending request")));
         }
         match self.worlds.get_mut(k) {
             Some(w) if w.root.is_text() == root.is_text() => {
@@ -379,4 +380,12 @@ impl GridArrays {
         }
         o
     }
+}
+
+/// The request asks `side` to act and it already holds a complete or irrevocable choice.
+pub(crate) fn has_chosen(root: &Game, side: usize) -> bool {
+    let state = root.state();
+    let choice = &state.sides[side].choice;
+    matches!(state.requests[side].kind, RequestKind::Move | RequestKind::Switch)
+        && (choice.len >= 2 || choice.cant_undo)
 }

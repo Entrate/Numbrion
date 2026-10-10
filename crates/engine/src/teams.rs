@@ -303,10 +303,28 @@ impl SetDef {
             || self.nature as isize >= dex::NATURES.len() as isize
             || self.level == 0
             || self.ivs.iter().any(|&iv| iv > 31)
-            || self.tera_type.0 as usize >= dex::TYPE_NAMES.len()
+            // TypeIds are one-based; packed sets accept every generated name, including "???".
+            || !(1..=dex::TYPE_NAMES.len()).contains(&(self.tera_type.0 as usize))
         {
             return Err(TeamError("Invalid typed set definition".into()));
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tera_validation_tests {
+    use super::*;
+
+    #[test]
+    fn typed_tera_domain_matches_packed_parsing() {
+        let team = TeamDef::unpack("Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,???").unwrap();
+        let set = team.sets[0].clone();
+        assert_eq!(set.tera_type, dex::TYPE_UNKNOWN);
+        assert!(set.validate().is_ok());
+        for (tera, ok) in [(0, false), (1, true), (dex::TYPE_STELLAR.0, true), (dex::TYPE_UNKNOWN.0, true), (21, false)] {
+            let set = SetDef { tera_type: TypeId(tera), ..set.clone() };
+            assert_eq!(set.validate().is_ok(), ok, "tera {tera}");
+        }
     }
 }

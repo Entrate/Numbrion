@@ -21,9 +21,11 @@ Profiles go stale when engine code changes: rerun the script after every engine 
 
 ## Results (2026-10-10, branch `perf3`)
 
-- Correctness: the PGO `difftest.exe` replays all 13,034 gate battles bit-exact and passes the
-  124 harness selftests; engine (351) and pyengine (18) tests pass on the MSVC toolchain.
-- Speed, 1 thread, fuzz-2000, interleaved on a busy CPU (other builds running, so noisy):
-  GNU 743, MSVC without PGO 757, **MSVC with PGO 910 battles/s** (mean of 4 rounds; PGO won every
-  round). Re-measure on an idle machine before quoting.
+- Correctness at `a5fee3d`: the PGO `difftest.exe` (profile retrained on that head) replays all 13,034 gate
+  battles bit-exact and passes the 124 harness selftests. Engine (351) and pyengine (18) tests passed on the
+  MSVC toolchain at `158b4f2`; the GNU gate at `a5fee3d` has 359 and 22.
+- Speed at `a5fee3d`, 1 thread, fuzz-2000, three interleaved rounds while a training run shared the CPU
+  (ratios meaningful, absolute values low): GNU 1,149, MSVC without PGO 1,166, **MSVC with PGO 1,559
+  battles/s** (+34% over the same code built with MSVC without PGO). An earlier busy-CPU run at `158b4f2`
+  measured 743 / 757 / 910. Re-measure on an idle machine before quoting.
 - The PGO wheel is untested in Python so far.

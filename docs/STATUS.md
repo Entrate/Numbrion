@@ -18,7 +18,8 @@ identical protocol log, identical requests (byte-level JSON), identical PRNG sta
 | slice0/1/2 (core-only to common effects) | 600 | 600 pass |
 | sample-50 | 50 | 50 pass |
 
-Total: 63,634 battles, ~1.68M decisions, ~32M log lines, zero divergences.
+Total: 64,034 battles, ~1.68M decisions, ~32M log lines, zero divergences (corpus coverage accumulated
+before 2026-10-10; see below for the gate run at the current head).
 
 Reproduce: `cd crates/difftest && cargo build --release && ./target/release/difftest replay <corpus> --sim engine`.
 
@@ -30,3 +31,12 @@ for measurements, before/after flamegraphs and remaining ideas.
 
 Portable build (default since 5c87aaa, no target-cpu tuning): 1,033 battles/s on one thread, same parity.
 CPU-specific tuning is intentionally skipped; training will move to another machine (Windows + GPU).
+
+Performance rounds 2-4 (2026-10-10, Windows, merged at `a5fee3d`): per-pass callback-relation masks, event
+fast paths for ModifyBoost/ModifySpe/Type, compile-time key/id tables, cheaper construction, plus the
+search worker (`restore_from`/`clone`/`reset`), hidden-set determinization and `GridExecutor`. Gate at the
+merged head: 359 engine and 22 pyengine tests, 13,034 replayed battles (5 committed fixtures, a fuzz-2000 and
+a fresh fuzz-10k corpus) bit-exact, 124 harness selftests. One-thread fuzz-2000 throughput, all builds
+interleaved while a training run shared the CPU (ratios meaningful, absolute values low): pre-round `main`
+787, current GNU build 1,149 (1.46x), MSVC build 1,166, MSVC + PGO 1,559 battles/s (1.98x; see
+[PGO](design/PGO.md)). Multi-thread numbers for this head are not yet re-measured.
