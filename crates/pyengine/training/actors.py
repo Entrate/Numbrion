@@ -65,6 +65,30 @@ class SharedArrays:
                 block.unlink()
 
 
+def memory_mb() -> dict:
+    """Working set and private bytes of this process (Windows), for leak checks."""
+    if sys.platform != "win32":
+        return {}
+    import ctypes
+    from ctypes import wintypes
+
+    class Counters(ctypes.Structure):
+        _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD)] + [
+            (name, ctypes.c_size_t) for name in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
+                                                 "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
+                                                 "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage",
+                                                 "PrivateUsage")]
+
+    kernel32 = ctypes.WinDLL("kernel32")
+    kernel32.GetCurrentProcess.restype = wintypes.HANDLE  # the pseudo-handle -1 must not be truncated to 32 bits
+    kernel32.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+    counters = Counters()
+    counters.cb = ctypes.sizeof(counters)
+    if not kernel32.K32GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
+        return {}
+    return {"rss_mb": counters.WorkingSetSize >> 20, "private_mb": counters.PrivateUsage >> 20}
+
+
 def weight_layout(model) -> list:
     """(name, shape, offset) of every persistent tensor in ``model.state_dict()``."""
     layout, offset = [], 0
@@ -203,6 +227,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 out["bootstrap"][rows] = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
             stats["seconds"] = time.perf_counter() - started
             stats["inference_seconds"] = inference
+            stats.update(memory_mb())
             connection.send(stats)
     except Exception:
         import traceback
@@ -235,6 +260,7 @@ class Actors:
                 child, [b.names() for b in self.buffers], self.weights.names(), n_envs, steps, int(bounds[w]),
                 int(bounds[w + 1]), pools, seed * 1000 + w, path, config))
             process.start()
+            child.close()  # so recv() raises EOFError instead of hanging if the actor dies
             self.connections.append(parent)
             self.processes.append(process)
         self.pending = False
@@ -261,6 +287,9 @@ class Actors:
         totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns", "pool_games", "pool_wins")}
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
+        for key in ("rss_mb", "private_mb"):  # the largest actor
+            if all(key in r for r in replies):
+                totals["actor_" + key] = max(r[key] for r in replies)
         return totals
 
     def close(self) -> None:

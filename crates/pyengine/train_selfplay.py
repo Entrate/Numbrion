@@ -19,17 +19,15 @@ Run from the repository root:
 from __future__ import annotations
 
 import argparse
-import ctypes
 import json
 import os
-import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import torch
 
-from training.actors import Actors
+from training.actors import Actors, memory_mb
 from training.device import training_device
 from training.dex import load_dex
 from training.model import Model
@@ -64,26 +62,6 @@ def save(path: Path, payload: dict) -> None:
 
 def cpu_state(model: torch.nn.Module) -> dict:
     return {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
-
-
-def memory_mb() -> dict:
-    """Working set and private bytes of this process (Windows), for leak checks."""
-    if sys.platform != "win32":
-        return {}
-
-    class Counters(ctypes.Structure):
-        _fields_ = [("cb", ctypes.c_ulong), ("PageFaultCount", ctypes.c_ulong)] + [
-            (name, ctypes.c_size_t) for name in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
-                                                 "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
-                                                 "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage",
-                                                 "PrivateUsage")]
-
-    counters = Counters()
-    counters.cb = ctypes.sizeof(counters)
-    process = ctypes.windll.kernel32.GetCurrentProcess()
-    if not ctypes.windll.psapi.GetProcessMemoryInfo(process, ctypes.byref(counters), counters.cb):
-        return {}
-    return {"rss_mb": counters.WorkingSetSize >> 20, "private_mb": counters.PrivateUsage >> 20}
 
 
 def spread_mask(n: int, fraction: float) -> np.ndarray:
@@ -273,6 +251,7 @@ def main():
                 "pool_win_rate": round(collected["pool_wins"] / collected["pool_games"], 3) if collected["pool_games"] else None,
                 "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5), "ko_bonus": round(collected_info["ko_bonus"], 4),
                 "pool_size": len(pool), **stats, **memory_mb(),
+                **{k: v for k, v in collected.items() if k.startswith("actor_")},
             }
             print(json.dumps(metrics), flush=True)
             with (args.output / "metrics.jsonl").open("a", encoding="utf-8") as stream:
