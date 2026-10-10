@@ -79,6 +79,41 @@ Tera 15%), the "always use the strongest attack" heuristic, and earlier snapshot
 also reports mistake counters (attacks into Protect, failed Fake Outs, moves with no target, own-side hits,
 Tera and switch frequency), calibration of the critic, and Showdown HTML replays.
 
+## First run (2026-10-10)
+
+60 minutes of training on the Ryzen 5 3600 + RX 5500 with the defaults above: 712 PPO updates and
+189,395 self-play battles (about 53 battles/s, 4.5M trained decisions). Evaluation took 4 minutes,
+using duplicate games on the held-out teams (400 games per matchup, 1,000 for the final baselines):
+
+| Snapshot | vs random | vs strongest-attack heuristic | final (60 min) vs this snapshot |
+|---|---:|---:|---:|
+| 0 min (untrained) | 42.2% | 0.3% | 99.8% |
+| 5 min | 100% | 53.0% | 65.5% |
+| 10 min | 99.3% | 60.5% | 66.5% |
+| 20 min | 99.5% | 63.0% | 59.0% |
+| 30 min | 99.5% | 62.3% | 57.0% |
+| 35 min | 99.5% | 67.5% | 49.5% |
+| 45 min | 100% | 65.7% | 60.3% |
+| 55 min | 99.3% | 69.0% | 50.5% |
+| 60 min | 100% (1,000 games) | 67.8% (1,000 games, about +130 Elo) | |
+
+The heuristic itself beats the random player in all 400 games. Both TIPS tripwires for the first hours
+(95%+ vs random, then beating "always use the strongest attack") were met within five minutes. Most of the
+gain came in the first 5-10 minutes, slower gains followed until about 35 minutes, and the last 25 minutes
+were roughly flat (final vs 35/55 min: 49.5% and 50.5%, error about +/-5%).
+
+The final policy plays an all-out attack style: self-play battles average 9.5 turns, games against the
+heuristic 5-6, it terastallizes in nearly every battle (usually on turn 1), and it almost never uses Fake
+Out (3 times in 1,260 games) or other status moves. Policy entropy fell from 4.0 to about 0.7 during the run.
+Its mistake rates are low (0.35% of moves without a target, 0.16% hitting its own side), but the
+heuristic never uses Protect, so these games do not test reading Protect. The critic ranks positions
+well: higher values always meant more wins. Against the weaker heuristic it is underconfident, for example
+predicting 55% where the actual rate was 67%, because it was trained on self-play, where both sides win
+equally often.
+
+Outputs (git-ignored): `scratch/training/first-run/` with `metrics.jsonl`, `snapshots/`,
+`evaluation.json` and four HTML replays in `replays/`.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.
