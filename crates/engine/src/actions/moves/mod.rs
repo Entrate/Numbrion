@@ -11,3 +11,6 @@ pub mod targeting;
 /// Empty immutable effects object: the `base` for a runtime-created `self`/secondary
 /// object (e.g. Curse's `move.self = {boosts}`), since scratch effects borrow immutable data.
 pub use support::EMPTY_EFFECTS;
+
+#[cfg(test)]
+mod tests;
