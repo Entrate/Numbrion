@@ -35,8 +35,7 @@ impl Owned {
 
 /// The condition record that shares a move's key (`pokemon.addVolatile(move.id)`).
 fn condition_of_move(move_id: EffectId) -> EffectId {
-    dex::lookup(EffectKind::Condition, dex::effect(move_id).key)
-        .expect("a cantusetwice move has a bare condition record")
+    dex::same_key_condition(move_id).expect("a cantusetwice move has a bare condition record")
 }
 
 impl<L: LogSink> Battle<L> {

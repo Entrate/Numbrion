@@ -18,6 +18,9 @@ pub use hook_index::{
     CallbackKind, callback_relations, effect_callback_relations, effect_has_callback, event_hook,
     has_callback, kind_callback_relations,
 };
+mod keys;
+pub(crate) use keys::key_ids;
+pub use keys::{KeyIds, condition_id, same_key_condition};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -308,7 +311,7 @@ pub fn species(id: EffectId) -> &'static SpeciesData {
 pub fn move_data(id: EffectId) -> &'static MoveData {
     &MOVES[(id.0 - MOVE_START) as usize]
 }
-pub fn table(kind: EffectKind) -> &'static [EffectData] {
+pub const fn table(kind: EffectKind) -> &'static [EffectData] {
     match kind {
         EffectKind::Species => SPECIES_DATA,
         EffectKind::Move => MOVES_DATA,
@@ -318,7 +321,7 @@ pub fn table(kind: EffectKind) -> &'static [EffectData] {
         EffectKind::Rule => RULES_DATA,
     }
 }
-pub fn effect(id: EffectId) -> &'static EffectData {
+pub const fn effect(id: EffectId) -> &'static EffectData {
     let kind = id.kind().expect("invalid effect id");
     let entries = table(kind);
     &entries[(id.0 - entries[0].id.0) as usize]

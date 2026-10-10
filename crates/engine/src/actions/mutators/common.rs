@@ -114,12 +114,10 @@ impl<L: LogSink> Battle<L> {
         };
         self.state.effects.alloc(owner, target, id, order)
     }
+    /// Same-key condition record, else the id itself, then the alias step;
+    /// a compile-time table (`dex::condition_id`). NONE stays NONE.
     pub(crate) fn condition_id(&self, id: EffectId) -> EffectId {
-        if id == EffectId::NONE {
-            return id;
-        }
-        dex::lookup(EffectKind::Condition, dex::effect(id).key)
-            .map_or(dex::canonical_effect(id), dex::canonical_effect)
+        dex::condition_id(id)
     }
     pub(crate) fn condition_ref(&self, id: EffectId) -> EffectRef {
         let id = self.condition_id(id);
