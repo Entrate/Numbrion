@@ -71,14 +71,18 @@ impl<L: LogSink> Battle<L> {
                 Stat::SpD => EventId::ModifySpD,
                 Stat::Spe => EventId::ModifySpe,
             };
-            value = numeric_stat_relay(self.run_event(
-                event,
-                EventArg::Holder(Holder::mon(pokemon)),
-                EventArg::Null,
-                EffectRef::None,
-                Relay::Number(value),
-                RunEventOptions::default(),
-            ));
+            value = if stat == Stat::Spe && self.query_event_is_empty(pokemon, event) {
+                numeric_stat_relay(self.empty_query_event(event, Relay::Number(value)))
+            } else {
+                numeric_stat_relay(self.run_event(
+                    event,
+                    EventArg::Holder(Holder::mon(pokemon)),
+                    EventArg::Null,
+                    EffectRef::None,
+                    Relay::Number(value),
+                    RunEventOptions::default(),
+                ))
+            };
         }
         // This format does not override battle.trunc.
         if stat == Stat::Spe && value > 10000.0 {
@@ -162,14 +166,18 @@ impl<L: LogSink> Battle<L> {
     /// Ports `sim/pokemon.ts:580,618`. PRNG: ModifyBoost dispatch only.
     fn stats_modify_boosts(&mut self, target: MonId, boosts: OrderedBoosts) -> OrderedBoosts {
         let original = self.stash_boosts(boosts);
-        let result = self.run_event(
-            EventId::ModifyBoost,
-            EventArg::Holder(Holder::mon(target)),
-            EventArg::Null,
-            EffectRef::None,
-            Relay::Boosts(original),
-            RunEventOptions::default(),
-        );
+        let result = if self.query_event_is_empty(target, EventId::ModifyBoost) {
+            self.empty_query_event(EventId::ModifyBoost, Relay::Boosts(original))
+        } else {
+            self.run_event(
+                EventId::ModifyBoost,
+                EventArg::Holder(Holder::mon(target)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Boosts(original),
+                RunEventOptions::default(),
+            )
+        };
         let Relay::Boosts(handle) = result else {
             panic!("ModifyBoost returned a non-object relay");
         };

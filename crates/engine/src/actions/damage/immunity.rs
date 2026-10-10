@@ -204,14 +204,18 @@ impl<L: LogSink> Battle<L> {
             }
         }
         let original = self.stash_types(base);
-        let result = self.run_event(
-            EventId::Type,
-            EventArg::Holder(Holder::mon(pokemon)),
-            EventArg::Null,
-            EffectRef::None,
-            Relay::Types(original),
-            RunEventOptions::default(),
-        );
+        let result = if self.query_event_is_empty(pokemon, EventId::Type) {
+            self.empty_query_event(EventId::Type, Relay::Types(original))
+        } else {
+            self.run_event(
+                EventId::Type,
+                EventArg::Holder(Holder::mon(pokemon)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Types(original),
+                RunEventOptions::default(),
+            )
+        };
         let Relay::Types(handle) = result else {
             panic!("Type event returned a non-array relay");
         };
