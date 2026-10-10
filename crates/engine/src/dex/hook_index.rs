@@ -44,6 +44,35 @@ static CALLBACK_RELS: [u8; EVENT_COUNT] = {
     masks
 };
 
+// Includes the possible onStart fallback for a Pokemon's SwitchIn. This is
+// conservative when onAnySwitchIn disables that fallback; false remains exact.
+static EFFECT_CALLBACK_RELS: [[u8; EVENT_COUNT]; MANIFESTS.len()] = {
+    let mut masks = [[0; EVENT_COUNT]; MANIFESTS.len()];
+    let mut i = 0;
+    while i < HOOKS.len() {
+        let h = &HOOKS[i];
+        if h.site.is_empty() && !matches!(h.value, HookValue::Absent) {
+            masks[h.effect.0 as usize][h.event as usize] |= 1 << h.rel as usize;
+            if h.event as usize == EventId::Start as usize
+                && h.rel as usize == HookRel::On as usize
+                && matches!(
+                    MANIFESTS[h.effect.0 as usize].effect_type,
+                    EffectType::Ability | EffectType::Item
+                )
+            {
+                masks[h.effect.0 as usize][EventId::SwitchIn as usize] |= 1 << HookRel::On as usize;
+            }
+        }
+        i += 1;
+    }
+    masks
+};
+
+#[inline]
+pub fn effect_has_callback(id: EffectId, event: EventId, rel: HookRel) -> bool {
+    EFFECT_CALLBACK_RELS[canonical_effect(id).0 as usize][event as usize] & (1 << rel as usize) != 0
+}
+
 #[inline]
 pub fn callback_relations(event: EventId) -> u8 {
     CALLBACK_RELS[event as usize]
@@ -69,6 +98,7 @@ mod tests {
         for h in HOOKS.iter().filter(|h| h.site.is_empty()) {
             if !matches!(h.value, HookValue::Absent) {
                 assert!(has_callback(h.event, h.rel));
+                assert!(effect_has_callback(h.effect, h.event, h.rel));
             }
         }
         for view in SPECIES_CONDITION_VIEWS {

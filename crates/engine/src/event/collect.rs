@@ -172,6 +172,13 @@ impl<L: LogSink> Battle<L> {
         if cell == CellId::NONE {
             return;
         }
+        if matches!(selector.mode, CollectMode::Callback) {
+            if let EffectRef::Dex(id) = effect {
+                if !dex::effect_has_callback(id, selector.event, selector.rel) {
+                    return;
+                }
+            }
+        }
         let hook = self.get_callback(holder, effect, selector.event, selector.rel);
         let duration = self.state.effects.cells[cell.0 as usize].duration;
         if hook.is_none()
@@ -200,7 +207,8 @@ impl<L: LogSink> Battle<L> {
     ) {
         if pokemon == MonId::NONE
             || (matches!(selector.mode, CollectMode::Callback)
-                && !dex::has_callback(selector.event, selector.rel))
+                && (!dex::has_callback(selector.event, selector.rel)
+                    || !self.pokemon_has_callback(pokemon, selector)))
         {
             return;
         }
@@ -268,6 +276,25 @@ impl<L: LogSink> Battle<L> {
                 );
             }
         }
+    }
+    /// Recompute from current effect references, so direct state edits, nested
+    /// installs/removals and snapshot restoration require no cache invalidation.
+    /// Only proves absence; collection still captures and pins every listener.
+    fn pokemon_has_callback(&self, pokemon: MonId, selector: HookSelector) -> bool {
+        let p = &self.state.pokemon[pokemon.0 as usize];
+        let has = |id| dex::effect_has_callback(id, selector.event, selector.rel);
+        if has(p.ability) || has(p.item) || has(p.base_species) || has(self.status_id(pokemon)) {
+            return true;
+        }
+        let cell_has = |c: &CellId| has(self.state.effects.cells[c.0 as usize].id);
+        if p.volatiles.as_slice().iter().any(cell_has) {
+            return true;
+        }
+        p.position < 2
+            && self.state.sides[pokemon.side().0 as usize].slot_conditions[p.position as usize]
+                .as_slice()
+                .iter()
+                .any(cell_has)
     }
     pub fn find_battle_event_handlers(
         &mut self,
