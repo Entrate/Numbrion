@@ -389,7 +389,6 @@ function record(sc, seed) {
 		return snap;
 	};
 	boundary();
-	const lines = [];
 	for (const [i, [c1, c2]] of sc.script.entries()) {
 		if (s.ended) break;
 		for (const [side, alternatives] of [['p1', c1], ['p2', c2]]) {
@@ -409,7 +408,6 @@ function record(sc, seed) {
 				}
 				throw new Error(`${sc.name} turn ${i + 1}: ${side} ${JSON.stringify(alternatives)} rejected: ${r.error}`);
 			}
-			lines.push(`C ${side} ${choice}`);
 			out.push(`C ${side} ${choice}`);
 		}
 		boundary();
