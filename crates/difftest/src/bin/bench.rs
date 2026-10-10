@@ -92,22 +92,47 @@ fn bench<L: LogSink + Default>(battles: &[Battle], threads: usize, seconds: f64)
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let path = args.first().expect("usage: bench <fixtures> [--threads N] [--seconds S] [--textlog]");
+    let path = args.first().expect("usage: bench <fixtures> [--threads N] [--seconds S] [--textlog] [--profile out.svg]");
     let get = |k: &str| args.iter().position(|a| a == k).and_then(|i| args.get(i + 1));
     let threads: usize = get("--threads").map_or(1, |v| v.parse().unwrap());
     let seconds: f64 = get("--seconds").map_or(10.0, |v| v.parse().unwrap());
     let textlog = args.iter().any(|a| a == "--textlog");
+    let profile = get("--profile").cloned();
 
     let battles = load(path);
     // Warm-up and correctness gate (every battle must end with the fixture's turn count).
     for b in &battles {
         run_one::<NoLog>(b);
     }
+    let guard = profile.as_ref().map(|_| {
+        pprof::ProfilerGuardBuilder::default().frequency(999).build().expect("profiler")
+    });
     let (bps, tps, dps) = if textlog {
         bench::<TextLog>(&battles, threads, seconds)
     } else {
         bench::<NoLog>(&battles, threads, seconds)
     };
+    if let (Some(guard), Some(path)) = (guard, profile) {
+        let report = guard.report().build().expect("report");
+        let file = std::fs::File::create(&path).expect("create svg");
+        report.flamegraph(file).expect("flamegraph");
+        // Self-time table: leaf frame -> samples.
+        let mut leaf: std::collections::HashMap<String, usize> = Default::default();
+        let mut total = 0usize;
+        for (frames, count) in report.data.iter() {
+            total += *count as usize;
+            if let Some(f) = frames.frames.first().and_then(|s| s.first()) {
+                *leaf.entry(f.name()).or_default() += *count as usize;
+            }
+        }
+        let mut v: Vec<_> = leaf.into_iter().collect();
+        v.sort_by(|a, b| b.1.cmp(&a.1));
+        println!("self time (top 40 of {total} samples):");
+        for (name, n) in v.iter().take(40) {
+            println!("  {:5.1}%  {}", 100.0 * *n as f64 / total as f64, name);
+        }
+        println!("flamegraph written to {path}");
+    }
     println!(
         "{} battles loaded | sink={} threads={} | {:.0} battles/s, {:.0} turns/s, {:.0} choose-calls/s ({:.1} battles/s/thread)",
         battles.len(),

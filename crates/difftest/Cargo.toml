@@ -20,6 +20,7 @@ engine = { path = "../engine", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "raw_value"] }
 flate2 = "1"
+pprof = { version = "0.14", default-features = false, features = ["flamegraph", "frame-pointer"] }
 
 # Profiles are only read from a workspace root, so they must be repeated here.
 [profile.release]
