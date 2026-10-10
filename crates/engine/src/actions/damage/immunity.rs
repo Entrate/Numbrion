@@ -1,4 +1,4 @@
-//! Type/groundedness queries ported from pinned Showdown; damage immunity remains explicit stubs.
+//! Type, effectiveness and immunity ports from pinned Showdown.
 #![allow(unused_variables, unused_imports)]
 use crate::{
     Battle,
@@ -6,7 +6,7 @@ use crate::{
     dex::{self, ImmunityId},
     event::{EffectRef, EventArg, Relay, RunEventOptions},
     ids::*,
-    log::LogSink,
+    log::{LogArg, LogEntry, LogSink, LogTag},
     state::{
         CellId,
         scratch::{HitData, OrderedBoosts},
@@ -16,7 +16,76 @@ impl<L: LogSink> Battle<L> {
     /// Run per-type Effectiveness hooks then sum modifiers
     /// Ports `sim/pokemon.ts:2208-2234`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
     pub fn run_effectiveness(&mut self, target: MonId, move_handle: MoveHandle) -> i8 {
-        todo!("stage D: run_effectiveness")
+        let m = *self.active_move(move_handle);
+        let e = EffectRef::ActiveMove(move_handle.0);
+        let mut total = 0i8;
+        if self.state.pokemon[target.0 as usize].terastallized != TypeId::NONE
+            && m.move_type == dex::type_id("Stellar").unwrap()
+        {
+            total = 1;
+        } else {
+            let types = self.get_types(target, false, false);
+            for &ty in &types.values[..types.len as usize] {
+                let n = match dex::TYPE_CHART[(ty.0 - 1) as usize][(m.move_type.0 - 1) as usize] {
+                    1 => 1.,
+                    2 => -1.,
+                    _ => 0.,
+                };
+                let r = self.single_event(
+                    EventId::Effectiveness,
+                    e,
+                    None,
+                    EventArg::Holder(Holder::mon(target)),
+                    EventArg::Type(ty),
+                    e,
+                    Relay::Number(n),
+                    None,
+                );
+                let r = self.run_event(
+                    EventId::Effectiveness,
+                    EventArg::Holder(Holder::mon(target)),
+                    EventArg::Type(ty),
+                    e,
+                    r,
+                    RunEventOptions::default(),
+                );
+                total += super::super::mutators::common::number(r) as i8;
+            }
+        }
+        if self.state.pokemon[target.0 as usize].species == dex::SPECIES_TERAPAGOSTERASTAL
+            && self.query_has_ability(target, "terashell")
+            && !self.suppressing_ability(Some(target))
+        {
+            let cell = self.state.pokemon[target.0 as usize].ability_state;
+            const RESISTED: u32 = 1 << crate::state::present::CUSTOM_START;
+            if m.hit == 1 {
+                self.state.effects.cells[cell.0 as usize].present &= !RESISTED;
+            }
+            if self.state.effects.cells[cell.0 as usize].present & RESISTED != 0 {
+                return -1;
+            }
+            if m.category == dex::Category::Status
+                || m.id == dex::MOVE_STRUGGLE
+                || !self.run_immunity(
+                    target,
+                    ImmunitySource::Move(move_handle),
+                    ImmunityMessage::Silent,
+                )
+                || total < 0
+                || self.state.pokemon[target.0 as usize].hp
+                    < self.state.pokemon[target.0 as usize].max_hp
+            {
+                return total;
+            }
+            self.add(LogEntry::new(
+                "-activate",
+                &[LogArg::Mon(target), LogArg::Text("ability: Tera Shell")],
+                &[],
+            ));
+            self.state.effects.cells[cell.0 as usize].present |= RESISTED;
+            return -1;
+        }
+        total
     }
     /// Type immunity including groundedness and ignore-immunity events
     /// Ports `sim/pokemon.ts:2236-2267`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
@@ -26,7 +95,55 @@ impl<L: LogSink> Battle<L> {
         source: ImmunitySource,
         message: ImmunityMessage,
     ) -> bool {
-        todo!("stage D: run_immunity")
+        let ty = match source {
+            ImmunitySource::Type(t) => t,
+            ImmunitySource::Move(h) => {
+                let m = self.active_move(h);
+                if m.runtime_flags & crate::state::scratch::move_runtime::IGNORE_IMMUNITY != 0
+                    || m.ignore_immunity_types & (1 << m.move_type.0) != 0
+                {
+                    return true;
+                }
+                m.move_type
+            }
+        };
+        if ty == TypeId::NONE || ty == dex::type_id("???").unwrap() {
+            return true;
+        }
+        let negate = !self
+            .run_event(
+                EventId::NegateImmunity,
+                EventArg::Holder(Holder::mon(target)),
+                EventArg::Type(ty),
+                EffectRef::None,
+                Relay::Undefined,
+                RunEventOptions::default(),
+            )
+            .truthy();
+        let immune = if ty == dex::type_id("Ground").unwrap() {
+            self.is_grounded(target, negate)
+        } else {
+            let types = self.get_types(target, false, false);
+            Relay::Bool(
+                negate
+                    || types.values[..types.len as usize]
+                        .iter()
+                        .all(|t| dex::TYPE_CHART[(t.0 - 1) as usize][(ty.0 - 1) as usize] != 3),
+            )
+        };
+        if immune.truthy() {
+            return true;
+        }
+        if !matches!(message, ImmunityMessage::Silent) {
+            let tags: &[LogTag<'_>] =
+                if immune == Relay::Null && self.query_has_ability(target, "levitate") {
+                    &[LogTag::Value("from", LogArg::Text("ability: Levitate"))]
+                } else {
+                    &[]
+                };
+            self.add(LogEntry::new("-immune", &[LogArg::Mon(target)], tags));
+        }
+        false
     }
     /// Status/powder/sandstorm immunity has a separate name space
     /// Ports `sim/pokemon.ts:2269-2294`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
@@ -36,7 +153,34 @@ impl<L: LogSink> Battle<L> {
         immunity: ImmunityId,
         message: ImmunityMessage,
     ) -> bool {
-        todo!("stage D: run_status_immunity")
+        if self.state.pokemon[target.0 as usize].flags & crate::state::mon_flags::FAINTED != 0 {
+            return false;
+        }
+        let types = self.get_types(target, false, false);
+        if types.values[..types.len as usize]
+            .iter()
+            .any(|t| dex::IMMUNITY_CHART[(t.0 - 1) as usize][immunity as usize] == 3)
+        {
+            if !matches!(message, ImmunityMessage::Silent) {
+                self.add(LogEntry::new("-immune", &[LogArg::Mon(target)], &[]));
+            }
+            return false;
+        }
+        let r = self.run_event(
+            EventId::Immunity,
+            EventArg::Holder(Holder::mon(target)),
+            EventArg::Null,
+            EffectRef::None,
+            Relay::StatusImmunity(immunity),
+            RunEventOptions::default(),
+        );
+        if !r.truthy() {
+            if !matches!(message, ImmunityMessage::Silent) && r != Relay::Null {
+                self.add(LogEntry::new("-immune", &[LogArg::Mon(target)], &[]));
+            }
+            return false;
+        }
+        true
     }
     /// Includes added type, Tera and Type events
     /// Ports `sim/pokemon.ts:2138-2146`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
