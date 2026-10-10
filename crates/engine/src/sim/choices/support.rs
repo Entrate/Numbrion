@@ -204,6 +204,24 @@ impl<L: LogSink> Battle<L> {
         dex::species(self.ch_set(mon).species).types[0]
     }
 
+    /// Tera eligibility (`pokemon.canTerastallize`) from lifecycle's cached query.
+    /// Unit tests may swap in a state-derived model (`tests::LOCAL_TERA`) because
+    /// lifecycle's implementation is a separate owner's work.
+    #[inline]
+    pub(crate) fn ch_can_tera(&self, mon: MonId) -> TypeId {
+        #[cfg(test)]
+        if super::tests::LOCAL_TERA.with(|c| c.get()) {
+            let p = self.ch_mon(mon);
+            let side = &self.state.sides[mon.side().0 as usize];
+            return if side.tera_used || p.flags & mon_flags::TERA_BLOCKED != 0 {
+                TypeId::NONE
+            } else {
+                self.ch_tera_type(mon)
+            };
+        }
+        self.can_terastallize(mon)
+    }
+
     /// Battle.canSwitch(side) (battle.ts:1570,1582-1590): living bench Pokemon from
     /// party index 2. A pure restatement of lifecycle's query so choices never depend
     /// on unfinished code for a trivial read.

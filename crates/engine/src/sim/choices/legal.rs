@@ -187,7 +187,7 @@ impl<L: LogSink> Battle<L> {
                 slot.moves[0] = self.legal_forced_move(&req.moves[0]);
                 slot.move_count = 1;
             } else {
-                let can_tera = self.can_terastallize(mon) != TypeId::NONE;
+                let can_tera = self.ch_can_tera(mon) != TypeId::NONE;
                 let slots = self.ch_mon(mon).move_slots();
                 let mut any_enabled = false;
                 for sl in slots.iter().take(n) {

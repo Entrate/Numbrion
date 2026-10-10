@@ -167,12 +167,19 @@ impl<L: LogSink> Battle<L> {
     pub fn choose(&mut self, side: usize, input: &str) -> Result<(), ChoiceError> {
         assert!(side < 2, "invalid side index {side}");
         let sid = SideId(side as u8);
-        self.choose_side(sid, input)?;
-        if !self.is_choice_done(sid) {
-            let msg = format!("Incomplete choice: {input} - missing other pokemon");
-            return Err(self.emit_choice_error(sid, &msg, None));
-        }
+        self.choose_no_commit(sid, input)?;
         self.commit_if_ready()
+    }
+
+    /// Everything in Battle.choose before `allChoicesDone`: parse the text, then
+    /// require the side's own choice to be complete. Never commits. PRNG: none.
+    pub(crate) fn choose_no_commit(&mut self, side: SideId, input: &str) -> Result<(), ChoiceError> {
+        self.choose_side(side, input)?;
+        if !self.is_choice_done(side) {
+            let msg = format!("Incomplete choice: {input} - missing other pokemon");
+            return Err(self.emit_choice_error(side, &msg, None));
+        }
+        Ok(())
     }
 
     /// `if (this.allChoicesDone()) this.commitChoices()`.
@@ -635,7 +642,7 @@ impl<L: LogSink> Battle<L> {
             return Err(self.emit_choice_error(side, &msg, None));
         }
         let terastallize = modifier == ChoiceModifier::Terastallize;
-        if terastallize && self.can_terastallize(pokemon) == TypeId::NONE {
+        if terastallize && self.ch_can_tera(pokemon) == TypeId::NONE {
             let msg = format!("Can't move: {} can't Terastallize.", self.ch_name(pokemon));
             return Err(self.emit_choice_error(side, &msg, None));
         }
@@ -1143,6 +1150,16 @@ impl<L: LogSink> Battle<L> {
     /// may be omitted. Moves are checked through the text path (index and target),
     /// so hidden-information rejections behave exactly as in `choose`.
     pub fn choose_typed(&mut self, side: SideId, slots: &[SlotChoice]) -> Result<(), ChoiceError> {
+        self.choose_typed_no_commit(side, slots)?;
+        self.commit_if_ready()
+    }
+
+    /// `choose_typed` without the final `allChoicesDone`/commit step.
+    pub(crate) fn choose_typed_no_commit(
+        &mut self,
+        side: SideId,
+        slots: &[SlotChoice],
+    ) -> Result<(), ChoiceError> {
         let s = side.0 as usize;
         if self.side_request_kind(side) == RequestKind::None {
             let msg = if self.state.ended {
@@ -1217,7 +1234,7 @@ impl<L: LogSink> Battle<L> {
             );
             return Err(self.emit_choice_error(side, &msg, None));
         }
-        self.commit_if_ready()
+        Ok(())
     }
 
     /// Text rendering of typed input for messages only.

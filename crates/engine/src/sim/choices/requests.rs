@@ -195,6 +195,10 @@ impl<L: LogSink> Battle<L> {
     /// sorted by redirect order, so it never draws. A literal `true` (no handler)
     /// means not locked.
     pub(crate) fn ch_get_locked_move(&mut self, pokemon: MonId) -> Option<LockedMove> {
+        #[cfg(test)]
+        if let Some(l) = super::tests::lock_override(pokemon) {
+            return Some(l);
+        }
         let relay = self.priority_event(
             EventId::LockMove,
             EventArg::Holder(Holder::mon(pokemon)),
@@ -300,7 +304,7 @@ impl<L: LogSink> Battle<L> {
         data.flags = flags;
         if !any_locked {
             // canMegaEvo/X/Y, canUltraBurst, canZMove and Dynamax are never set in gen 9.
-            let tera = self.can_terastallize(pokemon);
+            let tera = self.ch_can_tera(pokemon);
             if tera != TypeId::NONE {
                 data.can_tera = tera;
                 data.flags |= rf::CAN_TERASTALLIZE;
