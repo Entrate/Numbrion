@@ -217,7 +217,12 @@ fn synthetic_name(s: SyntheticEffect) -> &'static str {
 }
 
 fn dex_name(id: EffectId) -> &'static str {
-    dex::effect(id).name
+    // `EffectId::NONE` is JS `''`/`undefined`: an empty field.
+    if id == EffectId::NONE {
+        ""
+    } else {
+        dex::effect(id).name
+    }
 }
 
 /// Ports dex-data.ts:129-143 and dex-moves.ts:477. PRNG: none. Name versus fullname.
