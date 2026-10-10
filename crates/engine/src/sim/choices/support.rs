@@ -165,7 +165,11 @@ impl<L: LogSink> Battle<L> {
     /// `!!pokemon.switchFlag` (true or a move id).
     #[inline]
     pub(crate) fn ch_switch_flag(&self, mon: MonId) -> bool {
-        mon != MonId::NONE && self.ch_mon(mon).switch_flag != EffectId::NONE
+        // L stores `switchFlag = true` as SWITCH_REQUESTED and the move-id form in `switch_flag`.
+        mon != MonId::NONE && {
+            let p = self.ch_mon(mon);
+            p.flags & crate::state::mon_flags::SWITCH_REQUESTED != 0 || p.switch_flag != EffectId::NONE
+        }
     }
 
     /// The occupant of active slot `index` (`side.active[index]`).

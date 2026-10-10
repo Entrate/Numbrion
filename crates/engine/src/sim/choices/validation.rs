@@ -847,7 +847,10 @@ impl<L: LogSink> Battle<L> {
             }
             let c = &mut self.state.sides[s].choice;
             c.forced_switches_left = c.forced_switches_left.saturating_sub(1);
-            self.state.pokemon[pokemon.0 as usize].switch_flag = EffectId::NONE;
+            // side.ts:971 `pokemon.switchFlag = false`: clear both representations.
+            let p = &mut self.state.pokemon[pokemon.0 as usize];
+            p.switch_flag = EffectId::NONE;
+            p.flags &= !crate::state::mon_flags::SWITCH_REQUESTED;
             self.push_action(
                 side,
                 SlotChoice {
