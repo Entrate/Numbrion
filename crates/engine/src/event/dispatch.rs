@@ -347,6 +347,22 @@ impl<L: LogSink> Battle<L> {
         if !has || spread {
             relay = Relay::Bool(true);
         }
+        // With no captured listeners, no callback can observe a frame or change
+        // its modifier. Keep relay normalization and JS numeric wrapping above/below.
+        // each_event's outer active-Pokemon sort still runs, including its draws.
+        if self.scratch.handlers[b as usize].len == 0 {
+            if let Relay::Number(n) = relay {
+                if n >= 0.0 && n == n.floor() {
+                    relay = Relay::Number(self.modify(n, 4096.0, 4096.0));
+                }
+            }
+            self.finish_handlers(b);
+            return if spread {
+                EventResult::Spread(relays)
+            } else {
+                EventResult::Single(relay)
+            };
+        }
         let parent = self.scratch.current_frame;
         let frame = self.push_frame(
             event,
@@ -872,4 +888,94 @@ fn suffix_event(e: EventId, field: bool) -> Option<EventId> {
         (SwitchIn, false) => SideSwitchIn,
         _ => return None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn battle() -> Battle {
+        let packed = "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric";
+        Battle::new([1, 2, 3, 4], packed, packed).unwrap()
+    }
+
+    #[test]
+    fn empty_events_preserve_relay_semantics_and_parent_frame() {
+        let mut b = battle();
+        let prng = b.state.prng;
+        for (input, expected) in [
+            (Relay::Undefined, Relay::Bool(true)),
+            (Relay::Null, Relay::Bool(true)),
+            (Relay::Bool(false), Relay::Bool(false)),
+            (Relay::Number(0.0), Relay::Number(0.0)),
+            (Relay::Number(1.5), Relay::Number(1.5)),
+            (Relay::Number(-2.0), Relay::Number(-2.0)),
+            (Relay::Number(1048576.0), Relay::Number(0.0)),
+            (Relay::Number(f64::INFINITY), Relay::Number(0.0)),
+        ] {
+            assert_eq!(
+                b.run_event(
+                    EventId::NegateImmunity,
+                    EventArg::Null,
+                    EventArg::Null,
+                    EffectRef::None,
+                    input,
+                    RunEventOptions::default()
+                ),
+                expected
+            );
+            assert_eq!(b.state.prng, prng);
+            assert_eq!(b.scratch.current_frame, 255);
+            assert_eq!(b.scratch.event_depth, 0);
+            assert_eq!(b.scratch.handler_depth, 0);
+        }
+        let targets = EventTargets {
+            mons: [MonId(0), MonId(6), MonId::NONE, MonId::NONE],
+            len: 2,
+        };
+        let omitted = b.run_event_spread(
+            EventId::NegateImmunity,
+            targets,
+            EventArg::Null,
+            EffectRef::None,
+            TargetResults::default(),
+            RunEventOptions::default(),
+        );
+        assert_eq!(omitted.len, 2);
+        assert_eq!(omitted.values[..2], [Relay::Bool(true); 2]);
+        let explicit = TargetResults {
+            values: [
+                Relay::Number(1048576.0),
+                Relay::Bool(false),
+                Relay::Undefined,
+                Relay::Undefined,
+            ],
+            len: 2,
+        };
+        let result = b.run_event_spread(
+            EventId::NegateImmunity,
+            targets,
+            EventArg::Null,
+            EffectRef::None,
+            explicit,
+            RunEventOptions::default(),
+        );
+        assert_eq!(result.len, 2);
+        assert_eq!(result.values, explicit.values);
+        assert_eq!(b.state.prng, prng);
+    }
+
+    #[test]
+    fn empty_each_event_still_draws_for_tied_active_speeds() {
+        let mut b = battle();
+        for side in [SideId(0), SideId(1)] {
+            let m = MonId(side.0 * 6);
+            b.state.sides[side.0 as usize].active[0] = m;
+            b.state.pokemon[m.0 as usize].speed = 100;
+        }
+        let mut expected = b.state.prng;
+        expected.sample_index(2);
+        b.each_event(EventId::BeforeTurn, EffectRef::None, Relay::Undefined);
+        assert_eq!(b.state.prng, expected);
+    }
 }
