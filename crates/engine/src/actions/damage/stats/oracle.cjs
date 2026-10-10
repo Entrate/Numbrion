@@ -52,4 +52,17 @@ for(const weight of [0,1,55,65535])for(const heavy of [false,true])for(const act
  p.position=0;const restored=p.getMoveHitData(move);t.position=0;const other=t.getMoveHitData(move);
  rows.push(['H',Number(first===same),Number(first===restored),Number(first===next),Number(first===other),Number(restored.crit),restored.typeMod,Number(restored.bypassProtect),Number(next.crit),next.typeMod,Number(next.bypassProtect),Object.keys(move.moveHitData).join(','),b.prng.getSeed()].join('\t'));
 }
+// Integration against real Unaware callbacks: sparse keys/stat_user targets and
+// two perfectly tied AnyModifyBoost holders make repeated best-stat queries draw.
+for(const mode of ['source','target','both'])for(const stat of names)for(const stage of [-4,0,4])for(const other of [false,true]) {
+ const {b,p,t}=fixture();p.ability=mode==='target'?'static':'unaware';t.ability=mode==='source'?'static':'unaware';
+ stored(p,[111,222,333,444,555]);boosts(p,stage);b.activePokemon=p;b.activeTarget=t;
+ const calculated=p.calculateStat(stat,stage,1,other?t:undefined);const queried=p.getStat(stat);
+ rows.push(['A',mode,stat,stage,Number(other),calculated,queried,b.prng.getSeed()].join('\t'));
+}
+for(const values of [[0,0,0,0,0],[100,100,100,100,100],[100,200,300,400,500],[500,400,300,200,100]])for(const unboosted of [false,true])for(const unmodified of [false,true]) {
+ const {b,p,t}=fixture('unaware');t.ability='unaware';stored(p,values);
+ const actual=p.getBestStat(unboosted,unmodified);
+ rows.push(['U',values.join(','),Number(unboosted),Number(unmodified),actual,b.prng.getSeed()].join('\t'));
+}
 process.stdout.write(rows.join('\n')+'\n');
