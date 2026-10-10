@@ -196,3 +196,6 @@ pub fn charge_try_move<L: LogSink>(
     );
     Relay::Null
 }
+
+#[cfg(test)]
+mod tests;
