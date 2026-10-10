@@ -50,6 +50,22 @@ const VOCAB_KINDS = new Set(['-activate', '-start', '-end', '-singleturn', '-sin
 	'-weather', 'cant', '-fail', '-block']);
 const IDENT = /^p[12][ab]?: /;
 
+// Coarse argument class, close to the catalog's shape granularity (05-log-shapes.txt).
+function cls(v) {
+	if (v === '') return 'E';
+	let m;
+	if (/^p[12][ab]: /.test(v)) return 'P';
+	if (/^p[12]: /.test(v)) return 'N';
+	if (/^p[12][ab](,p[12][ab])+$/.test(v)) return 'SS';
+	if (/^p[12][ab]$/.test(v)) return 'S';
+	if (/^p[12]$/.test(v)) return 'D';
+	if (/^-?\d+$/.test(v)) return 'I';
+	if (/^\d+\/\d+( [a-z]+)?$/.test(v) || v === '0 fnt') return 'H';
+	if ((m = /^\[([A-Za-z]+)\](?: (.*))?$/s.exec(v))) return m[2] === undefined ? `[${m[1]}]` : `[${m[1]}]${cls(m[2])}`;
+	if ((m = /^(move|ability|item|pokemon): /.exec(v))) return m[1][0].toUpperCase();
+	return 'W';
+}
+
 function shapeKeys(log) {
 	const keys = new Set();
 	for (let i = 0; i < log.length; i++) {
@@ -70,6 +86,7 @@ function shapeKeys(log) {
 		}
 		if (kind === 'switch' || kind === 'drag') key += /, tera:/.test(f[3]) ? '/tera' : '';
 		keys.add(key);
+		keys.add(`S:${kind}|${f.slice(2).map(cls).join('|')}`);
 	}
 	return keys;
 }

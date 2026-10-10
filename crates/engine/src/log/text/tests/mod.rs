@@ -17,7 +17,9 @@ use crate::{
     state::{Status, mon_flags, scratch::EffectRef},
 };
 
+mod args;
 mod counting;
+mod edits;
 mod moves;
 mod replay;
 mod shapes;
