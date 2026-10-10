@@ -137,3 +137,54 @@ fn as_one_start_restart_end_and_berry_sentinels_match_oracle() {
         assert_eq!(b.seed(), [1, 2, 3, 4]);
     }
 }
+
+#[test]
+fn battle_scenario_teams_are_in_scope() {
+    check_scenario_teams(include_str!("scenarios.tsv"));
+}
+macro_rules! scenario {
+    ($($name:ident),*) => {$ (
+        #[test]
+        #[ignore = "needs core"]
+        fn $name() { replay_scenario(include_str!("scenarios.tsv"), stringify!($name)); }
+    )*};
+}
+scenario!(
+    illusion_reveal,
+    imposter_mirrored_slot,
+    transform_success,
+    transform_illusion_failure,
+    trace_single_candidate,
+    as_one_berries
+);
+
+scenario!(as_one_start);
+
+#[test]
+fn every_batch_function_site_is_registered() {
+    const IDS: &[EffectId] = &[
+        dex::MOVE_TRANSFORM,
+        dex::ABILITY_ASONEGLASTRIER,
+        dex::ABILITY_ASONESPECTRIER,
+        dex::ABILITY_ILLUSION,
+        dex::ABILITY_IMPOSTER,
+        dex::ABILITY_TRACE,
+    ];
+    let mut count = 0;
+    for (i, h) in dex::HOOKS.iter().enumerate() {
+        if IDS.contains(&h.effect) && matches!(h.value, dex::HookValue::Function) {
+            assert!(
+                matches!(
+                    crate::effects::hook_coverage(dex::HookId(i as u16)),
+                    crate::effects::HookCoverage::Implemented
+                ),
+                "{} {} {}",
+                dex::effect(h.effect).key,
+                h.key,
+                h.site
+            );
+            count += 1;
+        }
+    }
+    assert_eq!(count, 16);
+}

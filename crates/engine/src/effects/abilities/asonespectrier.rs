@@ -35,7 +35,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:275-285. PRNG: none. word0=unnerved; bit8=present.
+        // data/abilities.ts:275-280. PRNG: none. word0=unnerved; bit8=present.
         dex::HOOK_ABILITY_ASONESPECTRIER_ONSTART => {
             if b.hook_state(cx).payload.words[0] != 0 {
                 return Relay::Undefined;
@@ -55,17 +55,17 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             b.hook_state_mut(cx).present |= 1 << 8;
             Relay::Undefined
         }
-        // data/abilities.ts:281. PRNG: none.
+        // data/abilities.ts:281-283. PRNG: none.
         dex::HOOK_ABILITY_ASONESPECTRIER_ONEND => {
             b.hook_state_mut(cx).payload.words[0] = 0;
             b.hook_state_mut(cx).present |= 1 << 8;
             Relay::Undefined
         }
-        // data/abilities.ts:284. PRNG: none; absent and false both allow eating.
+        // data/abilities.ts:284-286. PRNG: none; absent and false both allow eating.
         dex::HOOK_ABILITY_ASONESPECTRIER_ONFOETRYEATITEM => {
             Relay::Bool(b.hook_state(cx).payload.words[0] == 0)
         }
-        // data/abilities.ts:287. PRNG: nested boost events only.
+        // data/abilities.ts:287-291. PRNG: nested boost events only.
         dex::HOOK_ABILITY_ASONESPECTRIER_ONSOURCEAFTERFAINT => {
             if effect_is_move(b, effect_at(b, cx, 3)) {
                 let n = relay_number(b, cx, 0) as i8;

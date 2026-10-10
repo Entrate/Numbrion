@@ -35,7 +35,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:2057-2073. PRNG: none; party order, never original MonId order.
+        // data/abilities.ts:2057-2071. PRNG: none; party order, never original MonId order.
         dex::HOOK_ABILITY_ILLUSION_ONBEFORESWITCHIN => {
             let user = mon(b, cx, 0);
             b.state.pokemon[user.0 as usize].illusion = MonId::NONE;
@@ -58,7 +58,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:2074-2078. PRNG: nested End event only; same captured ability state.
+        // data/abilities.ts:2072-2076. PRNG: nested End event only; same captured ability state.
         dex::HOOK_ABILITY_ILLUSION_ONDAMAGINGHIT => {
             let target = mon(b, cx, 1);
             if b.state.pokemon[target.0 as usize].illusion != MonId::NONE {
@@ -79,7 +79,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:2079-2091. PRNG: none. Illusion Level Mod is a format rule.
+        // data/abilities.ts:2077-2088. PRNG: none. Illusion Level Mod is a format rule.
         dex::HOOK_ABILITY_ILLUSION_ONEND => {
             let user = mon(b, cx, 0);
             let p = b.state.pokemon[user.0 as usize];
@@ -105,7 +105,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:2092-2094. PRNG: none; no reveal logs on faint.
+        // data/abilities.ts:2089-2091. PRNG: none; no reveal logs on faint.
         dex::HOOK_ABILITY_ILLUSION_ONFAINT => {
             let m = mon(b, cx, 0);
             b.state.pokemon[m.0 as usize].illusion = MonId::NONE;

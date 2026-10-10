@@ -8,14 +8,15 @@ const team=(...p)=>p.join(']');
 const scenarios=[];
 const add=(name,p1,p2,steps,must)=>scenarios.push({name,p1,p2,steps,must,seed:[101+scenarios.length,202,303,404]});
 
-const partner=()=>mon('Mudsdale','stamina','protect');
-add('illusion_reveal',team(mon('Zoroark','illusion','flamethrower'),partner(),mon('Pikachu','static','protect',{level:83})),team(mon('Pikachu','static','thunderbolt'),partner()),['p1:move 1 1, move 1','p2:move 1 1, move 1'],['replace','Illusion Level Mod']);
-add('imposter_mirrored_slot',team(mon('Ditto','imposter','transform'),partner()),team(mon('Pikachu','static','thunderbolt'),mon('Swampert','torrent','protect')),[],['-transform|p1a: Ditto|p2b: Swampert']);
-add('transform_success',team(mon('Ditto','limber','transform'),partner()),team(mon('Pikachu','static','thunderbolt'),partner()),['p1:move 1 1, move 1','p2:move 1 2, move 1'],['-transform']);
-add('transform_illusion_failure',team(mon('Ditto','limber','transform'),partner()),team(mon('Zoroark','illusion','protect'),partner(),mon('Pikachu','static','protect')),['p1:move 1 1, move 1','p2:move 1, move 1'],['|-fail|p1a: Ditto']);
-add('trace_single_candidate',team(mon('Gardevoir','trace','protect'),partner()),team(mon('Venusaur','chlorophyll','protect'),mon('Iron Hands','quarkdrive','protect',{gender:'N'})),[],['Chlorophyll|Trace|[from] ability: Trace']);
-add('as_one_berries',team(mon('Calyrex-Ice','asoneglastrier','protect',{gender:'N'}),mon('Calyrex-Shadow','asonespectrier','protect',{gender:'N'})),team(mon('Snorlax','thickfat','protect',{item:'Sitrus Berry'}),partner()),[],['As One','Unnerve']);
+const partner=()=>mon('Mudsdale','stamina','irondefense');
+add('illusion_reveal',team(mon('Zoroark','illusion','flamethrower'),partner(),mon('Pikachu','static','irondefense',{level:83})),team(mon('Pikachu','static','thunderbolt'),partner()),['p1:move 1 1, move 1','p2:move 1 1, move 1'],['replace','Illusion Level Mod']);
+add('imposter_mirrored_slot',team(mon('Ditto','imposter','transform'),partner()),team(mon('Pikachu','static','thunderbolt'),mon('Swampert','torrent','irondefense')),[],['-transform|p1a: Ditto|p2b: Swampert']);
+add('transform_success',team(mon('Mew','synchronize','transform',{gender:'N'}),partner()),team(mon('Pikachu','static','thunderbolt'),partner()),['p1:move 1 1, move 1','p2:move 1 2, move 1'],['-transform']);
+add('transform_illusion_failure',team(mon('Mew','synchronize','transform',{gender:'N'}),partner()),team(mon('Zoroark','illusion','irondefense'),partner(),mon('Pikachu','static','irondefense')),['p1:move 1 1, move 1','p2:move 1, move 1'],['|-fail|p1a: Mew']);
+add('trace_single_candidate',team(mon('Gardevoir','trace','irondefense'),partner()),team(mon('Venusaur','chlorophyll','irondefense'),mon('Iron Hands','quarkdrive','irondefense',{gender:'N'})),[],['Chlorophyll|Trace|[from] ability: Trace']);
+add('as_one_berries',team(mon('Calyrex-Ice','asoneglastrier','irondefense',{gender:'N'}),mon('Calyrex-Shadow','asonespectrier','irondefense',{gender:'N'})),team(mon('Snorlax','thickfat','irondefense',{item:'Sitrus Berry'}),partner()),[],['As One','Unnerve']);
 
+add('as_one_start',team(mon('Calyrex-Ice','asoneglastrier','irondefense',{gender:'N'}),mon('Calyrex-Shadow','asonespectrier','irondefense',{gender:'N'})),team(partner(),partner()),[],['As One','Unnerve']);
 let out='# name\tseed\tp1\tp2\tsteps\tfinal seed\tlog\n';
 for(const s of scenarios){
  const session=new Session(sim,{seed:s.seed,teams:[s.p1,s.p2]});

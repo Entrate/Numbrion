@@ -72,7 +72,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:5137-5150. PRNG: sample exactly once, even one candidate; setAbility events may draw.
+        // data/abilities.ts:5137-5148. PRNG: sample exactly once, even one candidate; setAbility events may draw.
         // word0=seek, bit8=present. No scratch handles retained.
         dex::HOOK_ABILITY_TRACE_ONUPDATE => {
             if b.hook_state(cx).payload.words[0] == 0 {
