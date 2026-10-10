@@ -36,8 +36,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             if b.state.pokemon[m.0 as usize].base_species != dex::SPECIES_TERAPAGOSSTELLAR {
                 return Relay::Undefined;
             }
-            if b.state.field.weather != crate::state::CellId::NONE
-                || b.state.field.terrain != crate::state::CellId::NONE
+            if b.state.effects.cells[b.state.field.weather.0 as usize].id != EffectId::NONE
+                || b.state.effects.cells[b.state.field.terrain.0 as usize].id != EffectId::NONE
             {
                 b.add(LogEntry::new(
                     "-ability",
