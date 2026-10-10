@@ -287,14 +287,7 @@ impl Env {
             if a.needs_action() {
                 let m0 = a.mask0();
                 self.out.mask0[s] = m0;
-                let mut any = 0;
-                for cls in CLASS_MASKS {
-                    let members = m0 & cls;
-                    if members != 0 {
-                        any |= a.mask1(members.trailing_zeros() as usize);
-                    }
-                }
-                self.out.mask1_any[s] = any;
+                self.out.mask1_any[s] = a.mask1_any(m0);
                 if shared.cfg.joint_mask {
                     a.write_joint(&mut self.joint[s * N_ACTIONS * N_ACTIONS..(s + 1) * N_ACTIONS * N_ACTIONS]);
                 }

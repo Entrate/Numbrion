@@ -1,7 +1,7 @@
 //! `Game`: one engine battle plus everything the training interface needs around it (packed teams for
 //! cloning, hidden-information-safe per-player log views). Pure Rust, no Python.
 
-use crate::mask::SideActions;
+use crate::mask::{Req, SideActions};
 use engine::{
     Battle,
     ids::{MonId, SideId},
@@ -248,6 +248,11 @@ impl Game {
         self.state().sides[side].party
     }
 
+    /// `side_actions(side).req` without building the legal actions.
+    pub fn request_kind(&self, side: usize) -> Req {
+        with!(self, b => Req::of(b, SideId(side as u8)))
+    }
+
     pub fn side_actions(&self, side: usize) -> SideActions {
         with!(self, b => SideActions::from_battle(b, SideId(side as u8)))
     }
@@ -271,12 +276,19 @@ impl Game {
     /// Shares immutable definitions and copies state directly; allocates independent scratch.
     /// The copy's logs and views start empty. Constructor parsing/draws are skipped.
     pub fn duplicate(&self) -> Game {
-        let sink = match &self.sink { Sink::No(b) => Sink::No(b.clone()), Sink::Text(b) => Sink::Text(b.clone()) };
-        Game { sink, packed: self.packed.clone(), names: Arc::clone(&self.names), seed0: self.seed0,
-            views: self.views.as_ref().map(|v| LogViews { keep_omni: v.keep_omni, ..LogViews::default() }) }
+        self.fork(self.views.as_ref().is_some_and(|v| v.keep_omni))
     }
 
-    /// Adopt a root's immutable context as well as its state, reusing this worker's scratch.
+    /// `duplicate`, choosing whether the copy keeps the omniscient stream (search workers do not).
+    pub fn fork(&self, keep_omni: bool) -> Game {
+        let sink = match &self.sink { Sink::No(b) => Sink::No(b.clone()), Sink::Text(b) => Sink::Text(b.clone()) };
+        Game { sink, packed: self.packed.clone(), names: Arc::clone(&self.names), seed0: self.seed0,
+            views: self.views.as_ref().map(|_| LogViews { keep_omni, ..LogViews::default() }) }
+    }
+
+    /// Adopt a root's immutable context as well as its state, reusing this worker's scratch. Unlike
+    /// `copy_state_from`, `other` may come from different teams, names or seed (another determinized
+    /// world); only the log mode must match. The worker's log views restart empty.
     pub fn restore_from(&mut self, other: &Game) -> Result<(), String> {
         match (&mut self.sink, &other.sink) {
             (Sink::No(b), Sink::No(o)) => b.clone_from(o),
