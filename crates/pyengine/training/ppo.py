@@ -121,13 +121,17 @@ class EntropyController:
         self.log_coef = min(max(float(state["log_coef"]), math.log(self.low)), math.log(self.high))
 
 
-def ko_shaping(fainted_before: np.ndarray, fainted_after: np.ndarray, done: np.ndarray, bonus: float) -> np.ndarray:
+def ko_shaping(potential: np.ndarray, fainted_after: np.ndarray, done: np.ndarray,
+               bonus: float) -> tuple[np.ndarray, np.ndarray]:
     """Potential-based KO shaping per row: ``Phi(after) - Phi(before)`` with ``Phi = bonus * (foe KOs - own KOs)``.
 
-    ``fainted_*`` are [rows, 2] (own, foe) KO counts; ``done`` [rows] marks rows whose battle just ended, where the
-    potential is zero. Over a battle the bonus therefore sums to zero: it only moves credit for KOs earlier and no
+    ``potential`` [rows] is each row's stored ``Phi`` from its previous step (zero at a battle's start);
+    ``fainted_after`` is [rows, 2] (own, foe) KO counts; ``done`` [rows] marks rows whose battle just ended, where the
+    potential is zero. Returns (shaping reward, new potential). Subtracting the stored potential, rather than one
+    recomputed with the current bonus, keeps the bonus summing to exactly zero over a battle even while it decays
+    between rollouts, and settles what is owed once it reaches zero. It only moves credit for KOs earlier and no
     longer pays for the KO margin of a win or loss (the old bonus did, which favoured all-out trading). gamma is
     taken as 1 (0.995 in PPO; the difference is below 1e-3 per step).
     """
-    after = np.where(done[:, None], 0.0, fainted_after)
-    return (bonus * ((after[:, 1] - after[:, 0]) - (fainted_before[:, 1] - fainted_before[:, 0]))).astype(np.float32)
+    after = np.where(done, 0.0, bonus * (fainted_after[:, 1] - fainted_after[:, 0])).astype(np.float32)
+    return (after - potential).astype(np.float32), after

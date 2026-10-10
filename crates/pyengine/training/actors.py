@@ -158,6 +158,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
 
     result = env.reset()
     b = observe(result)
+    potential = np.zeros(2 * count, dtype=np.float32)  # KO-shaping potential per row (training.ppo.ko_shaping)
     try:
         while True:
             command, argument = connection.recv()
@@ -191,7 +192,6 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 for k in OBS_KEYS:
                     out[k][t, rows] = getattr(b, k)
                 active = result["needs_action"].reshape(-1).copy()
-                fainted_before = b.fainted.copy()
                 mask0 = result["mask0"].reshape(-1, N_ACTIONS).copy()
                 mask0[~active] = False
                 mask0[~active, PASS] = True
@@ -235,8 +235,10 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 b = observe(result)
                 done = result["done"]
                 reward = result["reward"].reshape(-1).astype(np.float32)
-                if ko_bonus > 0:  # potential-based, sums to zero over a battle (training.ppo.ko_shaping)
-                    reward = reward + ko_shaping(fainted_before, b.fainted, np.repeat(done, 2), ko_bonus)
+                # Potential-based, sums to zero over a battle (training.ppo.ko_shaping); the stored potential
+                # carries across rollouts, so a decayed or zero bonus still settles what was credited.
+                shaped, potential = ko_shaping(potential, b.fainted, np.repeat(done, 2), ko_bonus)
+                reward = reward + shaped
                 out["reward"][t, rows] = reward
                 out["done"][t, rows] = np.repeat(done, 2)
                 stats["completed"] += int(done.sum())

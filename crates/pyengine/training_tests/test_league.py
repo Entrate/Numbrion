@@ -202,14 +202,32 @@ def test_heuristic_plays_legal_moves_in_engine_battles():
 def test_ko_shaping_is_potential_based():
     # One row over a battle: (own, foe) KO counts after each step; the battle ends at the last step.
     counts = np.array([[0, 0], [0, 1], [1, 1], [1, 3], [2, 3], [2, 4]], dtype=np.float32)
-    rewards = []
+    rewards, potential = [], np.zeros(1, dtype=np.float32)
     for t in range(1, len(counts)):
         done = np.array([t == len(counts) - 1])
-        rewards.append(float(ko_shaping(counts[t - 1:t], counts[t:t + 1], done, 0.02)[0]))
+        shaped, potential = ko_shaping(potential, counts[t:t + 1], done, 0.02)
+        rewards.append(float(shaped[0]))
     assert rewards[0] == pytest.approx(0.02) and rewards[1] == pytest.approx(-0.02)
     assert rewards[2] == pytest.approx(0.04)
     assert sum(rewards) == pytest.approx(0.0, abs=1e-7)  # no reward for the KO margin itself
     assert rewards[-1] == pytest.approx(-0.02 * (3 - 2))  # the potential is paid back when the battle ends
+    assert float(potential[0]) == 0.0
+
+
+def test_ko_shaping_sums_to_zero_while_the_bonus_decays():
+    # A KO credited at bonus 0.02, the bonus then decays (and reaches zero) before the battle ends.
+    counts = np.array([[0, 1], [0, 1], [0, 2], [1, 2]], dtype=np.float32)
+    bonuses = [0.02, 0.01, 0.005, 0.0]
+    done = [False, False, False, True]
+    rewards, potential = [], np.zeros(1, dtype=np.float32)
+    for row, bonus, end in zip(counts, bonuses, done):
+        shaped, potential = ko_shaping(potential, row[None], np.array([end]), bonus)
+        rewards.append(float(shaped[0]))
+    assert rewards[0] == pytest.approx(0.02)
+    assert sum(rewards) == pytest.approx(0.0, abs=1e-7)
+    # At bonus zero the outstanding potential is still settled.
+    shaped, potential = ko_shaping(np.array([0.03], dtype=np.float32), counts[2:3], np.array([False]), 0.0)
+    assert float(shaped[0]) == pytest.approx(-0.03) and float(potential[0]) == 0.0
 
 
 # ---- action-usage diagnostics --------------------------------------------------------------------------------------

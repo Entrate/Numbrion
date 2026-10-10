@@ -147,7 +147,9 @@ reward defaults described under "Training" above. `train_selfplay.py --help` lis
     estimates. The actors report per-env results, and the trainer attributes them to the opponent it assigned.
 - **KO shaping** (`training/ppo.py`, `ko_shaping`). The bonus is now potential-based:
   `reward += Phi(after) - Phi(before)` with `Phi = bonus * (foe KOs - own KOs)`, and `Phi = 0` once the battle
-  ends. It sums to zero over a battle. It still gives credit for KOs early, but no longer pays for the KO margin.
+  ends. Each row keeps its last potential across rollouts and pays back exactly that, so the bonus sums to zero over
+  a battle even while it decays (and still settles once it reaches zero). It still gives credit for KOs early, but no
+  longer pays for the KO margin.
   Under the old bonus, the margin was worth up to +/-0.25 on top of the +/-1 result. The default is 0.02
   (previously 0.05). It decays to zero at 25% of the run (previously 50%).
 - **Diagnostics** (`training/diagnostics.py`). Every metrics line now includes:
