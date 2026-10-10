@@ -87,7 +87,7 @@ impl<L: LogSink> Battle<L> {
     ) -> f64 {
         let e = EffectRef::ActiveMove(move_handle.0);
         if self.active_move(move_handle).move_type == TypeId::NONE {
-            self.active_move_mut(move_handle).move_type = dex::type_id("???").unwrap();
+            self.active_move_mut(move_handle).move_type = dex::TYPE_UNKNOWN;
         }
         let m = *self.active_move(move_handle);
         let ty = m.move_type;
@@ -111,7 +111,7 @@ impl<L: LogSink> Battle<L> {
         }
         damage = crate::math::randomizer(crate::math::trunc_f64(damage), self.state.prng.random(16))
             as f64;
-        if ty != dex::type_id("???").unwrap() {
+        if ty != dex::TYPE_UNKNOWN {
             let m = *self.active_move(move_handle);
             let is_stab =
                 m.traits & dex::MOVE_TRAIT_FORCESTAB != 0 || self.has_type(source, &[ty]) || {
@@ -120,7 +120,7 @@ impl<L: LogSink> Battle<L> {
                 };
             let mut stab = if is_stab { 1.5 } else { 1. };
             let tera = self.state.pokemon[source.0 as usize].terastallized;
-            if tera == dex::type_id("Stellar").unwrap() {
+            if tera == dex::TYPE_STELLAR {
                 if self.state.pokemon[source.0 as usize].stellar_boosted_types & (1 << ty.0) == 0
                     || m.runtime_flags & move_runtime::STELLAR_BOOSTED != 0
                 {
@@ -179,7 +179,7 @@ impl<L: LogSink> Battle<L> {
         let m = *self.active_move(move_handle);
         if self.state.pokemon[source.0 as usize].status == crate::state::Status::Burn
             && m.category == dex::Category::Physical
-            && !self.query_has_ability(source, "guts")
+            && !self.query_has_ability(source, dex::key_ids!("guts"))
             && m.id != dex::MOVE_FACADE
         {
             damage = self.modify(damage, 0.5, 1.);
@@ -397,7 +397,7 @@ impl<L: LogSink> Battle<L> {
         let crit = self.move_hit_data(target, h).crit;
         let tera = self.state.pokemon[source.0 as usize].terastallized;
         if tera != TypeId::NONE {
-            let tera_power = if tera == dex::type_id("Stellar").unwrap() {
+            let tera_power = if tera == dex::TYPE_STELLAR {
                 self.state.pokemon[source.0 as usize].stellar_boosted_types & (1 << m.move_type.0)
                     == 0
             } else {
@@ -510,7 +510,7 @@ fn numeric_move(bp: f64) -> ActiveMove {
         defensive_stat: None,
         offensive_target: false,
         ignore_immunity_types: 0,
-        move_type: dex::type_id("???").unwrap(),
+        move_type: dex::TYPE_UNKNOWN,
         category: dex::Category::Physical,
         target: dex::MoveTarget::Normal,
         priority: 0,

@@ -15,6 +15,19 @@ impl SpeedSortable for Option<Listener> {
     }
 }
 impl<L: LogSink> Battle<L> {
+    /// An absence proof skips discovery, but retains its stack checks and the
+    /// empty event's numeric modifier arithmetic (including JS uint32 wrapping).
+    pub(crate) fn empty_query_event(&mut self, event: EventId, mut relay: Relay) -> Relay {
+        self.check_event_limits(event, false);
+        let b = self.reserve_handlers();
+        if let Relay::Number(n) = relay {
+            if n >= 0.0 && n == n.floor() {
+                relay = Relay::Number(self.modify(n, 4096.0, 4096.0));
+            }
+        }
+        self.finish_handlers(b);
+        relay
+    }
     fn reserve_handlers(&mut self) -> u8 {
         let i = self.scratch.handler_depth;
         assert!((i as usize) < CALL_DEPTH, "handler stack overflow");
@@ -322,7 +335,6 @@ impl<L: LogSink> Battle<L> {
                 buffer.entries[..buffer.len as usize].rotate_right(1);
             }
         }
-        self.sort_handlers(b, event, options.fast_exit);
         let spread = matches!(target, EventTarget::Spread(_));
         let has = if spread {
             relays.len != 0
@@ -363,6 +375,8 @@ impl<L: LogSink> Battle<L> {
                 EventResult::Single(relay)
             };
         }
+        // Sorting nothing draws nothing, so the empty path above may skip it.
+        self.sort_handlers(b, event, options.fast_exit);
         let parent = self.scratch.current_frame;
         let frame = self.push_frame(
             event,
@@ -897,6 +911,40 @@ mod tests {
     fn battle() -> Battle {
         let packed = "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric";
         Battle::new([1, 2, 3, 4], packed, packed).unwrap()
+    }
+
+    #[test]
+    fn absent_query_matches_generic_numeric_wrapping_and_stack_checks() {
+        let mut b = battle();
+        for n in [0.0, 1.5, -2.0, 1048576.0, f64::INFINITY] {
+            let expected = b.run_event(
+                EventId::ModifySpe,
+                EventArg::Holder(Holder::mon(MonId(0))),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Number(n),
+                RunEventOptions::default(),
+            );
+            assert_eq!(
+                b.empty_query_event(EventId::ModifySpe, Relay::Number(n)),
+                expected
+            );
+        }
+        b.scratch.handler_depth = CALL_DEPTH as u8;
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                b.empty_query_event(EventId::ModifySpe, Relay::Number(1.0));
+            }))
+            .is_err()
+        );
+        b.scratch.handler_depth = 0;
+        b.scratch.event_depth = EVENT_DEPTH as u8;
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                b.empty_query_event(EventId::ModifySpe, Relay::Number(1.0));
+            }))
+            .is_err()
+        );
     }
 
     #[test]

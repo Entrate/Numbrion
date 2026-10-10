@@ -7,6 +7,7 @@ use crate::{
     game::Game,
     mask::{Req, SideActions},
     pool::TeamPool,
+    search::{GridArrays, GridError, GridExecutor as Grid, Options, Seeds, Stop},
 };
 use numpy::{AllowTypeChange, IntoPyArray, PyArray1, PyArrayLikeDyn, PyArrayMethods, PyUntypedArrayMethods};
 use pyo3::{
@@ -30,6 +31,17 @@ pyo3::create_exception!(
 
 fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+/// Lock two distinct battles in address order, so two threads copying in opposite directions cannot deadlock.
+fn lock_pair<'a>(dst: &'a Battle, src: &'a Battle) -> (MutexGuard<'a, Game>, MutexGuard<'a, Game>) {
+    if (dst as *const Battle) < (src as *const Battle) {
+        let d = lock(&dst.g);
+        (d, lock(&src.g))
+    } else {
+        let s = lock(&src.g);
+        (lock(&dst.g), s)
+    }
 }
 
 fn choice_err(e: engine::sim::ChoiceError) -> PyErr {
@@ -281,8 +293,9 @@ impl Battle {
 
     /// An independent copy at the current decision boundary. The PRNG state is copied too: the copy replays
     /// exactly what the original would do. Call `reseed` for search that must not know the real future
-    /// randomness. Log buffers of the copy start empty. Cost is dominated by rebuilding the team definitions;
-    /// for hot loops reuse a scratch battle with `copy_from`.
+    /// randomness. Log buffers of the copy start empty. The copy shares the immutable team definitions (no
+    /// parsing, no constructor draws) and only allocates its own engine scratch (~8 us). For hot loops reuse a
+    /// worker battle with `restore_from` (~1 us), or run a whole grid of cells with `GridExecutor`.
     fn clone(&self, py: Python<'_>) -> Battle {
         Battle { g: Mutex::new(py.detach(|| lock(&self.g).duplicate())) }
     }
@@ -296,13 +309,13 @@ impl Battle {
     }
 
     /// Overwrite this battle's state with `other`'s (cheap, ~1 us). Both must come from the same constructor
-    /// arguments (same seed, teams and names), e.g. a scratch `clone()` of the original.
+    /// arguments (same seed, teams and names), e.g. a scratch `clone()` of the original. `restore_from` drops
+    /// that requirement.
     fn copy_from(&self, other: &Battle) -> PyResult<()> {
         if std::ptr::eq(self, other) {
             return Ok(());
         }
-        let o = lock(&other.g);
-        let mut g = lock(&self.g);
+        let (mut g, o) = lock_pair(self, other);
         if !g.same_origin(&o) {
             return Err(PyValueError::new_err("copy_from needs a battle built from the same seed, teams and names"));
         }
@@ -310,9 +323,61 @@ impl Battle {
         Ok(())
     }
 
+    /// Make this battle an exact copy of `other` at its decision boundary, reusing this battle's allocations
+    /// (~1 us, nothing allocated). Unlike `copy_from`, `other` may have different teams, names or seed (for
+    /// example another determinized world); only the log mode (`log=`) must match. Afterwards this battle
+    /// plays out exactly like `other` (same PRNG state; `reseed` to change it), its teams/names/`prng_seed`
+    /// are `other`'s, and its unread log lines are dropped (its log views restart empty).
+    fn restore_from(&self, other: &Battle) -> PyResult<()> {
+        if std::ptr::eq(self, other) {
+            return Ok(());
+        }
+        let (mut g, o) = lock_pair(self, other);
+        g.restore_from(&o).map_err(|e| PyValueError::new_err(format!("{e} (log=True vs log=False)")))
+    }
+
+    /// Return to the state of a freshly constructed `Battle(seed, p1, p2, names, log)` before `start()`,
+    /// keeping the names, the log mode and every allocation (no scratch allocation; teams equal to the current
+    /// ones are not parsed again). `p1`/`p2` default to the current teams; unspecified genders are drawn from
+    /// the new seed exactly as the constructor draws them. An invalid team raises ValueError and leaves the
+    /// battle unchanged. Call `start()` afterwards.
+    #[pyo3(signature = (seed, p1=None, p2=None))]
+    fn reset(&self, py: Python<'_>, seed: [u16; 4], p1: Option<&str>, p2: Option<&str>) -> PyResult<()> {
+        py.detach(|| {
+            let mut g = lock(&self.g);
+            let [c1, c2] = g.packed_teams().clone();
+            g.reset(seed, p1.map_or(c1, |t| Arc::from(t)), p2.map_or(c2, |t| Arc::from(t)))
+        })
+        .map_err(PyValueError::new_err)
+    }
+
     /// Replace the PRNG state (four 16-bit words). The next draw is the first of the new stream.
     fn reseed(&self, seed: [u16; 4]) {
         lock(&self.g).reseed(seed);
+    }
+
+    /// `start()` has run.
+    #[getter]
+    fn started(&self) -> bool {
+        lock(&self.g).started()
+    }
+
+    // Determinized worlds built with these two are ordinary roots for `GridExecutor.run`.
+
+    /// Determinization: indices into the opponent's packed team (construction order, stable for the battle)
+    /// of the Pokemon `viewer` has never seen and whose sets `replace_hidden_set` can swap now.
+    fn hidden_team_indices(&self, viewer: usize) -> PyResult<Vec<usize>> {
+        check_side(viewer)?;
+        Ok(lock(&self.g).hidden_team_indices(viewer))
+    }
+
+    /// Give the opponent's never-revealed Pokemon at packed-team `index` the single packed set `packed_set`,
+    /// in place, with no events, log lines or PRNG draws: the result equals constructing the battle with that set
+    /// and replaying the same choices (docs/design/TRAINING-API.md). Raises ValueError, battle unchanged, when
+    /// the Pokemon was revealed or the swap is unsupported. Call `reseed` before searching the world.
+    fn replace_hidden_set(&self, viewer: usize, index: usize, packed_set: &str) -> PyResult<()> {
+        check_side(viewer)?;
+        lock(&self.g).replace_hidden_set(viewer, index, packed_set).map_err(PyValueError::new_err)
     }
 
     #[getter]
@@ -522,6 +587,151 @@ impl BatchEnv {
     }
 }
 
+fn grid_err(e: GridError) -> PyErr {
+    match e {
+        GridError::Input(e) => PyValueError::new_err(e),
+        GridError::Engine(e) => PyRuntimeError::new_err(e),
+    }
+}
+
+/// Batched one-decision search: many cells, each = restore a root, submit both sides' action codes, run to
+/// the next decision boundary, on a persistent pool of Rust threads (one reusable battle per thread, GIL
+/// released). See docs/design/TRAINING-API.md, "Search".
+///
+/// `GridExecutor(threads=0)`; `threads=0` uses all hardware threads.
+#[pyclass(frozen, module = "numbrion")]
+struct GridExecutor {
+    ex: Mutex<Grid>,
+    threads: usize,
+}
+
+#[pymethods]
+impl GridExecutor {
+    #[new]
+    #[pyo3(signature = (threads=0))]
+    fn new(threads: usize) -> PyResult<Self> {
+        let threads = if threads == 0 { std::thread::available_parallelism().map_or(1, |n| n.get()) } else { threads };
+        Ok(GridExecutor { ex: Mutex::new(Grid::new(threads).map_err(PyRuntimeError::new_err)?), threads })
+    }
+
+    #[getter]
+    fn threads(&self) -> usize {
+        self.threads
+    }
+
+    /// `run(roots, actions, world=None, seeds=None, stop="boundary", requests=True, masks=False, logs=None,
+    /// keep_leaves=False)` -> dict, one entry per cell in input order.
+    ///
+    /// * `roots`: a `Battle` or a list of them (worlds, e.g. determinized copies), each started, not ended, and
+    ///   all with the same `log` mode. They are snapshotted at the call; the battles themselves never change.
+    /// * `actions`: int array `[n, 2 sides, 2 slots]` of action codes; a side that needs no action at its root
+    ///   ignores its entries (use -1). Every pair is checked against its root's mask first (ValueError, nothing
+    ///   runs).
+    /// * `world`: int array `[n]`, the root of each cell (default: all 0).
+    /// * `seeds`: None keeps each root's PRNG state (cells replay the real future randomness); a `[4]` seed
+    ///   reseeds every cell with it (common random numbers); `[n, 4]` gives each cell its own.
+    /// * `stop`: `"boundary"` stops at the first decision boundary (the next turn, or a mid-turn / end-of-turn
+    ///   replacement request: U-turn, faint, Revival Blessing), or the end. `"turn"` then answers replacement
+    ///   requests with Showdown's `default` choice (first eligible party members) until a move request or the end.
+    /// * `requests` / `masks` / `logs` / `keep_leaves`: also return each side's request JSON, the leaf masks
+    ///   (`mask0`, `mask1_any`), each side's player-view lines from the root to the leaf (default: when the roots
+    ///   have `log=True`), and the leaf battles themselves (one `Battle` per cell, ~8 us each).
+    ///
+    /// Always returned: `ended` bool[n], `winner` int8[n] (-1: tie or running), `turn` int32[n], `steps` int32[n]
+    /// (choice rounds applied: 1, plus auto-answered replacements), `needs_action` bool[n, 2], `request_kind`
+    /// uint8[n, 2] (0 none, 1 move, 2 switch). Results do not depend on `threads` or scheduling.
+    #[pyo3(signature = (roots, actions, world=None, seeds=None, stop="boundary", requests=true, masks=false,
+                        logs=None, keep_leaves=false))]
+    #[allow(clippy::too_many_arguments)]
+    fn run<'py>(
+        &self,
+        py: Python<'py>,
+        roots: &Bound<'py, PyAny>,
+        actions: PyArrayLikeDyn<'py, i32, AllowTypeChange>,
+        world: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+        seeds: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+        stop: &str,
+        requests: bool,
+        masks: bool,
+        logs: Option<bool>,
+        keep_leaves: bool,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        let roots: Vec<Bound<'py, Battle>> = match roots.cast::<Battle>() {
+            Ok(b) => vec![b.clone()],
+            Err(_) => roots.extract().map_err(|_| PyValueError::new_err("roots must be a Battle or a list of Battles"))?,
+        };
+        let Some(first) = roots.first() else { return Err(PyValueError::new_err("roots is empty")) };
+        let shape = actions.shape().to_vec();
+        if shape.len() != 3 || shape[1..] != [2, 2] {
+            return Err(PyValueError::new_err(format!("actions must have shape (n, 2, 2), got {shape:?}")));
+        }
+        let n = shape[0];
+        let flat: Vec<i32> = actions.as_array().iter().copied().collect();
+        let world: Vec<u32> = match world {
+            None => Vec::new(),
+            Some(w) => {
+                if w.shape() != [n] {
+                    return Err(PyValueError::new_err(format!("world must have shape ({n},), got {:?}", w.shape())));
+                }
+                let w: Vec<i64> = w.as_array().iter().copied().collect();
+                w.iter().map(|&x| u32::try_from(x).map_err(|_| PyValueError::new_err(format!("world index {x} out of range")))).collect::<PyResult<_>>()?
+            }
+        };
+        let seeds = match seeds {
+            None => Seeds::Root,
+            Some(s) => {
+                let shape = s.shape().to_vec();
+                if shape != [4] && shape != [n, 4] {
+                    return Err(PyValueError::new_err(format!("seeds must have shape (4,) or ({n}, 4), got {shape:?}")));
+                }
+                let words: Vec<u16> = s.as_array().iter().map(|&x| u16::try_from(x).map_err(|_| PyValueError::new_err(format!("seed word {x} out of range 0..65536")))).collect::<PyResult<_>>()?;
+                Seeds::Fixed(words.chunks(4).map(|c| [c[0], c[1], c[2], c[3]]).collect())
+            }
+        };
+        let stop = match stop {
+            "boundary" => Stop::Boundary,
+            "turn" => Stop::Turn,
+            other => return Err(PyValueError::new_err(format!("stop must be 'boundary' or 'turn', got {other:?}"))),
+        };
+        let logs = logs.unwrap_or_else(|| first.get().g.lock().map_or(false, |g| g.is_text()));
+        let opts = Options { stop, requests, masks, logs, keep_leaves };
+        let refs: Vec<&Battle> = roots.iter().map(|b| b.get()).collect();
+        let leaves = py
+            .detach(|| {
+                let mut ex = lock(&self.ex);
+                for (k, r) in refs.iter().enumerate() {
+                    ex.stage_root(k, &lock(&r.g))?;
+                }
+                ex.run_staged(refs.len(), &world, &flat, &seeds, &opts)
+            })
+            .map_err(grid_err)?;
+        let a = GridArrays::from_leaves(&leaves, masks);
+        let d = PyDict::new(py);
+        d.set_item("ended", bools(py, &a.ended))?;
+        d.set_item("winner", a.winner.into_pyarray(py))?;
+        d.set_item("turn", a.turn.into_pyarray(py))?;
+        d.set_item("steps", a.steps.into_pyarray(py))?;
+        d.set_item("needs_action", bools(py, &a.needs_action).reshape([n, 2])?)?;
+        d.set_item("request_kind", a.request_kind.into_pyarray(py).reshape([n, 2])?)?;
+        if let (Some(m0), Some(m1)) = (&a.mask0, &a.mask1_any) {
+            d.set_item("mask0", bools(py, m0).reshape([n, 2, N_ACTIONS])?)?;
+            d.set_item("mask1_any", bools(py, m1).reshape([n, 2, N_ACTIONS])?)?;
+        }
+        let mut leaves = leaves;
+        if requests {
+            d.set_item("requests", PyList::new(py, leaves.iter_mut().map(|l| std::mem::take(&mut l.requests)).map(|[a, b]| (a, b)))?)?;
+        }
+        if logs {
+            d.set_item("logs", PyList::new(py, leaves.iter_mut().map(|l| std::mem::take(&mut l.logs)).map(|[a, b]| (a, b)))?)?;
+        }
+        if keep_leaves {
+            let games: Vec<Battle> = leaves.into_iter().filter_map(|l| l.game).map(|g| Battle { g: Mutex::new(*g) }).collect();
+            d.set_item("leaves", PyList::new(py, games)?)?;
+        }
+        Ok(d)
+    }
+}
+
 #[pyfunction]
 fn describe_action(a: i64) -> PyResult<String> {
     Ok(action::describe(code(a)?))
@@ -552,6 +762,7 @@ fn switch_action(party: u8) -> PyResult<usize> {
 fn _numbrion(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Battle>()?;
     m.add_class::<BatchEnv>()?;
+    m.add_class::<GridExecutor>()?;
     m.add("ChoiceError", m.py().get_type::<ChoiceError>())?;
     m.add_function(wrap_pyfunction!(describe_action, m)?)?;
     m.add_function(wrap_pyfunction!(decode_action, m)?)?;

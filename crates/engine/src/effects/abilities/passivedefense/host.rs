@@ -114,12 +114,19 @@ impl<L: LogSink> MirrorHost for MirrorBattleHost<'_, L> {
         );
     }
 }
+/// The volatiles the Own Tempo/Oblivious update reads and removes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum UpdateVolatile {
+    Confusion,
+    Attract,
+    Taunt,
+}
 pub trait UpdateHost {
     fn status(&mut self) -> Status;
-    fn volatile(&mut self, key: &'static str) -> bool;
+    fn volatile(&mut self, v: UpdateVolatile) -> bool;
     fn activate(&mut self);
     fn cure(&mut self);
-    fn remove(&mut self, key: &'static str);
+    fn remove(&mut self, v: UpdateVolatile);
     fn attract_end(&mut self);
 }
 pub fn update<H: UpdateHost>(h: &mut H, id: EffectId) {
@@ -139,20 +146,20 @@ pub fn update<H: UpdateHost>(h: &mut H, id: EffectId) {
             }
         }
         dex::ABILITY_OWNTEMPO => {
-            if h.volatile("confusion") {
+            if h.volatile(UpdateVolatile::Confusion) {
                 h.activate();
-                h.remove("confusion");
+                h.remove(UpdateVolatile::Confusion);
             }
         }
         dex::ABILITY_OBLIVIOUS => {
-            if h.volatile("attract") {
+            if h.volatile(UpdateVolatile::Attract) {
                 h.activate();
-                h.remove("attract");
+                h.remove(UpdateVolatile::Attract);
                 h.attract_end();
             }
-            if h.volatile("taunt") {
+            if h.volatile(UpdateVolatile::Taunt) {
                 h.activate();
-                h.remove("taunt");
+                h.remove(UpdateVolatile::Taunt);
             }
         }
         _ => panic!("unexpected update ability"),
@@ -167,8 +174,13 @@ impl<L: LogSink> UpdateHost for UpdateBattleHost<'_, L> {
     fn status(&mut self) -> Status {
         self.b.state.pokemon[self.target.0 as usize].status
     }
-    fn volatile(&mut self, name: &'static str) -> bool {
-        has_volatile(self.b, self.target, name)
+    fn volatile(&mut self, v: UpdateVolatile) -> bool {
+        let keys = match v {
+            UpdateVolatile::Confusion => dex::key_ids!("confusion"),
+            UpdateVolatile::Attract => dex::key_ids!("attract"),
+            UpdateVolatile::Taunt => dex::key_ids!("taunt"),
+        };
+        has_volatile(self.b, self.target, keys)
     }
     fn activate(&mut self) {
         log(self.b, "-activate", self.target, self.id, true)
@@ -176,11 +188,11 @@ impl<L: LogSink> UpdateHost for UpdateBattleHost<'_, L> {
     fn cure(&mut self) {
         self.b.cure_status(self.target, false);
     }
-    fn remove(&mut self, name: &'static str) {
-        let id = match name {
-            "confusion" => dex::CONDITION_CONFUSION,
-            "taunt" => dex::CONDITION_TAUNT,
-            "attract" => {
+    fn remove(&mut self, v: UpdateVolatile) {
+        let id = match v {
+            UpdateVolatile::Confusion => dex::CONDITION_CONFUSION,
+            UpdateVolatile::Taunt => dex::CONDITION_TAUNT,
+            UpdateVolatile::Attract => {
                 const ATTRACT: EffectId = optional_id(dex::CONDITIONS_DATA, "attract");
                 assert!(
                     ATTRACT != EffectId::NONE,
@@ -188,7 +200,6 @@ impl<L: LogSink> UpdateHost for UpdateBattleHost<'_, L> {
                 );
                 ATTRACT
             }
-            _ => panic!("unknown volatile"),
         };
         self.b.remove_volatile(self.target, id);
     }

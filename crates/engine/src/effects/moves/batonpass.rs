@@ -33,7 +33,9 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         // data/moves.ts:1101-1107. PRNG: none.
         dex::HOOK_MOVE_BATONPASS_ONHIT => {
             let t = mon(b, cx, 0);
-            if b.can_switch(t.side()) == 0 || volatile(b, t, "commanded") {
+            if b.can_switch(t.side()) == 0
+                || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "commanded") })
+            {
                 b.attr_last_move(MoveLineEdit::Still);
                 b.add(LogEntry::new("-fail", &[LogArg::Mon(t)], &[]));
                 return Relay::NotFail;

@@ -30,7 +30,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/moves.ts:4510-4515. `source?.hasItem('terrainextender') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_ELECTRICTERRAIN_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "terrainextender")
+            support::duration_callback(b, cx, dex::key_ids!("terrainextender"))
         }
         // data/moves.ts:4516-4523. slp on grounded, not semi-invulnerable target: -activate when effect is yawn or a secondary-less Move; return false. PRNG: none directly.
         dex::HOOK_CONDITION_ELECTRICTERRAIN_ONSETSTATUS => set_status(b, cx),

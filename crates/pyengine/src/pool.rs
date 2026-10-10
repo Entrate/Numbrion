@@ -5,13 +5,14 @@ use std::{
     fs::File,
     io::{self, BufRead, BufReader, Read},
     path::Path,
-    sync::Arc,
+    sync::{Arc, OnceLock},
 };
 
 /// Teams of one or more pool files, stored back to back.
 #[derive(Default)]
 pub struct TeamPool {
     teams: Vec<Arc<str>>,
+    parsed: Vec<OnceLock<Result<Arc<engine::teams::TeamDef>, String>>>,
 }
 
 impl TeamPool {
@@ -28,6 +29,7 @@ impl TeamPool {
         let t = line.trim();
         if !t.is_empty() {
             self.teams.push(Arc::from(t));
+            self.parsed.push(OnceLock::new());
         }
     }
 
@@ -70,6 +72,12 @@ impl TeamPool {
 
     pub fn get(&self, i: usize) -> &Arc<str> {
         &self.teams[i]
+    }
+
+    /// Parse each sampled team once; preserve lazy validation/retry behavior for bad pool rows.
+    pub fn parsed(&self, i: usize) -> Result<Arc<engine::teams::TeamDef>, String> {
+        self.parsed[i].get_or_init(|| engine::teams::TeamDef::unpack(&self.teams[i])
+            .map(Arc::new).map_err(|e| e.0)).clone()
     }
 }
 

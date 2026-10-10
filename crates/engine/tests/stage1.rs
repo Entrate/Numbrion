@@ -11,6 +11,38 @@ where
 {
     s.split(',').map(|n| n.parse().unwrap()).collect()
 }
+
+#[test]
+fn parsed_construction_and_reset_preserve_constructor_gender_draws() {
+    use std::sync::Arc;
+    let mut worker: Option<Battle> = None;
+    let mut sampled = 0;
+    for line in include_str!("data/constructor.tsv").lines().filter(|s| s.starts_with("B\t")) {
+        let f: Vec<_> = line.split('\t').collect();
+        let p1 = Arc::new(TeamDef::unpack(f[3]).unwrap());
+        let p2 = Arc::new(TeamDef::unpack(f[4]).unwrap());
+        let initial: [u16; 4] = numbers(f[1]).try_into().unwrap();
+        for seed in [initial, [1, 2, 3, 4], [17, 19, 23, 29], [65535; 4]] {
+            let fresh = Battle::new(seed, f[3], f[4]).unwrap();
+            if let Some(w) = &mut worker {
+                w.reset_from_team_defs(seed, p1.clone(), p2.clone()).unwrap();
+            } else {
+                worker = Some(Battle::from_team_defs(seed, p1.clone(), p2.clone(),
+                    ["Player 1".into(), "Player 2".into()], engine::log::NoLog).unwrap());
+            }
+            let w = worker.as_mut().unwrap();
+            assert_eq!(format!("{:?}", w.state), format!("{:?}", fresh.state));
+            assert_eq!(w.teams(), fresh.teams());
+            sampled += usize::from(seed != w.seed());
+            // Reset from the retained input, rather than the previous resolved genders.
+            w.reset_seed(initial).unwrap();
+            let reference = Battle::new(initial, f[3], f[4]).unwrap();
+            assert_eq!(w.seed(), reference.seed());
+            assert_eq!(w.teams(), reference.teams());
+        }
+    }
+    assert!(sampled >= 4, "unspecified-gender constructor draws were not exercised");
+}
 #[test]
 fn constructor_matches_pinned_showdown() {
     let mut battle: Option<Battle> = None;

@@ -29,16 +29,18 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     let t = mon(b, cx, 0);
     let s = mon(b, cx, 1);
     let p = b.state.pokemon[t.0 as usize];
-    if p.last_move == EffectId::NONE || volatile(b, t, "dynamax") {
+    if p.last_move == EffectId::NONE
+        || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "dynamax") })
+    {
         return Relay::Bool(false);
     }
     let m = &dex::MOVES[(p.last_move.0 - dex::MOVE_START) as usize];
     if m.flags & (dex::FLAG_FAILINSTRUCT | dex::FLAG_CHARGE | dex::FLAG_RECHARGE) != 0
         || matches!(dex::effect(m.id).data.get(dex::FIELD_ISZ), Some(dex::DataValue::Text(s)) if !s.is_empty())
         || dex::effect(m.id).data.get(dex::FIELD_ISMAX) == Some(dex::DataValue::Bool(true))
-        || volatile(b, t, "beakblast")
-        || volatile(b, t, "focuspunch")
-        || volatile(b, t, "shelltrap")
+        || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "beakblast") })
+        || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "focuspunch") })
+        || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "shelltrap") })
         || b.get_move_data(t, p.last_move).is_some_and(|m| m.pp == 0)
     {
         return Relay::Bool(false);

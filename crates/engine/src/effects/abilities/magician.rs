@@ -36,8 +36,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     let p = b.state.pokemon[s.0 as usize];
     if p.flags & mon_flags::SWITCH_REQUESTED != 0
         || p.item != EffectId::NONE
-        || volatile(b, s, "gem")
-        || dex::effect(m.id).key == "fling"
+        || volatile(b, s, const { optional_id(dex::CONDITIONS_DATA, "gem") })
+        || dex::key_ids!("fling").contains(m.id)
         || m.category == dex::Category::Status
     {
         return Relay::Undefined;

@@ -37,7 +37,7 @@ fn move_overlays_match_pinned_callbacks() {
         } else {
             dex::type_id(c[2]).unwrap()
         };
-        b.teams.sides[0].sets[0].tera_type = tera;
+        std::sync::Arc::make_mut(&mut std::sync::Arc::make_mut(&mut b.teams).sides[0]).sets[0].tera_type = tera;
         let p = &mut b.state.pokemon[0];
         p.species = species;
         p.base_species = species;

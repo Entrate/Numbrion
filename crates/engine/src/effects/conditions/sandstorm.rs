@@ -30,7 +30,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/conditions.ts:630-635. `source?.hasItem('smoothrock') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_SANDSTORM_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "smoothrock")
+            support::duration_callback(b, cx, dex::key_ids!("smoothrock"))
         }
         // data/conditions.ts:639-643. Rock type in sandstorm: returns modify(spd, 1.5). PRNG: none directly (Type events).
         dex::HOOK_CONDITION_SANDSTORM_ONMODIFYSPD => {

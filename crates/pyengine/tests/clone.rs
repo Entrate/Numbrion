@@ -94,3 +94,81 @@ fn reseed_replaces_the_prng() {
     }
     assert!(trials >= 5 && differing >= trials / 2, "reseeding had no visible effect ({differing}/{trials})");
 }
+
+/// Reuse a dirty worker at every boundary, including nonempty mid-turn queues.
+#[test]
+fn restored_workers_match_at_random_and_replacement_boundaries() {
+    let pool = test_pool();
+    let revival: Vec<_> = (0..pool.len()).filter(|&i| pool.get(i).contains("revivalblessing")).collect();
+    let mut rng = SplitMix::new(77);
+    let p = SamplerParams::default();
+    let (mut boundaries, mut pivots, mut faints, mut revives) = (0, 0, 0, 0);
+    for b in 0..n_battles(60) {
+        let i = revival[rng.below(revival.len())];
+        let j = revival[rng.below(revival.len())];
+        let Some(mut g) = new_game_with(&pool, i, j, rng.battle_seed(), true) else { continue };
+        let mut worker = g.duplicate();
+        while !g.ended() {
+            let acts = [g.side_actions(0), g.side_actions(1)];
+            revives += acts.iter().any(|a| a.revival.iter().any(|&r| r)) as usize;
+            if acts.iter().any(|a| a.req == _numbrion::mask::Req::Switch) {
+                let active = g.state().sides.iter().flat_map(|s| s.active).filter(|m| *m != engine::ids::MonId::NONE);
+                if active.clone().any(|m| g.state().pokemon[m.0 as usize].hp == 0) {
+                    faints += 1;
+                } else if !acts.iter().any(|a| a.revival.iter().any(|&r| r)) {
+                    pivots += 1;
+                }
+            }
+            // Leave unread branch logs and a different PRNG/state in the worker.
+            worker.copy_state_from(&g);
+            worker.reseed([9, 8, 7, 6]);
+            random_step(&mut worker, &mut rng, &p);
+            worker.copy_state_from(&g);
+            assert!(worker.drain_omni().is_empty());
+            assert!(worker.drain_player(0).is_empty());
+            assert!(worker.drain_player(1).is_empty());
+            assert_eq!(worker.signature(), g.signature());
+            g.drain_omni();
+            g.drain_player(0);
+            g.drain_player(1);
+            let codes = random_step_codes(&mut g, &mut rng, &p, Some(engine::dex::MOVE_REVIVALBLESSING));
+            apply_codes(&mut worker, &codes);
+            assert_eq!(worker.signature(), g.signature(), "battle {b} boundary {boundaries}");
+            assert_eq!(worker.drain_omni(), g.drain_omni());
+            for side in 0..2 {
+                assert_eq!(worker.drain_player(side), g.drain_player(side));
+            }
+            boundaries += 1;
+        }
+    }
+    eprintln!("restore: {boundaries} boundaries, {pivots} pivots, {faints} faints, {revives} revivals");
+    assert!(boundaries > 100 && pivots > 0 && faints > 0 && revives > 0);
+}
+
+#[test]
+fn reset_worker_matches_fresh_games_with_new_teams_and_seeds() {
+    let pool = test_pool();
+    let mut rng = SplitMix::new(143);
+    let p = SamplerParams::default();
+    for log in [false, true] {
+        let mut worker = new_game(&pool, &mut rng, log);
+        for _ in 0..12 {
+            let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
+            let seed = rng.battle_seed();
+            let Some(mut fresh) = new_game_with(&pool, i, j, seed, log) else { continue };
+            worker.reset_from_team_defs(seed, [pool.get(i).clone(), pool.get(j).clone()],
+                [pool.parsed(i).unwrap(), pool.parsed(j).unwrap()]).unwrap();
+            worker.start().unwrap();
+            assert_eq!(worker.signature(), fresh.signature());
+            assert_eq!(worker.drain_omni(), fresh.drain_omni());
+            for side in 0..2 { assert_eq!(worker.drain_player(side), fresh.drain_player(side)); }
+            while !fresh.ended() {
+                let codes = random_step_codes(&mut fresh, &mut rng, &p, None);
+                apply_codes(&mut worker, &codes);
+                assert_eq!(worker.signature(), fresh.signature());
+                assert_eq!(worker.drain_omni(), fresh.drain_omni());
+                for side in 0..2 { assert_eq!(worker.drain_player(side), fresh.drain_player(side)); }
+            }
+        }
+    }
+}

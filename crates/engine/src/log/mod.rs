@@ -108,6 +108,9 @@ pub enum MoveLineEdit<'a> {
 /// emit ports battle.ts:3081-3120; edit_move ports :3121-3144. PRNG: none.
 pub trait LogSink {
     const ENABLED: bool;
+    /// Discard branch history and mutable line/cursor state at a restore/reset boundary.
+    /// Stateless sinks need no work; history-retaining sinks must override this.
+    fn reset(&mut self) {}
     fn emit(&mut self, view: LogView<'_>, entry: LogEntry<'_>);
     fn edit_move(&mut self, view: LogView<'_>, edit: MoveLineEdit<'_>);
 }

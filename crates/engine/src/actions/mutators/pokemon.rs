@@ -170,6 +170,8 @@ impl<L: LogSink> Battle<L> {
     /// Virtual move PP/types/boosts/ability; preserve real base slot ownership
     /// Ports `sim/pokemon.ts:1270-1385`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
     pub fn transform_into(&mut self, pokemon: MonId, target: MonId, effect: EffectRef) -> bool {
+        // `species.name === 'Eternatus-Eternamax'`; None outside the generated scope.
+        const ETERNAMAX: Option<EffectId> = dex::key_id(EffectKind::Species, "eternatuseternamax");
         let p = self.state.pokemon[pokemon.0 as usize];
         let t = self.state.pokemon[target.0 as usize];
         let species = dex::species(t.species);
@@ -181,10 +183,10 @@ impl<L: LogSink> Battle<L> {
                 .is_some()
             || t.flags & mon_flags::TRANSFORMED != 0
             || p.flags & mon_flags::TRANSFORMED != 0
-            || species.name == "Eternatus-Eternamax"
-            || (matches!(species.base_species_name, "Ogerpon" | "Terapagos")
+            || Some(t.species) == ETERNAMAX
+            || (matches!(species.base_species, dex::SPECIES_OGERPON | dex::SPECIES_TERAPAGOS)
                 && (p.terastallized != TypeId::NONE || t.terastallized != TypeId::NONE))
-            || p.terastallized == dex::type_id("Stellar").unwrap()
+            || p.terastallized == dex::TYPE_STELLAR
         {
             return false;
         }
@@ -231,17 +233,25 @@ impl<L: LogSink> Battle<L> {
         receiver.boosts = t.boosts;
         receiver.virtual_move_slots = slots;
         receiver.virtual_move_count = original.len() as u8;
-        for key in ["dragoncheer", "focusenergy", "gmaxchistrike", "laserfocus"] {
-            if let Some(id) = dex::lookup(EffectKind::Condition, key) {
+        // Critical-hit volatiles, resolved at compile time (None outside the scope);
+        // `true` marks the layered ones whose payload is copied.
+        const CRIT_VOLATILES: [(Option<EffectId>, bool); 4] = [
+            (dex::key_id(EffectKind::Condition, "dragoncheer"), true),
+            (dex::key_id(EffectKind::Condition, "focusenergy"), false),
+            (dex::key_id(EffectKind::Condition, "gmaxchistrike"), true),
+            (dex::key_id(EffectKind::Condition, "laserfocus"), false),
+        ];
+        for (id, _) in CRIT_VOLATILES {
+            if let Some(id) = id {
                 self.remove_volatile(pokemon, id);
             }
         }
-        for key in ["dragoncheer", "focusenergy", "gmaxchistrike", "laserfocus"] {
-            if let Some(id) = dex::lookup(EffectKind::Condition, key) {
+        for (id, layered) in CRIT_VOLATILES {
+            if let Some(id) = id {
                 if let Some(c) = self.get_volatile(target, id) {
                     let payload = self.state.effects.cells[c.0 as usize].payload;
                     self.add_volatile(pokemon, id, Attribution::NONE, None);
-                    if key == "dragoncheer" || key == "gmaxchistrike" {
+                    if layered {
                         let d = self
                             .get_volatile(pokemon, id)
                             .expect("critical volatile rejected");
@@ -269,8 +279,8 @@ impl<L: LogSink> Battle<L> {
             true,
         );
         if matches!(
-            dex::species(self.state.pokemon[pokemon.0 as usize].species).base_species_name,
-            "Ogerpon" | "Terapagos"
+            dex::species(self.state.pokemon[pokemon.0 as usize].species).base_species,
+            dex::SPECIES_OGERPON | dex::SPECIES_TERAPAGOS
         ) {
             self.state.pokemon[pokemon.0 as usize].flags |= mon_flags::TERA_BLOCKED;
         }
@@ -285,8 +295,7 @@ impl<L: LogSink> Battle<L> {
         switch_effect: EffectId,
     ) -> () {
         self.clear_volatile(pokemon, true);
-        let shedtail =
-            switch_effect != EffectId::NONE && dex::effect(switch_effect).key == "shedtail";
+        let shedtail = dex::key_ids!("shedtail").contains(switch_effect);
         if !shedtail {
             self.state.pokemon[pokemon.0 as usize].boosts =
                 self.state.pokemon[source.0 as usize].boosts;
@@ -392,15 +401,15 @@ impl<L: LogSink> Battle<L> {
         assert!(types.len > 0 && types.len <= 2, "persistent type capacity");
         let p = &self.state.pokemon[pokemon.0 as usize];
         if !enforce {
-            if types.values[..types.len as usize].contains(&dex::type_id("Stellar").unwrap())
+            if types.values[..types.len as usize].contains(&dex::TYPE_STELLAR)
                 || p.terastallized != TypeId::NONE
             {
                 return false;
             }
-            if matches!(
-                dex::species(p.species).base_species_name,
-                "Arceus" | "Silvally"
-            ) {
+            // `['Arceus', 'Silvally'].includes(species.baseSpecies)`; None outside the scope.
+            const SILVALLY: Option<EffectId> = dex::key_id(EffectKind::Species, "silvally");
+            let base = dex::species(p.species).base_species;
+            if base == dex::SPECIES_ARCEUS || Some(base) == SILVALLY {
                 return false;
             }
         }
@@ -438,7 +447,7 @@ impl<L: LogSink> Battle<L> {
         announce_pads: bool,
     ) -> bool {
         let contact = self.active_move(move_handle).flags & dex::FLAG_CONTACT != 0;
-        if contact && self.query_has_item(attacker, "protectivepads") {
+        if contact && self.query_has_item(attacker, dex::key_ids!("protectivepads")) {
             if announce_pads {
                 self.add(LogEntry::new(
                     "-activate",

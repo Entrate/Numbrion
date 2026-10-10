@@ -111,15 +111,12 @@ fn status_field<L: LogSink>(b: &Battle<L>, e: EffectRef) -> bool {
         _ => false,
     }
 }
-fn key(id: EffectId, name: &str) -> bool {
-    id != EffectId::NONE && dex::effect(id).key == name
-}
-fn has_volatile<L: LogSink>(b: &Battle<L>, m: MonId, name: &str) -> bool {
+fn has_volatile<L: LogSink>(b: &Battle<L>, m: MonId, keys: dex::KeyIds) -> bool {
     b.state.pokemon[m.0 as usize]
         .volatiles
         .as_slice()
         .iter()
-        .any(|c| key(b.state.effects.cells[c.0 as usize].id, name))
+        .any(|c| keys.contains(b.state.effects.cells[c.0 as usize].id))
 }
 fn hit_type<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> i8 {
     let m = mon_arg(b, cx, 2);
@@ -147,7 +144,7 @@ pub fn source_modify_damage<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: Hoo
         dex::ABILITY_FLUFFY => {
             return chain(
                 b,
-                if mv.move_type == dex::type_id("Fire").unwrap() {
+                if mv.move_type == dex::TYPE_FIRE {
                     2
                 } else {
                     1
@@ -217,14 +214,14 @@ pub fn modify_sp_a<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> 
     }
 }
 fn water_boost<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
-    if move_overlay(b, move_arg(b, cx, 3)).move_type == dex::type_id("Water").unwrap() {
+    if move_overlay(b, move_arg(b, cx, 3)).move_type == dex::TYPE_WATER {
         chain(b, 2, 1)
     } else {
         Relay::Undefined
     }
 }
 fn flash_boost<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
-    if move_overlay(b, move_arg(b, cx, 3)).move_type == dex::type_id("Fire").unwrap()
+    if move_overlay(b, move_arg(b, cx, 3)).move_type == dex::TYPE_FIRE
         && b.has_ability(mon_arg(b, cx, 1), &[dex::ABILITY_FLASHFIRE])
     {
         chain(b, 3, 2)
@@ -236,11 +233,11 @@ fn flash_boost<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
 pub fn source_modify_atk<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let t = move_overlay(b, move_arg(b, cx, 3)).move_type;
     let yes = match id {
-        dex::ABILITY_PURIFYINGSALT => t == dex::type_id("Ghost").unwrap(),
+        dex::ABILITY_PURIFYINGSALT => t == dex::TYPE_GHOST,
         dex::ABILITY_THICKFAT => {
-            t == dex::type_id("Fire").unwrap() || t == dex::type_id("Ice").unwrap()
+            t == dex::TYPE_FIRE || t == dex::TYPE_ICE
         }
-        dex::ABILITY_WATERBUBBLE => t == dex::type_id("Fire").unwrap(),
+        dex::ABILITY_WATERBUBBLE => t == dex::TYPE_FIRE,
         _ => panic!("unhandled source atk"),
     };
     if yes {
@@ -289,29 +286,28 @@ pub fn modify_type<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> 
     if id == dex::ABILITY_LIQUIDVOICE {
         // Dynamax is unavailable in the fixed Gen 9 format.
         if mv.flags & dex::FLAG_SOUND != 0 {
-            mv.move_type = dex::type_id("Water").unwrap()
+            mv.move_type = dex::TYPE_WATER
         }
-    } else if mv.move_type == dex::type_id("Normal").unwrap()
-        && !matches!(
-            dex::effect(mv.id).key,
-            "judgment"
-                | "multiattack"
-                | "naturalgift"
-                | "revelationdance"
-                | "technoblast"
-                | "terrainpulse"
-                | "weatherball"
+    } else if mv.move_type == dex::TYPE_NORMAL
+        && !dex::key_ids!(
+            "judgment",
+            "multiattack",
+            "naturalgift",
+            "revelationdance",
+            "technoblast",
+            "terrainpulse",
+            "weatherball",
         )
+        .contains(mv.id)
         && !(mv.id == dex::MOVE_TERABLAST
             && b.state.pokemon[m.0 as usize].terastallized != TypeId(0))
     {
         // Z/Max moves cannot exist in this format.
-        mv.move_type = dex::type_id(if id == dex::ABILITY_GALVANIZE {
-            "Electric"
+        mv.move_type = if id == dex::ABILITY_GALVANIZE {
+            dex::TYPE_ELECTRIC
         } else {
-            "Fairy"
-        })
-        .unwrap();
+            dex::TYPE_FAIRY
+        };
         mv.type_changer_boosted = id;
     }
     Relay::Undefined
@@ -331,8 +327,8 @@ pub fn modify_move<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> 
             }
             if mv.runtime_flags & move_runtime::IGNORE_IMMUNITY == 0 {
                 mv.runtime_flags |= move_runtime::IGNORE_IMMUNITY_PRESENT;
-                mv.ignore_immunity_types |= (1 << dex::type_id("Normal").unwrap().0)
-                    | (1 << dex::type_id("Fighting").unwrap().0)
+                mv.ignore_immunity_types |= (1 << dex::TYPE_NORMAL.0)
+                    | (1 << dex::TYPE_FIGHTING.0)
             }
         }
         _ => panic!("unhandled modify move"),
@@ -378,7 +374,7 @@ pub fn try_boost<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Re
     if source == Some(t) {
         return Relay::Undefined;
     }
-    if id == dex::ABILITY_FLOWERVEIL && !b.has_type(t, &[dex::type_id("Grass").unwrap()]) {
+    if id == dex::ABILITY_FLOWERVEIL && !b.has_type(t, &[dex::TYPE_GRASS]) {
         return Relay::Undefined;
     }
     let mut changed = false;
@@ -394,7 +390,7 @@ pub fn try_boost<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Re
     if changed && !secondary(b, e) {
         if id == dex::ABILITY_FLOWERVEIL {
             block(b, t, id, owner(b, cx));
-        } else if acc || !key(b.event_effect_id(e), "octolock") {
+        } else if acc || !dex::key_ids!("octolock").contains(b.event_effect_id(e)) {
             fail_boost(b, t, id, if acc { Some("accuracy") } else { None });
         }
     }
@@ -414,7 +410,7 @@ fn fail_boost<L: LogSink>(b: &mut Battle<L>, t: MonId, id: EffectId, stat: Optio
 }
 /// Ports data/abilities.ts:679. PRNG: none directly; nested core events retain draws.
 pub fn change_boost<L: LogSink>(_: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
-    if key(effect_id(b, cx, 3), "zpower") {
+    if dex::key_ids!("zpower").contains(effect_id(b, cx, 3)) {
         return Relay::Undefined;
     }
     let s = boost_slot(b, cx);
@@ -467,10 +463,9 @@ pub fn try_add_volatile<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx
     let t = mon_arg(b, cx, 1);
     match id {
         dex::ABILITY_AROMAVEIL => {
-            if matches!(
-                dex::effect(status).key,
-                "attract" | "disable" | "encore" | "healblock" | "taunt" | "torment"
-            ) {
+            if dex::key_ids!("attract", "disable", "encore", "healblock", "taunt", "torment")
+                .contains(status)
+            {
                 if b.event_effect_type(effect(b, cx, 3)) == dex::EffectType::Move {
                     block(b, t, id, owner(b, cx))
                 }
@@ -478,7 +473,7 @@ pub fn try_add_volatile<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx
             }
         }
         dex::ABILITY_FLOWERVEIL => {
-            if b.has_type(t, &[dex::type_id("Grass").unwrap()]) && status == dex::CONDITION_YAWN {
+            if b.has_type(t, &[dex::TYPE_GRASS]) && status == dex::CONDITION_YAWN {
                 block(b, t, id, owner(b, cx));
                 return Relay::Null;
             }
@@ -510,7 +505,7 @@ pub fn set_status<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> R
     let e = effect(b, cx, 3);
     if id == dex::ABILITY_FLOWERVEIL {
         let source = Battle::<L>::arg_mon(b.event_arg(cx, 2));
-        if b.has_type(t, &[dex::type_id("Grass").unwrap()])
+        if b.has_type(t, &[dex::TYPE_GRASS])
             && source.is_some()
             && source != Some(t)
             && e != EffectRef::None
@@ -588,15 +583,15 @@ pub fn try_hit<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Rela
     let mv = *move_overlay(b, i);
     let self_hit = t == s;
     let absorb_type = match id {
-        dex::ABILITY_EARTHEATER => Some("Ground"),
-        dex::ABILITY_VOLTABSORB | dex::ABILITY_MOTORDRIVE => Some("Electric"),
-        dex::ABILITY_WATERABSORB => Some("Water"),
-        dex::ABILITY_SAPSIPPER => Some("Grass"),
-        dex::ABILITY_FLASHFIRE => Some("Fire"),
+        dex::ABILITY_EARTHEATER => Some(dex::TYPE_GROUND),
+        dex::ABILITY_VOLTABSORB | dex::ABILITY_MOTORDRIVE => Some(dex::TYPE_ELECTRIC),
+        dex::ABILITY_WATERABSORB => Some(dex::TYPE_WATER),
+        dex::ABILITY_SAPSIPPER => Some(dex::TYPE_GRASS),
+        dex::ABILITY_FLASHFIRE => Some(dex::TYPE_FIRE),
         _ => None,
     };
     if let Some(typ) = absorb_type {
-        if !self_hit && mv.move_type == dex::type_id(typ).unwrap() {
+        if !self_hit && mv.move_type == typ {
             return absorb(&mut BattleHost { b, move_index: i }, id, t);
         }
         return Relay::Undefined;
@@ -607,9 +602,7 @@ pub fn try_hit<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) -> Rela
         dex::ABILITY_SOUNDPROOF => !self_hit && mv.flags & dex::FLAG_SOUND != 0,
         // No scoped move has ohko; verified by the pinned numeric probe.
         dex::ABILITY_STURDY => false,
-        dex::ABILITY_OBLIVIOUS => {
-            matches!(dex::effect(mv.id).key, "attract" | "captivate" | "taunt")
-        }
+        dex::ABILITY_OBLIVIOUS => dex::key_ids!("attract", "captivate", "taunt").contains(mv.id),
         dex::ABILITY_TELEPATHY => {
             !self_hit && t.side() == s.side() && mv.category != Category::Status
         }
@@ -649,7 +642,7 @@ pub fn try_hit_side<L: LogSink>(id: EffectId, b: &mut Battle<L>, cx: HookCtx) ->
         if s == o || t.side() != s.side() {
             return Relay::Undefined;
         }
-        if move_overlay(b, i).move_type == dex::type_id("Grass").unwrap() {
+        if move_overlay(b, i).move_type == dex::TYPE_GRASS {
             b.boost(singleton(0, 1), Some(o), Attribution::DEFAULT, false, false);
         }
     }

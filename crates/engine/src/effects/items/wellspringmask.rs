@@ -22,18 +22,19 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         dex::HOOK_ITEM_WELLSPRINGMASK_ONBASEPOWER => {
             let mv = *move_overlay(b, move_arg(b, cx, 3));
-            if dex::species(b.state.pokemon[mon_arg(b, cx, 1).0 as usize].base_species)
-                .name
-                .starts_with("Ogerpon-Wellspring")
-            {
+            // `name.startsWith('Ogerpon-Wellspring')`: the forme and its Tera forme.
+            if matches!(
+                b.state.pokemon[mon_arg(b, cx, 1).0 as usize].base_species,
+                dex::SPECIES_OGERPONWELLSPRING | dex::SPECIES_OGERPONWELLSPRINGTERA
+            ) {
                 b.chain_modify(4915.0, 4096.0);
             }
         }
         dex::HOOK_ITEM_WELLSPRINGMASK_ONTAKEITEM => {
             return Relay::Bool(
                 dex::species(b.state.pokemon[mon_arg(b, cx, 1).0 as usize].base_species)
-                    .base_species_name
-                    != "Ogerpon",
+                    .base_species
+                    != dex::SPECIES_OGERPON,
             );
         }
         _ => unreachable!("unexpected wellspringmask callback"),

@@ -8,11 +8,13 @@ public API of `crates/engine`; feature engineering (turning requests and logs in
 
 | Piece | Where |
 |---|---|
-| `numbrion.Battle` | one battle: debugging, scripted play, search (`clone`, `reseed`) |
+| `numbrion.Battle` | one battle: debugging, scripted play, search (`clone`, `restore_from`, `reset`, `reseed`) |
 | `numbrion.BatchEnv` | N battles, `step(actions)` with auto-reset, masks, rewards |
+| `numbrion.GridExecutor` | one-decision search grids (restore root, both choices, next boundary) on Rust threads |
 | action codes, masks | `src/action.rs`, `src/mask.rs` |
+| search executor | `src/search.rs` (see "Search" below) |
 | tests | `tests/*.rs` (Rust, exhaustive mask checks) and `pytests/` (Python) |
-| benchmark | `crates/pyengine/bench.py` |
+| benchmarks | `crates/pyengine/bench.py`, `search_bench.py`, `examples/grid_bench.rs` |
 
 ## Build and install
 
@@ -22,7 +24,7 @@ Linux/macOS (the repo keeps its virtualenv in `.venv`, which is git-ignored):
 uv venv .venv && uv pip install --python .venv/bin/python maturin numpy pytest   # or: python -m venv .venv
 cd crates/pyengine
 ../../.venv/bin/maturin develop --release --uv      # editable install; use plain `maturin develop` with pip
-../../.venv/bin/python -m pytest                    # 19 tests, ~15 s
+../../.venv/bin/python -m pytest                    # 27 tests, ~15 s
 ../../.venv/bin/python bench.py --threads 1 6       # throughput
 ```
 
@@ -149,7 +151,8 @@ b.start()                         # run to the first decision (turn 1)
 | `turn`, `ended`, `winner` (0/1/`None`), `tie`, `pokemon_left` | state |
 | `drain_log()` | **omniscient** raw lines (engine `battle.log`, `\|split\|pN` triples intact) since the last call; needs `log=True` |
 | `drain_player_log(side)` | **player view**, see below; needs `log=True` |
-| `clone()`, `copy_from(other)`, `reseed(seed)`, `prng_seed` | search support, see below |
+| `clone()`, `copy_from(other)`, `restore_from(other)`, `reset(seed, p1=None, p2=None)`, `reseed(seed)`, `prng_seed`, `started` | search support, see below |
+| `hidden_team_indices(viewer)`, `replace_hidden_set(viewer, index, packed_set)` | determinization, see below |
 
 A committing `choose`/`choose_action` runs the battle synchronously to the next decision or the end. A side
 may re-submit (Showdown's cancel support) until the other side has answered. Time-line `\|t:\|` entries have
@@ -168,22 +171,68 @@ an empty timestamp, as in the fixtures.
   stream (all secret lines) and must never be fed to a policy.
 * Build observations only from `request_json` and `drain_player_log` (docs/training/TIPS.md rule 1).
 
-### `clone`, `copy_from`, `reseed` (search)
+### `clone`, `restore_from`, `copy_from`, `reset`, `reseed` (search)
 
 `clone()` returns an independent battle at the same decision boundary. **It copies the whole true state:
 both teams in full, all hidden information, and the PRNG state.** A search that must not see the real future
 randomness or the opponent's hidden sets must call `reseed(new_seed)` on the copy (it replaces the PRNG state;
-the next draw is the first of the new stream) and must itself determinize the opponent (the engine has no
-notion of "unknown" slots: the copy always has the real teams, so hidden-set sampling means constructing a
-new `Battle` from sampled teams). Unseeded clones replay *exactly* what the original will do, which is
-useful for debugging and for reproducing a position.
+the next draw is the first of the new stream) and must determinize the opponent: never-revealed opponent sets
+can be swapped in place (next section); everything else in the copy is the real state. Unseeded clones replay
+*exactly* what the original will do, which is useful for debugging and for reproducing a position.
 
-Implementation: `Battle` is not `Clone`, so `clone()` rebuilds the battle from the packed teams and overwrites
-its `BattleState` (a `Copy` snapshot, ~38 KB) with the original's; the copy's log buffers start empty.
-Measured on this PC: `clone()` ~45 us, `copy_from()` ~0.7 us, `legal_mask` ~1.5 us. In hot loops keep one
-scratch clone per search worker and call `scratch.copy_from(root)` (same seed, teams and names required) to
-reset it. A cloned battle plays out bit-identically to the original under identical decisions, including the
-omniscient and both player logs (tested at random boundaries of many battles).
+| Method | Cost (noisy, this PC) | Contract |
+|---|---:|---|
+| `clone()` | ~8 us | new battle sharing the immutable team definitions (`Arc`); no team parsing, no constructor draws; allocates its own engine scratch; log views start empty |
+| `restore_from(other)` | ~1 us | turns an existing battle into an exact copy of `other` (state, PRNG, teams, names), reusing its allocations; `other` may have **different** teams/names/seed (another world); only the log mode must match; unread log lines are dropped |
+| `copy_from(other)` | ~1 us | the older, stricter form: state only, `other` must come from the same constructor arguments |
+| `reset(seed, p1=None, p2=None)` | ~7 us | back to a freshly constructed `Battle(seed, p1, p2, names, log)` before `start()`, keeping names, log mode and allocations; teams default to the current ones (unspecified genders are drawn again from the new seed, exactly like the constructor); a bad team raises `ValueError` and changes nothing |
+
+All of them require (and Python battles always are at) a flushed decision boundary. A restored or cloned battle
+plays out bit-identically to the original under identical decisions, including the omniscient and both player
+logs (tested at random boundaries of many battles, including mid-turn replacement and Revival Blessing
+requests). In hot loops keep one worker battle and `restore_from(root)` it per sample, or run a whole grid with
+`GridExecutor` (below), which does exactly that on Rust threads.
+
+### Determinization: `hidden_team_indices`, `replace_hidden_set`
+
+```python
+world = root.clone()                                  # one sampled world per determinization
+for i in world.hidden_team_indices(viewer):           # opponent Pokemon the viewer has never seen
+    world.replace_hidden_set(viewer, i, sample_set())  # one packed set, e.g. a line's record from a team pool
+world.reseed(world_seed)                              # the PRNG is hidden information too
+worker = world.clone()                                # then worker.copy_from(world) per grid cell
+```
+
+* `hidden_team_indices(viewer)`: indices into the opponent's *packed team* (construction order, stable for the
+  whole battle; not the request's party order) whose set can be swapped now: never switched in (the leads
+  are), never chosen or inspected by an Illusion user as its disguise, and unchanged since construction.
+  Only the count is visible to a player, so which index holds which unseen Pokemon carries no information.
+* `replace_hidden_set(viewer, index, packed_set)` gives that Pokemon a new set, raising `ValueError` (battle
+  unchanged) for any other Pokemon, after the end, for Zacian/Zamazenta-style species (their `BattleStart`
+  forme change already ran at start), and for a random-gender species with an empty gender field when the
+  replaced input had an explicit or fixed gender: write `M`/`F` into the packed gender field. When both sets
+  leave a random gender unspecified, the replaced Pokemon's drawn gender is reused; give it explicitly to avoid
+  that small leak. Everything derived from the set changes (species, stats, HP, types, weight, moves and PP,
+  ability, item, Tera type, level, gender, name, details); no log lines, events or PRNG draws happen, and
+  `teams` reports the new packed text, so `copy_from` between the world and battles cloned before the swap is
+  refused (clone the world instead).
+* **Contract (tested):** the result is exactly the battle constructed with the sampled set from the start
+  (all genders resolved, PRNG at its post-construction state) after replaying the same choices: that replay
+  reproduces the original log, PRNG and the viewer's requests at every boundary, ends in the identical state,
+  and both then play out bit-identically. When the swap does not change the constructor's gender-draw count it
+  is also the battle built from the original seed and the swapped packed teams. Checked by
+  `crates/engine/tests/determinize.rs` (random battles, explicit and drawn genders) and
+  `difftest determinize_check` on all 13,034 recorded gate battles (25,582 swaps at 33,505 boundaries,
+  including mid-turn replacement requests); through this API by `crates/pyengine/tests/determinize.rs` and
+  `pytests/test_determinize.py`. Engine API: `Battle::replace_hidden_set`, `hidden_mons`, `revealed_mons`
+  (`crates/engine/src/battle/determinize.rs`).
+* Not determinized: what is hidden about *revealed* Pokemon (unrevealed moves, item, ability, EVs, Tera type)
+  stays true in the copy, and so does a choice the opponent already submitted at this boundary (a search
+  re-submits both sides anyway).
+* Cost (Ryzen 5 3600, shared and noisy): one swap ~1.7 us, a whole world (~4 hidden sets) ~6 us on top of a
+  ~1.1 us restore, versus ~9 us for a scratch-reusing `reset_from_team_defs` and ~17 us for `from_team_defs`
+  (~49 us from packed text) followed by a full history replay. `crates/difftest/src/bin/search_bench.rs`
+  measures these (`--op replace|replace-all|reset-defs|construct-defs`).
 
 ## `numbrion.BatchEnv`
 
@@ -268,6 +317,95 @@ NoLog mode (default) offers the request only; the opponent side of the board is 
 tracker of *revealed* information (so a NoLog environment could provide a public board state) does not exist
 in the engine yet.
 
+## Search (`numbrion.GridExecutor`)
+
+One-turn search evaluates a grid of joint actions: per decision ~10 candidate pairs per side, optionally
+several determinized worlds, each cell = restore the root, submit both sides' choices, advance to the next
+decision boundary, score the leaf with a value net. `GridExecutor` runs the engine part of that in Rust:
+
+```python
+ex = numbrion.GridExecutor(threads=3)                  # persistent thread pool, one reusable battle per thread
+root = env.clone_battle(e)                             # any started Battle at a fresh decision boundary
+actions = numbrion.grid_actions(p1_pairs, p2_pairs)    # [k1, 2] x [k2, 2] -> int32 [k1*k2, 2, 2], cell i*k2 + j
+seeds = rng.integers(0, 1 << 16, size=(len(actions), 4))
+out = ex.run(root, actions, seeds=seeds)               # GIL released; dict, one entry per cell in input order
+```
+
+`run(roots, actions, world=None, seeds=None, stop="boundary", requests=True, masks=False, logs=None,
+keep_leaves=False)`:
+
+* **Cell.** The worker of the thread that picks the cell restores the cell's root (`restore_from`, ~1 us, no
+  allocation), reseeds it, submits side 0's then side 1's codes (only for sides that need an action at the root;
+  the other side's entries are ignored, use -1) and runs to the stop point. Choices commit only when both sides
+  have chosen, so the submission order is invisible.
+* **`actions`** are the typed codes of "Action space", `[n, 2 sides, 2 slots]`, the `BatchEnv.step` layout.
+  Every pair is checked against its root's mask before anything runs.
+* **Worlds.** `roots` is one `Battle` or a list; `world[i]` picks the root of cell `i` (default 0). Worlds may
+  differ in teams, names and seeds (only `log` must agree), so determinized worlds are just roots built by the
+  caller (clone the root, `replace_hidden_set` for the opponent's never-revealed Pokemon, see
+  "Determinization"). Passing all worlds in one call keeps the threads busy without a per-world barrier. The
+  roots are snapshotted at the call and never modified.
+* **Seeds.** `None`: every cell keeps its root's PRNG state, i.e. replays the real future randomness (debugging;
+  a leak in real play). `[4]`: every cell is reseeded with the same seed (common random numbers: cells of one
+  world differ only by their actions, which lowers the variance of action comparisons). `[n, 4]`: one seed per
+  cell.
+* **Stop.** `"boundary"` (default) stops at the **first** decision boundary after the root choices, exactly
+  one `BatchEnv.step`: the next turn's move request, or a mid-turn replacement request (U-turn, Volt Switch,
+  Eject Button, ...: the switching side gets `request_kind` 2, the other side waits with 0), an end-of-turn
+  faint replacement, a Revival Blessing request, or the end of the battle. The value net then scores a
+  replacement boundary like any other training boundary. `"turn"` additionally answers every replacement
+  request with Showdown's `default` choice (`Side.autoChoose`: the first eligible party members) until a move
+  request or the end; `steps` counts the choice rounds (1 + replacement rounds). That is a convenience with a
+  fixed replacement policy, not a search over replacements; for that use `keep_leaves` and search the leaf.
+* **Roots** must be started, not ended, and at a fresh boundary where neither side has chosen yet. A root on
+  which one side already chose (possible with Showdown's cancel support, e.g. a per-side loop that re-reads
+  `needs_action` after the other side's choice already ran the turn) is rejected, because the other side's
+  choice would run the turn with that stored choice.
+* **Determinism.** A cell's result depends only on its root, codes, seed and the options: never on `threads`,
+  the scheduling, or what a worker ran before (`restore_from` resets every transient engine field). Tested
+  against a naive per-cell copy (Rust: `tests/search.rs`, 1 and 3 threads, dirty workers, several worlds per
+  call, all seeding modes, both stop modes; Python: `pytests/test_search.py`).
+* **Errors.** Bad input raises `ValueError` before anything runs (shapes, an illegal pair naming the cell and
+  side, world index, seed range, mixed log modes, `logs=True` on `log=False` roots, unstarted, finished or
+  half-chosen roots). `RuntimeError` means the engine rejected a mask-legal action (a bug).
+
+Result keys (`n` cells, `A` = 47):
+
+| Key | dtype / shape | Meaning |
+|---|---|---|
+| `ended` | bool `[n]` | the battle ended inside the cell |
+| `winner` | int8 `[n]` | 0/1 when ended with a winner; -1 for a tie or a running battle |
+| `turn` | int32 `[n]` | turn counter at the leaf |
+| `steps` | int32 `[n]` | choice rounds applied (always 1 with `stop="boundary"`) |
+| `needs_action`, `request_kind` | bool / uint8 `[n, 2]` | as in `BatchEnv.step`, at the leaf |
+| `requests` | list of `(str or None, str or None)` | with `requests=True` (default): each side's request JSON at the leaf |
+| `logs` | list of `([str], [str])` | with `logs` (default: when the roots have `log=True`): each side's **player-view** lines from the root to the leaf |
+| `mask0`, `mask1_any` | bool `[n, 2, A]` | with `masks=True`: the leaf masks, as in `BatchEnv.step` |
+| `leaves` | list of `Battle` | with `keep_leaves=True`: independent leaf battles (one `clone()`, ~8 us each) for deeper search |
+
+**Evaluating a leaf.** Observations are built only from a side's own request and its player-view lines
+(TIPS rule 1), so a leaf observation for side `s` is: the root's observation tracker state for `s`, fed with
+`out["logs"][i][s]`, encoded with `out["requests"][i][s]`. That is exactly what `BatchEnv.observe` would
+have delivered at that boundary (same split-line resolution), so the training encoder needs no search-specific
+path. It needs `log=True` roots; `log=False` roots return requests only (cheaper: no log text is formatted).
+The executor does not return tensors: feature encoding stays in Python, batched over all cells.
+
+**Cost** (`search_bench.py`, 32 mid-battle roots at turns 3-10, 10 x 10 cells each, every cell reseeded and
+returning both requests; noisy PC shared with other jobs, 4 alternating rounds of 1.5 s per mode):
+
+| Mode | NoLog us/cell | NoLog cells/s | log=True us/cell | log=True cells/s |
+|---|---:|---:|---:|---:|
+| `GridExecutor(1)` | 65.6 | 15,200 | 86.6 | 11,500 |
+| `GridExecutor(3)` | 27.3 | 36,700 | 41.8 | 23,900 |
+| Python loop, `worker.restore_from(root)` per cell | 67.5 | 14,800 | 97.3 | 10,300 |
+| Python loop, `root.clone()` per cell | 89.2 | 11,200 | 112.2 | 8,900 |
+
+A cell is dominated by the simulated turn (~60 us here); restore is ~1 us of it, so the executor's single-thread
+cost equals a hand-written restore loop and its value is running the cells in parallel with the GIL released
+(2.4x on 3 threads on the shared machine; per-cell work is independent, so it should scale with idle cores).
+`cargo run --release -p pyengine --example grid_bench` measures the same without Python (NoLog: executor/1
+70 us, executor/3 35 us, sequential restore 70 us, clone per cell 75 us).
+
 ## Performance
 
 Ryzen 5 3600 (6 cores / 12 threads), engine at `df62d35` (perf round 1 merged), portable release build, team pool = first 20,000 teams of `pool-s1-200k`, random legal self-play
@@ -296,7 +434,8 @@ So the engine itself sets the ceiling (about 1,000 battles/s per core); the inte
 and ~27% on six threads with 16 environments per thread (the per-step barrier waits for the slowest
 environment; 64 environments per thread recover it to ~14%), and building masks is ~1.5 us per side-boundary. The network, not the simulator, will be the bottleneck in
 training (docs/training/TIPS.md). Construction of a battle costs ~70 us (`Scratch::default` is ~30 us of it),
-about 7% of a battle; `Battle.clone()` pays the same.
+about 7% of a battle; auto-reset now reuses the battle (`reset`, ~7 us) and `Battle.clone()` skips parsing
+(~8 us).
 
 ## Validation
 
@@ -305,7 +444,12 @@ about 7% of a battle; `Battle.clone()` pays the same.
   independence, illegal-action handling, observation hooks; 400 complete battles through the Rust driver
   with no rejection or panic.
 * `pytest` in `crates/pyengine` (about 15 s): the same properties through the Python API, including 300
-  battles driven by `BatchEnv.step` with numpy-sampled actions.
+  battles driven by `BatchEnv.step` with numpy-sampled actions, `restore_from`/`reset` equivalence, and
+  `GridExecutor` against a per-cell Python loop on 1 and 3 threads.
+* `tests/search.rs`: `GridExecutor` cells against naive copies (requests, logs, masks, outcome, PRNG of the
+  kept leaves, and the leaves played on); with `NUMBRION_TEST_BATTLES=400`: 4,418 boundary-mode cells (1,014
+  replacement leaves: 61 pivots, 941 faints, 12 Revival Blessing) and 4,271 turn-mode cells, all identical on
+  1 and 3 threads.
 * `NUMBRION_TEST_BATTLES=N` scales the number of battles of every test; the figures below were produced with it.
 
 Large runs on this PC (engine perf round 1), all green:
@@ -323,7 +467,7 @@ Revival Blessing); the Python run used the full pools.
 
 ## Requests for the engine (not blocking)
 
-1. `impl Clone for Battle` (or `Battle::restore_from(&Battle)`): `Battle` has no `Clone`, so `clone()`
-   rebuilds team definitions and a fresh `Scratch` (~70 us instead of ~1 us).
-2. `Battle::reset(seed, p1, p2)` reusing an existing `Scratch`, to make auto-reset cheaper.
-3. A public tracker of revealed information, so NoLog environments can offer a public board state.
+1. Done: `impl Clone for Battle`, `Battle::restore_from` and `Battle::reset` (used by `clone`, `restore_from`,
+   `copy_from`, `reset`, `BatchEnv` auto-reset and `GridExecutor`).
+2. A public tracker of revealed information, so NoLog environments can offer a public board state.
+   (`Battle::revealed_mons` covers only which Pokemon were ever switched in or used as a disguise.)

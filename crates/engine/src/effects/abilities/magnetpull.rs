@@ -22,7 +22,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         let holder = b.hook_state(cx).target;
         if holder.0 < 12
             && b.is_adjacent(target, crate::ids::MonId(holder.0))
-            && b.has_type(target, &[dex::type_id("Steel").unwrap()])
+            && b.has_type(target, &[dex::TYPE_STEEL])
         {
             b.try_trap(target, true);
         }
@@ -40,7 +40,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         return Relay::Undefined;
     };
     let known_type = b.state.pokemon[target.0 as usize].flags & mon_flags::KNOWN_TYPE != 0;
-    if !known_type || b.has_type(target, &[dex::type_id("Steel").unwrap()]) {
+    if !known_type || b.has_type(target, &[dex::TYPE_STEEL]) {
         b.state.pokemon[target.0 as usize].flags |= mon_flags::MAYBE_TRAPPED;
     }
     Relay::Undefined

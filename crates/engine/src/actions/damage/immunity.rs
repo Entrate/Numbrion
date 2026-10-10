@@ -20,7 +20,7 @@ impl<L: LogSink> Battle<L> {
         let e = EffectRef::ActiveMove(move_handle.0);
         let mut total = 0i8;
         if self.state.pokemon[target.0 as usize].terastallized != TypeId::NONE
-            && m.move_type == dex::type_id("Stellar").unwrap()
+            && m.move_type == dex::TYPE_STELLAR
         {
             total = 1;
         } else {
@@ -53,7 +53,7 @@ impl<L: LogSink> Battle<L> {
             }
         }
         if self.state.pokemon[target.0 as usize].species == dex::SPECIES_TERAPAGOSTERASTAL
-            && self.query_has_ability(target, "terashell")
+            && self.query_has_ability(target, dex::key_ids!("terashell"))
             && !self.suppressing_ability(Some(target))
         {
             let cell = self.state.pokemon[target.0 as usize].ability_state;
@@ -107,7 +107,7 @@ impl<L: LogSink> Battle<L> {
                 m.move_type
             }
         };
-        if ty == TypeId::NONE || ty == dex::type_id("???").unwrap() {
+        if ty == TypeId::NONE || ty == dex::TYPE_UNKNOWN {
             return true;
         }
         let negate = !self
@@ -120,7 +120,7 @@ impl<L: LogSink> Battle<L> {
                 RunEventOptions::default(),
             )
             .truthy();
-        let immune = if ty == dex::type_id("Ground").unwrap() {
+        let immune = if ty == dex::TYPE_GROUND {
             self.is_grounded(target, negate)
         } else {
             let types = self.get_types(target, false, false);
@@ -135,12 +135,13 @@ impl<L: LogSink> Battle<L> {
             return true;
         }
         if !matches!(message, ImmunityMessage::Silent) {
-            let tags: &[LogTag<'_>] =
-                if immune == Relay::Null && self.query_has_ability(target, "levitate") {
-                    &[LogTag::Value("from", LogArg::Text("ability: Levitate"))]
-                } else {
-                    &[]
-                };
+            let tags: &[LogTag<'_>] = if immune == Relay::Null
+                && self.query_has_ability(target, dex::key_ids!("levitate"))
+            {
+                &[LogTag::Value("from", LogArg::Text("ability: Levitate"))]
+            } else {
+                &[]
+            };
             self.add(LogEntry::new("-immune", &[LogArg::Mon(target)], tags));
         }
         false
@@ -186,7 +187,7 @@ impl<L: LogSink> Battle<L> {
     /// Ports `sim/pokemon.ts:2138-2146`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
     pub fn get_types(&mut self, pokemon: MonId, exclude_added: bool, pre_tera: bool) -> Types {
         let mon = &self.state.pokemon[pokemon.0 as usize];
-        let stellar = dex::type_id("Stellar").expect("generated Stellar type");
+        let stellar = dex::TYPE_STELLAR;
         if !pre_tera && mon.terastallized != TypeId::NONE && mon.terastallized != stellar {
             return Types {
                 values: [mon.terastallized, TypeId::NONE, TypeId::NONE],
@@ -204,14 +205,18 @@ impl<L: LogSink> Battle<L> {
             }
         }
         let original = self.stash_types(base);
-        let result = self.run_event(
-            EventId::Type,
-            EventArg::Holder(Holder::mon(pokemon)),
-            EventArg::Null,
-            EffectRef::None,
-            Relay::Types(original),
-            RunEventOptions::default(),
-        );
+        let result = if self.query_event_is_empty(pokemon, EventId::Type) {
+            self.empty_query_event(EventId::Type, Relay::Types(original))
+        } else {
+            self.run_event(
+                EventId::Type,
+                EventArg::Holder(Holder::mon(pokemon)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Types(original),
+                RunEventOptions::default(),
+            )
+        };
         let Relay::Types(handle) = result else {
             panic!("Type event returned a non-array relay");
         };
@@ -264,10 +269,10 @@ impl<L: LogSink> Battle<L> {
             .pseudo_weather
             .as_slice()
             .iter()
-            .any(|c| dex::effect(self.state.effects.cells[c.0 as usize].id).key == "gravity");
+            .any(|c| dex::key_ids!("gravity").contains(self.state.effects.cells[c.0 as usize].id));
         if gravity
-            || self.query_has_volatile(pokemon, "ingrain")
-            || self.query_has_volatile(pokemon, "smackdown")
+            || self.query_has_volatile(pokemon, dex::key_ids!("ingrain"))
+            || self.query_has_volatile(pokemon, dex::key_ids!("smackdown"))
         {
             return Relay::Bool(true);
         }
@@ -277,48 +282,44 @@ impl<L: LogSink> Battle<L> {
         } else {
             self.state.pokemon[pokemon.0 as usize].item
         };
-        let item_key = if item == EffectId::NONE {
-            ""
-        } else {
-            dex::effect(item).key
-        };
-        if item_key == "ironball" {
+        if dex::key_ids!("ironball").contains(item) {
             return Relay::Bool(true);
         }
         if !negate_immunity
             && self.has_type(pokemon, &[TypeId(3)])
-            && !(self.has_type(pokemon, &[TypeId(20)]) && self.query_has_volatile(pokemon, "roost"))
+            && !(self.has_type(pokemon, &[TypeId(20)])
+                && self.query_has_volatile(pokemon, dex::key_ids!("roost")))
         {
             return Relay::Bool(false);
         }
-        if (self.query_has_ability(pokemon, "levitate")
-            || self.query_has_ability(pokemon, "eelevate"))
+        if (self.query_has_ability(pokemon, dex::key_ids!("levitate"))
+            || self.query_has_ability(pokemon, dex::key_ids!("eelevate")))
             && !self.suppressing_ability(Some(pokemon))
         {
             return Relay::Null;
         }
-        if self.query_has_volatile(pokemon, "magnetrise")
-            || self.query_has_volatile(pokemon, "telekinesis")
+        if self.query_has_volatile(pokemon, dex::key_ids!("magnetrise"))
+            || self.query_has_volatile(pokemon, dex::key_ids!("telekinesis"))
         {
             return Relay::Bool(false);
         }
-        Relay::Bool(item_key != "airballoon")
+        Relay::Bool(!dex::key_ids!("airballoon").contains(item))
     }
     /// Semi-invulnerability conditions and the Sky Drop source relation
     /// Ports `sim/pokemon.ts:2162-2188`. PRNG: none.
     pub fn is_semi_invulnerable(&self, pokemon: MonId) -> bool {
-        if [
-            "fly",
-            "bounce",
-            "dive",
-            "dig",
-            "phantomforce",
-            "shadowforce",
-            "skydrop",
-        ]
-        .iter()
-        .any(|key| self.query_has_volatile(pokemon, key))
-        {
+        if self.query_has_volatile(
+            pokemon,
+            dex::key_ids!(
+                "fly",
+                "bounce",
+                "dive",
+                "dig",
+                "phantomforce",
+                "shadowforce",
+                "skydrop",
+            ),
+        ) {
             return true;
         }
         // isSkyDropped also follows the opposing holder's common source field.
@@ -330,7 +331,7 @@ impl<L: LogSink> Battle<L> {
             let list = &self.state.pokemon[active.0 as usize].volatiles;
             if list.as_slice().iter().any(|c| {
                 let cell = &self.state.effects.cells[c.0 as usize];
-                dex::effect(cell.id).key == "skydrop" && cell.source == pokemon
+                dex::key_ids!("skydrop").contains(cell.id) && cell.source == pokemon
             }) {
                 return true;
             }
@@ -343,10 +344,9 @@ impl<L: LogSink> Battle<L> {
         let weather = self.field_effective_weather();
         let source_effect = self.scratch.current_effect;
         let source_id = self.event_effect_id(source_effect);
-        let mega_sol_effect =
-            source_id != EffectId::NONE && dex::effect(source_id).key == "megasol";
+        let mega_sol_effect = dex::key_ids!("megasol").contains(source_id);
         if self.scratch.active_pokemon != MonId::NONE
-            && self.query_has_ability(self.scratch.active_pokemon, "megasol")
+            && self.query_has_ability(self.scratch.active_pokemon, dex::key_ids!("megasol"))
             && source_effect != EffectRef::None
             && (mega_sol_effect
                 || matches!(
@@ -358,12 +358,8 @@ impl<L: LogSink> Battle<L> {
             // itself is excluded from the generated executable ability closure.
             return dex::CONDITION_SUNNYDAY;
         }
-        if weather != EffectId::NONE
-            && matches!(
-                dex::effect(weather).key,
-                "sunnyday" | "raindance" | "desolateland" | "primordialsea"
-            )
-            && self.query_has_item(pokemon, "utilityumbrella")
+        if dex::key_ids!("sunnyday", "raindance", "desolateland", "primordialsea").contains(weather)
+            && self.query_has_item(pokemon, dex::key_ids!("utilityumbrella"))
         {
             return EffectId::NONE;
         }

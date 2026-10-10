@@ -46,7 +46,24 @@ pub fn speed_sort<T: SpeedSortable>(prng: &mut Prng, list: &mut [T], order: Sort
         list.len() <= HANDLER_CAPACITY,
         "speed-sort capacity exceeded"
     );
-    let mut indexes = [0u16; HANDLER_CAPACITY];
+    // Most lists are short; avoid clearing (and stack-probing) the full-capacity buffer.
+    if list.len() <= 16 {
+        selection_speed_sort::<T, 16>(prng, list, order);
+    } else {
+        long_speed_sort(prng, list, order);
+    }
+}
+/// Out of line, so callers' frames do not reserve the full-capacity buffer.
+#[inline(never)]
+fn long_speed_sort<T: SpeedSortable>(prng: &mut Prng, list: &mut [T], order: SortOrder) {
+    selection_speed_sort::<T, HANDLER_CAPACITY>(prng, list, order);
+}
+fn selection_speed_sort<T: SpeedSortable, const N: usize>(
+    prng: &mut Prng,
+    list: &mut [T],
+    order: SortOrder,
+) {
+    let mut indexes = [0u16; N];
     let mut sorted = 0;
     while sorted + 1 < list.len() {
         indexes[0] = sorted as u16;
@@ -84,39 +101,41 @@ pub fn speed_sort<T: SpeedSortable>(prng: &mut Prng, list: &mut [T], order: Sort
 /// Ports sim/battle.ts:408-430. PRNG: none. Return JS comparator sign, preserving
 /// falsy zero order, explicit default keys, quarter-speed and redirect holder order.
 pub fn compare_priority(a: Priority, b: Priority, order: SortOrder) -> f64 {
-    let candidates = match order {
-        SortOrder::Priority => [
+    // Evaluated lazily in JS || order; later keys are pure, so skipping them is exact.
+    macro_rules! first_truthy {
+        ($($value:expr),+) => {{
+            $(
+                let value = $value;
+                // JS || advances past NaN as well as either signed zero. Infinity is truthy.
+                if value != 0.0 && !value.is_nan() {
+                    return value;
+                }
+            )+
+            0.0
+        }};
+    }
+    match order {
+        SortOrder::Priority => first_truthy!(
             js_default(a.order, 4294967296.0) - js_default(b.order, 4294967296.0),
             js_default(b.priority, 0.0) - js_default(a.priority, 0.0),
             js_default(b.speed, 0.0) - js_default(a.speed, 0.0),
             js_default(a.sub_order, 0.0) - js_default(b.sub_order, 0.0),
-            a.effect_order as f64 - b.effect_order as f64,
-        ],
-        SortOrder::Redirect => [
+            a.effect_order as f64 - b.effect_order as f64
+        ),
+        SortOrder::Redirect => first_truthy!(
             js_default(b.priority, 0.0) - js_default(a.priority, 0.0),
             js_default(b.speed, 0.0) - js_default(a.speed, 0.0),
             match (a.redirect_order, b.redirect_order) {
                 (Some(a), Some(b)) => a as f64 - b as f64,
                 _ => 0.0,
-            },
-            0.0,
-            0.0,
-        ],
-        SortOrder::LeftToRight => [
+            }
+        ),
+        SortOrder::LeftToRight => first_truthy!(
             js_default(a.order, 4294967296.0) - js_default(b.order, 4294967296.0),
             js_default(b.priority, 0.0) - js_default(a.priority, 0.0),
-            a.index as f64 - b.index as f64,
-            0.0,
-            0.0,
-        ],
-    };
-    for value in candidates {
-        // JS || advances past NaN as well as either signed zero. Infinity is truthy.
-        if value != 0.0 && !value.is_nan() {
-            return value;
-        }
+            a.index as f64 - b.index as f64
+        ),
     }
-    0.0
 }
 
 #[inline]
@@ -197,10 +216,10 @@ impl<L: LogSink> Battle<L> {
                 } else if effect_id.0 != 0 {
                     // Perish Body/Stall are outside current scope, but preserve defaults
                     // if the pinned closure later acquires their identifiers.
-                    match dex::effect(effect_id).key {
-                        "perishbody" => listener.priority.sub_order = 6.0,
-                        "stall" => listener.priority.sub_order = 9.0,
-                        _ => {}
+                    if dex::key_ids!("perishbody").contains(effect_id) {
+                        listener.priority.sub_order = 6.0;
+                    } else if dex::key_ids!("stall").contains(effect_id) {
+                        listener.priority.sub_order = 9.0;
                     }
                 }
             }
@@ -321,6 +340,36 @@ mod tests {
         speed_sort(&mut prng, &mut list, SortOrder::Priority);
         assert_eq!(ids(&list), [1, 3, 5, 2, 6, 4, 7, 0]);
         assert_eq!(prng.seed(), [43514, 9542, 40559, 8561]);
+    }
+
+    #[test]
+    fn short_and_long_buffers_sort_identically_around_the_threshold() {
+        let keys = [3.0, 1.0, 3.0, f64::NAN, 2.0, 0.0, 3.0, f64::INFINITY, 1.0, 2.0];
+        for len in 2..=20 {
+            for seed in 0..8u16 {
+                let mut list: Vec<Entry> = (0..len)
+                    .map(|i| Entry {
+                        id: i as u8,
+                        key: Priority {
+                            speed: keys[(i * 7 + seed as usize) % keys.len()],
+                            sub_order: (i % 3) as f64,
+                            ..Priority::default()
+                        },
+                    })
+                    .collect();
+                let mut long = list.clone();
+                let mut prng = Prng::from_seed([seed, 2, 3, 4]);
+                let mut long_prng = Prng::from_seed([seed, 2, 3, 4]);
+                speed_sort(&mut prng, &mut list, SortOrder::Priority);
+                selection_speed_sort::<_, HANDLER_CAPACITY>(
+                    &mut long_prng,
+                    &mut long,
+                    SortOrder::Priority,
+                );
+                assert_eq!(ids(&list), ids(&long), "len {len} seed {seed}");
+                assert_eq!(prng.seed(), long_prng.seed(), "len {len} seed {seed}");
+            }
+        }
     }
 
     #[test]

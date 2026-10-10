@@ -14,7 +14,18 @@ pub use events_generated::*;
 pub use hooks_generated::*;
 pub use ids_generated::*;
 mod hook_index;
-pub use hook_index::{callback_relations, effect_has_callback, event_hook, has_callback};
+pub use hook_index::{
+    CallbackKind, callback_relations, effect_callback_relations, effect_has_callback, event_hook,
+    has_callback, kind_callback_relations,
+};
+mod field_index;
+pub use field_index::{data_duration, is_primal_orb, self_chance};
+mod keys;
+pub(crate) use keys::key_ids;
+pub use keys::{
+    ABILITY_SLOT_NAMES_ARE_NOT_KEYS, KeyIds, condition_id, immunity_column, immunity_column_of,
+    key_id, same_key_condition,
+};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -305,7 +316,7 @@ pub fn species(id: EffectId) -> &'static SpeciesData {
 pub fn move_data(id: EffectId) -> &'static MoveData {
     &MOVES[(id.0 - MOVE_START) as usize]
 }
-pub fn table(kind: EffectKind) -> &'static [EffectData] {
+pub const fn table(kind: EffectKind) -> &'static [EffectData] {
     match kind {
         EffectKind::Species => SPECIES_DATA,
         EffectKind::Move => MOVES_DATA,
@@ -315,27 +326,158 @@ pub fn table(kind: EffectKind) -> &'static [EffectData] {
         EffectKind::Rule => RULES_DATA,
     }
 }
-pub fn effect(id: EffectId) -> &'static EffectData {
+pub const fn effect(id: EffectId) -> &'static EffectData {
     let kind = id.kind().expect("invalid effect id");
     let entries = table(kind);
     &entries[(id.0 - entries[0].id.0) as usize]
 }
 /// Input boundary only. Battle dispatch never normalizes strings.
 pub fn lookup(kind: EffectKind, text: &str) -> Option<EffectId> {
-    let normalized: String = text
-        .bytes()
-        .filter(u8::is_ascii_alphanumeric)
-        .map(|c| c.to_ascii_lowercase() as char)
-        .collect();
     let entries = table(kind);
-    entries
-        .binary_search_by_key(&normalized.as_str(), |e| e.key)
-        .ok()
-        .map(|i| entries[i].id)
+    if text.len() <= 64 {
+        let mut key = [0u8; 64];
+        let mut len = 0;
+        for byte in text.bytes().filter(u8::is_ascii_alphanumeric) {
+            key[len] = byte.to_ascii_lowercase();
+            len += 1;
+        }
+        entries
+            .binary_search_by(|e| e.key.as_bytes().cmp(&key[..len]))
+            .ok()
+            .map(|i| entries[i].id)
+    } else {
+        // Preserve unbounded input handling without making common lookups allocate.
+        let normalized: String = text
+            .bytes()
+            .filter(u8::is_ascii_alphanumeric)
+            .map(|c| c.to_ascii_lowercase() as char)
+            .collect();
+        entries
+            .binary_search_by_key(&normalized.as_str(), |e| e.key)
+            .ok()
+            .map(|i| entries[i].id)
+    }
 }
 pub fn type_id(text: &str) -> Option<TypeId> {
-    TYPE_NAMES
-        .iter()
-        .position(|s| s.eq_ignore_ascii_case(text))
-        .map(|i| TypeId(i as u8 + 1))
+    // Dispatch on the first ASCII byte, then retain the original full-string
+    // comparison. This keeps the generated TypeId ordering and rejects exactly
+    // the same non-ASCII and malformed names as the former table scan.
+    let first = text.as_bytes().first()?.to_ascii_lowercase();
+    let id = match first {
+        b'n' if text.eq_ignore_ascii_case("Normal") => 1,
+        b'f' if text.eq_ignore_ascii_case("Fighting") => 2,
+        b'f' if text.eq_ignore_ascii_case("Flying") => 3,
+        b'p' if text.eq_ignore_ascii_case("Poison") => 4,
+        b'g' if text.eq_ignore_ascii_case("Ground") => 5,
+        b'r' if text.eq_ignore_ascii_case("Rock") => 6,
+        b'b' if text.eq_ignore_ascii_case("Bug") => 7,
+        b'g' if text.eq_ignore_ascii_case("Ghost") => 8,
+        b's' if text.eq_ignore_ascii_case("Steel") => 9,
+        b'f' if text.eq_ignore_ascii_case("Fire") => 10,
+        b'w' if text.eq_ignore_ascii_case("Water") => 11,
+        b'g' if text.eq_ignore_ascii_case("Grass") => 12,
+        b'e' if text.eq_ignore_ascii_case("Electric") => 13,
+        b'p' if text.eq_ignore_ascii_case("Psychic") => 14,
+        b'i' if text.eq_ignore_ascii_case("Ice") => 15,
+        b'd' if text.eq_ignore_ascii_case("Dragon") => 16,
+        b'd' if text.eq_ignore_ascii_case("Dark") => 17,
+        b'f' if text.eq_ignore_ascii_case("Fairy") => 18,
+        b's' if text.eq_ignore_ascii_case("Stellar") => 19,
+        b'?' if text == "???" => 20,
+        _ => return None,
+    };
+    Some(TypeId(id))
+}
+
+/// `type_id(text).unwrap()` for an exact generated name, resolved at compile time.
+const fn type_const(text: &str) -> TypeId {
+    let mut i = 0;
+    while i < TYPE_NAMES.len() {
+        let (a, b) = (TYPE_NAMES[i].as_bytes(), text.as_bytes());
+        if a.len() == b.len() {
+            let mut j = 0;
+            while j < a.len() && a[j] == b[j] {
+                j += 1;
+            }
+            if j == a.len() {
+                return TypeId(i as u8 + 1);
+            }
+        }
+        i += 1;
+    }
+    panic!("unknown type name");
+}
+pub const TYPE_NORMAL: TypeId = type_const("Normal");
+pub const TYPE_FIGHTING: TypeId = type_const("Fighting");
+pub const TYPE_FLYING: TypeId = type_const("Flying");
+pub const TYPE_POISON: TypeId = type_const("Poison");
+pub const TYPE_GROUND: TypeId = type_const("Ground");
+pub const TYPE_ROCK: TypeId = type_const("Rock");
+pub const TYPE_BUG: TypeId = type_const("Bug");
+pub const TYPE_GHOST: TypeId = type_const("Ghost");
+pub const TYPE_STEEL: TypeId = type_const("Steel");
+pub const TYPE_FIRE: TypeId = type_const("Fire");
+pub const TYPE_WATER: TypeId = type_const("Water");
+pub const TYPE_GRASS: TypeId = type_const("Grass");
+pub const TYPE_ELECTRIC: TypeId = type_const("Electric");
+pub const TYPE_PSYCHIC: TypeId = type_const("Psychic");
+pub const TYPE_ICE: TypeId = type_const("Ice");
+pub const TYPE_DRAGON: TypeId = type_const("Dragon");
+pub const TYPE_DARK: TypeId = type_const("Dark");
+pub const TYPE_FAIRY: TypeId = type_const("Fairy");
+pub const TYPE_STELLAR: TypeId = type_const("Stellar");
+pub const TYPE_UNKNOWN: TypeId = type_const("???");
+
+#[cfg(test)]
+mod construction_lookup_tests {
+    use super::*;
+
+    #[test]
+    fn type_lookup_matches_generated_order_and_ascii_case_rules() {
+        for (i, name) in TYPE_NAMES.iter().enumerate() {
+            let expected = Some(TypeId(i as u8 + 1));
+            assert_eq!(type_id(name), expected);
+            assert_eq!(type_id(&name.to_ascii_lowercase()), expected);
+            assert_eq!(type_id(&name.to_ascii_uppercase()), expected);
+        }
+        for invalid in ["", " normal", "Normal!", "grounded", "Ｆｉｒｅ", "???x"] {
+            assert_eq!(type_id(invalid), None, "{invalid}");
+        }
+    }
+
+    #[test]
+    fn effect_lookup_matches_allocating_normalization() {
+        let kinds = [
+            EffectKind::Species,
+            EffectKind::Move,
+            EffectKind::Ability,
+            EffectKind::Item,
+            EffectKind::Condition,
+            EffectKind::Rule,
+        ];
+        for kind in kinds {
+            for effect in table(kind) {
+                let decorated = format!("{} !", effect.key.to_ascii_uppercase());
+                let normalized: String = decorated
+                    .bytes()
+                    .filter(u8::is_ascii_alphanumeric)
+                    .map(|byte| byte.to_ascii_lowercase() as char)
+                    .collect();
+                let entries = table(kind);
+                let old = entries
+                    .binary_search_by_key(&normalized.as_str(), |entry| entry.key)
+                    .ok()
+                    .map(|i| entries[i].id);
+                assert_eq!(lookup(kind, &decorated), old, "{kind:?} {decorated}");
+            }
+            let long = format!("{}Normal", "!".repeat(65));
+            let normalized = "normal";
+            let entries = table(kind);
+            let old = entries
+                .binary_search_by_key(&normalized, |entry| entry.key)
+                .ok()
+                .map(|i| entries[i].id);
+            assert_eq!(lookup(kind, &long), old, "{kind:?} long input");
+        }
+    }
 }

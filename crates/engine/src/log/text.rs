@@ -35,6 +35,12 @@ const TARGET_FIELD: usize = 4;
 impl LogSink for TextLog {
     const ENABLED: bool = true;
 
+    fn reset(&mut self) {
+        self.entries.clear();
+        self.last_move_line = None;
+        self.drain_cursor = 0;
+    }
+
     /// Ports battle.ts:3081-3120. PRNG: none. Push one String per raw log entry.
     ///
     /// Plain entries are one line (the omniscient view, so `Health`/`FullDetails` never appear in

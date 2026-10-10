@@ -30,7 +30,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
     match hook {
         // data/conditions.ts:548-553. `source?.hasItem('heatrock') ? 8 : 5`; direct call. PRNG: none.
         dex::HOOK_CONDITION_SUNNYDAY_DURATIONCALLBACK => {
-            support::duration_callback(b, cx, "heatrock")
+            support::duration_callback(b, cx, dex::key_ids!("heatrock"))
         }
         // data/conditions.ts:554-568. Hydro Steam attacker branch is outside scope; defender sun: Fire x1.5, Water x0.5. PRNG: none.
         dex::HOOK_CONDITION_SUNNYDAY_ONWEATHERMODIFYDAMAGE => support::weather_modify_damage(

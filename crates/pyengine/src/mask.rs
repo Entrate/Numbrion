@@ -29,6 +29,19 @@ pub enum Req {
 }
 
 impl Req {
+    /// The side's pending request, as `SideActions::from_battle` reports it, without building legal actions:
+    /// `legal_actions` is empty exactly for waiting sides and after a choice that cannot be undone.
+    pub fn of<L: LogSink>(b: &Battle<L>, side: SideId) -> Req {
+        if b.state.sides[side.0 as usize].choice.cant_undo {
+            return Req::None;
+        }
+        match b.side_request_kind(side) {
+            RequestKind::Move => Req::Move,
+            RequestKind::Switch => Req::Switch,
+            RequestKind::None | RequestKind::Wait => Req::None,
+        }
+    }
+
     /// 0 none/wait, 1 move, 2 switch (the value exposed to Python as `request_kind`).
     pub const fn code(self) -> u8 {
         match self {
@@ -68,15 +81,12 @@ impl SideActions {
     }
 
     pub fn from_battle<L: LogSink>(b: &Battle<L>, side: SideId) -> Self {
-        let legal = b.legal_actions(side);
-        if legal.slot_count == 0 {
+        let req = Req::of(b, side);
+        if req == Req::None {
             return Self::none();
         }
-        let req = match b.side_request_kind(side) {
-            RequestKind::Move => Req::Move,
-            RequestKind::Switch => Req::Switch,
-            RequestKind::None | RequestKind::Wait => return Self::none(),
-        };
+        let legal = b.legal_actions(side);
+        debug_assert_eq!(legal.slot_count, 2);
         let mut out = SideActions {
             req,
             legal,
@@ -199,6 +209,18 @@ impl SideActions {
             }
         }
         out
+    }
+
+    /// Union of `mask1(a0)` over the codes of `mask0` (one representative per joint class suffices).
+    pub fn mask1_any(&self, mask0: u64) -> u64 {
+        let mut any = 0;
+        for cls in CLASS_MASKS {
+            let members = mask0 & cls;
+            if members != 0 {
+                any |= self.mask1(members.trailing_zeros() as usize);
+            }
+        }
+        any
     }
 
     pub fn is_legal(&self, a0: usize, a1: usize) -> bool {

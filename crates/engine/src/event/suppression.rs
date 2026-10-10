@@ -23,8 +23,9 @@ impl<L: LogSink> Battle<L> {
             && !target.is_some_and(|m| {
                 // Ability Shield is outside the frozen scope. Never let the
                 // absent optional ID match an empty item.
-                let shield = crate::effects::support::optional_id(dex::ITEMS_DATA, "abilityshield");
-                shield != EffectId::NONE && self.has_item(m, &[shield])
+                const SHIELD: EffectId =
+                    crate::effects::support::optional_id(dex::ITEMS_DATA, "abilityshield");
+                SHIELD != EffectId::NONE && self.has_item(m, &[SHIELD])
             })
     }
 

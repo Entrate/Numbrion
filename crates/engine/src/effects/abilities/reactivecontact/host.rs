@@ -106,7 +106,7 @@ impl Hit {
             struggle,
             pecharunt: id == dex::ABILITY_POISONPUPPETEER
                 && source.is_some_and(|m| {
-                    dex::species(b.state.pokemon[m.0 as usize].base_species).name == "Pecharunt"
+                    b.state.pokemon[m.0 as usize].base_species == dex::SPECIES_PECHARUNT
                 }),
             is_move: b.event_effect_type(effect) == dex::EffectType::Move,
             is_move_callback: !status_callback,

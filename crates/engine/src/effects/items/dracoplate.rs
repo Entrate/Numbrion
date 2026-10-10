@@ -23,7 +23,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_ITEM_DRACOPLATE_ONBASEPOWER => {
             if let Some(i) = optional_move(b, cx, 3) {
                 let mv = *move_overlay(b, i);
-                if mv.move_type == dex::type_id("Dragon").unwrap() {
+                if mv.move_type == dex::TYPE_DRAGON {
                     b.chain_modify(4915.0, 4096.0);
                 }
             }

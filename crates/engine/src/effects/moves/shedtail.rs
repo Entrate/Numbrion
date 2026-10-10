@@ -33,7 +33,9 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_MOVE_SHEDTAIL_ONTRYHIT => {
             let t = mon(b, cx, 0);
             let p = b.state.pokemon[t.0 as usize];
-            if b.can_switch(t.side()) == 0 || volatile(b, t, "commanded") {
+            if b.can_switch(t.side()) == 0
+                || volatile(b, t, const { optional_id(dex::CONDITIONS_DATA, "commanded") })
+            {
                 b.add(LogEntry::new("-fail", &[LogArg::Mon(t)], &[]));
                 return Relay::NotFail;
             }

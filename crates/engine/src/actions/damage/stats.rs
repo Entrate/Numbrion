@@ -22,7 +22,7 @@ impl<L: LogSink> Battle<L> {
     ) -> f64 {
         let mut base_index = stat as usize;
         // calculateStat swaps the base defense, but leaves the boost key intact.
-        if self.stats_has_pseudo_weather("wonderroom") {
+        if self.stats_has_pseudo_weather(dex::key_ids!("wonderroom")) {
             base_index = opposite_defense(stat) as usize;
         }
         let base = self.state.pokemon[pokemon.0 as usize].stored_stats[base_index];
@@ -46,7 +46,7 @@ impl<L: LogSink> Battle<L> {
         // key in Wonder Room. Ordinary getStat leaves the swap to ModifyDef/SpD.
         let mut value =
             f64::from(self.state.pokemon[pokemon.0 as usize].stored_stats[stat as usize]);
-        if options.unmodified && self.stats_has_pseudo_weather("wonderroom") {
+        if options.unmodified && self.stats_has_pseudo_weather(dex::key_ids!("wonderroom")) {
             stat = opposite_defense(stat);
         }
         if !options.unboosted {
@@ -71,14 +71,18 @@ impl<L: LogSink> Battle<L> {
                 Stat::SpD => EventId::ModifySpD,
                 Stat::Spe => EventId::ModifySpe,
             };
-            value = numeric_stat_relay(self.run_event(
-                event,
-                EventArg::Holder(Holder::mon(pokemon)),
-                EventArg::Null,
-                EffectRef::None,
-                Relay::Number(value),
-                RunEventOptions::default(),
-            ));
+            value = if stat == Stat::Spe && self.query_event_is_empty(pokemon, event) {
+                numeric_stat_relay(self.empty_query_event(event, Relay::Number(value)))
+            } else {
+                numeric_stat_relay(self.run_event(
+                    event,
+                    EventArg::Holder(Holder::mon(pokemon)),
+                    EventArg::Null,
+                    EffectRef::None,
+                    Relay::Number(value),
+                    RunEventOptions::default(),
+                ))
+            };
         }
         // This format does not override battle.trunc.
         if stat == Stat::Spe && value > 10000.0 {
@@ -92,7 +96,7 @@ impl<L: LogSink> Battle<L> {
         let mut speed = self.get_stat(pokemon, Stat::Spe, StatOptions::default());
         // gen9randomdoublesbattle does not include twisteddimensionmod, so the
         // source's ruleTable ternary selects the ordinary Trick Room presence.
-        if self.stats_has_pseudo_weather("trickroom") {
+        if self.stats_has_pseudo_weather(dex::key_ids!("trickroom")) {
             speed = 10000.0 - speed;
         }
         (math::trunc_f64(speed) % (1 << 13)) as u16
@@ -149,27 +153,32 @@ impl<L: LogSink> Battle<L> {
         }
     }
 
-    fn stats_has_pseudo_weather(&self, key: &str) -> bool {
+    /// Any pseudo-weather cell whose effect carries one of `keys` (compile-time ids).
+    fn stats_has_pseudo_weather(&self, keys: dex::KeyIds) -> bool {
         self.state
             .field
             .pseudo_weather
             .as_slice()
             .iter()
-            .any(|c| dex::effect(self.state.effects.cells[c.0 as usize].id).key == key)
+            .any(|c| keys.contains(self.state.effects.cells[c.0 as usize].id))
     }
     /// The source receives a fresh object: sparse in calculateStat, full copy in
     /// getStat. A callback may replace it; reclaim both handles after copying.
     /// Ports `sim/pokemon.ts:580,618`. PRNG: ModifyBoost dispatch only.
     fn stats_modify_boosts(&mut self, target: MonId, boosts: OrderedBoosts) -> OrderedBoosts {
         let original = self.stash_boosts(boosts);
-        let result = self.run_event(
-            EventId::ModifyBoost,
-            EventArg::Holder(Holder::mon(target)),
-            EventArg::Null,
-            EffectRef::None,
-            Relay::Boosts(original),
-            RunEventOptions::default(),
-        );
+        let result = if self.query_event_is_empty(target, EventId::ModifyBoost) {
+            self.empty_query_event(EventId::ModifyBoost, Relay::Boosts(original))
+        } else {
+            self.run_event(
+                EventId::ModifyBoost,
+                EventArg::Holder(Holder::mon(target)),
+                EventArg::Null,
+                EffectRef::None,
+                Relay::Boosts(original),
+                RunEventOptions::default(),
+            )
+        };
         let Relay::Boosts(handle) = result else {
             panic!("ModifyBoost returned a non-object relay");
         };

@@ -306,8 +306,8 @@ fn named_format_excluded_effects_never_match_none_and_semi_invulnerability_reads
     let mut b = fixture();
     b.state.pokemon[0].ability = EffectId::NONE;
     b.state.pokemon[0].item = EffectId::NONE;
-    assert!(!b.query_has_item(MonId(0), "abilityshield"));
-    assert!(!b.query_has_ability(MonId(0), "klutz"));
+    assert!(!b.query_has_item(MonId(0), dex::key_ids!("abilityshield")));
+    assert!(!b.query_has_ability(MonId(0), dex::key_ids!("klutz")));
     assert!(!b.is_semi_invulnerable(MonId(0)));
     let cell = b.state.effects.alloc(
         Holder::mon(MonId(0)),

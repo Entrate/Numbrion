@@ -46,7 +46,7 @@ pub struct MoveSlot {
 }
 /// Present + numeric-present bits, positive-damage-this-turn bit. Latest qualifying
 /// records reproduce every scoped consumer without an unbounded attack history.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct AttackRecord {
     pub last_seq: u32,
@@ -58,7 +58,8 @@ pub struct AttackRecord {
     pub numeric_slot: SlotId,
     pub flags: u8,
 }
-#[derive(Clone, Copy, Debug)]
+/// `PartialEq` serves determinization's untouched-since-construction check.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Pokemon {
     pub flags: u32,
@@ -268,6 +269,10 @@ pub struct BattleState {
     pub last_move: EffectId,
     pub last_successful_move: EffectId,
     pub format_state: CellId,
+    /// Bit i: MonId(i) may have been observed (switched in, or chosen/inspected by Illusion).
+    /// Monotone search bookkeeping read by determinization only; no Showdown counterpart.
+    /// Placed in tail padding, so the snapshot size is unchanged.
+    pub revealed_mons: u16,
     pub support_cancel: bool,
     pub report_percentages: bool,
     pub illusion_hint: bool,
@@ -306,6 +311,7 @@ impl BattleState {
             last_move: EffectId::NONE,
             last_successful_move: EffectId::NONE,
             format_state,
+            revealed_mons: 0,
             support_cancel: false,
             report_percentages: false,
             illusion_hint: false,
