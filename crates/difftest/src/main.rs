@@ -197,6 +197,13 @@ fn cmd_replay(args: &[String]) -> Result<u8, String> {
     }
     .map_err(|e| format!("{input}: {e}"))?;
 
+    #[cfg(feature = "engine")]
+    if std::env::var_os("NUMBRION_REACHED").is_some() {
+        for h in engine::effects::reached_hooks() {
+            let hk = &engine::dex::HOOKS[h.0 as usize];
+            eprintln!("REACHED {:?} {} {} {}", hk.effect.kind(), engine::dex::effect(hk.effect).key, hk.key, hk.site);
+        }
+    }
     if let Some(path) = p.values.get("failed-out") {
         let list: Vec<String> = report.failures.iter().map(|r| r.pos.to_string()).collect();
         std::fs::write(path, format!("{}\n", list.join(","))).map_err(|e| format!("{path}: {e}"))?;

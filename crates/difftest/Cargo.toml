@@ -16,7 +16,7 @@ default = ["engine"]
 engine = ["dep:engine"]
 
 [dependencies]
-engine = { path = "../engine", optional = true }
+engine = { path = "../engine", optional = true, features = ["trace-hooks"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "raw_value"] }
 flate2 = "1"
