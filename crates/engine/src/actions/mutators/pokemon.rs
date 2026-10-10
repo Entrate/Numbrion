@@ -184,7 +184,7 @@ impl<L: LogSink> Battle<L> {
             || species.name == "Eternatus-Eternamax"
             || (matches!(species.base_species_name, "Ogerpon" | "Terapagos")
                 && (p.terastallized != TypeId::NONE || t.terastallized != TypeId::NONE))
-            || p.terastallized == dex::type_id("Stellar").unwrap()
+            || p.terastallized == dex::TYPE_STELLAR
         {
             return false;
         }
@@ -392,7 +392,7 @@ impl<L: LogSink> Battle<L> {
         assert!(types.len > 0 && types.len <= 2, "persistent type capacity");
         let p = &self.state.pokemon[pokemon.0 as usize];
         if !enforce {
-            if types.values[..types.len as usize].contains(&dex::type_id("Stellar").unwrap())
+            if types.values[..types.len as usize].contains(&dex::TYPE_STELLAR)
                 || p.terastallized != TypeId::NONE
             {
                 return false;

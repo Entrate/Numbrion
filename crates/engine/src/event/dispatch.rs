@@ -322,7 +322,6 @@ impl<L: LogSink> Battle<L> {
                 buffer.entries[..buffer.len as usize].rotate_right(1);
             }
         }
-        self.sort_handlers(b, event, options.fast_exit);
         let spread = matches!(target, EventTarget::Spread(_));
         let has = if spread {
             relays.len != 0
@@ -363,6 +362,8 @@ impl<L: LogSink> Battle<L> {
                 EventResult::Single(relay)
             };
         }
+        // Sorting nothing draws nothing, so the empty path above may skip it.
+        self.sort_handlers(b, event, options.fast_exit);
         let parent = self.scratch.current_frame;
         let frame = self.push_frame(
             event,

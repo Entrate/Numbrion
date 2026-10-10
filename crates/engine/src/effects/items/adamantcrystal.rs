@@ -23,8 +23,8 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
         dex::HOOK_ITEM_ADAMANTCRYSTAL_ONBASEPOWER => {
             let mv = *move_overlay(b, move_arg(b, cx, 3));
             if (base_num(b, mon_arg(b, cx, 1)) == 483.0)
-                && (mv.move_type == dex::type_id("Steel").unwrap()
-                    || mv.move_type == dex::type_id("Dragon").unwrap())
+                && (mv.move_type == dex::TYPE_STEEL
+                    || mv.move_type == dex::TYPE_DRAGON)
             {
                 b.chain_modify(4915.0, 4096.0);
             }

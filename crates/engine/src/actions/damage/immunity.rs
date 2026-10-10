@@ -20,7 +20,7 @@ impl<L: LogSink> Battle<L> {
         let e = EffectRef::ActiveMove(move_handle.0);
         let mut total = 0i8;
         if self.state.pokemon[target.0 as usize].terastallized != TypeId::NONE
-            && m.move_type == dex::type_id("Stellar").unwrap()
+            && m.move_type == dex::TYPE_STELLAR
         {
             total = 1;
         } else {
@@ -107,7 +107,7 @@ impl<L: LogSink> Battle<L> {
                 m.move_type
             }
         };
-        if ty == TypeId::NONE || ty == dex::type_id("???").unwrap() {
+        if ty == TypeId::NONE || ty == dex::TYPE_UNKNOWN {
             return true;
         }
         let negate = !self
@@ -120,7 +120,7 @@ impl<L: LogSink> Battle<L> {
                 RunEventOptions::default(),
             )
             .truthy();
-        let immune = if ty == dex::type_id("Ground").unwrap() {
+        let immune = if ty == dex::TYPE_GROUND {
             self.is_grounded(target, negate)
         } else {
             let types = self.get_types(target, false, false);
@@ -186,7 +186,7 @@ impl<L: LogSink> Battle<L> {
     /// Ports `sim/pokemon.ts:2138-2146`. PRNG: none directly; dispatched events/callbacks may sort ties or draw.
     pub fn get_types(&mut self, pokemon: MonId, exclude_added: bool, pre_tera: bool) -> Types {
         let mon = &self.state.pokemon[pokemon.0 as usize];
-        let stellar = dex::type_id("Stellar").expect("generated Stellar type");
+        let stellar = dex::TYPE_STELLAR;
         if !pre_tera && mon.terastallized != TypeId::NONE && mon.terastallized != stellar {
             return Types {
                 values: [mon.terastallized, TypeId::NONE, TypeId::NONE],

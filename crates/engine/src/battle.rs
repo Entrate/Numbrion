@@ -29,6 +29,15 @@ impl<L: LogSink> Battle<L> {
         p2_packed: &str,
         log: L,
     ) -> Result<Self, TeamError> {
+        Self::with_log_named(seed, p1_packed, p2_packed, ["Player 1", "Player 2"], log)
+    }
+    fn with_log_named(
+        seed: [u16; 4],
+        p1_packed: &str,
+        p2_packed: &str,
+        names: [&str; 2],
+        log: L,
+    ) -> Result<Self, TeamError> {
         let mut teams = TeamDefs {
             sides: [TeamDef::unpack(p1_packed)?, TeamDef::unpack(p2_packed)?],
         };
@@ -118,7 +127,7 @@ impl<L: LogSink> Battle<L> {
             state,
             teams,
             log,
-            names: ["Player 1".into(), "Player 2".into()],
+            names: names.map(str::to_owned),
             scratch: crate::event::Scratch::default(),
         })
     }
@@ -130,9 +139,7 @@ impl<L: LogSink> Battle<L> {
         p2: (&str, &str),
         log: L,
     ) -> Result<Self, TeamError> {
-        let mut b = Self::with_log(seed, p1.1, p2.1, log)?;
-        b.set_names(p1.0, p2.0);
-        Ok(b)
+        Self::with_log_named(seed, p1.1, p2.1, [p1.0, p2.0], log)
     }
     /// Ports battle.ts:3224-3257. PRNG: none. Set before start; strings stay outside state.
     pub fn set_names(&mut self, p1: &str, p2: &str) {

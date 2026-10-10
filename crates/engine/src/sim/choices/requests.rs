@@ -355,7 +355,7 @@ impl<L: LogSink> Battle<L> {
         for (i, slot) in slots[..count].iter().enumerate() {
             let mut kind = TargetKind::from(slot.target);
             if slot.id == dex::MOVE_CURSE {
-                let ghost = dex::type_id("Ghost").expect("Ghost type");
+                let ghost = dex::TYPE_GHOST;
                 if !self.has_type(pokemon, &[ghost]) {
                     kind = TargetKind::SelfTarget;
                 }

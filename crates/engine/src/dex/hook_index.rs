@@ -46,6 +46,7 @@ static CALLBACK_RELS: [u8; EVENT_COUNT] = {
 
 // Includes the possible onStart fallback for a Pokemon's SwitchIn. This is
 // conservative when onAnySwitchIn disables that fallback; false remains exact.
+// Rows are indexed by raw id: alias rows hold their canonical effect's masks.
 static EFFECT_CALLBACK_RELS: [[u8; EVENT_COUNT]; MANIFESTS.len()] = {
     let mut masks = [[0; EVENT_COUNT]; MANIFESTS.len()];
     let mut i = 0;
@@ -65,12 +66,26 @@ static EFFECT_CALLBACK_RELS: [[u8; EVENT_COUNT]; MANIFESTS.len()] = {
         }
         i += 1;
     }
+    // canonical_effect is a single lookup, so copy canonical rows after all hooks.
+    let canonical = masks;
+    let mut a = 0;
+    while a < CONDITION_RULE_ALIASES.len() {
+        let (from, to) = CONDITION_RULE_ALIASES[a];
+        masks[from.0 as usize] = canonical[to.0 as usize];
+        a += 1;
+    }
     masks
 };
 
 #[inline]
 pub fn effect_has_callback(id: EffectId, event: EventId, rel: HookRel) -> bool {
-    EFFECT_CALLBACK_RELS[canonical_effect(id).0 as usize][event as usize] & (1 << rel as usize) != 0
+    effect_callback_relations(id, event) & (1 << rel as usize) != 0
+}
+
+/// All relation bits of `effect_has_callback` for one effect and event.
+#[inline]
+pub fn effect_callback_relations(id: EffectId, event: EventId) -> u8 {
+    EFFECT_CALLBACK_RELS[id.0 as usize][event as usize]
 }
 
 #[inline]
@@ -107,6 +122,19 @@ mod tests {
                 if !matches!(h.value, HookValue::Absent) {
                     assert!(has_callback(h.event, h.rel));
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn alias_rows_match_canonical_rows() {
+        for id in 0..MANIFESTS.len() {
+            let id = EffectId(id as u16);
+            for h in HOOKS {
+                assert_eq!(
+                    effect_callback_relations(id, h.event),
+                    effect_callback_relations(canonical_effect(id), h.event)
+                );
             }
         }
     }

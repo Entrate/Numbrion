@@ -7,6 +7,15 @@ use crate::{
     log::LogSink,
     state::{CellId, mon_flags},
 };
+/// One discovery pass's callback relations per holder (Pokemon 0-11, sides
+/// 12-13, field 14) for a single event. Collection runs no callbacks and changes
+/// no effect references, so a pass may reuse them; nothing persists across
+/// passes or needs invalidation. A clear bit proves that collection is empty.
+struct PassRelations {
+    event: EventId,
+    known: u16,
+    masks: [u8; 15],
+}
 impl<L: LogSink> Battle<L> {
     pub fn find_event_handlers(
         &mut self,
@@ -20,14 +29,30 @@ impl<L: LogSink> Battle<L> {
         {
             return;
         }
+        let mut relations = PassRelations {
+            event: selector.event,
+            known: 0,
+            masks: [0; 15],
+        };
+        self.find_event_handlers_in(target, selector, source, buffer, &mut relations);
+    }
+    fn find_event_handlers_in(
+        &mut self,
+        target: EventTarget,
+        selector: HookSelector,
+        source: Option<MonId>,
+        buffer: u8,
+        relations: &mut PassRelations,
+    ) {
         if let EventTarget::Spread(ts) = target {
             for i in 0..ts.len as usize {
                 let start = self.scratch.handlers[buffer as usize].len;
-                self.find_event_handlers(
+                self.find_event_handlers_in(
                     EventTarget::Single(EventArg::Holder(Holder::mon(ts.mons[i]))),
                     selector,
                     source,
                     buffer,
+                    relations,
                 );
                 let b = &mut self.scratch.handlers[buffer as usize];
                 for entry in &mut b.entries[start as usize..b.len as usize] {
@@ -58,7 +83,7 @@ impl<L: LogSink> Battle<L> {
                 }))
         {
             let m = MonId(holder.0);
-            self.find_pokemon_event_handlers(m, selector, buffer);
+            self.find_pokemon_event_handlers_in(relations, m, selector, buffer);
             if prefixed {
                 for (side, rel) in [
                     (m.side(), HookRel::Ally),
@@ -77,12 +102,14 @@ impl<L: LogSink> Battle<L> {
                         if self.state.pokemon[a.0 as usize].hp == 0 {
                             continue;
                         }
-                        self.find_pokemon_event_handlers(
+                        self.find_pokemon_event_handlers_in(
+                            relations,
                             a,
                             HookSelector { rel, ..selector },
                             buffer,
                         );
-                        self.find_pokemon_event_handlers(
+                        self.find_pokemon_event_handlers_in(
+                            relations,
                             a,
                             HookSelector {
                                 rel: HookRel::Any,
@@ -97,7 +124,8 @@ impl<L: LogSink> Battle<L> {
         }
         if prefixed {
             if let Some(m) = source {
-                self.find_pokemon_event_handlers(
+                self.find_pokemon_event_handlers_in(
+                    relations,
                     m,
                     HookSelector {
                         rel: HookRel::Source,
@@ -118,14 +146,16 @@ impl<L: LogSink> Battle<L> {
                             continue;
                         }
                         if own || prefixed {
-                            self.find_pokemon_event_handlers(
+                            self.find_pokemon_event_handlers_in(
+                                relations,
                                 m,
                                 HookSelector { rel, ..selector },
                                 buffer,
                             );
                         }
                         if prefixed {
-                            self.find_pokemon_event_handlers(
+                            self.find_pokemon_event_handlers_in(
+                                relations,
                                 m,
                                 HookSelector {
                                     rel: HookRel::Any,
@@ -136,7 +166,9 @@ impl<L: LogSink> Battle<L> {
                         }
                     }
                 }
-                if own || prefixed {
+                let side_holder = 12 + side.0 as usize;
+                if (own || prefixed) && self.pass_may_collect(relations, side_holder, selector, rel)
+                {
                     self.find_side_event_handlers(
                         side,
                         HookSelector { rel, ..selector },
@@ -144,7 +176,8 @@ impl<L: LogSink> Battle<L> {
                         buffer,
                     );
                 }
-                if prefixed {
+                if prefixed && self.pass_may_collect(relations, side_holder, selector, HookRel::Any)
+                {
                     self.find_side_event_handlers(
                         side,
                         HookSelector {
@@ -157,8 +190,59 @@ impl<L: LogSink> Battle<L> {
                 }
             }
         }
-        self.find_field_event_handlers(selector, None, buffer);
+        if self.pass_may_collect(relations, 14, selector, selector.rel) {
+            self.find_field_event_handlers(selector, None, buffer);
+        }
         self.find_battle_event_handlers(selector, None, buffer);
+    }
+    /// False only when Callback collection for this holder and relation is
+    /// provably empty. Duration collection is never pruned.
+    fn pass_may_collect(
+        &self,
+        relations: &mut PassRelations,
+        holder: usize,
+        selector: HookSelector,
+        rel: HookRel,
+    ) -> bool {
+        if !matches!(selector.mode, CollectMode::Callback) {
+            return true;
+        }
+        // Globally absent relations need no holder mask (as the collectors check).
+        if !dex::has_callback(selector.event, rel) {
+            return false;
+        }
+        debug_assert_eq!(relations.event, selector.event);
+        if relations.known & (1 << holder) == 0 {
+            relations.masks[holder] = match holder {
+                0..12 => self.pokemon_callback_relations(MonId(holder as u8), selector.event),
+                12 | 13 => {
+                    let conditions = self.state.sides[holder - 12].conditions;
+                    self.cells_callback_relations(conditions.as_slice(), selector.event)
+                }
+                _ => {
+                    let field = &self.state.field;
+                    self.cells_callback_relations(field.pseudo_weather.as_slice(), selector.event)
+                        | self.cells_callback_relations(
+                            &[field.weather, field.terrain],
+                            selector.event,
+                        )
+                }
+            };
+            relations.known |= 1 << holder;
+        }
+        relations.masks[holder] & (1 << rel as usize) != 0
+    }
+    fn cells_callback_relations(&self, cells: &[CellId], event: EventId) -> u8 {
+        let mut mask = 0;
+        for &c in cells {
+            if c != CellId::NONE {
+                mask |= dex::effect_callback_relations(
+                    self.state.effects.cells[c.0 as usize].id,
+                    event,
+                );
+            }
+        }
+        mask
     }
     fn collect_cell(
         &mut self,
@@ -212,17 +296,42 @@ impl<L: LogSink> Battle<L> {
         {
             return;
         }
-        let p = self.state.pokemon[pokemon.0 as usize];
+        self.collect_pokemon_cells(pokemon, selector, buffer);
+    }
+    /// `find_pokemon_event_handlers` with this pass's cached relation masks.
+    fn find_pokemon_event_handlers_in(
+        &mut self,
+        relations: &mut PassRelations,
+        pokemon: MonId,
+        selector: HookSelector,
+        buffer: u8,
+    ) {
+        if pokemon == MonId::NONE
+            || (matches!(selector.mode, CollectMode::Callback)
+                && !dex::has_callback(selector.event, selector.rel))
+            || !self.pass_may_collect(relations, pokemon.0 as usize, selector, selector.rel)
+        {
+            return;
+        }
+        self.collect_pokemon_cells(pokemon, selector, buffer);
+    }
+    fn collect_pokemon_cells(&mut self, pokemon: MonId, selector: HookSelector, buffer: u8) {
+        // Snapshot only the fields read below, not the whole Pokemon.
+        let p = &self.state.pokemon[pokemon.0 as usize];
+        let (volatiles, position) = (p.volatiles, p.position);
+        let (status_state, ability, ability_state) = (p.status_state, p.ability, p.ability_state);
+        let (item, item_state) = (p.item, p.item_state);
+        let (base_species, species_state) = (p.base_species, p.species_state);
         let holder = Holder::mon(pokemon);
         self.collect_cell(
             EffectRef::Dex(self.status_id(pokemon)),
-            p.status_state,
+            status_state,
             holder,
             selector,
             EndHandler::Status(pokemon),
             buffer,
         );
-        for c in p.volatiles.as_slice().iter().copied() {
+        for c in volatiles.as_slice().iter().copied() {
             let id = self.state.effects.cells[c.0 as usize].id;
             self.collect_cell(
                 EffectRef::Dex(id),
@@ -234,16 +343,16 @@ impl<L: LogSink> Battle<L> {
             );
         }
         self.collect_cell(
-            EffectRef::Dex(p.ability),
-            p.ability_state,
+            EffectRef::Dex(ability),
+            ability_state,
             holder,
             selector,
             EndHandler::Ability(pokemon),
             buffer,
         );
         self.collect_cell(
-            EffectRef::Dex(p.item),
-            p.item_state,
+            EffectRef::Dex(item),
+            item_state,
             holder,
             selector,
             EndHandler::Item(pokemon),
@@ -251,8 +360,8 @@ impl<L: LogSink> Battle<L> {
         );
         // Species durations do not participate.
         self.collect_cell(
-            EffectRef::Dex(p.base_species),
-            p.species_state,
+            EffectRef::Dex(base_species),
+            species_state,
             holder,
             HookSelector {
                 mode: CollectMode::Callback,
@@ -261,9 +370,9 @@ impl<L: LogSink> Battle<L> {
             EndHandler::None,
             buffer,
         );
-        if p.position < 2 {
+        if position < 2 {
             let slots =
-                self.state.sides[pokemon.side().0 as usize].slot_conditions[p.position as usize];
+                self.state.sides[pokemon.side().0 as usize].slot_conditions[position as usize];
             for c in slots.as_slice().iter().copied() {
                 let id = self.state.effects.cells[c.0 as usize].id;
                 self.collect_cell(
@@ -271,11 +380,30 @@ impl<L: LogSink> Battle<L> {
                     c,
                     holder,
                     selector,
-                    EndHandler::Slot(SlotId::new(pokemon.side(), p.position), id),
+                    EndHandler::Slot(SlotId::new(pokemon.side(), position), id),
                     buffer,
                 );
             }
         }
+    }
+    /// Union of `effect_has_callback` relation bits over the Pokemon's current
+    /// effects; the same absence proof as `pokemon_has_callback`, for every relation.
+    fn pokemon_callback_relations(&self, pokemon: MonId, event: EventId) -> u8 {
+        let p = &self.state.pokemon[pokemon.0 as usize];
+        let rels = |id| dex::effect_callback_relations(id, event);
+        let cell_rels = |c: &CellId| rels(self.state.effects.cells[c.0 as usize].id);
+        let mut mask =
+            rels(p.ability) | rels(p.item) | rels(p.base_species) | rels(self.status_id(pokemon));
+        for c in p.volatiles.as_slice() {
+            mask |= cell_rels(c);
+        }
+        if p.position < 2 {
+            let slots = &self.state.sides[pokemon.side().0 as usize].slot_conditions;
+            for c in slots[p.position as usize].as_slice() {
+                mask |= cell_rels(c);
+            }
+        }
+        mask
     }
     /// Recompute from current effect references, so direct state edits, nested
     /// installs/removals and snapshot restoration require no cache invalidation.
@@ -302,9 +430,10 @@ impl<L: LogSink> Battle<L> {
         custom_holder: Option<MonId>,
         buffer: u8,
     ) {
-        if matches!(selector.mode, CollectMode::Callback)
-            && !dex::has_callback(selector.event, selector.rel)
-        {
+        // The synthetic Format has no hooks here (event_hook resolves it to no
+        // effect, and the SwitchIn fallback needs an ability or item), so
+        // Callback collection is always empty; only durations can be found.
+        if matches!(selector.mode, CollectMode::Callback) {
             return;
         }
         self.collect_cell(
@@ -438,5 +567,32 @@ impl<L: LogSink> Battle<L> {
             }
         }
         b.len = 0;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::log::NoLog;
+
+    #[test]
+    fn format_callback_collection_is_always_empty() {
+        let packed = "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric";
+        let battle: Battle<NoLog> = Battle::new([1, 2, 3, 4], packed, packed).unwrap();
+        let format = EffectRef::Synthetic(SyntheticEffect::Format);
+        for event in dex::HOOKS.iter().map(|h| h.event) {
+            for rel in [
+                HookRel::On,
+                HookRel::Source,
+                HookRel::Ally,
+                HookRel::Foe,
+                HookRel::Any,
+                HookRel::Direct,
+            ] {
+                for holder in [Holder::BATTLE, Holder::mon(MonId(0))] {
+                    assert_eq!(battle.get_callback(holder, format, event, rel), None);
+                }
+            }
+        }
     }
 }

@@ -119,9 +119,9 @@ fn number(text: &str, default: f64) -> f64 {
 fn vector(text: &str, default: u8, max: u8) -> [u8; 6] {
     let mut values = [default; 6];
     if !text.is_empty() {
-        let parts: Vec<_> = text.split(',').take(6).collect();
-        for (i, v) in values.iter_mut().enumerate() {
-            let n = parts.get(i).map_or(0.0, |s| number(s, default as f64));
+        let mut parts = text.split(',');
+        for v in &mut values {
+            let n = parts.next().map_or(0.0, |s| number(s, default as f64));
             *v = n.floor().clamp(0.0, max as f64) as u8;
         }
     }
@@ -174,9 +174,12 @@ impl TeamDef {
             if index >= 6 {
                 return Err(TeamError("This format supports at most six Pokemon".into()));
             }
-            let f: Vec<_> = record.splitn(12, '|').collect();
-            if f.len() != 12 {
-                return Err(TeamError(format!("Malformed packed set {}", index + 1)));
+            let mut fields = record.splitn(12, '|');
+            let mut f = [""; 12];
+            for field in &mut f {
+                *field = fields
+                    .next()
+                    .ok_or_else(|| TeamError(format!("Malformed packed set {}", index + 1)))?;
             }
             let species = lookup(
                 EffectKind::Species,
@@ -190,11 +193,9 @@ impl TeamDef {
             } else {
                 f[0]
             };
-            let mut set = SetDef {
-                species,
-                name: truncate_utf16(name, 20),
-                ..SetDef::default()
-            };
+            let set = &mut team.sets[index];
+            set.species = species;
+            set.name = truncate_utf16(name, 20);
             if !f[2].is_empty() {
                 set.item = lookup(EffectKind::Item, f[2])?
             }
@@ -243,28 +244,29 @@ impl TeamDef {
             };
             set.shiny = !f[9].is_empty();
             set.level = level(f[10]);
-            let misc: Vec<_> = f[11].split(',').take(6).collect();
-            if let Some(h) = misc.first() {
-                set.happiness = number(h, 255.0).floor().clamp(0.0, 255.0) as u8;
+            let mut misc_fields = f[11].split(',');
+            let mut misc = [""; 6];
+            for field in &mut misc {
+                *field = misc_fields.next().unwrap_or("");
             }
-            set.hp_type = misc.get(1).unwrap_or(&"").to_string();
-            if let Some(ball) = misc.get(2).filter(|s| !s.is_empty()) {
+            set.happiness = number(misc[0], 255.0).floor().clamp(0.0, 255.0) as u8;
+            set.hp_type = misc[1].to_string();
+            if !misc[2].is_empty() {
+                let ball = misc[2];
                 set.pokeball = ball
                     .bytes()
                     .filter(u8::is_ascii_alphanumeric)
                     .map(|b| b.to_ascii_lowercase() as char)
                     .collect();
             }
-            set.gigantamax = misc.get(3).is_some_and(|s| !s.is_empty());
-            if let Some(d) = misc.get(4) {
-                set.dynamax_level = number(d, 10.0).floor().clamp(0.0, 10.0) as u8;
-            }
-            set.tera_type = if let Some(t) = misc.get(5).filter(|s| !s.is_empty()) {
+            set.gigantamax = !misc[3].is_empty();
+            set.dynamax_level = number(misc[4], 10.0).floor().clamp(0.0, 10.0) as u8;
+            set.tera_type = if !misc[5].is_empty() {
+                let t = misc[5];
                 dex::type_id(t).ok_or_else(|| TeamError(format!("Unknown Tera type {t}")))?
             } else {
                 s.types[0]
             };
-            team.sets[index] = set;
             team.len += 1;
         }
         Ok(team)
