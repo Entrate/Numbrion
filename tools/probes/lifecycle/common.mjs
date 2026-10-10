@@ -123,3 +123,28 @@ export function stateSummary(b) {
 	const orders = b.sides.flatMap(s => s.pokemon.map(p => `${p.abilityState.effectOrder}.${p.itemState.effectOrder}`)).join(',');
 	return {active, party, speeds, orders, seed: seedWords(b), effectOrder: b.effectOrder, speedOrder: b.speedOrder.join(','), queue: queueSummary(b)};
 }
+
+/** The full state column of flow.tsv / move.tsv. */
+export function stateString(b) {
+	const mons = [];
+	for (const s of b.sides) {
+		const sorted = [...s.pokemon].sort((a, c) => monIndex(a) - monIndex(c));
+		for (const p of sorted) {
+			mons.push([
+				monIndex(p), p.hp, +p.fainted, +p.faintQueued, +p.isActive, +!!p.switchFlag, +!!p.forceSwitchFlag,
+				+(p.status === 'fnt'), p.position, p.terastallized || 0, +!!p.canTerastallize, +!!p.beingCalledBack,
+			].join('.'));
+		}
+	}
+	const active = b.sides.flatMap(s => s.active.map(p => monIndex(p))).join(',');
+	const party = b.sides.map(s => s.pokemon.map(p => monIndex(p)).join(',')).join(';');
+	const speeds = b.sides.flatMap(s => s.pokemon.map(p => p.speed)).join(',');
+	const orders = b.sides.flatMap(s => s.pokemon.map(p => `${p.abilityState.effectOrder}.${p.itemState.effectOrder}`)).join(',');
+	return [
+		`rs=${b.requestState || '-'}`, `ended=${+b.ended}`, `winner=${b.winner || '-'}`, `turn=${b.turn}`, `mid=${+b.midTurn}`,
+		`left=${b.sides.map(s => s.pokemonLeft).join(',')}`, `fl=${b.sides.map(s => s.totalFainted).join(',')}`,
+		`active=${active}`, `party=${party}`, `speeds=${speeds}`, `orders=${orders}`, `so=${b.speedOrder.join(',')}`,
+		`mons=${mons.join(' ')}`,
+	].join(' ');
+}
+

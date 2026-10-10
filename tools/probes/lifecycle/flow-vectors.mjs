@@ -10,7 +10,7 @@
 // crates/engine/src/sim/lifecycle/vectors/flow.tsv
 import fs from 'node:fs';
 import path from 'node:path';
-import {root, rng, pick, randomTeams, pack, startBattle, queueSummary, seedWords, monIndex, withoutFormeTera, realEndTurn} from './common.mjs';
+import {root, rng, pick, randomTeams, pack, startBattle, queueSummary, seedWords, monIndex, withoutFormeTera, realEndTurn, stateString} from './common.mjs';
 
 withoutFormeTera();
 
@@ -21,29 +21,6 @@ const ROUNDS = 3;
 
 function mon(b, idx) {
 	return b.sides[idx < 6 ? 0 : 1].pokemon.find(p => monIndex(p) === idx);
-}
-
-function stateString(b) {
-	const mons = [];
-	for (const s of b.sides) {
-		const sorted = [...s.pokemon].sort((a, c) => monIndex(a) - monIndex(c));
-		for (const p of sorted) {
-			mons.push([
-				monIndex(p), p.hp, +p.fainted, +p.faintQueued, +p.isActive, +!!p.switchFlag, +!!p.forceSwitchFlag,
-				+(p.status === 'fnt'), p.position, p.terastallized || 0, +!!p.canTerastallize, +!!p.beingCalledBack,
-			].join('.'));
-		}
-	}
-	const active = b.sides.flatMap(s => s.active.map(p => monIndex(p))).join(',');
-	const party = b.sides.map(s => s.pokemon.map(p => monIndex(p)).join(',')).join(';');
-	const speeds = b.sides.flatMap(s => s.pokemon.map(p => p.speed)).join(',');
-	const orders = b.sides.flatMap(s => s.pokemon.map(p => `${p.abilityState.effectOrder}.${p.itemState.effectOrder}`)).join(',');
-	return [
-		`rs=${b.requestState || '-'}`, `ended=${+b.ended}`, `winner=${b.winner || '-'}`, `turn=${b.turn}`, `mid=${+b.midTurn}`,
-		`left=${b.sides.map(s => s.pokemonLeft).join(',')}`, `fl=${b.sides.map(s => s.totalFainted).join(',')}`,
-		`active=${active}`, `party=${party}`, `speeds=${speeds}`, `orders=${orders}`, `so=${b.speedOrder.join(',')}`,
-		`mons=${mons.join(' ')}`,
-	].join(' ');
 }
 
 /** battle.turnLoop() minus the final endTurn (Rust replays the same decomposition). */
