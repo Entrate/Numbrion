@@ -83,14 +83,15 @@ pub mod request_flags {
     pub const CAN_TERASTALLIZE: u16 = 1 << 5;
 }
 
-/// MoveSlot.flags layout read by the request builder (pokemon.ts:13-23,1021-1027):
-/// bits 0..=1 are `disabled` (0 false, 1 true, 2 'hidden'), bit 2 is `used`.
-/// The disabling mutators must write this layout. PRNG: none.
+/// MoveSlot.flags layout (pokemon.ts:13-23,1021-1027), shared with the disabling
+/// mutators: `disabled` is true (bit 0), 'hidden' (bit 1); `used` is bit 2. True
+/// disables are never overwritten by later hidden ones. PRNG: none.
 pub mod slot_flags {
-    pub const DISABLED_TRUE: u8 = 1;
-    pub const DISABLED_HIDDEN: u8 = 2;
-    pub const DISABLED_MASK: u8 = 3;
-    pub const USED: u8 = 1 << 2;
+    use crate::actions::mutators::pokemon as m;
+    pub const DISABLED_TRUE: u8 = m::SLOT_DISABLED;
+    pub const DISABLED_HIDDEN: u8 = m::SLOT_HIDDEN;
+    pub const DISABLED_MASK: u8 = m::SLOT_DISABLED | m::SLOT_HIDDEN;
+    pub const USED: u8 = m::SLOT_USED;
 }
 
 /// Move target kinds as Showdown strings. `MoveTarget` lacks `adjacentFoe` (Max
