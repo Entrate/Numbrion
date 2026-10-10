@@ -75,6 +75,26 @@ pub fn write_ident(out: &mut String, view: LogView<'_>, mon: MonId) {
     out.push_str(&set_of(view, named).name);
 }
 
+/// `Pokemon.fullname` (pokemon.ts:335): `pN: Name` with the mon's own name, whether or not it is
+/// active and whatever disguise is up. Request JSON writes this as `ident` (pokemon.ts:1155).
+pub fn write_fullname(out: &mut String, view: LogView<'_>, mon: MonId) {
+    write_side_id(out, mon.side());
+    out.push_str(": ");
+    out.push_str(&set_of(view, mon).name);
+}
+
+/// The stored `Pokemon.details` field: `getUpdatedDetails()` evaluated with `species == baseSpecies`
+/// (pokemon.ts:377,1443): no Illusion substitution and no tera suffix. Request JSON writes this
+/// as `details` (pokemon.ts:1156).
+pub fn write_stored_details(out: &mut String, view: LogView<'_>, mon: MonId) {
+    push_updated_details(
+        out,
+        view,
+        mon,
+        view.state.pokemon[mon.0 as usize].base_species,
+    );
+}
+
 pub(crate) fn status_name(status: Status) -> &'static str {
     match status {
         Status::None => "",

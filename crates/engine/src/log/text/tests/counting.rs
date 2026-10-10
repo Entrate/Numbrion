@@ -19,18 +19,32 @@ fn pre_start_count_is_four_and_the_opening_log_realizes_it_once() {
     let (mut quiet, mut text) = pair();
     assert_eq!(quiet.scratch.unsent_lines, 4);
     assert_eq!(text.scratch.unsent_lines, 4);
-    assert!(text.log.entries.is_empty(), "nothing is written before start");
+    assert!(
+        text.log.entries.is_empty(),
+        "nothing is written before start"
+    );
 
     quiet.emit_opening_log();
     text.emit_opening_log();
-    assert_eq!(quiet.scratch.unsent_lines, 4, "reset before emitting: not double counted");
+    assert_eq!(
+        quiet.scratch.unsent_lines, 4,
+        "reset before emitting: not double counted"
+    );
     assert_eq!(text.scratch.unsent_lines, 4);
     assert_eq!(
         lines(&text),
-        ["|t:|", "|gametype|doubles", "|player|p1|Alice||", "|player|p2|Bob||"]
+        [
+            "|t:|",
+            "|gametype|doubles",
+            "|player|p1|Alice||",
+            "|player|p2|Bob||"
+        ]
     );
     // Both counters keep agreeing as lines are added.
-    for b in [&mut text as &mut dyn Counter, &mut quiet as &mut dyn Counter] {
+    for b in [
+        &mut text as &mut dyn Counter,
+        &mut quiet as &mut dyn Counter,
+    ] {
         b.line();
     }
     assert_eq!(quiet.scratch.unsent_lines, 5);
@@ -114,7 +128,10 @@ fn send_updates_resets_the_logical_count_for_every_sink() {
     assert_eq!(text.scratch.unsent_lines, 1000);
     quiet.line();
     text.line();
-    assert!(quiet.scratch.unsent_lines > 1000, "LINE LIMIT is `> 1000` unsent lines");
+    assert!(
+        quiet.scratch.unsent_lines > 1000,
+        "LINE LIMIT is `> 1000` unsent lines"
+    );
     assert!(text.scratch.unsent_lines > 1000);
     quiet.send_updates();
     assert_eq!(quiet.scratch.unsent_lines, 0);
@@ -168,7 +185,15 @@ fn hints_once_per_side_and_plain() {
     assert_eq!(&b.log.entries[3..], ["|split|p2", "|-hint|only you", ""]);
     assert_eq!(b.scratch.unsent_lines, 4 + 1 + 1 + 1 + 3);
     // Interpolated hint text (data/moves.ts:20930 style) through Parts.
-    b.hint(LogArg::Parts(&[LogArg::Text("Special"), LogArg::Text("|"), LogArg::Text("Physical Shell Side Arm")]), false, None);
+    b.hint(
+        LogArg::Parts(&[
+            LogArg::Text("Special"),
+            LogArg::Text("|"),
+            LogArg::Text("Physical Shell Side Arm"),
+        ]),
+        false,
+        None,
+    );
     assert_eq!(last(&b), "|-hint|Special|Physical Shell Side Arm");
 }
 
@@ -183,5 +208,9 @@ fn once_hint_with_a_side_is_not_modelled() {
 #[should_panic(expected = "HP-dependent argument but no split side")]
 fn hp_arguments_require_a_split_entry() {
     let mut b = standard_active();
-    b.add(LogEntry::new("-damage", &[LogArg::Mon(mon(0, 0)), LogArg::Health(mon(0, 0))], &[]));
+    b.add(LogEntry::new(
+        "-damage",
+        &[LogArg::Mon(mon(0, 0)), LogArg::Health(mon(0, 0))],
+        &[],
+    ));
 }

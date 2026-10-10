@@ -29,10 +29,28 @@ fn plain_move_line_and_source_tags() {
     add_move(&mut b, p1a(), "Stomping Tantrum", p2a(), &[]);
     assert_eq!(last(&b), "|move|p1a: Wugtrio|Stomping Tantrum|p2a: Klefki");
     // `[from] ${sourceEffect.fullname}` (battle-actions.ts:452): condition, ability, move.
-    add_move(&mut b, p1b(), "Meteor Beam", p2b(), &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))]);
-    assert_eq!(last(&b), "|move|p1b: Dondozo|Meteor Beam|p2b: Reshiram|[from] lockedmove");
-    add_move(&mut b, p2a(), "Swords Dance", p2a(), &[LogTag::From(fx(EffectKind::Ability, "Dancer"))]);
-    assert_eq!(last(&b), "|move|p2a: Klefki|Swords Dance|p2a: Klefki|[from] ability: Dancer");
+    add_move(
+        &mut b,
+        p1b(),
+        "Meteor Beam",
+        p2b(),
+        &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))],
+    );
+    assert_eq!(
+        last(&b),
+        "|move|p1b: Dondozo|Meteor Beam|p2b: Reshiram|[from] lockedmove"
+    );
+    add_move(
+        &mut b,
+        p2a(),
+        "Swords Dance",
+        p2a(),
+        &[LogTag::From(fx(EffectKind::Ability, "Dancer"))],
+    );
+    assert_eq!(
+        last(&b),
+        "|move|p2a: Klefki|Swords Dance|p2a: Klefki|[from] ability: Dancer"
+    );
     // Tera Blast animation tag (data/moves.ts:19221): `[anim] Tera Blast Ground`.
     let ground = dex::type_id("Ground").unwrap();
     add_move(
@@ -45,7 +63,10 @@ fn plain_move_line_and_source_tags() {
             LogArg::Parts(&[LogArg::Text("Tera Blast "), LogArg::Type(ground)]),
         )],
     );
-    assert_eq!(last(&b), "|move|p2b: Reshiram|Tera Blast|p1a: Wugtrio|[anim] Tera Blast Ground");
+    assert_eq!(
+        last(&b),
+        "|move|p2b: Reshiram|Tera Blast|p1a: Wugtrio|[anim] Tera Blast Ground"
+    );
 }
 
 #[test]
@@ -60,13 +81,28 @@ fn still_blanks_the_target_and_appends() {
     b.attr_last_move(MoveLineEdit::Still);
     b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
         "spread",
-        LogArg::Spread { mons: [MonId::NONE; 4], len: 0 },
+        LogArg::Spread {
+            mons: [MonId::NONE; 4],
+            len: 0,
+        },
     )));
-    assert_eq!(last(&b), "|move|p1a: Wugtrio|Life Dew||[still]|[still]|[spread] ");
+    assert_eq!(
+        last(&b),
+        "|move|p1a: Wugtrio|Life Dew||[still]|[still]|[spread] "
+    );
     // `[from]` before `[still]`: Magic Bounce reflecting a status move.
-    add_move(&mut b, p2a(), "Stealth Rock", p1a(), &[LogTag::From(fx(EffectKind::Ability, "Magic Bounce"))]);
+    add_move(
+        &mut b,
+        p2a(),
+        "Stealth Rock",
+        p1a(),
+        &[LogTag::From(fx(EffectKind::Ability, "Magic Bounce"))],
+    );
     b.attr_last_move(MoveLineEdit::Still);
-    assert_eq!(last(&b), "|move|p2a: Klefki|Stealth Rock||[from] ability: Magic Bounce|[still]");
+    assert_eq!(
+        last(&b),
+        "|move|p2a: Klefki|Stealth Rock||[from] ability: Magic Bounce|[still]"
+    );
     // `[still]` can also arrive as a plain tag.
     add_move(&mut b, p2b(), "Tailwind", p2b(), &[]);
     b.attr_last_move(MoveLineEdit::Tag(LogTag::Bare("still")));
@@ -81,25 +117,52 @@ fn miss_notarget_and_spread() {
     let mut b = standard_active();
     add_move(&mut b, p2a(), "Thunder Wave", p1a(), &[]);
     b.attr_last_move(MoveLineEdit::Miss);
-    assert_eq!(last(&b), "|move|p2a: Klefki|Thunder Wave|p1a: Wugtrio|[miss]");
-    add_move(&mut b, p2b(), "Meteor Beam", p1b(), &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))]);
+    assert_eq!(
+        last(&b),
+        "|move|p2a: Klefki|Thunder Wave|p1a: Wugtrio|[miss]"
+    );
+    add_move(
+        &mut b,
+        p2b(),
+        "Meteor Beam",
+        p1b(),
+        &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))],
+    );
     b.attr_last_move(MoveLineEdit::Miss);
-    assert_eq!(last(&b), "|move|p2b: Reshiram|Meteor Beam|p1b: Dondozo|[from] lockedmove|[miss]");
+    assert_eq!(
+        last(&b),
+        "|move|p2b: Reshiram|Meteor Beam|p1b: Dondozo|[from] lockedmove|[miss]"
+    );
     // A fainted/benched target prints as a NOSLOT ident (battle-actions.ts:457-462).
     add_move(&mut b, p1b(), "Body Press", mon(0, 2), &[]);
     b.attr_last_move(MoveLineEdit::NoTarget);
-    assert_eq!(last(&b), "|move|p1b: Dondozo|Body Press|p1: Gholdengo|[notarget]");
+    assert_eq!(
+        last(&b),
+        "|move|p1b: Dondozo|Body Press|p1: Gholdengo|[notarget]"
+    );
     // [spread] lists the targets still hit, in getMoveTargets order (allies first).
     add_move(&mut b, p2a(), "Earthquake", p1a(), &[]);
     let hit = [p2b(), p1a(), p1b(), MonId::NONE];
-    b.attr_last_move(MoveLineEdit::Tag(LogTag::Value("spread", LogArg::Spread { mons: hit, len: 3 })));
-    assert_eq!(last(&b), "|move|p2a: Klefki|Earthquake|p1a: Wugtrio|[spread] p2b,p1a,p1b");
+    b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
+        "spread",
+        LogArg::Spread { mons: hit, len: 3 },
+    )));
+    assert_eq!(
+        last(&b),
+        "|move|p2a: Klefki|Earthquake|p1a: Wugtrio|[spread] p2b,p1a,p1b"
+    );
     add_move(&mut b, p1a(), "Icy Wind", p2a(), &[]);
     b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
         "spread",
-        LogArg::Spread { mons: [p2b(), MonId::NONE, MonId::NONE, MonId::NONE], len: 1 },
+        LogArg::Spread {
+            mons: [p2b(), MonId::NONE, MonId::NONE, MonId::NONE],
+            len: 1,
+        },
     )));
-    assert_eq!(last(&b), "|move|p1a: Wugtrio|Icy Wind|p2a: Klefki|[spread] p2b");
+    assert_eq!(
+        last(&b),
+        "|move|p1a: Wugtrio|Icy Wind|p2a: Klefki|[spread] p2b"
+    );
 }
 
 #[test]
@@ -114,7 +177,10 @@ fn packed_spread_edit() {
     ] {
         add_move(&mut b, p1a(), "Heat Wave", p2a(), &[]);
         b.attr_last_move(MoveLineEdit::Spread(packed));
-        assert_eq!(last(&b), format!("|move|p1a: Wugtrio|Heat Wave|p2a: Klefki|{want}"));
+        assert_eq!(
+            last(&b),
+            format!("|move|p1a: Wugtrio|Heat Wave|p2a: Klefki|{want}")
+        );
     }
 }
 
@@ -125,9 +191,18 @@ fn retarget_rewrites_field_four() {
     b.attr_last_move(MoveLineEdit::Retarget(p2b()));
     assert_eq!(last(&b), "|move|p1a: Wugtrio|Thunderbolt|p2b: Reshiram");
     // Tags already appended are preserved.
-    add_move(&mut b, p1a(), "Thunderbolt", p2a(), &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))]);
+    add_move(
+        &mut b,
+        p1a(),
+        "Thunderbolt",
+        p2a(),
+        &[LogTag::From(fx(EffectKind::Condition, "lockedmove"))],
+    );
     b.attr_last_move(MoveLineEdit::Retarget(p2b()));
-    assert_eq!(last(&b), "|move|p1a: Wugtrio|Thunderbolt|p2b: Reshiram|[from] lockedmove");
+    assert_eq!(
+        last(&b),
+        "|move|p1a: Wugtrio|Thunderbolt|p2b: Reshiram|[from] lockedmove"
+    );
     // retargetLastMove has no [still] special case: it just overwrites the field.
     add_move(&mut b, p1a(), "Protect", p1a(), &[]);
     b.attr_last_move(MoveLineEdit::Still);
@@ -140,7 +215,11 @@ fn short_lines_are_padded_like_js_arrays() {
     // Choice-lock / Gorilla Tactics fail paths print a bare `|move|p|Name` (data/conditions.ts:342).
     let mut b = standard_active();
     let bare = |b: &mut Battle<TextLog>| {
-        b.add_move(LogEntry::new("move", &[LogArg::Mon(p1a()), LogArg::Text("Protect")], &[]));
+        b.add_move(LogEntry::new(
+            "move",
+            &[LogArg::Mon(p1a()), LogArg::Text("Protect")],
+            &[],
+        ));
     };
     bare(&mut b);
     assert_eq!(last(&b), "|move|p1a: Wugtrio|Protect");
@@ -156,14 +235,27 @@ fn edits_land_on_the_move_line_not_the_last_line() {
     let mut b = standard_active();
     add_move(&mut b, p2a(), "Rock Slide", p1a(), &[]);
     add(&mut b, "-supereffective", &[LogArg::Mon(p1a())], &[]);
-    add_split(&mut b, "-damage", &[LogArg::Mon(p1a()), LogArg::Health(p1a())], &[], 0, false);
+    add_split(
+        &mut b,
+        "-damage",
+        &[LogArg::Mon(p1a()), LogArg::Health(p1a())],
+        &[],
+        0,
+        false,
+    );
     add(&mut b, "-crit", &[LogArg::Mon(p1b())], &[]);
     b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
         "spread",
-        LogArg::Spread { mons: [p1a(), p1b(), MonId::NONE, MonId::NONE], len: 2 },
+        LogArg::Spread {
+            mons: [p1a(), p1b(), MonId::NONE, MonId::NONE],
+            len: 2,
+        },
     )));
     let l = lines(&b);
-    assert_eq!(l[0], "|move|p2a: Klefki|Rock Slide|p1a: Wugtrio|[spread] p1a,p1b");
+    assert_eq!(
+        l[0],
+        "|move|p2a: Klefki|Rock Slide|p1a: Wugtrio|[spread] p1a,p1b"
+    );
     assert_eq!(l.len(), 6, "an edit never appends: {l:?}");
     assert_eq!(l[5], "|-crit|p1b: Dondozo");
 }
@@ -174,11 +266,25 @@ fn nested_move_steals_the_pointer() {
     // (Magic Bounce / Dancer, 05-protocol.md section 2.2).
     let mut b = standard_active();
     add_move(&mut b, p1a(), "String Shot", p2a(), &[]);
-    add(&mut b, "-ability", &[LogArg::Mon(p2a()), LogArg::Text("Magic Bounce")], &[]);
-    add_move(&mut b, p2a(), "String Shot", p1a(), &[LogTag::From(fx(EffectKind::Ability, "Magic Bounce"))]);
+    add(
+        &mut b,
+        "-ability",
+        &[LogArg::Mon(p2a()), LogArg::Text("Magic Bounce")],
+        &[],
+    );
+    add_move(
+        &mut b,
+        p2a(),
+        "String Shot",
+        p1a(),
+        &[LogTag::From(fx(EffectKind::Ability, "Magic Bounce"))],
+    );
     b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
         "spread",
-        LogArg::Spread { mons: [p1a(), p1b(), MonId::NONE, MonId::NONE], len: 2 },
+        LogArg::Spread {
+            mons: [p1a(), p1b(), MonId::NONE, MonId::NONE],
+            len: 2,
+        },
     )));
     let l = lines(&b);
     assert_eq!(l[0], "|move|p1a: Wugtrio|String Shot|p2a: Klefki");
@@ -205,21 +311,36 @@ fn edit_without_a_move_line_is_a_no_op() {
     add(&mut b, "-fail", &[LogArg::Mon(p1a())], &[]);
     b.attr_last_move(MoveLineEdit::Still);
     assert_eq!(lines(&b), ["|-fail|p1a: Wugtrio"]);
-    assert_eq!(b.scratch.unsent_lines, 5, "4 pre-start lines + 1; edits never count");
+    assert_eq!(
+        b.scratch.unsent_lines, 5,
+        "4 pre-start lines + 1; edits never count"
+    );
 }
 
 #[test]
 fn anim_line_is_deleted_by_still_and_the_pointer_is_cleared() {
     let mut b = standard_active();
-    add(&mut b, "-prepare", &[LogArg::Mon(p1a()), LogArg::Text("Solar Beam")], &[]);
+    add(
+        &mut b,
+        "-prepare",
+        &[LogArg::Mon(p1a()), LogArg::Text("Solar Beam")],
+        &[],
+    );
     b.add_move(LogEntry::new(
         "-anim",
-        &[LogArg::Mon(p1a()), LogArg::Text("Solar Beam"), LogArg::Mon(p2a())],
+        &[
+            LogArg::Mon(p1a()),
+            LogArg::Text("Solar Beam"),
+            LogArg::Mon(p2a()),
+        ],
         &[],
     ));
     add(&mut b, "-fail", &[LogArg::Mon(p1a())], &[]);
     b.attr_last_move(MoveLineEdit::Still);
-    assert_eq!(lines(&b), ["|-prepare|p1a: Wugtrio|Solar Beam", "|-fail|p1a: Wugtrio"]);
+    assert_eq!(
+        lines(&b),
+        ["|-prepare|p1a: Wugtrio|Solar Beam", "|-fail|p1a: Wugtrio"]
+    );
     assert_eq!(b.log.last_move_line, None);
     // Nothing is left to edit.
     b.attr_last_move(MoveLineEdit::Miss);
@@ -231,18 +352,32 @@ fn anim_line_takes_other_attrs() {
     let mut b = standard_active();
     b.add_move(LogEntry::new(
         "-anim",
-        &[LogArg::Mon(p2b()), LogArg::Text("Meteor Beam"), LogArg::Mon(p1a())],
+        &[
+            LogArg::Mon(p2b()),
+            LogArg::Text("Meteor Beam"),
+            LogArg::Mon(p1a()),
+        ],
         &[],
     ));
     b.attr_last_move(MoveLineEdit::Miss);
-    assert_eq!(last(&b), "|-anim|p2b: Reshiram|Meteor Beam|p1a: Wugtrio|[miss]");
+    assert_eq!(
+        last(&b),
+        "|-anim|p2b: Reshiram|Meteor Beam|p1a: Wugtrio|[miss]"
+    );
     b.add_move(LogEntry::new(
         "-anim",
-        &[LogArg::Mon(p2b()), LogArg::Text("Solar Beam"), LogArg::Mon(mon(0, 2))],
+        &[
+            LogArg::Mon(p2b()),
+            LogArg::Text("Solar Beam"),
+            LogArg::Mon(mon(0, 2)),
+        ],
         &[],
     ));
     b.attr_last_move(MoveLineEdit::NoTarget);
-    assert_eq!(last(&b), "|-anim|p2b: Reshiram|Solar Beam|p1: Gholdengo|[notarget]");
+    assert_eq!(
+        last(&b),
+        "|-anim|p2b: Reshiram|Solar Beam|p1: Gholdengo|[notarget]"
+    );
 }
 
 #[test]
@@ -253,11 +388,22 @@ fn drained_lines_can_still_be_edited_and_are_not_resent() {
     b.drain_log(&mut out);
     assert_eq!(out, ["|move|p1a: Wugtrio|Icy Wind|p2a: Klefki"]);
     b.attr_last_move(MoveLineEdit::Miss);
-    assert_eq!(b.log.entries[0], "|move|p1a: Wugtrio|Icy Wind|p2a: Klefki|[miss]");
+    assert_eq!(
+        b.log.entries[0],
+        "|move|p1a: Wugtrio|Icy Wind|p2a: Klefki|[miss]"
+    );
     out.clear();
     b.drain_log(&mut out);
-    assert!(out.is_empty(), "history is kept, only new entries are drained");
-    add(&mut b, "-miss", &[LogArg::Mon(p1a()), LogArg::Mon(p2a())], &[]);
+    assert!(
+        out.is_empty(),
+        "history is kept, only new entries are drained"
+    );
+    add(
+        &mut b,
+        "-miss",
+        &[LogArg::Mon(p1a()), LogArg::Mon(p2a())],
+        &[],
+    );
     b.drain_log(&mut out);
     assert_eq!(out, ["|-miss|p1a: Wugtrio|p2a: Klefki"]);
 }

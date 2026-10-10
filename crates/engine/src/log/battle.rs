@@ -4,8 +4,7 @@ use crate::Battle;
 
 /// The one `once` hint in scope: Illusion Level Mod (data/abilities.ts:2085). Showdown keeps a
 /// `hints` set keyed by the text (or `pN|text`); here its single member is one state bit.
-const ONCE_HINT_UNSUPPORTED: &str =
-    "once-hint with a side is not reachable in the scoped format (only Illusion Level Mod uses `once`)";
+const ONCE_HINT_UNSUPPORTED: &str = "once-hint with a side is not reachable in the scoped format (only Illusion Level Mod uses `once`)";
 
 impl<L: LogSink> Battle<L> {
     /// Ports battle.ts:3091-3113. PRNG: none; count without formatting for NoLog.

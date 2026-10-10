@@ -50,18 +50,29 @@ fn js_number_to_string() {
 #[test]
 fn primitive_arguments() {
     let b = standard_active();
-    assert_eq!(arg(&b, LogArg::Text("a|b")), "a|b", "strings are never escaped");
+    assert_eq!(
+        arg(&b, LogArg::Text("a|b")),
+        "a|b",
+        "strings are never escaped"
+    );
     assert_eq!(arg(&b, LogArg::Empty), "");
     assert_eq!(arg(&b, LogArg::Bool(true)), "true");
     assert_eq!(arg(&b, LogArg::Bool(false)), "false");
     assert_eq!(arg(&b, LogArg::Number(-3)), "-3");
     assert_eq!(arg(&b, LogArg::Number(0)), "0");
-    assert_eq!(arg(&b, LogArg::Mon(MonId::NONE)), "", "null Pokemon keeps an empty field");
+    assert_eq!(
+        arg(&b, LogArg::Mon(MonId::NONE)),
+        "",
+        "null Pokemon keeps an empty field"
+    );
     assert_eq!(arg(&b, LogArg::Side(SideId(0))), "p1: Alice");
     assert_eq!(arg(&b, LogArg::Side(SideId(1))), "p2: Bob");
     assert_eq!(arg(&b, LogArg::SideId(SideId(1))), "p2");
     assert_eq!(arg(&b, LogArg::PlayerName(SideId(0))), "Alice");
-    assert_eq!(arg(&b, LogArg::Type(dex::type_id("Stellar").unwrap())), "Stellar");
+    assert_eq!(
+        arg(&b, LogArg::Type(dex::type_id("Stellar").unwrap())),
+        "Stellar"
+    );
     assert_eq!(arg(&b, LogArg::Type(dex::type_id("???").unwrap())), "???");
     assert_eq!(arg(&b, LogArg::Type(TypeId::NONE)), "");
     for (s, want) in [
@@ -76,7 +87,13 @@ fn primitive_arguments() {
     ] {
         assert_eq!(arg(&b, LogArg::Status(s)), want);
     }
-    assert_eq!(arg(&b, LogArg::Species(id(EffectKind::Species, "Mimikyu-Busted"))), "Mimikyu-Busted");
+    assert_eq!(
+        arg(
+            &b,
+            LogArg::Species(id(EffectKind::Species, "Mimikyu-Busted"))
+        ),
+        "Mimikyu-Busted"
+    );
     // Parts concatenate without separators (nested too).
     assert_eq!(
         arg(
@@ -90,26 +107,69 @@ fn primitive_arguments() {
         ),
         "Event: Faint7"
     );
-    assert_eq!(arg(&b, LogArg::Spread { mons: [mon(1, 0), mon(0, 1), MonId::NONE, MonId::NONE], len: 2 }), "p2a,p1b");
-    assert_eq!(arg(&b, LogArg::Spread { mons: [MonId::NONE; 4], len: 0 }), "");
+    assert_eq!(
+        arg(
+            &b,
+            LogArg::Spread {
+                mons: [mon(1, 0), mon(0, 1), MonId::NONE, MonId::NONE],
+                len: 2
+            }
+        ),
+        "p2a,p1b"
+    );
+    assert_eq!(
+        arg(
+            &b,
+            LogArg::Spread {
+                mons: [MonId::NONE; 4],
+                len: 0
+            }
+        ),
+        ""
+    );
 }
 
 #[test]
 fn effect_name_versus_fullname() {
     let b = standard_active();
     for (kind, name, short, long) in [
-        (EffectKind::Move, "Knock Off", "Knock Off", "move: Knock Off"),
-        (EffectKind::Ability, "Intimidate", "Intimidate", "ability: Intimidate"),
+        (
+            EffectKind::Move,
+            "Knock Off",
+            "Knock Off",
+            "move: Knock Off",
+        ),
+        (
+            EffectKind::Ability,
+            "Intimidate",
+            "Intimidate",
+            "ability: Intimidate",
+        ),
         (EffectKind::Item, "Life Orb", "Life Orb", "item: Life Orb"),
-        (EffectKind::Species, "Mimikyu-Busted", "Mimikyu-Busted", "pokemon: Mimikyu-Busted"),
+        (
+            EffectKind::Species,
+            "Mimikyu-Busted",
+            "Mimikyu-Busted",
+            "pokemon: Mimikyu-Busted",
+        ),
         // Conditions (statuses, volatiles, weathers, move-owned) have bare names in both forms.
         (EffectKind::Condition, "brn", "brn", "brn"),
         (EffectKind::Condition, "confusion", "confusion", "confusion"),
         (EffectKind::Condition, "RainDance", "RainDance", "RainDance"),
-        (EffectKind::Condition, "Stealth Rock", "Stealth Rock", "Stealth Rock"),
+        (
+            EffectKind::Condition,
+            "Stealth Rock",
+            "Stealth Rock",
+            "Stealth Rock",
+        ),
         (EffectKind::Condition, "Recoil", "Recoil", "Recoil"),
         (EffectKind::Condition, "Drain", "Drain", "Drain"),
-        (EffectKind::Rule, "Sleep Clause Mod", "Sleep Clause Mod", "Sleep Clause Mod"),
+        (
+            EffectKind::Rule,
+            "Sleep Clause Mod",
+            "Sleep Clause Mod",
+            "Sleep Clause Mod",
+        ),
     ] {
         let e = fx(kind, name);
         assert_eq!(effect(&b, e, false), short, "{name}");
@@ -131,9 +191,15 @@ fn effect_name_versus_fullname() {
         assert_eq!(effect(&b, e, false), effect(&b, e, true));
     }
     assert_eq!(effect(&b, EffectRef::MoveCondition(mv), true), "Reflect");
-    assert_eq!(effect(&b, EffectRef::SpeciesCondition(sp), true), "Mimikyu-Busted");
+    assert_eq!(
+        effect(&b, EffectRef::SpeciesCondition(sp), true),
+        "Mimikyu-Busted"
+    );
     // Synthetic effect objects.
-    assert_eq!(effect(&b, EffectRef::Synthetic(SyntheticEffect::Recoil), true), "Recoil");
+    assert_eq!(
+        effect(&b, EffectRef::Synthetic(SyntheticEffect::Recoil), true),
+        "Recoil"
+    );
     assert_eq!(effect(&b, EffectRef::None, true), "");
 }
 
@@ -204,8 +270,16 @@ fn active_move_effects_print_the_move() {
         1,
         false,
     );
-    assert_eq!(got[1], "|switch|p2a: Klefki|Klefki, L78, F|217/217|[from] U-turn");
-    let got = add(&mut b, "-activate", &[LogArg::Mon(mon(0, 0))], &[LogTag::From(e)]);
+    assert_eq!(
+        got[1],
+        "|switch|p2a: Klefki|Klefki, L78, F|217/217|[from] U-turn"
+    );
+    let got = add(
+        &mut b,
+        "-activate",
+        &[LogArg::Mon(mon(0, 0))],
+        &[LogTag::From(e)],
+    );
     assert_eq!(got, ["|-activate|p1a: Wugtrio|[from] move: U-turn"]);
 }
 
@@ -219,15 +293,25 @@ fn tags_keep_call_site_order_and_forms() {
         &mut b,
         "-item",
         &[LogArg::Mon(w), LogArg::Text("Leftovers")],
-        &[LogTag::Of(k), LogTag::From(fx(EffectKind::Ability, "Frisk")), LogTag::Bare("silent")],
+        &[
+            LogTag::Of(k),
+            LogTag::From(fx(EffectKind::Ability, "Frisk")),
+            LogTag::Bare("silent"),
+        ],
     );
-    assert_eq!(got, ["|-item|p1a: Wugtrio|Leftovers|[of] p2a: Klefki|[from] ability: Frisk|[silent]"]);
+    assert_eq!(
+        got,
+        ["|-item|p1a: Wugtrio|Leftovers|[of] p2a: Klefki|[from] ability: Frisk|[silent]"]
+    );
     // Duplicated tags are kept as given.
     let got = add(
         &mut b,
         "-x",
         &[],
-        &[LogTag::From(fx(EffectKind::Move, "Protect")), LogTag::From(fx(EffectKind::Move, "Protect"))],
+        &[
+            LogTag::From(fx(EffectKind::Move, "Protect")),
+            LogTag::From(fx(EffectKind::Move, "Protect")),
+        ],
     );
     assert_eq!(got, ["|-x|[from] move: Protect|[from] move: Protect"]);
     // Value tags: text, empty (trailing space), mon, number.
@@ -243,8 +327,16 @@ fn tags_keep_call_site_order_and_forms() {
             LogTag::Text("[raw] text"),
         ],
     );
-    assert_eq!(got, ["|-x|[wisher] Vaporeon|[spread] |[of] p1a: Wugtrio|[n] 2|[raw] text"]);
+    assert_eq!(
+        got,
+        ["|-x|[wisher] Vaporeon|[spread] |[of] p1a: Wugtrio|[n] 2|[raw] text"]
+    );
     // `[of] ${null}` is written by call sites as the text "null".
-    let got = add(&mut b, "-x", &[], &[LogTag::Value("of", LogArg::Text("null"))]);
+    let got = add(
+        &mut b,
+        "-x",
+        &[],
+        &[LogTag::Value("of", LogArg::Text("null"))],
+    );
     assert_eq!(got, ["|-x|[of] null"]);
 }

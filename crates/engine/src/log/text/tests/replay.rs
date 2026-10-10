@@ -90,7 +90,6 @@ struct Stats {
     illusion_switches: usize,
     from_effects: usize,
     from_bare: usize,
-    skipped: usize,
 }
 
 struct Runner {
@@ -142,7 +141,11 @@ impl Runner {
             self.set_name(m)
         };
         if shown != name {
-            fail(id, at, &format!("slot mon is `{shown}`, line says `{name}` ({text})"));
+            fail(
+                id,
+                at,
+                &format!("slot mon is `{shown}`, line says `{name}` ({text})"),
+            );
         }
         m
     }
@@ -173,7 +176,15 @@ impl Runner {
             .filter(|m| self.set_name(*m) == name)
             .collect();
         if found.len() != 1 {
-            fail(id, at, &format!("`p{}: {name}` matches {} party members", side + 1, found.len()));
+            fail(
+                id,
+                at,
+                &format!(
+                    "`p{}: {name}` matches {} party members",
+                    side + 1,
+                    found.len()
+                ),
+            );
         }
         found[0]
     }
@@ -235,7 +246,11 @@ impl Runner {
         }
         if matches!(kind, "-sidestart" | "-sideend") && idx == 0 {
             let side = (s.as_bytes()[1] - b'1') as usize;
-            assert_eq!(s, format!("p{}: {}", side + 1, self.b.names[side]), "side ident");
+            assert_eq!(
+                s,
+                format!("p{}: {}", side + 1, self.b.names[side]),
+                "side ident"
+            );
             return A::Side(side as u8);
         }
         if let Some(m) = self.mon_ident(id, at, s) {
@@ -293,7 +308,8 @@ impl Runner {
                 Edit::NoTarget => self.b.attr_last_move(MoveLineEdit::NoTarget),
                 Edit::Spread(ms) => {
                     let a = A::Spread(ms);
-                    self.b.attr_last_move(MoveLineEdit::Tag(LogTag::Value("spread", lower_a(&a))));
+                    self.b
+                        .attr_last_move(MoveLineEdit::Tag(LogTag::Value("spread", lower_a(&a))));
                 }
             }
         }
@@ -323,7 +339,11 @@ impl Runner {
             self.flush_edits();
             self.finalize_all_faints();
         }
-        let (hp, max, status) = Self::parse_hp(if matches!(kind, "switch" | "drag") { f[4].split('|').next().unwrap() } else { f[3] });
+        let (hp, max, status) = Self::parse_hp(if matches!(kind, "switch" | "drag") {
+            f[4].split('|').next().unwrap()
+        } else {
+            f[3]
+        });
         // Details live in f[3], HP in f[4] for switch/drag (`|switch|IDENT|DETAILS|HP`).
         let m;
         match kind {
@@ -354,10 +374,17 @@ impl Runner {
                         } else {
                             // Equal max HP for the disguise and Zoroark: only a later `|replace|` for this
                             // slot (before the slot's next switch-in) reveals the Illusion.
-                            let marker = format!("|replace|p{}{}: ", side + 1, (b'a' + slot as u8) as char);
+                            let marker =
+                                format!("|replace|p{}{}: ", side + 1, (b'a' + slot as u8) as char);
                             let revealed = log[at + 3..]
                                 .iter()
-                                .take_while(|l| !l.starts_with(&format!("|switch|p{}{}: ", side + 1, (b'a' + slot as u8) as char)))
+                                .take_while(|l| {
+                                    !l.starts_with(&format!(
+                                        "|switch|p{}{}: ",
+                                        side + 1,
+                                        (b'a' + slot as u8) as char
+                                    ))
+                                })
                                 .any(|l| l.starts_with(&marker));
                             if revealed {
                                 real = z;
@@ -400,7 +427,11 @@ impl Runner {
             }
             p.status = status;
         }
-        let hp_field = if matches!(kind, "switch" | "drag") { 5 } else { 4 };
+        let hp_field = if matches!(kind, "switch" | "drag") {
+            5
+        } else {
+            4
+        };
         let (a1, tag_start) = if matches!(kind, "switch" | "drag") {
             (A::Full(m), hp_field)
         } else {
@@ -416,7 +447,11 @@ impl Runner {
         let want = [side_marker, secret, public];
         for (i, (g, w)) in got.iter().zip(want).enumerate() {
             if g != w {
-                fail(&id, at + i, &format!("triple mismatch\n  want {w:?}\n   got {g:?}"));
+                fail(
+                    &id,
+                    at + i,
+                    &format!("triple mismatch\n  want {w:?}\n   got {g:?}"),
+                );
             }
         }
         self.stats.triples += 1;
@@ -429,7 +464,10 @@ impl Runner {
         let kind = f[1];
         let body = &f[2..];
         // Lines that cannot belong to a faint cascade: the fainted mons are benched by now.
-        if matches!(kind, "move" | "-anim" | "turn" | "upkeep" | "" | "t:" | "win" | "tie" | "cant") {
+        if matches!(
+            kind,
+            "move" | "-anim" | "turn" | "upkeep" | "" | "t:" | "win" | "tie" | "cant"
+        ) {
             self.finalize_all_faints();
         }
         match kind {
@@ -461,7 +499,10 @@ impl Runner {
         let mut i = 0;
         while i < body.len() {
             let s = body[i];
-            if s.starts_with('[') && !matches!(kind, "rule" | "-hint" | "-message" | "tier" | "win") && s.contains(']') {
+            if s.starts_with('[')
+                && !matches!(kind, "rule" | "-hint" | "-message" | "tier" | "win")
+                && s.contains(']')
+            {
                 tags.push(self.tag(&id, at, s));
             } else {
                 let a = match (kind, i) {
@@ -501,7 +542,8 @@ impl Runner {
                 // setSpecies(target.species): the transformed species is what getUpdatedDetails prints.
                 let m = self.mon_ident(&id, at, body[0]).unwrap();
                 let t = self.mon_ident(&id, at, body[1]).unwrap();
-                self.b.state.pokemon[m.0 as usize].species = self.b.state.pokemon[t.0 as usize].species;
+                self.b.state.pokemon[m.0 as usize].species =
+                    self.b.state.pokemon[t.0 as usize].species;
             }
             "-formechange" => {
                 let m = self.mon_ident(&id, at, body[0]).unwrap();
@@ -584,8 +626,12 @@ fn replay_battle(header: &[&str], log: &[&str], stats: &mut Stats) {
         for i in 0..r.b.state.sides[side].pokemon_count as usize {
             let set = &r.b.teams.sides[side].sets[i];
             let crowned = match (dex::species(set.species).name, set.item) {
-                ("Zacian", item) if item == id_of(EffectKind::Item, "Rusted Sword") => "Zacian-Crowned",
-                ("Zamazenta", item) if item == id_of(EffectKind::Item, "Rusted Shield") => "Zamazenta-Crowned",
+                ("Zacian", item) if item == id_of(EffectKind::Item, "Rusted Sword") => {
+                    "Zacian-Crowned"
+                }
+                ("Zamazenta", item) if item == id_of(EffectKind::Item, "Rusted Shield") => {
+                    "Zamazenta-Crowned"
+                }
                 _ => continue,
             };
             let crowned = id_of(EffectKind::Species, crowned);
@@ -616,7 +662,11 @@ fn replay_battle(header: &[&str], log: &[&str], stats: &mut Stats) {
     }
     assert_eq!(got.len(), log.len(), "{id}: entry count");
     // Logical line count equals the number of raw entries (no sendUpdates in between).
-    assert_eq!(r.b.scratch.unsent_lines as usize, log.len(), "{id}: unsent count");
+    assert_eq!(
+        r.b.scratch.unsent_lines as usize,
+        log.len(),
+        "{id}: unsent count"
+    );
     // Draining in uneven chunks returns the same log without losing or repeating entries.
     let mut sink = TextLog::default();
     let mut drained = Vec::new();
@@ -676,7 +726,10 @@ fn real_logs_replay_byte_for_byte() {
     assert!(stats.battles >= 50, "{stats:?}");
     assert!(stats.entries > 20_000, "{stats:?}");
     assert!(stats.triples > 3_000, "{stats:?}");
-    assert!(stats.illusion_switches > 0, "no Illusion switch-in in the vectors");
+    assert!(
+        stats.illusion_switches > 0,
+        "no Illusion switch-in in the vectors"
+    );
     assert!(stats.edits > 500, "{stats:?}");
 }
 

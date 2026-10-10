@@ -43,7 +43,11 @@ fn random_attr_sequences_match_the_real_battle_log() {
     for row in VECTORS.lines().filter(|l| !l.starts_with('#')) {
         let (ops, want) = row.split_once('\t').unwrap();
         // An empty log is the empty string (a lone blank entry would be `|`).
-        let want: Vec<&str> = if want.is_empty() { vec![] } else { want.split('\u{1e}').collect() };
+        let want: Vec<&str> = if want.is_empty() {
+            vec![]
+        } else {
+            want.split('\u{1e}').collect()
+        };
         let mut b = standard_active();
         for op in ops.split('\u{1e}') {
             let f: Vec<&str> = op.split('\u{1f}').collect();
@@ -64,7 +68,11 @@ fn random_attr_sequences_match_the_real_battle_log() {
                         &tags,
                     ));
                 }
-                "bare" => b.add_move(LogEntry::new("move", &[LogArg::Text(f[1]), LogArg::Text(f[2])], &[])),
+                "bare" => b.add_move(LogEntry::new(
+                    "move",
+                    &[LogArg::Text(f[1]), LogArg::Text(f[2])],
+                    &[],
+                )),
                 "anim" => b.add_move(LogEntry::new(
                     "-anim",
                     &[LogArg::Text(f[1]), LogArg::Text(f[2]), LogArg::Text(f[3])],
@@ -77,7 +85,10 @@ fn random_attr_sequences_match_the_real_battle_log() {
                     "[notarget]" => b.attr_last_move(MoveLineEdit::NoTarget),
                     t if t.starts_with("[spread] ") => {
                         // The three equivalent encodings, rotating.
-                        let slots: Vec<&str> = t["[spread] ".len()..].split(',').filter(|s| !s.is_empty()).collect();
+                        let slots: Vec<&str> = t["[spread] ".len()..]
+                            .split(',')
+                            .filter(|s| !s.is_empty())
+                            .collect();
                         spread_variant += 1;
                         match spread_variant % 3 {
                             0 => b.attr_last_move(MoveLineEdit::Tag(LogTag::Text(t))),
@@ -88,7 +99,10 @@ fn random_attr_sequences_match_the_real_battle_log() {
                                 }
                                 b.attr_last_move(MoveLineEdit::Tag(LogTag::Value(
                                     "spread",
-                                    LogArg::Spread { mons, len: slots.len() as u8 },
+                                    LogArg::Spread {
+                                        mons,
+                                        len: slots.len() as u8,
+                                    },
                                 )));
                             }
                             _ => {
@@ -105,7 +119,12 @@ fn random_attr_sequences_match_the_real_battle_log() {
                 other => panic!("op {other}"),
             }
         }
-        assert_eq!(b.log.entries, want, "ops: {}", ops.replace('\u{1e}', " ; ").replace('\u{1f}', " ~ "));
+        assert_eq!(
+            b.log.entries,
+            want,
+            "ops: {}",
+            ops.replace('\u{1e}', " ; ").replace('\u{1f}', " ~ ")
+        );
         cases += 1;
     }
     assert!(cases >= 600, "{cases}");

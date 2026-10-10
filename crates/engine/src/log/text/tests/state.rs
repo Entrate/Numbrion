@@ -1,7 +1,9 @@
 //! State-dependent strings against the pinned Showdown: `Pokemon.toString`, `getUpdatedDetails`,
 //! `(illusion || this).details + tera`, `getHealth` (both views) and `getFullDetails`.
 use super::*;
-use crate::log::format::{write_details, write_health, write_ident};
+use crate::log::format::{
+    write_details, write_fullname, write_health, write_ident, write_stored_details,
+};
 
 /// Applies one probe row's state to the engine (the mirror of `row()` in state-vectors.mjs) and
 /// returns the mon.
@@ -67,7 +69,7 @@ fn ident_details_and_health_match_pinned_showdown() {
     let mut rows = 0;
     for line in STATE_VECTORS.lines().filter(|l| !l.starts_with('#')) {
         let c: Vec<&str> = line.split('\t').collect();
-        assert_eq!(c.len(), 8, "{line}");
+        assert_eq!(c.len(), 10, "{line}");
         let pristine = b.state.pokemon;
         let m = apply(&mut b, c[0]);
         let v = view(&b);
@@ -83,8 +85,16 @@ fn ident_details_and_health_match_pinned_showdown() {
             c[3],
             "getUpdatedDetails: {ctx}"
         );
-        assert_eq!(string(|s| write_health(s, v, m, true)), c[4], "secret hp {ctx}");
-        assert_eq!(string(|s| write_health(s, v, m, false)), c[5], "shared hp {ctx}");
+        assert_eq!(
+            string(|s| write_health(s, v, m, true)),
+            c[4],
+            "secret hp {ctx}"
+        );
+        assert_eq!(
+            string(|s| write_health(s, v, m, false)),
+            c[5],
+            "shared hp {ctx}"
+        );
         // The function part getFullDetails, via the public argument writer, in both views.
         for (secret, want) in [(true, c[6]), (false, c[7])] {
             let got = string(|s| {
@@ -92,6 +102,13 @@ fn ident_details_and_health_match_pinned_showdown() {
             });
             assert_eq!(got, want, "getFullDetails secret={secret} {ctx}");
         }
+        // Request JSON `ident` / `details`: the real mon's fullname and the stored details.
+        assert_eq!(string(|s| write_fullname(s, v, m)), c[8], "fullname {ctx}");
+        assert_eq!(
+            string(|s| write_stored_details(s, v, m)),
+            c[9],
+            "stored details {ctx}"
+        );
         b.state.pokemon = pristine;
         rows += 1;
     }
@@ -119,9 +136,24 @@ fn switch_detailschange_and_replace_lines_match_pinned_showdown() {
         assert_eq!(got[0], format!("|split|p{}", side + 1), "{}", c[0]);
         assert_eq!(got[1], format!("|switch|{}|{}", c[1], c[6]), "{}", c[0]);
         assert_eq!(got[2], format!("|switch|{}|{}", c[1], c[7]), "{}", c[0]);
-        let got = add(&mut b, "detailschange", &[LogArg::Mon(m), LogArg::Details(m)], &[]);
-        assert_eq!(got, [format!("|detailschange|{}|{}", c[1], c[2])], "{}", c[0]);
-        let got = add(&mut b, "replace", &[LogArg::Mon(m), LogArg::Details(m)], &[]);
+        let got = add(
+            &mut b,
+            "detailschange",
+            &[LogArg::Mon(m), LogArg::Details(m)],
+            &[],
+        );
+        assert_eq!(
+            got,
+            [format!("|detailschange|{}|{}", c[1], c[2])],
+            "{}",
+            c[0]
+        );
+        let got = add(
+            &mut b,
+            "replace",
+            &[LogArg::Mon(m), LogArg::Details(m)],
+            &[],
+        );
         assert_eq!(got, [format!("|replace|{}|{}", c[1], c[3])], "{}", c[0]);
         b.state.pokemon = pristine;
         b.log.entries.clear();
@@ -153,8 +185,14 @@ fn health_rule_edge_cases_by_hand() {
     b.state.pokemon[m.0 as usize].hp = 0;
     assert_eq!(string(|s| write_health(s, view(&b), m, true)), "0 fnt");
     b.state.pokemon[m.0 as usize].hp = 100;
-    assert_eq!(string(|s| write_health(s, view(&b), m, true)), "100/214 tox");
-    assert_eq!(string(|s| write_health(s, view(&b), m, false)), "47/100 tox");
+    assert_eq!(
+        string(|s| write_health(s, view(&b), m, true)),
+        "100/214 tox"
+    );
+    assert_eq!(
+        string(|s| write_health(s, view(&b), m, false)),
+        "47/100 tox"
+    );
 }
 
 #[test]

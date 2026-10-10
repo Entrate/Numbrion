@@ -10,8 +10,7 @@
 //! * `counting`- drain cursor, logical unsent-line counting, hints, opening log, NoLog parity.
 use super::*;
 use crate::{
-    Battle,
-    dex,
+    Battle, dex,
     ids::*,
     log::{LogArg, LogEntry, LogTag, LogView, MoveLineEdit, NoLog},
     state::{Status, mon_flags, scratch::EffectRef},
@@ -115,7 +114,13 @@ pub(super) fn add_split(
     secret_only: bool,
 ) -> Vec<String> {
     let before = b.log.entries.len();
-    b.add(LogEntry::split(command, args, tags, SideId(side), secret_only));
+    b.add(LogEntry::split(
+        command,
+        args,
+        tags,
+        SideId(side),
+        secret_only,
+    ));
     b.log.entries[before..].to_vec()
 }
 

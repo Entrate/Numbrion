@@ -8,6 +8,7 @@
 //        crates/engine/src/log/text/tests/state-vectors.tsv
 //
 // Row: spec <TAB> ident <TAB> detailsFull <TAB> detailsPlain <TAB> hpSecret <TAB> hpShared <TAB> fullSecret <TAB> fullShared
+//      <TAB> fullname <TAB> storedDetails   (the last two are what request JSON uses: pokemon.ts:1155-1156)
 //   spec = space separated `key=value`: m=<side>:<index> (0-based p1:0), act=a|b, hp=N, st=<status>,
 //          ill=<side>:<index>, tera=<Type>, sp=<Species name> (permanent forme: species+baseSpecies+details).
 import { loadSim } from '../../oracle/lib/common.mjs';
@@ -65,7 +66,7 @@ function row(spec) {
 	const health = p.getHealth();
 	const full = p.getFullDetails();
 	const detailsFull = (p.illusion || p).details + (p.terastallized ? `, tera:${p.terastallized}` : '');
-	const out = [spec, p.toString(), detailsFull, p.getUpdatedDetails(), health.secret, health.shared, full.secret, full.shared];
+	const out = [spec, p.toString(), detailsFull, p.getUpdatedDetails(), health.secret, health.shared, full.secret, full.shared, p.fullname, p.details];
 	restore(p, saved);
 	return out.join('\t');
 }
