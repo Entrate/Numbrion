@@ -17,12 +17,25 @@ use super::{
 use crate::{
     Battle, dex,
     ids::*,
-    log::NoLog,
+    log::{LogEntry, LogSink, LogView, MoveLineEdit},
     state::{
         Status, Trapped, mon_flags,
         choices::{ChoiceKind, ChosenMoveKind, RequestKind, SlotChoice},
     },
 };
+
+/// Choices and requests are side updates. Any battle-log write or edit in a
+/// noncommitting probe is a contract violation, even if its bytes are unchanged.
+struct ForbiddenLog;
+impl LogSink for ForbiddenLog {
+    const ENABLED: bool = true;
+    fn emit(&mut self, _: LogView<'_>, _: LogEntry<'_>) {
+        panic!("choice/request emitted a battle-log entry");
+    }
+    fn edit_move(&mut self, _: LogView<'_>, _: MoveLineEdit<'_>) {
+        panic!("choice/request edited a battle-log entry");
+    }
+}
 
 thread_local! {
     /// When set, tera eligibility comes from side.tera_used / TERA_BLOCKED instead of lifecycle.
@@ -276,13 +289,14 @@ fn status_of(s: &str) -> Status {
 const RELEVANT_VOLATILES: [&str; 5] = ["healblock", "mustrecharge", "taunt", "lockedmove", "twoturnmove"];
 
 /// None when the case needs effect callbacks that are not implemented yet.
-fn build_battle(case: &J) -> Option<Battle<NoLog>> {
+fn build_battle(case: &J) -> Option<Battle<ForbiddenLog>> {
     let seed: Vec<u16> = case.get("seed").arr().iter().map(|n| n.int() as u16).collect();
     let teams = case.get("teams").arr();
-    let mut b = Battle::new(
+    let mut b = Battle::with_log(
         [seed[0], seed[1], seed[2], seed[3]],
         teams[0].str(),
         teams[1].str(),
+        ForbiddenLog,
     )
     .expect("teams");
     LOCK_OVERRIDE.with(|o| *o.borrow_mut() = [None; 12]);
@@ -421,12 +435,18 @@ fn build_battle(case: &J) -> Option<Battle<NoLog>> {
     for s in 0..2 {
         b.clear_choice(SideId(s));
     }
+    if !case.get("boundarySeed").is_null() {
+        let words = case.get("boundarySeed").arr();
+        b.state.prng = crate::prng::Prng::from_seed(core::array::from_fn(|i| words[i].int() as u16));
+    }
+    let seed_before = b.seed();
     let requests = b.get_requests(kind);
+    assert_eq!(b.seed(), seed_before, "request rebuilding advanced PRNG");
     b.state.requests = requests;
     Some(b)
 }
 
-fn flag_string(b: &Battle<NoLog>, side: usize) -> String {
+fn flag_string(b: &Battle<ForbiddenLog>, side: usize) -> String {
     let sd = &b.state.sides[side];
     (0..sd.pokemon_count as usize)
         .map(|i| {
@@ -530,7 +550,7 @@ fn base64_bits(s: &str) -> Vec<bool> {
 // Typed enumeration (joint choices from LegalActions)
 // ---------------------------------------------------------------------------------
 
-fn slot_options(b: &Battle<NoLog>, la: &LegalActions, k: usize, forced_left: u8, passes_left: u8, tera_used: bool, switch_ins: u8, kind: RequestKind) -> Vec<SlotChoice> {
+fn slot_options(b: &Battle<ForbiddenLog>, la: &LegalActions, k: usize, forced_left: u8, passes_left: u8, tera_used: bool, switch_ins: u8, kind: RequestKind) -> Vec<SlotChoice> {
     let ls = &la.slots[k];
     let mut out = Vec::new();
     let pass = SlotChoice::default();
@@ -597,7 +617,7 @@ fn slot_options(b: &Battle<NoLog>, la: &LegalActions, k: usize, forced_left: u8,
 }
 
 /// Every joint choice implied by the documented LegalActions semantics.
-fn enumerate_typed(b: &Battle<NoLog>, la: &LegalActions) -> Vec<[SlotChoice; 2]> {
+fn enumerate_typed(b: &Battle<ForbiddenLog>, la: &LegalActions) -> Vec<[SlotChoice; 2]> {
     let kind = b.side_request_kind(la.side);
     let mut out = Vec::new();
     let c = la.constraints;
@@ -618,7 +638,7 @@ fn enumerate_typed(b: &Battle<NoLog>, la: &LegalActions) -> Vec<[SlotChoice; 2]>
 
 #[allow(clippy::too_many_arguments)]
 fn apply(
-    b: &Battle<NoLog>,
+    b: &Battle<ForbiddenLog>,
     la: &LegalActions,
     k: usize,
     sc: &SlotChoice,
@@ -660,6 +680,9 @@ fn check_case(case: &J, skipped: &mut usize) {
     };
     let ctx = |what: &str| format!("case {id}: {what}");
 
+    let frozen_seed = b.seed();
+    let frozen_log_count = b.scratch.unsent_lines;
+
     // 1. Cached requests are byte-identical, and rebuilding them did not disturb state.
     for s in 0..2 {
         let expected = case.get("requests").at(s).str();
@@ -678,6 +701,8 @@ fn check_case(case: &J, skipped: &mut usize) {
         let side = SideId(op.get("side").int() as u8);
         let input = op.get("input").str();
         let res = b.choose_no_commit(side, input);
+        assert_eq!(b.seed(), frozen_seed, "case {id} op {n}: noncommit advanced PRNG");
+        assert_eq!(b.scratch.unsent_lines, frozen_log_count, "case {id} op {n}: noncommit changed log count");
         let what = |t: &str| format!("case {id} op {n} ({} {:?}): {t}", side.0 + 1, input);
         match (op.get("ok").bool(), &res) {
             (true, Ok(())) => {}
@@ -721,13 +746,20 @@ fn check_case(case: &J, skipped: &mut usize) {
         if expected.is_null() {
             continue;
         }
+        let request_before = b.request_json(s);
+        let flags_before = flag_string(&b, s);
         let typed = b.legal_actions(side);
+        assert_eq!(b.request_json(s), request_before, "case {id}: legal enumeration patched request");
+        assert_eq!(flag_string(&b, s), flags_before, "case {id}: legal enumeration changed hypotheses");
+        assert_eq!(b.seed(), frozen_seed, "case {id}: legal enumeration advanced PRNG");
         let typed_choices = enumerate_typed(&b, &typed);
         let bits = base64_bits(expected.get("bits").str());
         let mut accepted = BTreeSet::new();
         for (i, input) in list.iter().enumerate() {
             b.clear_choice(side);
             let ok = b.choose_no_commit(side, input).is_ok();
+            assert_eq!(b.seed(), frozen_seed, "case {id} candidate {i}: PRNG");
+            assert_eq!(b.scratch.unsent_lines, frozen_log_count, "case {id} candidate {i}: log count");
             if ok {
                 accepted.insert(b.choice_text(side));
             }
@@ -754,6 +786,8 @@ fn check_case(case: &J, skipped: &mut usize) {
                 "{}",
                 ctx(&format!("p{} is_legal_joint_choice false for accepted {joint:?}", s + 1))
             );
+            assert_eq!(b.seed(), frozen_seed, "case {id}: typed noncommit advanced PRNG");
+            assert_eq!(b.scratch.unsent_lines, frozen_log_count, "case {id}: typed noncommit changed log count");
             typed_set.insert(b.choice_text(side));
         }
         b.clear_choice(side);
@@ -810,6 +844,35 @@ fn vectors_match_showdown_with_lifecycle_tera() {
 // ---------------------------------------------------------------------------------
 // Focused unit tests
 // ---------------------------------------------------------------------------------
+
+#[test]
+fn target_suffix_trims_before_resolving_legacy_modifier() {
+    LOCAL_TERA.with(|c| c.set(true));
+    let case = parse_json(EMBEDDED.lines().next().unwrap());
+    let mut b = build_battle(&case).unwrap();
+    let seed = b.seed();
+    // Pinned side.ts:1233 applies trim after stripping the target, exposing mega.
+    let error = b.choose_no_commit(SideId(0), "move 1 mega  1").unwrap_err();
+    assert_eq!(error.text, "[Invalid choice] Can't move: Rampardos can't mega evolve");
+    assert_eq!(b.seed(), seed);
+}
+
+#[test]
+fn locked_undo_excludes_every_legal_resubmission() {
+    LOCAL_TERA.with(|c| c.set(true));
+    let case = parse_json(EMBEDDED.lines().next().unwrap());
+    let mut b = build_battle(&case).unwrap();
+    let mon = b.state.sides[0].active[0];
+    b.state.pokemon[mon.0 as usize].flags |= mon_flags::MAYBE_TRAPPED;
+    // side.ts:1000 accepts this switch but forbids a later undo/resubmission.
+    b.choose_no_commit(SideId(0), "switch 3, move 1 1").unwrap();
+    assert!(b.state.sides[0].choice.cant_undo);
+    let slots = b.state.sides[0].choice.slots;
+    assert_eq!(b.legal_actions(SideId(0)).slot_count, 0);
+    assert!(!b.is_legal_joint_choice(SideId(0), &slots));
+    let error = b.choose_typed_no_commit(SideId(0), &slots).unwrap_err();
+    assert_eq!(error.text, "[Invalid choice] Can't undo: A trapping/disabling effect would cause undo to leak information");
+}
 
 #[test]
 fn json_string_escaping_matches_json_stringify() {
