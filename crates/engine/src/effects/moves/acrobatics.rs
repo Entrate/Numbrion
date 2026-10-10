@@ -9,6 +9,10 @@ use crate::{
 };
 #[path = "movecallbacks/mod.rs"]
 mod support;
+// The whole batch's scenario replays and helper tests live in one module, compiled here only.
+#[cfg(test)]
+#[path = "movecallbacks/tests.rs"]
+mod scenario_tests;
 pub const ID: EffectId = dex::MOVE_ACROBATICS;
 pub const HOOKS: &[HookId] = &[dex::HOOK_MOVE_ACROBATICS_BASEPOWERCALLBACK];
 // Payload: none.
