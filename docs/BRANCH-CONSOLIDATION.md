@@ -20,6 +20,12 @@ Use `git show <commit>:<path>` to retrieve any historical file after branch dele
 A complete local Git bundle and original ref manifest are saved under ignored `scratch/`:
 `pre-main-consolidation.bundle` and `pre-main-consolidation-refs.txt`.
 
+Validation on the consolidated tree: 374 Rust tests and 24 Python tests passed,
+434 fixture battles matched the real engine, and all 124 harness self-tests passed.
+Eleven pre-existing Rust tests remain ignored. The recovered 42 move-execution
+vectors regenerate identically against pinned Showdown. DirectML training on the
+AMD Radeon RX 5500 changed model parameters and reduced the GPU check loss.
+
 | Former branch | Original head | Disposition |
 | --- | --- | --- |
 | `engine` | `9473b8ea6e4f4da83ee02c78f279ed1cc9949f85` | Completed engine and Windows training merged into main. |

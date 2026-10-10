@@ -104,7 +104,7 @@ pool has been generated locally for that next step.
 - Default-size GPU run: 100 PPO updates and 9,793 completed battles with 32
   environments and four Rust worker threads. The saved checkpoint is
   `scratch/training/directml/latest.pt`; the run resumed successfully from update 88.
-- Full Windows check: 373 Rust tests passed, with 11 pre-existing engine tests
+- Full Windows check: 374 Rust tests passed, with 11 pre-existing engine tests
   ignored; all 434 committed fixture battles passed through the real engine, and
   all 124 harness fault-injection checks passed. The Unix-only profiler is gated
   off on Windows, and log-replay tests accept both LF and CRLF fixture files.
