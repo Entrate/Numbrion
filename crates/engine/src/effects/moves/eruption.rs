@@ -24,7 +24,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:4892-4896 basePowerCallback(pokemon, target, move): direct call, args
 // [pokemon, target, move]. `move.basePower * pokemon.hp / pokemon.maxhp` is returned as the
-// unrounded JS number; getDamage floors/clamps it (battle-actions.ts:1585-1589). PRNG: none.
+// unrounded JS number; getDamage floors/clamps it (battle-actions.ts:1604-1609). PRNG: none.
 fn base_power_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     support::hp_scaled_base_power(b, cx)
 }

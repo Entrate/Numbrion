@@ -23,7 +23,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:5041-5045 onBasePower(basePower, pokemon): runEvent('BasePower', attacker,
 // defender, move, basePower, true) passes [basePower, attacker, defender, move]
-// (battle-actions.ts:1599). `pokemon.status && pokemon.status !== 'slp'` then
+// (battle-actions.ts:1637). `pokemon.status && pokemon.status !== 'slp'` then
 // `this.chainModify(2)`, which mutates the frame and returns undefined. PRNG: none.
 fn on_base_power<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let pokemon = mon_arg(b, cx, 1);

@@ -22,7 +22,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:6362-6367 onBasePower(basePower, pokemon): runEvent('BasePower', attacker,
 // defender, move, basePower, true) passes [basePower, attacker, defender, move]
-// (battle-actions.ts:1599). `this.lastSuccessfulMoveThisTurn === 'fusionflare'` (battle.ts:169,
+// (battle-actions.ts:1637). `this.lastSuccessfulMoveThisTurn === 'fusionflare'` (battle.ts:169,
 // set at battle-actions.ts:309 and cleared at battle.ts:1629 -> BattleState.last_successful_move)
 // then `this.chainModify(2)`, which mutates the frame and returns undefined. PRNG: none.
 fn on_base_power<L: LogSink>(b: &mut Battle<L>, _cx: HookCtx) -> Relay {

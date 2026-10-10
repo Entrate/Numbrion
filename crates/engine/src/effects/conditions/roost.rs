@@ -43,7 +43,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:15444-15452 onStart(target): Start single event from addVolatile
-// (pokemon.ts:2018), args [target, source, sourceEffect].
+// (pokemon.ts:2009), args [target, source, sourceEffect].
 //   if (target.terastallized) {
 //     if (target.hasType('Flying')) this.add('-hint', "If a Terastallized Pokemon uses Roost, it remains Flying-type.");
 //     return false;                       // the volatile is removed again

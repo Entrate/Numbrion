@@ -27,7 +27,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:4619-4625 onBasePower(basePower, source, target, move): runEvent('BasePower',
 // attacker, defender, move, basePower, true) passes [basePower, attacker, defender, move]
-// (battle-actions.ts:1599). `target.runEffectiveness(move) > 0` then
+// (battle-actions.ts:1637). `target.runEffectiveness(move) > 0` then
 // `this.chainModify([5461, 4096])`, which mutates the frame and returns undefined.
 // PRNG: none directly.
 fn on_base_power<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {

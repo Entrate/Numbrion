@@ -34,7 +34,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:6661-6663 onStart(pokemon): Start single event from addVolatile
-// (pokemon.ts:2018), args [pokemon, source, sourceEffect].
+// (pokemon.ts:2009), args [pokemon, source, sourceEffect].
 //   this.add('-singlemove', pokemon, 'Glaive Rush', '[silent]');
 // Returns undefined (the volatile stays). PRNG: none.
 fn on_start<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
@@ -48,7 +48,7 @@ fn on_start<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
 }
 
 // data/moves.ts:6664-6666 onAccuracy(): runEvent('Accuracy', target, source, move, accuracy)
-// (battle-actions.ts:709) with the volatile on the defender; it reads no argument and returns
+// (battle-actions.ts:732) with the volatile on the defender; it reads no argument and returns
 // `true`, which makes every move auto-hit (hitStepAccuracy then skips the accuracy roll, so no
 // randomChance draw happens). PRNG: none.
 fn on_accuracy<L: LogSink>(_b: &mut Battle<L>, _cx: HookCtx) -> Relay {
@@ -56,7 +56,7 @@ fn on_accuracy<L: LogSink>(_b: &mut Battle<L>, _cx: HookCtx) -> Relay {
 }
 
 // data/moves.ts:6667-6669 onSourceModifyDamage(): runEvent('ModifyDamage', pokemon, target, move,
-// baseDamage) (battle-actions.ts:1795) with the volatile on the defender (the `Source` prefix).
+// baseDamage) (battle-actions.ts:1813) with the volatile on the defender (the `Source` prefix).
 // `return this.chainModify(2)` mutates the event modifier and returns undefined. PRNG: none.
 fn on_source_modify_damage<L: LogSink>(b: &mut Battle<L>, _cx: HookCtx) -> Relay {
     b.chain_modify(2.0, 1.0);
@@ -64,7 +64,7 @@ fn on_source_modify_damage<L: LogSink>(b: &mut Battle<L>, _cx: HookCtx) -> Relay
 }
 
 // data/moves.ts:6670-6674 onBeforeMove(pokemon) at priority 100: runEvent('BeforeMove', pokemon,
-// target, move) (battle-actions.ts via runMove), args [pokemon, target, move].
+// target, move) (battle-actions.ts:255), args [pokemon, target, move].
 //   this.debug('removing Glaive Rush drawback before attack');   // no output
 //   pokemon.removeVolatile('glaiverush');                          // the result is ignored
 // removeVolatile runs the (absent) End hook and erases this very cell, which stays pinned while

@@ -12,7 +12,7 @@ use crate::{
     actions::MoveHandle,
     dex,
     effects::support::{mon_arg, move_arg},
-    event::{EventArg, HookCtx, Relay},
+    event::{HookCtx, Relay},
     ids::*,
     log::LogSink,
 };
@@ -106,9 +106,4 @@ pub fn half_target_hp_damage<L: LogSink>(b: &Battle<L>, cx: HookCtx) -> Relay {
     let target = mon_arg(b, cx, 1);
     let hp = b.get_undynamaxed_hp(target, None);
     Relay::Number((hp / 2.0).floor().max(1.0))
-}
-
-/// Pokemon argument as the event argument form accepted by mutators.
-pub fn mon_event_arg(m: MonId) -> EventArg {
-    EventArg::Holder(Holder::mon(m))
 }

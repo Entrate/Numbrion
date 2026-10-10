@@ -24,7 +24,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:7740-7744 onBasePower(basePower): runEvent('BasePower', attacker, defender,
-// move, basePower, true) (battle-actions.ts:1599). `this.field.getPseudoWeather('gravity')`
+// move, basePower, true) (battle-actions.ts:1637). `this.field.getPseudoWeather('gravity')`
 // then `this.chainModify(1.5)`, which mutates the frame and returns undefined. PRNG: none.
 fn on_base_power<L: LogSink>(b: &mut Battle<L>, _cx: HookCtx) -> Relay {
     if GRAVITY != EffectId::NONE && b.get_pseudo_weather(GRAVITY).is_some() {

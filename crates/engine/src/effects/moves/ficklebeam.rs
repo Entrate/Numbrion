@@ -22,7 +22,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:5227-5233 onBasePower(basePower, pokemon): runEvent('BasePower', attacker,
 // defender, move, basePower, true) passes [basePower, attacker, defender, move]
-// (battle-actions.ts:1599).
+// (battle-actions.ts:1637).
 //   if (this.randomChance(3, 10)) {                 // PRNG: exactly one random(10) draw per call
 //     this.attrLastMove('[anim] Fickle Beam All Out');
 //     this.add('-activate', pokemon, 'move: Fickle Beam');

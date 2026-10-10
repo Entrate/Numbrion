@@ -23,7 +23,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 
 // data/moves.ts:10057-10062 onBasePower(basePower, source): runEvent('BasePower', attacker,
 // defender, move, basePower, true) passes [basePower, attacker, defender, move]
-// (battle-actions.ts:1599). `source.statsLoweredThisTurn` then `this.chainModify(2)`, which
+// (battle-actions.ts:1637). `source.statsLoweredThisTurn` then `this.chainModify(2)`, which
 // mutates the frame and returns undefined. PRNG: none.
 fn on_base_power<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
     let source = mon_arg(b, cx, 1);

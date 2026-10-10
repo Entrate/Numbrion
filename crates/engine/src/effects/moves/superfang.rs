@@ -23,7 +23,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:18465-18467 damageCallback(pokemon, target): direct call from getDamage
-// (battle-actions.ts:1575-1577), args [pokemon, target].
+// (battle-actions.ts:1595), args [pokemon, target].
 // `this.clampIntRange(target.getUndynamaxedHP() / 2, 1)`; clampIntRange floors first
 // (lib/utils.ts:320), so odd HP rounds down and the minimum is 1. PRNG: none.
 fn damage_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {

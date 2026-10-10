@@ -25,7 +25,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:4788-4790 damageCallback(pokemon, target): direct call from getDamage
-// (battle-actions.ts:1575-1577), args [pokemon, target]. `target.getUndynamaxedHP() -
+// (battle-actions.ts:1595), args [pokemon, target]. `target.getUndynamaxedHP() -
 // pokemon.hp` (no Dynamax in this format: the target's current HP); may be zero or negative and
 // is returned unclamped. PRNG: none.
 fn damage_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {

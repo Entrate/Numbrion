@@ -22,7 +22,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:5305-5309 damageCallback(pokemon): direct call from getDamage
-// (battle-actions.ts:1575-1577), args [pokemon, target].
+// (battle-actions.ts:1595), args [pokemon, target].
 //   const damage = pokemon.hp;
 //   pokemon.faint();      // faint(source = null, effect = null): queues the faint, hp -> 0
 //   return damage;

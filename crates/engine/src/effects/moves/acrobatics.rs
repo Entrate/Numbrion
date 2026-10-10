@@ -27,7 +27,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
 }
 
 // data/moves.ts:121-127 basePowerCallback(pokemon, target, move): direct call from
-// getDamage (battle-actions.ts:1585) with args [pokemon, target, move]. `!pokemon.item` is the
+// getDamage (battle-actions.ts:1605) with args [pokemon, target, move]. `!pokemon.item` is the
 // empty item id; `move.basePower` is the live ActiveMove number. `this.debug` prints nothing.
 // PRNG: none.
 fn base_power_callback<L: LogSink>(b: &mut Battle<L>, cx: HookCtx) -> Relay {
