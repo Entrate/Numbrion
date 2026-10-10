@@ -121,7 +121,6 @@ fn termination_tera_and_turn_limit_match_pinned_showdown() {
 /// Full startup uses real rule dispatch, endTurn and C request caches. Unlike the
 /// flow/queue suites this test has no request recorder or interrupted turn loop.
 #[test]
-#[ignore = "integration gate: six rule Begin hooks must be registered"]
 fn full_startup_matches_pinned_showdown() {
     let mut rows = 0;
     for line in include_str!("vectors/startup.tsv")
