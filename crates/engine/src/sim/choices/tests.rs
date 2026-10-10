@@ -778,14 +778,14 @@ fn check_case(case: &J, skipped: &mut usize) {
         let mut typed_set = BTreeSet::new();
         for joint in &typed_choices {
             b.clear_choice(side);
-            if let Err(e) = b.choose_typed_no_commit(side, joint) {
-                panic!("{}", ctx(&format!("p{} typed {joint:?} rejected: {}", s + 1, e.text)));
-            }
             assert!(
                 b.is_legal_joint_choice(side, joint),
                 "{}",
-                ctx(&format!("p{} is_legal_joint_choice false for accepted {joint:?}", s + 1))
+                ctx(&format!("p{} is_legal_joint_choice false before submission {joint:?}", s + 1))
             );
+            if let Err(e) = b.choose_typed_no_commit(side, joint) {
+                panic!("{}", ctx(&format!("p{} typed {joint:?} rejected: {}", s + 1, e.text)));
+            }
             assert_eq!(b.seed(), frozen_seed, "case {id}: typed noncommit advanced PRNG");
             assert_eq!(b.scratch.unsent_lines, frozen_log_count, "case {id}: typed noncommit changed log count");
             typed_set.insert(b.choice_text(side));
