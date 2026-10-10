@@ -1,0 +1,1472 @@
+# protect_redirection scenarios recorded from the pinned Showdown build by
+# tools/probes/protect_redirection/scenarios.mjs. Do not edit by hand.
+# S name | SEED a,b,c,d | T1/T2 packed team | B turn seed (decision boundary) | L raw log line
+# (|t:| normalized) produced to reach that boundary | C side choice | E ended/running
+S protect_stall_chain
+SEED 1,2,3,4
+T1 |Corviknight||Pressure|protect,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Dondozo||Unaware|protect,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|protect,brickbreak|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Garchomp||Rough Skin|protect,brickbreak|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 1,2,3,4
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Corviknight|Corviknight, M|400/400
+L |switch|p1a: Corviknight|Corviknight, M|100/100
+L |split|p1
+L |switch|p1b: Dondozo|Dondozo, M|504/504
+L |switch|p1b: Dondozo|Dondozo, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2a: Kingambit|Kingambit, L50, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, L50, M|215/215
+L |switch|p2b: Garchomp|Garchomp, L50, M|100/100
+L |-ability|p1a: Corviknight|Pressure
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 2 43514,9542,40559,8561
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|Protect
+L |move|p2b: Garchomp|Protect|p2b: Garchomp
+L |-singleturn|p2b: Garchomp|Protect
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p2a: Kingambit|Protect||[still]
+L |-fail|p2a: Kingambit
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 3 62891,40560,22227,62965
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|Protect
+L |move|p2b: Garchomp|Protect||[still]
+L |-fail|p2b: Garchomp
+L |move|p1b: Dondozo|Protect||[still]
+L |-fail|p1b: Dondozo
+L |move|p2a: Kingambit|Protect||[still]
+L |-fail|p2a: Kingambit
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 4 54274,43667,37867,24894
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect||[still]
+L |-fail|p1a: Corviknight
+L |move|p2b: Garchomp|Protect|p2b: Garchomp
+L |-singleturn|p2b: Garchomp|Protect
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p2a: Kingambit|Protect||[still]
+L |-fail|p2a: Kingambit
+L |
+L |upkeep
+L |turn|4
+C p1 move 1, move 1
+C p2 move 2 1, move 2 2
+B 5 4124,63122,38965,57347
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|Protect
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p2b: Garchomp|Brick Break|p1b: Dondozo
+L |-activate|p1b: Dondozo|move: Protect
+L |move|p2a: Kingambit|Brick Break|p1a: Corviknight
+L |-activate|p1a: Corviknight|move: Protect
+L |
+L |upkeep
+L |turn|5
+C p1 move 1, move 1
+C p2 move 1, move 1
+B 6 56224,59251,18573,26068
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect||[still]
+L |-fail|p1a: Corviknight
+L |move|p2b: Garchomp|Protect|p2b: Garchomp
+L |-singleturn|p2b: Garchomp|Protect
+L |move|p1b: Dondozo|Protect||[still]
+L |-fail|p1b: Dondozo
+L |move|p2a: Kingambit|Protect||[still]
+L |-fail|p2a: Kingambit
+L |
+L |upkeep
+L |turn|6
+C p1 move 2 1, move 2 2
+C p2 move 1, move 1
+B 7 9621,18248,53276,33281
+L |
+L |t:|
+L |move|p2b: Garchomp|Protect|p2b: Garchomp
+L |-singleturn|p2b: Garchomp|Protect
+L |move|p2a: Kingambit|Protect|p2a: Kingambit
+L |-singleturn|p2a: Kingambit|Protect
+L |move|p1a: Corviknight|Brick Break|p2a: Kingambit
+L |-activate|p2a: Kingambit|move: Protect
+L |move|p1b: Dondozo|Brick Break|p2b: Garchomp
+L |-activate|p2b: Garchomp|move: Protect
+L |
+L |upkeep
+L |turn|7
+E running
+S shields_contact_and_status
+SEED 5,6,7,8
+T1 |Corviknight||Pressure|banefulbunker,burningbulwark,spikyshield,protect|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Dondozo||Unaware|protect,spikyshield,banefulbunker,burningbulwark|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|brickbreak,thunderwave,dragonpulse,protect|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Garchomp||Rough Skin|dragonpulse,brickbreak,thunderwave,protect|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 5,6,7,8
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Corviknight|Corviknight, M|400/400
+L |switch|p1a: Corviknight|Corviknight, M|100/100
+L |split|p1
+L |switch|p1b: Dondozo|Dondozo, M|504/504
+L |switch|p1b: Dondozo|Dondozo, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2a: Kingambit|Kingambit, L50, M|100/100
+L |split|p2
+L |switch|p2b: Garchomp|Garchomp, L50, M|215/215
+L |switch|p2b: Garchomp|Garchomp, L50, M|100/100
+L |-ability|p1a: Corviknight|Pressure
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 1, move 2 2
+B 2 38565,7865,19639,43898
+L |
+L |t:|
+L |move|p1a: Corviknight|Baneful Bunker|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|move: Protect
+L |move|p1b: Dondozo|Spiky Shield|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|move: Protect
+L |move|p2b: Garchomp|Brick Break|p1b: Dondozo
+L |-activate|p1b: Dondozo|move: Protect
+L |split|p2
+L |-damage|p2b: Garchomp|189/215|[from] Spiky Shield|[of] p1b: Dondozo
+L |-damage|p2b: Garchomp|88/100|[from] Spiky Shield|[of] p1b: Dondozo
+L |move|p2a: Kingambit|Brick Break|p1a: Corviknight
+L |-activate|p1a: Corviknight|move: Protect
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, move 3
+C p2 move 2 1, move 1 2
+B 3 57127,60052,42784,58739
+L |
+L |t:|
+L |move|p1a: Corviknight|Burning Bulwark|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|move: Protect
+L |move|p1b: Dondozo|Baneful Bunker||[still]
+L |-fail|p1b: Dondozo
+L |move|p2b: Garchomp|Dragon Pulse|p1b: Dondozo
+L |split|p1
+L |-damage|p1b: Dondozo|477/504
+L |-damage|p1b: Dondozo|95/100
+L |move|p2a: Kingambit|Thunder Wave|p1a: Corviknight|[miss]
+L |-miss|p2a: Kingambit|p1a: Corviknight
+L |
+L |upkeep
+L |turn|3
+C p1 move 3, move 1
+C p2 move 3 1, move 2 2
+B 4 557,47936,54207,25494
+L |
+L |t:|
+L |move|p1a: Corviknight|Spiky Shield||[still]
+L |-fail|p1a: Corviknight
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p2b: Garchomp|Brick Break|p1b: Dondozo
+L |-activate|p1b: Dondozo|move: Protect
+L |move|p2a: Kingambit|Dragon Pulse|p1a: Corviknight
+L |-resisted|p1a: Corviknight
+L |split|p1
+L |-damage|p1a: Corviknight|394/400
+L |-damage|p1a: Corviknight|99/100
+L |
+L |upkeep
+L |turn|4
+C p1 move 4, move 4
+C p2 move 2 1, move 3 2
+B 5 44822,23676,12722,38907
+L |
+L |t:|
+L |move|p1a: Corviknight|Protect|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|Protect
+L |move|p1b: Dondozo|Burning Bulwark||[still]
+L |-fail|p1b: Dondozo
+L |move|p2b: Garchomp|Thunder Wave|p1b: Dondozo
+L |-status|p1b: Dondozo|par
+L |move|p2a: Kingambit|Thunder Wave|p1a: Corviknight
+L |-activate|p1a: Corviknight|move: Protect
+L |
+L |upkeep
+L |turn|5
+C p1 move 1, move 4
+C p2 move 1 1, move 1 2
+B 6 42783,7014,34183,8579
+L |
+L |t:|
+L |move|p1a: Corviknight|Baneful Bunker||[still]
+L |-fail|p1a: Corviknight
+L |cant|p1b: Dondozo|par
+L |move|p2b: Garchomp|Dragon Pulse|p1b: Dondozo
+L |split|p1
+L |-damage|p1b: Dondozo|449/504 par
+L |-damage|p1b: Dondozo|90/100 par
+L |move|p2a: Kingambit|Brick Break|p1a: Corviknight
+L |split|p1
+L |-damage|p1a: Corviknight|376/400
+L |-damage|p1a: Corviknight|94/100
+L |
+L |upkeep
+L |turn|6
+C p1 move 2, move 3
+C p2 move 1 1, move 2 2
+B 7 51543,45061,46283,4436
+L |
+L |t:|
+L |move|p1a: Corviknight|Burning Bulwark|p1a: Corviknight
+L |-singleturn|p1a: Corviknight|move: Protect
+L |move|p1b: Dondozo|Baneful Bunker|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|move: Protect
+L |move|p2b: Garchomp|Brick Break|p1b: Dondozo
+L |-activate|p1b: Dondozo|move: Protect
+L |-status|p2b: Garchomp|psn
+L |move|p2a: Kingambit|Brick Break|p1a: Corviknight
+L |-activate|p1a: Corviknight|move: Protect
+L |-status|p2a: Kingambit|brn
+L |
+L |split|p2
+L |-damage|p2b: Garchomp|163/215 psn|[from] psn
+L |-damage|p2b: Garchomp|76/100 psn|[from] psn
+L |split|p2
+L |-damage|p2a: Kingambit|195/207 brn|[from] brn
+L |-damage|p2a: Kingambit|95/100 brn|[from] brn
+L |upkeep
+L |turn|7
+E running
+S wide_guard
+SEED 9,10,11,12
+T1 |Hitmontop||Intimidate|wideguard,protect,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Dondozo||Unaware|wideguard,protect,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Garchomp||Rough Skin|earthquake,rockslide,brickbreak,protect|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Kingambit||Defiant|rockslide,brickbreak,protect,earthquake|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 9,10,11,12
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Hitmontop|Hitmontop, M|304/304
+L |switch|p1a: Hitmontop|Hitmontop, M|100/100
+L |split|p1
+L |switch|p1b: Dondozo|Dondozo, M|504/504
+L |switch|p1b: Dondozo|Dondozo, M|100/100
+L |split|p2
+L |switch|p2a: Garchomp|Garchomp, L50, M|215/215
+L |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+L |split|p2
+L |switch|p2b: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2b: Kingambit|Kingambit, L50, M|100/100
+L |-ability|p1a: Hitmontop|Intimidate|boost
+L |-unboost|p2a: Garchomp|atk|1
+L |-unboost|p2b: Kingambit|atk|1
+L |-ability|p2b: Kingambit|Defiant|boost
+L |-boost|p2b: Kingambit|atk|2
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1, move 1
+B 2 14878,52017,57130,61583
+L |
+L |t:|
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p1a: Hitmontop|Wide Guard|p1a: Hitmontop
+L |-singleturn|p1a: Hitmontop|Wide Guard
+L |move|p2a: Garchomp|Earthquake|p1b: Dondozo|[spread] p2b
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |-supereffective|p2b: Kingambit
+L |split|p2
+L |-damage|p2b: Kingambit|145/207
+L |-damage|p2b: Kingambit|71/100
+L |move|p2b: Kingambit|Rock Slide|p1b: Dondozo|[spread] 
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 2
+C p2 move 2, move 1
+B 3 5252,50842,54596,18229
+L |
+L |t:|
+L |move|p1b: Dondozo|Protect||[still]
+L |-fail|p1b: Dondozo
+L |move|p1a: Hitmontop|Wide Guard|p1a: Hitmontop
+L |-singleturn|p1a: Hitmontop|Wide Guard
+L |move|p2a: Garchomp|Rock Slide|p1b: Dondozo|[spread] 
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |move|p2b: Kingambit|Rock Slide|p1a: Hitmontop|[spread] 
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 3 1
+C p2 move 3 1, move 2 2
+B 4 16499,49079,35514,11284
+L |
+L |t:|
+L |move|p1a: Hitmontop|Wide Guard|p1a: Hitmontop
+L |-singleturn|p1a: Hitmontop|Wide Guard
+L |move|p2a: Garchomp|Brick Break|p1a: Hitmontop
+L |-crit|p1a: Hitmontop
+L |split|p1
+L |-damage|p1a: Hitmontop|274/304
+L |-damage|p1a: Hitmontop|91/100
+L |move|p1b: Dondozo|Brick Break|p2a: Garchomp
+L |split|p2
+L |-damage|p2a: Garchomp|110/215
+L |-damage|p2a: Garchomp|52/100
+L |split|p1
+L |-damage|p1b: Dondozo|441/504|[from] ability: Rough Skin|[of] p2a: Garchomp
+L |-damage|p1b: Dondozo|88/100|[from] ability: Rough Skin|[of] p2a: Garchomp
+L |move|p2b: Kingambit|Brick Break|p1b: Dondozo
+L |split|p1
+L |-damage|p1b: Dondozo|423/504
+L |-damage|p1b: Dondozo|84/100
+L |
+L |upkeep
+L |turn|4
+C p1 move 1, move 1
+C p2 move 1, move 4
+B 5 38173,766,58626,9169
+L |
+L |t:|
+L |move|p1a: Hitmontop|Wide Guard|p1a: Hitmontop
+L |-singleturn|p1a: Hitmontop|Wide Guard
+L |move|p1b: Dondozo|Wide Guard|p1b: Dondozo
+L |move|p2a: Garchomp|Earthquake|p1a: Hitmontop|[spread] p2b
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |-supereffective|p2b: Kingambit
+L |split|p2
+L |-damage|p2b: Kingambit|89/207
+L |-damage|p2b: Kingambit|43/100
+L |move|p2b: Kingambit|Earthquake|p1b: Dondozo|[spread] p2a
+L |-activate|p1a: Hitmontop|move: Wide Guard
+L |-activate|p1b: Dondozo|move: Wide Guard
+L |split|p2
+L |-damage|p2a: Garchomp|57/215
+L |-damage|p2a: Garchomp|27/100
+L |
+L |upkeep
+L |turn|5
+C p1 move 2, move 2
+C p2 move 1, move 1
+B 6 10936,21844,45206,38771
+L |
+L |t:|
+L |move|p1a: Hitmontop|Protect||[still]
+L |-fail|p1a: Hitmontop
+L |move|p1b: Dondozo|Protect|p1b: Dondozo
+L |-singleturn|p1b: Dondozo|Protect
+L |move|p2a: Garchomp|Earthquake|p1a: Hitmontop|[spread] p2b,p1a
+L |-activate|p1b: Dondozo|move: Protect
+L |-supereffective|p2b: Kingambit
+L |split|p2
+L |-damage|p2b: Kingambit|27/207
+L |-damage|p2b: Kingambit|14/100
+L |split|p1
+L |-damage|p1a: Hitmontop|255/304
+L |-damage|p1a: Hitmontop|84/100
+L |move|p2b: Kingambit|Rock Slide|p1b: Dondozo|[spread] p1a
+L |-activate|p1b: Dondozo|move: Protect
+L |-resisted|p1a: Hitmontop
+L |split|p1
+L |-damage|p1a: Hitmontop|246/304
+L |-damage|p1a: Hitmontop|81/100
+L |
+L |upkeep
+L |turn|6
+E running
+S follow_me_rage_powder
+SEED 13,14,15,16
+T1 |Clefairy||Friend Guard|followme,calmmind,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Amoonguss||Regenerator|ragepowder,calmmind,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Rillaboom||Overgrow|brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Kingambit||Defiant|brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 13,14,15,16
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Clefairy|Clefairy, F|344/344
+L |switch|p1a: Clefairy|Clefairy, F|100/100
+L |split|p1
+L |switch|p1b: Amoonguss|Amoonguss, F|432/432
+L |switch|p1b: Amoonguss|Amoonguss, F|100/100
+L |split|p2
+L |switch|p2a: Rillaboom|Rillaboom, L50, M|207/207
+L |switch|p2a: Rillaboom|Rillaboom, L50, M|100/100
+L |split|p2
+L |switch|p2b: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2b: Kingambit|Kingambit, L50, M|100/100
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 2, move 1 2
+B 2 14049,14244,49561,2998
+L |
+L |t:|
+L |move|p1a: Clefairy|Follow Me|p1a: Clefairy
+L |-singleturn|p1a: Clefairy|move: Follow Me
+L |move|p2a: Rillaboom|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|331/344
+L |-damage|p1a: Clefairy|97/100
+L |move|p1b: Amoonguss|Calm Mind|p1b: Amoonguss
+L |-boost|p1b: Amoonguss|spa|1
+L |-boost|p1b: Amoonguss|spd|1
+L |move|p2b: Kingambit|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|315/344
+L |-damage|p1a: Clefairy|92/100
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, move 1
+C p2 move 1 1, move 1 1
+B 3 46642,31989,1818,4620
+L |
+L |t:|
+L |move|p1b: Amoonguss|Rage Powder|p1b: Amoonguss
+L |-singleturn|p1b: Amoonguss|move: Rage Powder
+L |move|p1a: Clefairy|Calm Mind|p1a: Clefairy
+L |-boost|p1a: Clefairy|spa|1
+L |-boost|p1a: Clefairy|spd|1
+L |move|p2a: Rillaboom|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|300/344
+L |-damage|p1a: Clefairy|88/100
+L |move|p2b: Kingambit|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|424/432
+L |-damage|p1b: Amoonguss|99/100
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 1 1, move 1 2
+B 4 2890,22974,41643,13458
+L |
+L |t:|
+L |move|p1a: Clefairy|Follow Me|p1a: Clefairy
+L |-singleturn|p1a: Clefairy|move: Follow Me
+L |move|p1b: Amoonguss|Rage Powder|p1b: Amoonguss
+L |-singleturn|p1b: Amoonguss|move: Rage Powder
+L |move|p2a: Rillaboom|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|286/344
+L |-damage|p1a: Clefairy|84/100
+L |move|p2b: Kingambit|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|270/344
+L |-damage|p1a: Clefairy|79/100
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 1
+C p2 move 1 1, move 1 1
+B 5 63553,39732,54772,200
+L |
+L |t:|
+L |move|p1b: Amoonguss|Rage Powder|p1b: Amoonguss
+L |-singleturn|p1b: Amoonguss|move: Rage Powder
+L |move|p1a: Clefairy|Calm Mind|p1a: Clefairy
+L |-boost|p1a: Clefairy|spa|1
+L |-boost|p1a: Clefairy|spd|1
+L |move|p2a: Rillaboom|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|255/344
+L |-damage|p1a: Clefairy|75/100
+L |move|p2b: Kingambit|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|416/432
+L |-damage|p1b: Amoonguss|97/100
+L |
+L |upkeep
+L |turn|5
+C p1 move 1, move 2
+C p2 move 1 2, move 1 2
+B 6 47655,59176,7008,53294
+L |
+L |t:|
+L |move|p1a: Clefairy|Follow Me|p1a: Clefairy
+L |-singleturn|p1a: Clefairy|move: Follow Me
+L |move|p2a: Rillaboom|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|241/344
+L |-damage|p1a: Clefairy|71/100
+L |move|p1b: Amoonguss|Calm Mind|p1b: Amoonguss
+L |-boost|p1b: Amoonguss|spa|1
+L |-boost|p1b: Amoonguss|spd|1
+L |move|p2b: Kingambit|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|227/344
+L |-damage|p1a: Clefairy|66/100
+L |
+L |upkeep
+L |turn|6
+E running
+S redirection_ignored_by_tracking
+SEED 17,18,19,20
+T1 |Clefairy||Friend Guard|followme,calmmind,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Amoonguss||Regenerator|ragepowder,calmmind,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Duraludon||Stalwart|brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Barraskewda||Propeller Tail|brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 17,18,19,20
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Clefairy|Clefairy, F|344/344
+L |switch|p1a: Clefairy|Clefairy, F|100/100
+L |split|p1
+L |switch|p1b: Amoonguss|Amoonguss, F|432/432
+L |switch|p1b: Amoonguss|Amoonguss, F|100/100
+L |split|p2
+L |switch|p2a: Duraludon|Duraludon, L50, M|177/177
+L |switch|p2a: Duraludon|Duraludon, L50, M|100/100
+L |split|p2
+L |switch|p2b: Barraskewda|Barraskewda, L50, M|168/168
+L |switch|p2b: Barraskewda|Barraskewda, L50, M|100/100
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 2, move 1 2
+B 2 28019,47139,1711,1242
+L |
+L |t:|
+L |move|p1a: Clefairy|Follow Me|p1a: Clefairy
+L |-singleturn|p1a: Clefairy|move: Follow Me
+L |move|p2b: Barraskewda|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|424/432
+L |-damage|p1b: Amoonguss|99/100
+L |move|p2a: Duraludon|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|417/432
+L |-damage|p1b: Amoonguss|97/100
+L |move|p1b: Amoonguss|Calm Mind|p1b: Amoonguss
+L |-boost|p1b: Amoonguss|spa|1
+L |-boost|p1b: Amoonguss|spd|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, move 1
+C p2 move 1 1, move 1 1
+B 3 35432,62661,21101,54608
+L |
+L |t:|
+L |move|p1b: Amoonguss|Rage Powder|p1b: Amoonguss
+L |-singleturn|p1b: Amoonguss|move: Rage Powder
+L |move|p2b: Barraskewda|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|330/344
+L |-damage|p1a: Clefairy|96/100
+L |move|p1a: Clefairy|Calm Mind|p1a: Clefairy
+L |-boost|p1a: Clefairy|spa|1
+L |-boost|p1a: Clefairy|spd|1
+L |move|p2a: Duraludon|Brick Break|p1a: Clefairy
+L |-resisted|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|319/344
+L |-damage|p1a: Clefairy|93/100
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 2
+C p2 move 1 2, move 1 2
+B 4 5239,4942,22169,23286
+L |
+L |t:|
+L |move|p1a: Clefairy|Follow Me|p1a: Clefairy
+L |-singleturn|p1a: Clefairy|move: Follow Me
+L |move|p2b: Barraskewda|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|410/432
+L |-damage|p1b: Amoonguss|95/100
+L |move|p2a: Duraludon|Brick Break|p1b: Amoonguss
+L |-resisted|p1b: Amoonguss
+L |split|p1
+L |-damage|p1b: Amoonguss|403/432
+L |-damage|p1b: Amoonguss|94/100
+L |move|p1b: Amoonguss|Calm Mind|p1b: Amoonguss
+L |-boost|p1b: Amoonguss|spa|1
+L |-boost|p1b: Amoonguss|spd|1
+L |
+L |upkeep
+L |turn|4
+E running
+S lightning_rod_storm_drain
+SEED 21,22,23,24
+T1 |Raichu||Lightning Rod|swordsdance,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Gastrodon||Storm Drain|swordsdance,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,
+T2 |Rotom-Wash||Levitate|thunderbolt,hydropump,calmmind|Serious|252,0,128,0,128,0|N|||50|,,,,,]|Lanturn||Volt Absorb|thunderbolt,hydropump,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 21,22,23,24
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Raichu|Raichu, M|324/324
+L |switch|p1a: Raichu|Raichu, M|100/100
+L |split|p1
+L |switch|p1b: Gastrodon|Gastrodon, F|426/426
+L |switch|p1b: Gastrodon|Gastrodon, F|100/100
+L |split|p2
+L |switch|p2a: Rotom|Rotom-Wash, L50|157/157
+L |switch|p2a: Rotom|Rotom-Wash, L50|100/100
+L |split|p2
+L |switch|p2b: Lanturn|Lanturn, L50, M|232/232
+L |switch|p2b: Lanturn|Lanturn, L50, M|100/100
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1 2, move 2 1
+B 2 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|2
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|2
+L |move|p2a: Rotom|Thunderbolt|p1a: Raichu
+L |-activate|p1a: Raichu|ability: Lightning Rod
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |move|p2b: Lanturn|Hydro Pump|p1b: Gastrodon
+L |-activate|p1b: Gastrodon|ability: Storm Drain
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 2 1, move 1 2
+B 3 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|2
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|2
+L |move|p2a: Rotom|Hydro Pump|p1b: Gastrodon
+L |-activate|p1b: Gastrodon|ability: Storm Drain
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |move|p2b: Lanturn|Thunderbolt|p1a: Raichu
+L |-activate|p1a: Raichu|ability: Lightning Rod
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 1 1, move 2 2
+B 4 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|2
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|2
+L |move|p2a: Rotom|Thunderbolt|p1a: Raichu
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |move|p2b: Lanturn|Hydro Pump|p1b: Gastrodon
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |
+L |upkeep
+L |turn|4
+C p1 move 1, move 1
+C p2 move 2 2, move 1 1
+B 5 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|0
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|0
+L |move|p2a: Rotom|Hydro Pump|p1b: Gastrodon
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |move|p2b: Lanturn|Thunderbolt|p1a: Raichu
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |
+L |upkeep
+L |turn|5
+C p1 move 1, move 1
+C p2 move 1 2, move 2 1
+B 6 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|0
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|0
+L |move|p2a: Rotom|Thunderbolt|p1a: Raichu
+L |-activate|p1a: Raichu|ability: Lightning Rod
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |move|p2b: Lanturn|Hydro Pump|p1b: Gastrodon
+L |-activate|p1b: Gastrodon|ability: Storm Drain
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |
+L |upkeep
+L |turn|6
+C p1 move 1, move 1
+C p2 move 2 1, move 1 2
+B 7 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|0
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|0
+L |move|p2a: Rotom|Hydro Pump|p1b: Gastrodon
+L |-activate|p1b: Gastrodon|ability: Storm Drain
+L |-ability|p1b: Gastrodon|Storm Drain|boost
+L |-boost|p1b: Gastrodon|spa|1
+L |move|p2b: Lanturn|Thunderbolt|p1a: Raichu
+L |-activate|p1a: Raichu|ability: Lightning Rod
+L |-ability|p1a: Raichu|Lightning Rod|boost
+L |-boost|p1a: Raichu|spa|1
+L |
+L |upkeep
+L |turn|7
+C p1 move 1, move 1
+C p2 move 1 1, move 2 2
+B 8 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|0
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|0
+L |move|p2a: Rotom|Thunderbolt|p1a: Raichu
+L |-immune|p1a: Raichu|[from] ability: Lightning Rod
+L |move|p2b: Lanturn|Hydro Pump|p1b: Gastrodon
+L |-immune|p1b: Gastrodon|[from] ability: Storm Drain
+L |
+L |upkeep
+L |turn|8
+C p1 move 1, move 1
+C p2 move 2 2, move 1 1
+B 9 21,22,23,24
+L |
+L |t:|
+L |move|p1a: Raichu|Swords Dance|p1a: Raichu
+L |-boost|p1a: Raichu|atk|0
+L |move|p1b: Gastrodon|Swords Dance|p1b: Gastrodon
+L |-boost|p1b: Gastrodon|atk|0
+L |move|p2a: Rotom|Hydro Pump|p1b: Gastrodon
+L |-immune|p1b: Gastrodon|[from] ability: Storm Drain
+L |move|p2b: Lanturn|Thunderbolt|p1a: Raichu
+L |-immune|p1a: Raichu|[from] ability: Lightning Rod
+L |
+L |upkeep
+L |turn|9
+E running
+S helping_hand_pollen_puff
+SEED 25,26,27,28
+T1 |Ribombee||Shield Dust|helpinghand,pollenpuff,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Garchomp||Rough Skin|dragonpulse,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||70|,,,,,]|Dondozo||Unaware|calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||70|,,,,,
+B 1 25,26,27,28
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Ribombee|Ribombee, F|324/324
+L |switch|p1a: Ribombee|Ribombee, F|100/100
+L |split|p1
+L |switch|p1b: Garchomp|Garchomp, M|420/420
+L |switch|p1b: Garchomp|Garchomp, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, L70, M|285/285
+L |switch|p2a: Kingambit|Kingambit, L70, M|100/100
+L |split|p2
+L |switch|p2b: Dondozo|Dondozo, L70, M|355/355
+L |switch|p2b: Dondozo|Dondozo, L70, M|100/100
+L |turn|1
+C p1 move 1 -2, move 1 1
+C p2 move 2, move 1
+B 2 7493,56211,13857,47145
+L |
+L |t:|
+L |move|p1a: Ribombee|Helping Hand|p1b: Garchomp
+L |-singleturn|p1b: Garchomp|Helping Hand|[of] p1a: Ribombee
+L |move|p1b: Garchomp|Dragon Pulse|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|192/285
+L |-damage|p2a: Kingambit|68/100
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Dondozo|Calm Mind|p2b: Dondozo
+L |-boost|p2b: Dondozo|spa|1
+L |-boost|p2b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 2 -2, move 3
+C p2 move 1 2, move 2 2
+B 3 48551,50192,6859,14998
+L |
+L |t:|
+L |move|p1a: Ribombee|Pollen Puff|p1b: Garchomp
+L |move|p1b: Garchomp|Calm Mind|p1b: Garchomp
+L |-boost|p1b: Garchomp|spa|1
+L |-boost|p1b: Garchomp|spd|1
+L |move|p2a: Kingambit|Brick Break|p1b: Garchomp
+L |split|p1
+L |-damage|p1b: Garchomp|386/420
+L |-damage|p1b: Garchomp|92/100
+L |split|p2
+L |-damage|p2a: Kingambit|157/285|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |-damage|p2a: Kingambit|56/100|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |move|p2b: Dondozo|Brick Break|p1b: Garchomp
+L |split|p1
+L |-damage|p1b: Garchomp|360/420
+L |-damage|p1b: Garchomp|86/100
+L |split|p2
+L |-damage|p2b: Dondozo|311/355|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |-damage|p2b: Dondozo|88/100|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |
+L |upkeep
+L |turn|3
+C p1 move 2 1, move 3
+C p2 move 1 2, move 2 2
+B 4 38750,62506,55688,31417
+L |
+L |t:|
+L |move|p1a: Ribombee|Pollen Puff|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|60/285
+L |-damage|p2a: Kingambit|22/100
+L |move|p1b: Garchomp|Calm Mind|p1b: Garchomp
+L |-boost|p1b: Garchomp|spa|1
+L |-boost|p1b: Garchomp|spd|1
+L |move|p2a: Kingambit|Brick Break|p1b: Garchomp
+L |split|p1
+L |-damage|p1b: Garchomp|322/420
+L |-damage|p1b: Garchomp|77/100
+L |split|p2
+L |-damage|p2a: Kingambit|25/285|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |-damage|p2a: Kingambit|9/100|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |move|p2b: Dondozo|Brick Break|p1b: Garchomp
+L |split|p1
+L |-damage|p1b: Garchomp|295/420
+L |-damage|p1b: Garchomp|71/100
+L |split|p2
+L |-damage|p2b: Dondozo|267/355|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |-damage|p2b: Dondozo|76/100|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |
+L |upkeep
+L |turn|4
+C p1 move 2 -2, move 3
+C p2 move 2, move 2 2
+B 5 7027,4323,65115,35517
+L |
+L |t:|
+L |move|p1a: Ribombee|Pollen Puff|p1b: Garchomp
+L |split|p1
+L |-heal|p1b: Garchomp|420/420
+L |-heal|p1b: Garchomp|100/100
+L |move|p1b: Garchomp|Calm Mind|p1b: Garchomp
+L |-boost|p1b: Garchomp|spa|1
+L |-boost|p1b: Garchomp|spd|1
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Dondozo|Brick Break|p1b: Garchomp
+L |split|p1
+L |-damage|p1b: Garchomp|391/420
+L |-damage|p1b: Garchomp|94/100
+L |split|p2
+L |-damage|p2b: Dondozo|223/355|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |-damage|p2b: Dondozo|63/100|[from] ability: Rough Skin|[of] p1b: Garchomp
+L |
+L |upkeep
+L |turn|5
+C p1 move 1 -2, move 2 2
+C p2 move 2, move 1
+B 6 12030,6995,41002,47078
+L |
+L |t:|
+L |move|p1a: Ribombee|Helping Hand|p1b: Garchomp
+L |-singleturn|p1b: Garchomp|Helping Hand|[of] p1a: Ribombee
+L |move|p1b: Garchomp|Brick Break|p2b: Dondozo
+L |split|p2
+L |-damage|p2b: Dondozo|92/355
+L |-damage|p2b: Dondozo|26/100
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |move|p2b: Dondozo|Calm Mind|p2b: Dondozo
+L |-boost|p2b: Dondozo|spa|1
+L |-boost|p2b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|6
+E running
+S ally_damage_modifiers
+SEED 29,30,31,32
+T1 |Clefairy||Friend Guard|dazzlinggleam,calmmind|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Stonjourner||Power Spot|rockslide,calmmind|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Perrserker||Steely Spirit|bulletpunch,brickbreak,calmmind|Serious|252,0,128,0,128,0|F|||70|,,,,,]|Kingambit||Defiant|bulletpunch,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||70|,,,,,
+B 1 34258,31221,20330,9885
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Clefairy|Clefairy, F|344/344
+L |switch|p1a: Clefairy|Clefairy, F|100/100
+L |split|p1
+L |switch|p1b: Stonjourner|Stonjourner, M|404/404
+L |switch|p1b: Stonjourner|Stonjourner, M|100/100
+L |split|p2
+L |switch|p2a: Perrserker|Perrserker, L70, F|243/243
+L |switch|p2a: Perrserker|Perrserker, L70, F|100/100
+L |split|p2
+L |switch|p2b: Kingambit|Kingambit, L70, M|285/285
+L |switch|p2b: Kingambit|Kingambit, L70, M|100/100
+L |turn|1
+C p1 move 1, move 2
+C p2 move 1 2, move 1 1
+B 2 19080,27346,3395,9601
+L |
+L |t:|
+L |move|p2b: Kingambit|Bullet Punch|p1a: Clefairy
+L |-supereffective|p1a: Clefairy
+L |-crit|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|140/344
+L |-damage|p1a: Clefairy|41/100
+L |move|p2a: Perrserker|Bullet Punch|p1b: Stonjourner
+L |-supereffective|p1b: Stonjourner
+L |split|p1
+L |-damage|p1b: Stonjourner|358/404
+L |-damage|p1b: Stonjourner|89/100
+L |move|p1b: Stonjourner|Calm Mind|p1b: Stonjourner
+L |-boost|p1b: Stonjourner|spa|1
+L |-boost|p1b: Stonjourner|spd|1
+L |move|p1a: Clefairy|Dazzling Gleam|p2a: Perrserker|[spread] p2a,p2b
+L |-resisted|p2a: Perrserker
+L |split|p2
+L |-damage|p2a: Perrserker|186/243
+L |-damage|p2a: Perrserker|77/100
+L |split|p2
+L |-damage|p2b: Kingambit|197/285
+L |-damage|p2b: Kingambit|70/100
+L |
+L |upkeep
+L |turn|2
+C p1 move 2, move 1
+C p2 move 1 1, move 1 2
+B 3 22791,26096,39433,20523
+L |
+L |t:|
+L |move|p2b: Kingambit|Bullet Punch|p1b: Stonjourner
+L |-supereffective|p1b: Stonjourner
+L |split|p1
+L |-damage|p1b: Stonjourner|309/404
+L |-damage|p1b: Stonjourner|77/100
+L |move|p2a: Perrserker|Bullet Punch|p1a: Clefairy
+L |-supereffective|p1a: Clefairy
+L |split|p1
+L |-damage|p1a: Clefairy|38/344
+L |-damage|p1a: Clefairy|12/100
+L |move|p1b: Stonjourner|Rock Slide|p2b: Kingambit|[spread] p2b
+L |-miss|p1b: Stonjourner|p2a: Perrserker
+L |-resisted|p2b: Kingambit
+L |split|p2
+L |-damage|p2b: Kingambit|155/285
+L |-damage|p2b: Kingambit|55/100
+L |move|p1a: Clefairy|Calm Mind|p1a: Clefairy
+L |-boost|p1a: Clefairy|spa|1
+L |-boost|p1a: Clefairy|spd|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 2
+C p2 move 1 2, move 2 2
+B 4 739,27481,46588,26458
+L |
+L |t:|
+L |move|p2a: Perrserker|Bullet Punch|p1b: Stonjourner
+L |-supereffective|p1b: Stonjourner
+L |split|p1
+L |-damage|p1b: Stonjourner|272/404
+L |-damage|p1b: Stonjourner|68/100
+L |move|p1b: Stonjourner|Calm Mind|p1b: Stonjourner
+L |-boost|p1b: Stonjourner|spa|1
+L |-boost|p1b: Stonjourner|spd|1
+L |move|p1a: Clefairy|Dazzling Gleam|p2b: Kingambit|[spread] p2a,p2b
+L |-resisted|p2a: Perrserker
+L |split|p2
+L |-damage|p2a: Perrserker|99/243
+L |-damage|p2a: Perrserker|41/100
+L |split|p2
+L |-damage|p2b: Kingambit|35/285
+L |-damage|p2b: Kingambit|13/100
+L |move|p2b: Kingambit|Brick Break|p1b: Stonjourner
+L |-supereffective|p1b: Stonjourner
+L |split|p1
+L |-damage|p1b: Stonjourner|230/404
+L |-damage|p1b: Stonjourner|57/100
+L |
+L |upkeep
+L |turn|4
+C p1 move 2, move 1
+C p2 move 3, move 3
+B 5 47091,60,12407,10303
+L |
+L |t:|
+L |move|p1b: Stonjourner|Rock Slide|p2a: Perrserker|[spread] p2a,p2b
+L |-resisted|p2a: Perrserker
+L |-resisted|p2b: Kingambit
+L |split|p2
+L |-damage|p2a: Perrserker|49/243
+L |-damage|p2a: Perrserker|21/100
+L |split|p2
+L |-damage|p2b: Kingambit|0 fnt
+L |-damage|p2b: Kingambit|0 fnt
+L |faint|p2b: Kingambit
+L |move|p1a: Clefairy|Calm Mind|p1a: Clefairy
+L |-boost|p1a: Clefairy|spa|1
+L |-boost|p1a: Clefairy|spd|1
+L |move|p2a: Perrserker|Calm Mind|p2a: Perrserker
+L |-boost|p2a: Perrserker|spa|1
+L |-boost|p2a: Perrserker|spd|1
+L |
+L |upkeep
+L |turn|5
+E running
+S armor_tail
+SEED 33,34,35,36
+T1 |Farigiraf||Armor Tail|calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Dondozo||Unaware|calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|suckerpunch,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Hitmontop||Intimidate|quickattack,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 33,34,35,36
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Farigiraf|Farigiraf, M|444/444
+L |switch|p1a: Farigiraf|Farigiraf, M|100/100
+L |split|p1
+L |switch|p1b: Dondozo|Dondozo, M|504/504
+L |switch|p1b: Dondozo|Dondozo, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2a: Kingambit|Kingambit, L50, M|100/100
+L |split|p2
+L |switch|p2b: Hitmontop|Hitmontop, L50, M|157/157
+L |switch|p2b: Hitmontop|Hitmontop, L50, M|100/100
+L |-ability|p2b: Hitmontop|Intimidate|boost
+L |-unboost|p1a: Farigiraf|atk|1
+L |-unboost|p1b: Dondozo|atk|1
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1 1, move 1 2
+B 2 33,34,35,36
+L |
+L |t:|
+L |move|p2b: Hitmontop|Quick Attack||[still]
+L |cant|p1a: Farigiraf|ability: Armor Tail|Quick Attack|[of] p2b: Hitmontop
+L |move|p2a: Kingambit|Sucker Punch||[still]
+L |cant|p1a: Farigiraf|ability: Armor Tail|Sucker Punch|[of] p2a: Kingambit
+L |move|p1a: Farigiraf|Calm Mind|p1a: Farigiraf
+L |-boost|p1a: Farigiraf|spa|1
+L |-boost|p1a: Farigiraf|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 2 1, move 2 2
+B 3 18365,47644,6918,59754
+L |
+L |t:|
+L |move|p1a: Farigiraf|Calm Mind|p1a: Farigiraf
+L |-boost|p1a: Farigiraf|spa|1
+L |-boost|p1a: Farigiraf|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |move|p2b: Hitmontop|Brick Break|p1b: Dondozo
+L |split|p1
+L |-damage|p1b: Dondozo|486/504
+L |-damage|p1b: Dondozo|97/100
+L |move|p2a: Kingambit|Brick Break|p1a: Farigiraf
+L |split|p1
+L |-damage|p1a: Farigiraf|420/444
+L |-damage|p1a: Farigiraf|95/100
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 1 2, move 1 1
+B 4 18365,47644,6918,59754
+L |
+L |t:|
+L |move|p2b: Hitmontop|Quick Attack||[still]
+L |cant|p1a: Farigiraf|ability: Armor Tail|Quick Attack|[of] p2b: Hitmontop
+L |move|p2a: Kingambit|Sucker Punch||[still]
+L |cant|p1a: Farigiraf|ability: Armor Tail|Sucker Punch|[of] p2a: Kingambit
+L |move|p1a: Farigiraf|Calm Mind|p1a: Farigiraf
+L |-boost|p1a: Farigiraf|spa|1
+L |-boost|p1a: Farigiraf|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|4
+E running
+S queenly_majesty
+SEED 37,38,39,40
+T1 |Tsareena||Queenly Majesty|calmmind,brickbreak|Serious|252,0,128,0,128,0|F|||100|,,,,,]|Dondozo||Unaware|calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|fakeout,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Hitmontop||Intimidate|quickattack,brickbreak,calmmind|Serious|252,0,128,0,128,0|M|||50|,,,,,
+B 1 37,38,39,40
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Tsareena|Tsareena, F|348/348
+L |switch|p1a: Tsareena|Tsareena, F|100/100
+L |split|p1
+L |switch|p1b: Dondozo|Dondozo, M|504/504
+L |switch|p1b: Dondozo|Dondozo, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, L50, M|207/207
+L |switch|p2a: Kingambit|Kingambit, L50, M|100/100
+L |split|p2
+L |switch|p2b: Hitmontop|Hitmontop, L50, M|157/157
+L |switch|p2b: Hitmontop|Hitmontop, L50, M|100/100
+L |-ability|p2b: Hitmontop|Intimidate|boost
+L |-unboost|p1a: Tsareena|atk|1
+L |-unboost|p1b: Dondozo|atk|1
+L |turn|1
+C p1 move 1, move 1
+C p2 move 1 2, move 1 1
+B 2 37,38,39,40
+L |
+L |t:|
+L |move|p2a: Kingambit|Fake Out||[still]
+L |cant|p1a: Tsareena|ability: Queenly Majesty|Fake Out|[of] p2a: Kingambit
+L |move|p2b: Hitmontop|Quick Attack||[still]
+L |cant|p1a: Tsareena|ability: Queenly Majesty|Quick Attack|[of] p2b: Hitmontop
+L |move|p1a: Tsareena|Calm Mind|p1a: Tsareena
+L |-boost|p1a: Tsareena|spa|1
+L |-boost|p1a: Tsareena|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 1, move 1
+C p2 move 2 1, move 1 2
+B 3 22251,46777,33275,901
+L |
+L |t:|
+L |move|p2b: Hitmontop|Quick Attack||[still]
+L |cant|p1a: Tsareena|ability: Queenly Majesty|Quick Attack|[of] p2b: Hitmontop
+L |move|p1a: Tsareena|Calm Mind|p1a: Tsareena
+L |-boost|p1a: Tsareena|spa|1
+L |-boost|p1a: Tsareena|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |move|p2a: Kingambit|Brick Break|p1a: Tsareena
+L |split|p1
+L |-damage|p1a: Tsareena|329/348
+L |-damage|p1a: Tsareena|95/100
+L |
+L |upkeep
+L |turn|3
+C p1 move 1, move 1
+C p2 move 3, move 2 2
+B 4 32336,15002,24604,57998
+L |
+L |t:|
+L |move|p1a: Tsareena|Calm Mind|p1a: Tsareena
+L |-boost|p1a: Tsareena|spa|1
+L |-boost|p1a: Tsareena|spd|1
+L |move|p1b: Dondozo|Calm Mind|p1b: Dondozo
+L |-boost|p1b: Dondozo|spa|1
+L |-boost|p1b: Dondozo|spd|1
+L |move|p2b: Hitmontop|Brick Break|p1b: Dondozo
+L |split|p1
+L |-damage|p1b: Dondozo|485/504
+L |-damage|p1b: Dondozo|97/100
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|4
+E running
+S dragon_darts_into_protect
+SEED 41,42,43,44
+T1 |Dragapult||Clear Body|dragondarts,calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||50|,,,,,]|Corviknight||Pressure|calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+T2 |Kingambit||Defiant|protect,calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,]|Dondozo||Unaware|protect,calmmind,brickbreak|Serious|252,0,128,0,128,0|M|||100|,,,,,
+B 1 41,42,43,44
+L |t:|
+L |gametype|doubles
+L |player|p1|Alice||
+L |player|p2|Bob||
+L |gen|9
+L |tier|[Gen 9] Random Doubles Battle
+L |rule|Species Clause: Limit one of each Pokémon
+L |rule|HP Percentage Mod: HP is shown in percentages
+L |rule|Illusion Level Mod: Illusion disguises the Pokémon's true level
+L |rule|Sleep Clause Mod: Limit one foe put to sleep
+L |
+L |t:|
+L |teamsize|p1|2
+L |teamsize|p2|2
+L |start
+L |split|p1
+L |switch|p1a: Dragapult|Dragapult, L50, M|195/195
+L |switch|p1a: Dragapult|Dragapult, L50, M|100/100
+L |split|p1
+L |switch|p1b: Corviknight|Corviknight, M|400/400
+L |switch|p1b: Corviknight|Corviknight, M|100/100
+L |split|p2
+L |switch|p2a: Kingambit|Kingambit, M|404/404
+L |switch|p2a: Kingambit|Kingambit, M|100/100
+L |split|p2
+L |switch|p2b: Dondozo|Dondozo, M|504/504
+L |switch|p2b: Dondozo|Dondozo, M|100/100
+L |-ability|p1b: Corviknight|Pressure
+L |turn|1
+C p1 move 1 1, move 1
+C p2 move 1, move 2
+B 2 46306,47896,42290,56242
+L |
+L |t:|
+L |move|p2a: Kingambit|Protect|p2a: Kingambit
+L |-singleturn|p2a: Kingambit|Protect
+L |move|p1b: Corviknight|Calm Mind|p1b: Corviknight
+L |-boost|p1b: Corviknight|spa|1
+L |-boost|p1b: Corviknight|spd|1
+L |move|p1a: Dragapult|Dragon Darts|p2b: Dondozo
+L |split|p2
+L |-damage|p2b: Dondozo|489/504
+L |-damage|p2b: Dondozo|98/100
+L |-anim|p1a: Dragapult|Dragon Darts|p2b: Dondozo
+L |split|p2
+L |-damage|p2b: Dondozo|474/504
+L |-damage|p2b: Dondozo|95/100
+L |move|p2b: Dondozo|Calm Mind|p2b: Dondozo
+L |-boost|p2b: Dondozo|spa|1
+L |-boost|p2b: Dondozo|spd|1
+L |
+L |upkeep
+L |turn|2
+C p1 move 1 2, move 1
+C p2 move 2, move 1
+B 3 33711,50087,5732,26856
+L |
+L |t:|
+L |move|p2b: Dondozo|Protect|p2b: Dondozo
+L |-singleturn|p2b: Dondozo|Protect
+L |move|p1b: Corviknight|Calm Mind|p1b: Corviknight
+L |-boost|p1b: Corviknight|spa|1
+L |-boost|p1b: Corviknight|spd|1
+L |move|p1a: Dragapult|Dragon Darts|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|397/404
+L |-damage|p2a: Kingambit|99/100
+L |-anim|p1a: Dragapult|Dragon Darts|p2a: Kingambit
+L |-resisted|p2a: Kingambit
+L |split|p2
+L |-damage|p2a: Kingambit|390/404
+L |-damage|p2a: Kingambit|97/100
+L |move|p2a: Kingambit|Calm Mind|p2a: Kingambit
+L |-boost|p2a: Kingambit|spa|1
+L |-boost|p2a: Kingambit|spd|1
+L |
+L |upkeep
+L |turn|3
+C p1 move 1 1, move 1
+C p2 move 1, move 1
+B 4 58170,48321,35451,8329
+L |
+L |t:|
+L |move|p2a: Kingambit|Protect|p2a: Kingambit
+L |-singleturn|p2a: Kingambit|Protect
+L |move|p2b: Dondozo|Protect||[still]
+L |-fail|p2b: Dondozo
+L |move|p1b: Corviknight|Calm Mind|p1b: Corviknight
+L |-boost|p1b: Corviknight|spa|1
+L |-boost|p1b: Corviknight|spd|1
+L |move|p1a: Dragapult|Dragon Darts|p2b: Dondozo
+L |split|p2
+L |-damage|p2b: Dondozo|458/504
+L |-damage|p2b: Dondozo|91/100
+L |-anim|p1a: Dragapult|Dragon Darts|p2b: Dondozo
+L |split|p2
+L |-damage|p2b: Dondozo|442/504
+L |-damage|p2b: Dondozo|88/100
+L |
+L |upkeep
+L |turn|4
+E running

@@ -29,6 +29,10 @@ use crate::{
     state::scratch::{OrderedBoosts, move_runtime},
 };
 
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;
+
 /// `battle.activePerHalf` (battle.ts:221): gen9randomdoublesbattle is a `doubles` game, so 2.
 pub const ACTIVE_PER_HALF: u32 = 2;
 
