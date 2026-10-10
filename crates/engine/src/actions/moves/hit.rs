@@ -1200,22 +1200,8 @@ impl<L: LogSink> Battle<L> {
     ) -> TargetResults {
         let mut damage = damage;
         if matches!(hit_effect, HitEffect::Primary) {
-            let fresh = self.get_spread_damage(targets, user, move_handle);
-            let mut last = None;
-            for i in 0..targets.count() {
-                if let Some(t) = targets.mon_at(i) {
-                    // getDamage false and null both mean "damage[i] = false".
-                    let v = match fresh.at(i) {
-                        Relay::Null => Relay::FAIL,
-                        v => v,
-                    };
-                    damage.set(i, v);
-                    last = Some(t);
-                }
-            }
-            if let Some(t) = last {
-                self.scratch.active_target = t;
-            }
+            // D keeps the incoming relay for targets that are already null/false.
+            damage = self.get_spread_damage_from(damage, targets, user, move_handle);
         } else {
             for i in 0..targets.count() {
                 if let Some(t) = targets.mon_at(i) {
