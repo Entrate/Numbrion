@@ -144,9 +144,8 @@ fn yawn_scenarios_match_pinned_showdown() {
 /// Rest and the Dire Claw / Tri Attack lotteries. These scenarios switch statused Pokemon out on
 /// purpose (to bring fresh targets in), and every voluntary switch of a statused Pokemon runs
 /// `singleEvent('CheckShow', naturalcure)` (sim/battle.ts:2767), whose handler belongs to the
-/// healing_residual batch. Verified passing bit-for-bit with that port applied.
+/// healing_residual batch (without that file they panic as "unimplemented effect hook").
 #[test]
-#[ignore = "needs abilities:naturalcure onCheckShow (healing_residual batch)"]
 fn rest_and_lottery_scenarios_match_pinned_showdown() {
     replay(&["rest_branches", "status_lotteries"]);
 }
