@@ -14,7 +14,9 @@ when the owning module merges; difftest is the final arbiter.
   semantics incl. omitted-source defaulting (`this.boost(...)` without source = undefined, defaults
   from the event) — see effects-reactive_stats.md.
 
-## actions/moves (owner M) — open core issues
-- `hit_single_event` (actions/moves/hit.rs) sets the current effect to the live move for a secondary's
-  `onHit`; Showdown's current effect there is the plain secondary object. Dire Claw/Tri Attack work
-  around it by passing `EffectRef::Dex(EffectId::NONE)` explicitly (rules_status report). Fix centrally.
+## actions/moves (owner M) — resolved in fix loop 1
+- Resolved: `HitView.callback_effect` distinguishes the live primary move from anonymous nested
+  hit objects in both `hit_single_event` and `run_move_effects`. `sourceEffect` remains the live move.
+  Dire Claw/Tri Attack now use ordinary source-effect defaulting; the per-effect workaround is removed.
+- The mutator defaulting items above are already implemented centrally in `mutation_attribution`,
+  `heal`, and `effective_terrain`; their oracle vectors and full-battle scenarios pass.

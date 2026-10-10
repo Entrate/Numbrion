@@ -7,6 +7,46 @@ use crate::{
     state::scratch::move_runtime as rt,
 };
 
+#[test]
+fn secondary_sleep_defaults_to_the_anonymous_hit_object() {
+    use crate::{
+        actions::{HitEffect, HitOptions, TargetResults},
+        dex,
+        ids::MonId,
+        log::TextLog,
+    };
+    let mon = "Mew|||earlybird|irondefense|Serious||N|||100|,,,,,Normal";
+    let team = format!("{mon}]{mon}");
+    let mut b =
+        crate::Battle::from_players([1, 2, 3, 4], ("A", &team), ("B", &team), TextLog::default())
+            .unwrap();
+    b.start().unwrap();
+    let mut log = Vec::new();
+    b.drain_log(&mut log);
+    log.clear();
+    let h = b.get_active_move(MoveInput::Dex(dex::MOVE_DIRECLAW));
+    let list = b.stash_secondaries(b.active_move(h).secondaries);
+    b.state.prng = Prng::from_seed([0, 0, 0, 2]); // sample chooses sleep, then its duration
+    b.run_move_effects(
+        TargetResults {
+            values: [Relay::Undefined; 4],
+            len: 1,
+        },
+        Targets::single(HitTarget::Pokemon(MonId(6))),
+        MonId(0),
+        h,
+        HitEffect::Secondary(secondary_code(list, 0)),
+        HitOptions {
+            secondary: true,
+            self_hit: false,
+        },
+    );
+    b.drain_log(&mut log);
+    assert_eq!(log, ["|-status|p2a: Mew|slp"]);
+    assert_eq!(b.seed(), [21985, 47036, 24629, 8292]);
+    b.release_relay(Relay::Secondaries(list));
+}
+
 fn boosts_json(b: &crate::Battle, mon: crate::ids::MonId) -> String {
     let v = b.state.pokemon[mon.0 as usize].boosts;
     format!(
