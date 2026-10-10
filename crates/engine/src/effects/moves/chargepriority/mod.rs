@@ -81,8 +81,8 @@ pub fn spa_plus_one() -> OrderedBoosts {
 /// `me first`: not in the generated scope, so `NONE` (which never equals a live move id).
 const MEFIRST: EffectId = optional_id(dex::MOVES_DATA, "mefirst");
 
-/// onTry(source, target) of Sucker Punch (data/moves.ts:18405-18412) and Thunderclap
-/// (19506-19513), identical statement for statement:
+/// onTry(source, target) of Sucker Punch (data/moves.ts:18405-18411) and Thunderclap
+/// (19506-19512), identical statement for statement:
 ///
 /// ```text
 /// const action = this.queue.willMove(target);
@@ -164,20 +164,20 @@ pub fn charge_try_move<L: LogSink>(
             false,
         );
     }
-    if let Some(weather) = skip_weather {
-        if b.effective_weather(attacker) == weather {
-            b.attr_last_move(MoveLineEdit::Still);
-            b.add_move(LogEntry::new(
-                "-anim",
-                &[
-                    LogArg::Mon(attacker),
-                    LogArg::Effect(effect),
-                    LogArg::Mon(defender),
-                ],
-                &[],
-            ));
-            return Relay::Undefined;
-        }
+    if let Some(weather) = skip_weather
+        && b.effective_weather(attacker) == weather
+    {
+        b.attr_last_move(MoveLineEdit::Still);
+        b.add_move(LogEntry::new(
+            "-anim",
+            &[
+                LogArg::Mon(attacker),
+                LogArg::Effect(effect),
+                LogArg::Mon(defender),
+            ],
+            &[],
+        ));
+        return Relay::Undefined;
     }
     if !b
         .prepare_charge_move(attacker, holder(defender), MoveHandle(mv))

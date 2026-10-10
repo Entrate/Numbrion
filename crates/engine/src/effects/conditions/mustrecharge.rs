@@ -1,4 +1,4 @@
-//! Ports data/conditions.ts:364-380 (mustrecharge; `duration: 2` is declarative and `onLockMove:
+//! Ports data/conditions.ts:364-378 (mustrecharge; `duration: 2` is declarative and `onLockMove:
 //! 'recharge'` is a manifest constant that the core turns into the synthetic Recharge move).
 //! No payload. PRNG: none directly.
 use crate::{

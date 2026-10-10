@@ -117,9 +117,10 @@ fn apply_pre(b: &mut Battle<TextLog>, op: &[&str]) {
     assert!(result.truthy(), "addVolatile {op:?} failed");
 }
 
-/// Replays every scenario (or just `only`) and compares the exact log lines and PRNG state after every decision boundary.
-fn run_scenarios(only: Option<&str>) {
-    for sc in parse_scenarios(include_str!("scenarios.txt")) {
+/// Replays every scenario in `text` (or just `only`) and compares the exact log lines and PRNG state after every
+/// decision boundary.
+fn replay(text: &'static str, only: Option<&str>) {
+    for sc in parse_scenarios(text) {
         if only.is_some_and(|n| n != sc.name) {
             continue;
         }
@@ -163,11 +164,30 @@ fn run_scenarios(only: Option<&str>) {
     }
 }
 
+fn run_scenarios(only: Option<&str>) {
+    replay(include_str!("scenarios.txt"), only);
+}
+
 /// Exact log lines and PRNG state after every decision boundary of the directed battles.
 /// Set CPM_SCENARIO=<name> to run just one.
 #[test]
 fn scenarios_match_pinned_showdown() {
     run_scenarios(std::env::var("CPM_SCENARIO").ok().as_deref());
+}
+
+/// The same battles with the real Protect / Taunt / Helping Hand / Follow Me / Leech Seed / Rest / Roost / Spikes /
+/// Tailwind / Knock Off / Super Fang in the slots that `scenarios.txt` fills with declarative stand-ins
+/// (`SC_KEEP_OTHER_BATCH_MOVES=1 node tools/probes/charge_priority_multihit/scenarios.mjs --out .../scenarios_full.txt`).
+/// Run it once the batches owning those callbacks (protect_redirection, disable_lock_trap, move_callbacks,
+/// hazards_screens, healing_residual) are merged; it adds Phantom/Shadow Force breaking Protect, Fake Out into Protect,
+/// Taunted Prankster users and so on.
+#[test]
+#[ignore = "needs the Protect/Taunt/Knock Off... callbacks of the other batches"]
+fn scenarios_with_other_batch_moves_match_pinned_showdown() {
+    replay(
+        include_str!("scenarios_full.txt"),
+        std::env::var("CPM_SCENARIO").ok().as_deref(),
+    );
 }
 
 /// Every function site of the batch is invoked by the scenarios. The reached set is process-wide, so this must run

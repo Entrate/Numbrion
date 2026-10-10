@@ -1,4 +1,4 @@
-//! Ports data/conditions.ts:287-327 (twoturnmove: Solar Beam, Meteor Beam, Electro Shot, Phantom Force,
+//! Ports data/conditions.ts:287-323 (twoturnmove: Solar Beam, Meteor Beam, Electro Shot, Phantom Force,
 //! Shadow Force; `duration: 2` is declarative).
 //!
 //! Payload map (PAYLOAD_WORDS = 1): `words[0]` = `effectState.move`, the EffectId of the charging
@@ -46,7 +46,7 @@ fn stored_move<L: LogSink>(b: &Battle<L>, cx: HookCtx) -> EffectId {
 
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/conditions.ts:290-312 onStart(attacker, defender, effect). `attacker` is the user of the
+        // data/conditions.ts:291-313 onStart(attacker, defender, effect). `attacker` is the user of the
         // two-turn move and the Pokemon the condition is applied to; `effect` is the charging move
         // (the ActiveMove that called addVolatile('twoturnmove', defender)).
         dex::HOOK_CONDITION_TWOTURNMOVE_ONSTART => {
@@ -54,7 +54,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             let mut defender = mon_arg(b, cx, 1);
             let effect = match b.event_arg(cx, 2) {
                 EventArg::Effect(e) => e,
-                other => panic!("twoturnmove Start without an effect: {other:?}"),
+                _ => panic!("twoturnmove Start without an effect"),
             };
             let move_id = b.event_effect_id(effect);
             // this.effectState.move = effect.id;
@@ -85,7 +85,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
                     let i = b.state.prng.sample_index(foes.len as usize);
                     defender = match foes.entries[i] {
                         crate::actions::HitTarget::Pokemon(m) => m,
-                        other => panic!("foes() entry {other:?} is not a Pokemon"),
+                        _ => panic!("foes() entry is not a Pokemon"),
                     };
                 }
                 // moveTargetLoc = attacker.getLocOf(defender);
@@ -113,17 +113,17 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             );
             Relay::Undefined
         }
-        // data/conditions.ts:313-315 onEnd(target): `target.removeVolatile(this.effectState.move)`.
+        // data/conditions.ts:314-316 onEnd(target): `target.removeVolatile(this.effectState.move)`.
         dex::HOOK_CONDITION_TWOTURNMOVE_ONEND => {
             let target = mon_arg(b, cx, 0);
             let move_id = stored_move(b, cx);
             b.remove_volatile(target, move_id);
             Relay::Undefined
         }
-        // data/conditions.ts:316-318 onLockMove(): `return this.effectState.move` (a move id, which the
+        // data/conditions.ts:317-319 onLockMove(): `return this.effectState.move` (a move id, which the
         // core turns into the forced move).
         dex::HOOK_CONDITION_TWOTURNMOVE_ONLOCKMOVE => Relay::Move(stored_move(b, cx)),
-        // data/conditions.ts:319-321 onMoveAborted(pokemon): `pokemon.removeVolatile('twoturnmove')`.
+        // data/conditions.ts:320-322 onMoveAborted(pokemon): `pokemon.removeVolatile('twoturnmove')`.
         dex::HOOK_CONDITION_TWOTURNMOVE_ONMOVEABORTED => {
             let pokemon = mon_arg(b, cx, 0);
             b.remove_volatile(pokemon, dex::CONDITION_TWOTURNMOVE);

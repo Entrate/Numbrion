@@ -19,7 +19,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/abilities.ts:2796-2800 onFractionalPriority(priority, pokemon, target, move) (manifest
+        // data/abilities.ts:2797-2801 onFractionalPriority(priority, pokemon, target, move) (manifest
         // priority -1): `move.category === 'Status'` -> -0.1, else undefined. The runEvent relay
         // starts at 0 (battle-queue.ts:249) and the event args are (priority, pokemon, null, move).
         // PRNG: none.
@@ -32,7 +32,7 @@ pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Rel
             }
             Relay::Undefined
         }
-        // data/abilities.ts:2801-2805 onModifyMove(move): `move.category === 'Status'` ->
+        // data/abilities.ts:2802-2806 onModifyMove(move): `move.category === 'Status'` ->
         // `move.ignoreAbility = true`. PRNG: none.
         dex::HOOK_ABILITY_MYCELIUMMIGHT_ONMODIFYMOVE => {
             let Some(mv) = cp::live_move_arg(b, cx, 0) else {

@@ -17,7 +17,7 @@ pub const WAIVERS: &[HookWaiver] = &[];
 const _: () = assert!(PAYLOAD_WORDS <= 4);
 pub fn dispatch<L: LogSink>(hook: HookId, b: &mut Battle<L>, cx: HookCtx) -> Relay {
     match hook {
-        // data/items.ts:3460-3464 onModifyMove(move): `if (move.multiaccuracy) delete move.multiaccuracy`
+        // data/items.ts:3461-3465 onModifyMove(move): `if (move.multiaccuracy) delete move.multiaccuracy`
         // (MULTIACCURACY is the live, not-deleted bit). PRNG: none.
         dex::HOOK_ITEM_LOADEDDICE_ONMODIFYMOVE => {
             let Some(mv) = cp::live_move_arg(b, cx, 0) else {
