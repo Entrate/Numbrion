@@ -1,0 +1,856 @@
+# Callback oracle vectors from tools/probes/weather_terrain/callbacks.mjs (pinned Showdown). Do not edit by hand.
+# effect	hook	weather	terrain	userTypes	userSemi	foeTypes	foeSemi	moveType	moveId	input	immunity	noTarget	relay	modifier	accuracy	basePower	moveTypeOut	targetOut	usesTerrain
+abilities:chlorophyll	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	8192	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	8192	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:chlorophyll	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	8192	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	8192	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:swiftswim	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	8192	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	8192	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	raindance		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	8192	70	50	Normal	normal	0
+abilities:slushrush	onModifySpe	snowscape		Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	8192	70	50	Normal	normal	0
+abilities:surgesurfer	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	8192	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	8192	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:surgesurfer	onModifySpe		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+abilities:solarpower	onModifySpA			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA			Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	6144	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	6144	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	raindance		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:solarpower	onModifySpA	snowscape		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk			Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	5461	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	5461	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	raindance		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+abilities:orichalcumpulse	onModifyAtk	snowscape		Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	0
+abilities:hadronengine	onModifySpA			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA			Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	5461	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	5461	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+abilities:hadronengine	onModifySpA		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	7		0	undefined	4096	70	50	Normal	normal	1
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+abilities:sandforce	onBasePower			Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+abilities:sandforce	onBasePower	sunnyday		Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+abilities:sandforce	onBasePower	raindance		Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	5325	70	50	Rock	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	5325	70	50	Ground	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	5325	70	50	Steel	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+abilities:sandforce	onBasePower	sandstorm		Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+abilities:sandforce	onBasePower	snowscape		Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+abilities:sandforce	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	false	4096	70	50	Normal	normal	0
+abilities:sandforce	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+abilities:sandforce	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	false	4096	70	50	Normal	normal	0
+abilities:sandrush	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+abilities:sandrush	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+abilities:icebody	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+abilities:icebody	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	false	4096	70	50	Normal	normal	0
+abilities:icebody	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+abilities:icebody	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity			Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	false	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	raindance		Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	raindance		Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	raindance		Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	raindance		Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100	sandstorm	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100	hail	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100	frz	0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onImmunity	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100	par	0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage			Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	2048	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	2048	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	6144	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	6144	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:raindance	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage			Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	6144	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	6144	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	2048	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	2048	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sunnyday		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	raindance		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	sandstorm		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Normal	thunderbolt	77		0	undefined	4096	70	50	Normal	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Fire	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Fire	thunderbolt	77		0	undefined	4096	70	50	Fire	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Water	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Water	thunderbolt	77		0	undefined	4096	70	50	Water	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Rock	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Rock	thunderbolt	77		0	undefined	4096	70	50	Rock	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ground	thunderbolt	100		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ground	thunderbolt	77		0	undefined	4096	70	50	Ground	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Steel	thunderbolt	100		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Steel	thunderbolt	77		0	undefined	4096	70	50	Steel	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Electric	thunderbolt	100		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Electric	thunderbolt	77		0	undefined	4096	70	50	Electric	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Grass	thunderbolt	100		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Grass	thunderbolt	77		0	undefined	4096	70	50	Grass	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Psychic	thunderbolt	100		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Psychic	thunderbolt	77		0	undefined	4096	70	50	Psychic	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ice	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Ice	thunderbolt	77		0	undefined	4096	70	50	Ice	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Flying	thunderbolt	100		0	undefined	4096	70	50	Flying	normal	0
+conditions:sunnyday	onWeatherModifyDamage	snowscape		Normal	0	Normal	0	Flying	thunderbolt	77		0	undefined	4096	70	50	Flying	normal	0
+conditions:sandstorm	onModifySpD			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Rock,Ground	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD			Rock,Ground	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Rock,Ground	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sunnyday		Rock,Ground	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Rock,Ground	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	raindance		Rock,Ground	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Rock	0	Normal	0	Normal	thunderbolt	100		0	150	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Rock	0	Normal	0	Normal	thunderbolt	191		0	286	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Rock,Ground	0	Normal	0	Normal	thunderbolt	100		0	150	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	sandstorm		Rock,Ground	0	Normal	0	Normal	thunderbolt	191		0	286	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Rock,Ground	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:sandstorm	onModifySpD	snowscape		Rock,Ground	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Ice,Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef			Ice,Flying	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Ice,Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sunnyday		Ice,Flying	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Ice,Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	raindance		Ice,Flying	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Ice	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Ice	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Ice,Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	sandstorm		Ice,Flying	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Normal	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Rock	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Rock	0	Normal	0	Normal	thunderbolt	191		0	undefined	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Ice	0	Normal	0	Normal	thunderbolt	100		0	150	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Ice	0	Normal	0	Normal	thunderbolt	191		0	286	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Ice,Flying	0	Normal	0	Normal	thunderbolt	100		0	150	4096	70	50	Normal	normal	0
+conditions:snowscape	onModifyDef	snowscape		Ice,Flying	0	Normal	0	Normal	thunderbolt	191		0	286	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	5325	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Normal	1	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Flying	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Flying	1	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Electric	thunderbolt	60		0	undefined	5325	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Electric	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:electricterrain	onBasePower			Electric	1	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Normal	earthquake	60		0	undefined	2048	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Fire	earthquake	60		0	undefined	2048	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Water	earthquake	60		0	undefined	2048	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Rock	earthquake	60		0	undefined	2048	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Ground	earthquake	60		0	undefined	2048	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Steel	earthquake	60		0	undefined	2048	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Electric	earthquake	60		0	undefined	2048	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Grass	earthquake	60		0	undefined	2048	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Psychic	earthquake	60		0	undefined	2048	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Ice	earthquake	60		0	undefined	2048	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	0	Flying	earthquake	60		0	undefined	2048	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Grass	thunderbolt	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Grass	earthquake	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Normal	1	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Grass	thunderbolt	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Grass	earthquake	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	0	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Grass	thunderbolt	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Grass	earthquake	60		0	undefined	5325	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Normal	0	Flying	1	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Normal	earthquake	60		0	undefined	2048	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Fire	earthquake	60		0	undefined	2048	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Water	earthquake	60		0	undefined	2048	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Rock	earthquake	60		0	undefined	2048	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Ground	earthquake	60		0	undefined	2048	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Steel	earthquake	60		0	undefined	2048	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Electric	earthquake	60		0	undefined	2048	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Grass	earthquake	60		0	undefined	2048	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Psychic	earthquake	60		0	undefined	2048	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Ice	earthquake	60		0	undefined	2048	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	0	Flying	earthquake	60		0	undefined	2048	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Grass	earthquake	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Normal	1	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Grass	earthquake	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	0	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Normal	earthquake	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Fire	earthquake	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Water	earthquake	60		0	undefined	4096	70	50	Water	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Rock	earthquake	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Ground	earthquake	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Steel	earthquake	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Electric	earthquake	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Grass	earthquake	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Psychic	earthquake	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Ice	earthquake	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:grassyterrain	onBasePower			Flying	0	Flying	1	Flying	earthquake	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Psychic	thunderbolt	60		0	undefined	5325	70	50	Psychic	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:psychicterrain	onBasePower			Normal	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:psychicterrain	onBasePower			Normal	1	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:psychicterrain	onBasePower			Flying	0	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Normal	thunderbolt	60		0	undefined	4096	70	50	Normal	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Fire	thunderbolt	60		0	undefined	4096	70	50	Fire	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Water	thunderbolt	60		0	undefined	4096	70	50	Water	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Rock	thunderbolt	60		0	undefined	4096	70	50	Rock	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Ground	thunderbolt	60		0	undefined	4096	70	50	Ground	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Steel	thunderbolt	60		0	undefined	4096	70	50	Steel	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Electric	thunderbolt	60		0	undefined	4096	70	50	Electric	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Grass	thunderbolt	60		0	undefined	4096	70	50	Grass	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Psychic	thunderbolt	60		0	undefined	4096	70	50	Psychic	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Ice	thunderbolt	60		0	undefined	4096	70	50	Ice	normal	0
+terrain:psychicterrain	onBasePower			Flying	1	Normal	0	Flying	thunderbolt	60		0	undefined	4096	70	50	Flying	normal	0
+moves:expandingforce	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower			Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		electricterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		grassyterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	6144	70	50	Normal	normal	1
+moves:expandingforce	onBasePower		psychicterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove			Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove		electricterrain	Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove		grassyterrain	Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:expandingforce	onModifyMove		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	allAdjacentFoes	1
+moves:expandingforce	onModifyMove		psychicterrain	Flying	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower			Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower			Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	6144	70	50	Normal	normal	1
+moves:psyblade	onBasePower		electricterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	6144	70	50	Normal	normal	1
+moves:psyblade	onBasePower		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower		grassyterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:psyblade	onBasePower		psychicterrain	Flying	0	Normal	0	Normal	thunderbolt	80		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority			Normal	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority			Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority			Flying	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority			Flying	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		electricterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		electricterrain	Flying	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		electricterrain	Flying	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	0		0	1	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		grassyterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	2	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		grassyterrain	Flying	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		grassyterrain	Flying	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		psychicterrain	Normal	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		psychicterrain	Flying	0	Normal	0	Normal	thunderbolt	0		0	undefined	4096	70	50	Normal	normal	1
+moves:grassyglide	onModifyPriority		psychicterrain	Flying	0	Normal	0	Normal	thunderbolt	1		0	undefined	4096	70	50	Normal	normal	1
+moves:bleakwindstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:bleakwindstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:sandsearstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:wildboltstorm	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	50	50	Normal	normal	0
+moves:hurricane	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:hurricane	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:hurricane	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	50	50	Normal	normal	0
+moves:thunder	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:thunder	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:thunder	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		1	undefined	4096	70	50	Normal	normal	0
+moves:blizzard	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:blizzard	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:blizzard	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:blizzard	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:blizzard	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	true	50	Normal	normal	0
+moves:weatherball	onModifyType			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:weatherball	onModifyType	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Fire	normal	0
+moves:weatherball	onModifyType	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Water	normal	0
+moves:weatherball	onModifyType	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Rock	normal	0
+moves:weatherball	onModifyType	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Ice	normal	0
+moves:weatherball	onModifyMove			Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	50	Normal	normal	0
+moves:weatherball	onModifyMove	sunnyday		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	100	Normal	normal	0
+moves:weatherball	onModifyMove	raindance		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	100	Normal	normal	0
+moves:weatherball	onModifyMove	sandstorm		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	100	Normal	normal	0
+moves:weatherball	onModifyMove	snowscape		Normal	0	Normal	0	Normal	thunderbolt	100		0	undefined	4096	70	100	Normal	normal	0

@@ -1,0 +1,968 @@
+D	thunderbolt	Water	-	unset	198	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Water	-	true	318	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Water	-	false	212	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Water	Electric	unset	264	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Water	Electric	true	424	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Water	Electric	false	284	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Water	Water	unset	198	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Water	Water	true	318	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Water	Water	false	212	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Water	Stellar	unset	264	0	1	57890,13032,12358,42006	-supereffective	Electric
+D	thunderbolt	Water	Stellar	true	424	1	1	30982,33910,19571,50263	-supereffective,-crit	Electric
+D	thunderbolt	Water	Stellar	false	284	0	1	30982,33910,19571,50263	-supereffective	Electric
+D	thunderbolt	Ground	-	unset	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	-	true	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	-	false	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Electric	unset	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Electric	true	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Electric	false	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Water	unset	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Water	true	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Water	false	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Stellar	unset	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Stellar	true	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Ground	Stellar	false	false	0	0	1,2,3,4	-immune	-
+D	thunderbolt	Electric	-	unset	49	0	-1	57890,13032,12358,42006	-resisted	-
+D	thunderbolt	Electric	-	true	79	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	thunderbolt	Electric	-	false	53	0	-1	30982,33910,19571,50263	-resisted	-
+D	thunderbolt	Electric	Electric	unset	66	0	-1	57890,13032,12358,42006	-resisted	-
+D	thunderbolt	Electric	Electric	true	106	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	thunderbolt	Electric	Electric	false	71	0	-1	30982,33910,19571,50263	-resisted	-
+D	thunderbolt	Electric	Water	unset	49	0	-1	57890,13032,12358,42006	-resisted	-
+D	thunderbolt	Electric	Water	true	79	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	thunderbolt	Electric	Water	false	53	0	-1	30982,33910,19571,50263	-resisted	-
+D	thunderbolt	Electric	Stellar	unset	66	0	-1	57890,13032,12358,42006	-resisted	Electric
+D	thunderbolt	Electric	Stellar	true	106	1	-1	30982,33910,19571,50263	-resisted,-crit	Electric
+D	thunderbolt	Electric	Stellar	false	71	0	-1	30982,33910,19571,50263	-resisted	Electric
+D	thunderbolt	Normal	-	unset	99	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Normal	-	true	159	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Normal	-	false	106	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Normal	Electric	unset	132	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Normal	Electric	true	212	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Normal	Electric	false	142	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Normal	Water	unset	99	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Normal	Water	true	159	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Normal	Water	false	106	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Normal	Stellar	unset	132	0	0	57890,13032,12358,42006	-	Electric
+D	thunderbolt	Normal	Stellar	true	212	1	0	30982,33910,19571,50263	-crit	Electric
+D	thunderbolt	Normal	Stellar	false	142	0	0	30982,33910,19571,50263	-	Electric
+D	thunderbolt	Flying	-	unset	198	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Flying	-	true	318	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Flying	-	false	212	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Flying	Electric	unset	264	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Flying	Electric	true	424	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Flying	Electric	false	284	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Flying	Water	unset	198	0	1	57890,13032,12358,42006	-supereffective	-
+D	thunderbolt	Flying	Water	true	318	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	thunderbolt	Flying	Water	false	212	0	1	30982,33910,19571,50263	-supereffective	-
+D	thunderbolt	Flying	Stellar	unset	264	0	1	57890,13032,12358,42006	-supereffective	Electric
+D	thunderbolt	Flying	Stellar	true	424	1	1	30982,33910,19571,50263	-supereffective,-crit	Electric
+D	thunderbolt	Flying	Stellar	false	284	0	1	30982,33910,19571,50263	-supereffective	Electric
+D	thunderbolt	Ghost	-	unset	99	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Ghost	-	true	159	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Ghost	-	false	106	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Ghost	Electric	unset	132	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Ghost	Electric	true	212	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Ghost	Electric	false	142	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Ghost	Water	unset	99	0	0	57890,13032,12358,42006	-	-
+D	thunderbolt	Ghost	Water	true	159	1	0	30982,33910,19571,50263	-crit	-
+D	thunderbolt	Ghost	Water	false	106	0	0	30982,33910,19571,50263	-	-
+D	thunderbolt	Ghost	Stellar	unset	132	0	0	57890,13032,12358,42006	-	Electric
+D	thunderbolt	Ghost	Stellar	true	212	1	0	30982,33910,19571,50263	-crit	Electric
+D	thunderbolt	Ghost	Stellar	false	142	0	0	30982,33910,19571,50263	-	Electric
+D	uturn	Water	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Water	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Water	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Water	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Water	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Water	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Water	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Water	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Water	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Water	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Bug
+D	uturn	Water	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Bug
+D	uturn	Water	Stellar	false	22	0	0	30982,33910,19571,50263	-	Bug
+D	uturn	Ground	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Ground	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Ground	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Ground	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Ground	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Ground	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Ground	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Ground	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Ground	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Ground	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Bug
+D	uturn	Ground	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Bug
+D	uturn	Ground	Stellar	false	22	0	0	30982,33910,19571,50263	-	Bug
+D	uturn	Electric	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Electric	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Electric	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Electric	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Electric	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Electric	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Electric	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Electric	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Electric	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Electric	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Bug
+D	uturn	Electric	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Bug
+D	uturn	Electric	Stellar	false	22	0	0	30982,33910,19571,50263	-	Bug
+D	uturn	Normal	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Normal	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Normal	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Normal	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Normal	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Normal	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Normal	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	uturn	Normal	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	uturn	Normal	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	uturn	Normal	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Bug
+D	uturn	Normal	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Bug
+D	uturn	Normal	Stellar	false	22	0	0	30982,33910,19571,50263	-	Bug
+D	uturn	Flying	-	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Flying	-	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Flying	-	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Flying	Electric	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Flying	Electric	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Flying	Electric	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Flying	Water	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Flying	Water	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Flying	Water	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Flying	Stellar	unset	10	0	-1	57890,13032,12358,42006	-resisted	Bug
+D	uturn	Flying	Stellar	true	63	1	-1	30982,33910,19571,50263	-resisted,-crit	Bug
+D	uturn	Flying	Stellar	false	11	0	-1	30982,33910,19571,50263	-resisted	Bug
+D	uturn	Ghost	-	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Ghost	-	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Ghost	-	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Ghost	Electric	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Ghost	Electric	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Ghost	Electric	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Ghost	Water	unset	8	0	-1	57890,13032,12358,42006	-resisted	-
+D	uturn	Ghost	Water	true	53	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	uturn	Ghost	Water	false	9	0	-1	30982,33910,19571,50263	-resisted	-
+D	uturn	Ghost	Stellar	unset	10	0	-1	57890,13032,12358,42006	-resisted	Bug
+D	uturn	Ghost	Stellar	true	63	1	-1	30982,33910,19571,50263	-resisted,-crit	Bug
+D	uturn	Ghost	Stellar	false	11	0	-1	30982,33910,19571,50263	-resisted	Bug
+D	bodypress	Water	-	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Water	-	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Water	-	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Water	Electric	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Water	Electric	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Water	Electric	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Water	Water	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Water	Water	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Water	Water	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Water	Stellar	unset	36	0	0	57890,13032,12358,42006	-	Fighting
+D	bodypress	Water	Stellar	true	114	1	0	30982,33910,19571,50263	-crit	Fighting
+D	bodypress	Water	Stellar	false	38	0	0	30982,33910,19571,50263	-	Fighting
+D	bodypress	Ground	-	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Ground	-	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Ground	-	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Ground	Electric	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Ground	Electric	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Ground	Electric	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Ground	Water	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Ground	Water	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Ground	Water	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Ground	Stellar	unset	36	0	0	57890,13032,12358,42006	-	Fighting
+D	bodypress	Ground	Stellar	true	114	1	0	30982,33910,19571,50263	-crit	Fighting
+D	bodypress	Ground	Stellar	false	38	0	0	30982,33910,19571,50263	-	Fighting
+D	bodypress	Electric	-	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Electric	-	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Electric	-	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Electric	Electric	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Electric	Electric	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Electric	Electric	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Electric	Water	unset	30	0	0	57890,13032,12358,42006	-	-
+D	bodypress	Electric	Water	true	95	1	0	30982,33910,19571,50263	-crit	-
+D	bodypress	Electric	Water	false	32	0	0	30982,33910,19571,50263	-	-
+D	bodypress	Electric	Stellar	unset	36	0	0	57890,13032,12358,42006	-	Fighting
+D	bodypress	Electric	Stellar	true	114	1	0	30982,33910,19571,50263	-crit	Fighting
+D	bodypress	Electric	Stellar	false	38	0	0	30982,33910,19571,50263	-	Fighting
+D	bodypress	Normal	-	unset	60	0	1	57890,13032,12358,42006	-supereffective	-
+D	bodypress	Normal	-	true	190	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	bodypress	Normal	-	false	64	0	1	30982,33910,19571,50263	-supereffective	-
+D	bodypress	Normal	Electric	unset	60	0	1	57890,13032,12358,42006	-supereffective	-
+D	bodypress	Normal	Electric	true	190	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	bodypress	Normal	Electric	false	64	0	1	30982,33910,19571,50263	-supereffective	-
+D	bodypress	Normal	Water	unset	60	0	1	57890,13032,12358,42006	-supereffective	-
+D	bodypress	Normal	Water	true	190	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	bodypress	Normal	Water	false	64	0	1	30982,33910,19571,50263	-supereffective	-
+D	bodypress	Normal	Stellar	unset	72	0	1	57890,13032,12358,42006	-supereffective	Fighting
+D	bodypress	Normal	Stellar	true	228	1	1	30982,33910,19571,50263	-supereffective,-crit	Fighting
+D	bodypress	Normal	Stellar	false	76	0	1	30982,33910,19571,50263	-supereffective	Fighting
+D	bodypress	Flying	-	unset	15	0	-1	57890,13032,12358,42006	-resisted	-
+D	bodypress	Flying	-	true	47	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	bodypress	Flying	-	false	16	0	-1	30982,33910,19571,50263	-resisted	-
+D	bodypress	Flying	Electric	unset	15	0	-1	57890,13032,12358,42006	-resisted	-
+D	bodypress	Flying	Electric	true	47	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	bodypress	Flying	Electric	false	16	0	-1	30982,33910,19571,50263	-resisted	-
+D	bodypress	Flying	Water	unset	15	0	-1	57890,13032,12358,42006	-resisted	-
+D	bodypress	Flying	Water	true	47	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	bodypress	Flying	Water	false	16	0	-1	30982,33910,19571,50263	-resisted	-
+D	bodypress	Flying	Stellar	unset	18	0	-1	57890,13032,12358,42006	-resisted	Fighting
+D	bodypress	Flying	Stellar	true	57	1	-1	30982,33910,19571,50263	-resisted,-crit	Fighting
+D	bodypress	Flying	Stellar	false	19	0	-1	30982,33910,19571,50263	-resisted	Fighting
+D	bodypress	Ghost	-	unset	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	-	true	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	-	false	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Electric	unset	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Electric	true	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Electric	false	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Water	unset	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Water	true	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Water	false	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Stellar	unset	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Stellar	true	false	0	0	1,2,3,4	-immune	-
+D	bodypress	Ghost	Stellar	false	false	0	0	1,2,3,4	-immune	-
+D	foulplay	Water	-	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Water	-	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Water	-	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Water	Electric	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Water	Electric	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Water	Electric	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Water	Water	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Water	Water	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Water	Water	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Water	Stellar	unset	53	0	0	57890,13032,12358,42006	-	Dark
+D	foulplay	Water	Stellar	true	170	1	0	30982,33910,19571,50263	-crit	Dark
+D	foulplay	Water	Stellar	false	58	0	0	30982,33910,19571,50263	-	Dark
+D	foulplay	Ground	-	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Ground	-	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Ground	-	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Ground	Electric	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Ground	Electric	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Ground	Electric	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Ground	Water	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Ground	Water	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Ground	Water	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Ground	Stellar	unset	53	0	0	57890,13032,12358,42006	-	Dark
+D	foulplay	Ground	Stellar	true	170	1	0	30982,33910,19571,50263	-crit	Dark
+D	foulplay	Ground	Stellar	false	58	0	0	30982,33910,19571,50263	-	Dark
+D	foulplay	Electric	-	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Electric	-	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Electric	-	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Electric	Electric	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Electric	Electric	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Electric	Electric	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Electric	Water	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Electric	Water	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Electric	Water	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Electric	Stellar	unset	53	0	0	57890,13032,12358,42006	-	Dark
+D	foulplay	Electric	Stellar	true	170	1	0	30982,33910,19571,50263	-crit	Dark
+D	foulplay	Electric	Stellar	false	58	0	0	30982,33910,19571,50263	-	Dark
+D	foulplay	Normal	-	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Normal	-	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Normal	-	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Normal	Electric	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Normal	Electric	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Normal	Electric	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Normal	Water	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Normal	Water	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Normal	Water	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Normal	Stellar	unset	53	0	0	57890,13032,12358,42006	-	Dark
+D	foulplay	Normal	Stellar	true	170	1	0	30982,33910,19571,50263	-crit	Dark
+D	foulplay	Normal	Stellar	false	58	0	0	30982,33910,19571,50263	-	Dark
+D	foulplay	Flying	-	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Flying	-	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Flying	-	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Flying	Electric	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Flying	Electric	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Flying	Electric	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Flying	Water	unset	44	0	0	57890,13032,12358,42006	-	-
+D	foulplay	Flying	Water	true	142	1	0	30982,33910,19571,50263	-crit	-
+D	foulplay	Flying	Water	false	48	0	0	30982,33910,19571,50263	-	-
+D	foulplay	Flying	Stellar	unset	53	0	0	57890,13032,12358,42006	-	Dark
+D	foulplay	Flying	Stellar	true	170	1	0	30982,33910,19571,50263	-crit	Dark
+D	foulplay	Flying	Stellar	false	58	0	0	30982,33910,19571,50263	-	Dark
+D	foulplay	Ghost	-	unset	88	0	1	57890,13032,12358,42006	-supereffective	-
+D	foulplay	Ghost	-	true	284	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	foulplay	Ghost	-	false	96	0	1	30982,33910,19571,50263	-supereffective	-
+D	foulplay	Ghost	Electric	unset	88	0	1	57890,13032,12358,42006	-supereffective	-
+D	foulplay	Ghost	Electric	true	284	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	foulplay	Ghost	Electric	false	96	0	1	30982,33910,19571,50263	-supereffective	-
+D	foulplay	Ghost	Water	unset	88	0	1	57890,13032,12358,42006	-supereffective	-
+D	foulplay	Ghost	Water	true	284	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	foulplay	Ghost	Water	false	96	0	1	30982,33910,19571,50263	-supereffective	-
+D	foulplay	Ghost	Stellar	unset	106	0	1	57890,13032,12358,42006	-supereffective	Dark
+D	foulplay	Ghost	Stellar	true	340	1	1	30982,33910,19571,50263	-supereffective,-crit	Dark
+D	foulplay	Ghost	Stellar	false	116	0	1	30982,33910,19571,50263	-supereffective	Dark
+D	psyshock	Water	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Water	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Water	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Water	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Water	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Water	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Water	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Water	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Water	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Water	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Water	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Water	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	psyshock	Ground	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ground	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ground	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ground	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ground	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ground	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ground	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ground	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ground	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ground	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Ground	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Ground	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	psyshock	Electric	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Electric	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Electric	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Electric	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Electric	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Electric	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Electric	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Electric	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Electric	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Electric	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Electric	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Electric	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	psyshock	Normal	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Normal	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Normal	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Normal	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Normal	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Normal	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Normal	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Normal	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Normal	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Normal	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Normal	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Normal	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	psyshock	Flying	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Flying	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Flying	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Flying	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Flying	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Flying	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Flying	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Flying	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Flying	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Flying	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Flying	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Flying	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	psyshock	Ghost	-	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ghost	-	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ghost	-	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ghost	Electric	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ghost	Electric	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ghost	Electric	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ghost	Water	unset	35	0	0	57890,13032,12358,42006	-	-
+D	psyshock	Ghost	Water	true	111	1	0	30982,33910,19571,50263	-crit	-
+D	psyshock	Ghost	Water	false	38	0	0	30982,33910,19571,50263	-	-
+D	psyshock	Ghost	Stellar	unset	42	0	0	57890,13032,12358,42006	-	Psychic
+D	psyshock	Ghost	Stellar	true	133	1	0	30982,33910,19571,50263	-crit	Psychic
+D	psyshock	Ghost	Stellar	false	46	0	0	30982,33910,19571,50263	-	Psychic
+D	sacredsword	Water	-	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Water	-	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Water	-	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Water	Electric	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Water	Electric	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Water	Electric	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Water	Water	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Water	Water	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Water	Water	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Water	Stellar	unset	50	0	0	57890,13032,12358,42006	-	Fighting
+D	sacredsword	Water	Stellar	true	161	1	0	30982,33910,19571,50263	-crit	Fighting
+D	sacredsword	Water	Stellar	false	54	0	0	30982,33910,19571,50263	-	Fighting
+D	sacredsword	Ground	-	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Ground	-	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Ground	-	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Ground	Electric	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Ground	Electric	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Ground	Electric	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Ground	Water	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Ground	Water	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Ground	Water	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Ground	Stellar	unset	50	0	0	57890,13032,12358,42006	-	Fighting
+D	sacredsword	Ground	Stellar	true	161	1	0	30982,33910,19571,50263	-crit	Fighting
+D	sacredsword	Ground	Stellar	false	54	0	0	30982,33910,19571,50263	-	Fighting
+D	sacredsword	Electric	-	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Electric	-	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Electric	-	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Electric	Electric	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Electric	Electric	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Electric	Electric	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Electric	Water	unset	42	0	0	57890,13032,12358,42006	-	-
+D	sacredsword	Electric	Water	true	134	1	0	30982,33910,19571,50263	-crit	-
+D	sacredsword	Electric	Water	false	45	0	0	30982,33910,19571,50263	-	-
+D	sacredsword	Electric	Stellar	unset	50	0	0	57890,13032,12358,42006	-	Fighting
+D	sacredsword	Electric	Stellar	true	161	1	0	30982,33910,19571,50263	-crit	Fighting
+D	sacredsword	Electric	Stellar	false	54	0	0	30982,33910,19571,50263	-	Fighting
+D	sacredsword	Normal	-	unset	84	0	1	57890,13032,12358,42006	-supereffective	-
+D	sacredsword	Normal	-	true	268	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	sacredsword	Normal	-	false	90	0	1	30982,33910,19571,50263	-supereffective	-
+D	sacredsword	Normal	Electric	unset	84	0	1	57890,13032,12358,42006	-supereffective	-
+D	sacredsword	Normal	Electric	true	268	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	sacredsword	Normal	Electric	false	90	0	1	30982,33910,19571,50263	-supereffective	-
+D	sacredsword	Normal	Water	unset	84	0	1	57890,13032,12358,42006	-supereffective	-
+D	sacredsword	Normal	Water	true	268	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	sacredsword	Normal	Water	false	90	0	1	30982,33910,19571,50263	-supereffective	-
+D	sacredsword	Normal	Stellar	unset	100	0	1	57890,13032,12358,42006	-supereffective	Fighting
+D	sacredsword	Normal	Stellar	true	322	1	1	30982,33910,19571,50263	-supereffective,-crit	Fighting
+D	sacredsword	Normal	Stellar	false	108	0	1	30982,33910,19571,50263	-supereffective	Fighting
+D	sacredsword	Flying	-	unset	21	0	-1	57890,13032,12358,42006	-resisted	-
+D	sacredsword	Flying	-	true	67	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	sacredsword	Flying	-	false	22	0	-1	30982,33910,19571,50263	-resisted	-
+D	sacredsword	Flying	Electric	unset	21	0	-1	57890,13032,12358,42006	-resisted	-
+D	sacredsword	Flying	Electric	true	67	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	sacredsword	Flying	Electric	false	22	0	-1	30982,33910,19571,50263	-resisted	-
+D	sacredsword	Flying	Water	unset	21	0	-1	57890,13032,12358,42006	-resisted	-
+D	sacredsword	Flying	Water	true	67	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	sacredsword	Flying	Water	false	22	0	-1	30982,33910,19571,50263	-resisted	-
+D	sacredsword	Flying	Stellar	unset	25	0	-1	57890,13032,12358,42006	-resisted	Fighting
+D	sacredsword	Flying	Stellar	true	80	1	-1	30982,33910,19571,50263	-resisted,-crit	Fighting
+D	sacredsword	Flying	Stellar	false	27	0	-1	30982,33910,19571,50263	-resisted	Fighting
+D	sacredsword	Ghost	-	unset	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	-	true	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	-	false	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Electric	unset	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Electric	true	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Electric	false	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Water	unset	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Water	true	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Water	false	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Stellar	unset	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Stellar	true	false	0	0	1,2,3,4	-immune	-
+D	sacredsword	Ghost	Stellar	false	false	0	0	1,2,3,4	-immune	-
+D	facade	Water	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Water	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Water	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Water	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Water	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Water	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Water	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Water	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Water	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Water	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Normal
+D	facade	Water	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Normal
+D	facade	Water	Stellar	false	22	0	0	30982,33910,19571,50263	-	Normal
+D	facade	Ground	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Ground	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Ground	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Ground	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Ground	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Ground	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Ground	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Ground	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Ground	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Ground	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Normal
+D	facade	Ground	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Normal
+D	facade	Ground	Stellar	false	22	0	0	30982,33910,19571,50263	-	Normal
+D	facade	Electric	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Electric	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Electric	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Electric	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Electric	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Electric	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Electric	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Electric	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Electric	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Electric	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Normal
+D	facade	Electric	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Normal
+D	facade	Electric	Stellar	false	22	0	0	30982,33910,19571,50263	-	Normal
+D	facade	Normal	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Normal	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Normal	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Normal	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Normal	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Normal	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Normal	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Normal	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Normal	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Normal	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Normal
+D	facade	Normal	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Normal
+D	facade	Normal	Stellar	false	22	0	0	30982,33910,19571,50263	-	Normal
+D	facade	Flying	-	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Flying	-	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Flying	-	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Flying	Electric	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Flying	Electric	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Flying	Electric	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Flying	Water	unset	17	0	0	57890,13032,12358,42006	-	-
+D	facade	Flying	Water	true	106	1	0	30982,33910,19571,50263	-crit	-
+D	facade	Flying	Water	false	18	0	0	30982,33910,19571,50263	-	-
+D	facade	Flying	Stellar	unset	20	0	0	57890,13032,12358,42006	-	Normal
+D	facade	Flying	Stellar	true	127	1	0	30982,33910,19571,50263	-crit	Normal
+D	facade	Flying	Stellar	false	22	0	0	30982,33910,19571,50263	-	Normal
+D	facade	Ghost	-	unset	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	-	true	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	-	false	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Electric	unset	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Electric	true	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Electric	false	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Water	unset	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Water	true	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Water	false	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Stellar	unset	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Stellar	true	false	0	0	1,2,3,4	-immune	-
+D	facade	Ghost	Stellar	false	false	0	0	1,2,3,4	-immune	-
+D	surgingstrikes	Water	-	unset	19	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	-	true	19	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	-	false	3	0	-1	30982,33910,19571,50263	-resisted	-
+D	surgingstrikes	Water	Electric	unset	19	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	Electric	true	19	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	Electric	false	3	0	-1	30982,33910,19571,50263	-resisted	-
+D	surgingstrikes	Water	Water	unset	29	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	Water	true	29	1	-1	30982,33910,19571,50263	-resisted,-crit	-
+D	surgingstrikes	Water	Water	false	5	0	-1	30982,33910,19571,50263	-resisted	-
+D	surgingstrikes	Water	Stellar	unset	23	1	-1	30982,33910,19571,50263	-resisted,-crit	Water
+D	surgingstrikes	Water	Stellar	true	23	1	-1	30982,33910,19571,50263	-resisted,-crit	Water
+D	surgingstrikes	Water	Stellar	false	4	0	-1	30982,33910,19571,50263	-resisted	Water
+D	surgingstrikes	Ground	-	unset	78	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	-	true	78	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	-	false	14	0	1	30982,33910,19571,50263	-supereffective	-
+D	surgingstrikes	Ground	Electric	unset	78	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	Electric	true	78	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	Electric	false	14	0	1	30982,33910,19571,50263	-supereffective	-
+D	surgingstrikes	Ground	Water	unset	116	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	Water	true	116	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	surgingstrikes	Ground	Water	false	20	0	1	30982,33910,19571,50263	-supereffective	-
+D	surgingstrikes	Ground	Stellar	unset	94	1	1	30982,33910,19571,50263	-supereffective,-crit	Water
+D	surgingstrikes	Ground	Stellar	true	94	1	1	30982,33910,19571,50263	-supereffective,-crit	Water
+D	surgingstrikes	Ground	Stellar	false	16	0	1	30982,33910,19571,50263	-supereffective	Water
+D	surgingstrikes	Electric	-	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	-	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	-	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Electric	Electric	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	Electric	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	Electric	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Electric	Water	unset	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	Water	true	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Electric	Water	false	10	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Electric	Stellar	unset	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Electric	Stellar	true	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Electric	Stellar	false	8	0	0	30982,33910,19571,50263	-	Water
+D	surgingstrikes	Normal	-	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	-	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	-	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Normal	Electric	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	Electric	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	Electric	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Normal	Water	unset	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	Water	true	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Normal	Water	false	10	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Normal	Stellar	unset	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Normal	Stellar	true	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Normal	Stellar	false	8	0	0	30982,33910,19571,50263	-	Water
+D	surgingstrikes	Flying	-	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	-	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	-	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Flying	Electric	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	Electric	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	Electric	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Flying	Water	unset	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	Water	true	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Flying	Water	false	10	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Flying	Stellar	unset	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Flying	Stellar	true	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Flying	Stellar	false	8	0	0	30982,33910,19571,50263	-	Water
+D	surgingstrikes	Ghost	-	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	-	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	-	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Ghost	Electric	unset	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	Electric	true	39	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	Electric	false	7	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Ghost	Water	unset	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	Water	true	58	1	0	30982,33910,19571,50263	-crit	-
+D	surgingstrikes	Ghost	Water	false	10	0	0	30982,33910,19571,50263	-	-
+D	surgingstrikes	Ghost	Stellar	unset	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Ghost	Stellar	true	47	1	0	30982,33910,19571,50263	-crit	Water
+D	surgingstrikes	Ghost	Stellar	false	8	0	0	30982,33910,19571,50263	-	Water
+D	wickedblow	Water	-	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	-	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	-	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Water	Electric	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	Electric	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	Electric	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Water	Water	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	Water	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Water	Water	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Water	Stellar	unset	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Water	Stellar	true	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Water	Stellar	false	23	0	0	30982,33910,19571,50263	-	Dark
+D	wickedblow	Ground	-	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	-	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	-	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Ground	Electric	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	Electric	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	Electric	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Ground	Water	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	Water	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Ground	Water	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Ground	Stellar	unset	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Ground	Stellar	true	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Ground	Stellar	false	23	0	0	30982,33910,19571,50263	-	Dark
+D	wickedblow	Electric	-	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	-	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	-	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Electric	Electric	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	Electric	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	Electric	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Electric	Water	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	Water	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Electric	Water	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Electric	Stellar	unset	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Electric	Stellar	true	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Electric	Stellar	false	23	0	0	30982,33910,19571,50263	-	Dark
+D	wickedblow	Normal	-	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	-	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	-	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Normal	Electric	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	Electric	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	Electric	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Normal	Water	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	Water	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Normal	Water	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Normal	Stellar	unset	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Normal	Stellar	true	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Normal	Stellar	false	23	0	0	30982,33910,19571,50263	-	Dark
+D	wickedblow	Flying	-	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	-	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	-	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Flying	Electric	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	Electric	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	Electric	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Flying	Water	unset	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	Water	true	112	1	0	30982,33910,19571,50263	-crit	-
+D	wickedblow	Flying	Water	false	19	0	0	30982,33910,19571,50263	-	-
+D	wickedblow	Flying	Stellar	unset	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Flying	Stellar	true	134	1	0	30982,33910,19571,50263	-crit	Dark
+D	wickedblow	Flying	Stellar	false	23	0	0	30982,33910,19571,50263	-	Dark
+D	wickedblow	Ghost	-	unset	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	-	true	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	-	false	38	0	1	30982,33910,19571,50263	-supereffective	-
+D	wickedblow	Ghost	Electric	unset	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	Electric	true	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	Electric	false	38	0	1	30982,33910,19571,50263	-supereffective	-
+D	wickedblow	Ghost	Water	unset	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	Water	true	224	1	1	30982,33910,19571,50263	-supereffective,-crit	-
+D	wickedblow	Ghost	Water	false	38	0	1	30982,33910,19571,50263	-supereffective	-
+D	wickedblow	Ghost	Stellar	unset	268	1	1	30982,33910,19571,50263	-supereffective,-crit	Dark
+D	wickedblow	Ghost	Stellar	true	268	1	1	30982,33910,19571,50263	-supereffective,-crit	Dark
+D	wickedblow	Ghost	Stellar	false	46	0	1	30982,33910,19571,50263	-supereffective	Dark
+D	nightshade	Water	-	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	-	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	-	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Electric	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Electric	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Electric	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Water	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Water	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Water	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Stellar	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Stellar	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Water	Stellar	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	-	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	-	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	-	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Electric	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Electric	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Electric	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Water	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Water	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Water	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Stellar	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Stellar	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ground	Stellar	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	-	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	-	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	-	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Electric	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Electric	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Electric	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Water	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Water	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Water	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Stellar	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Stellar	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Electric	Stellar	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Normal	-	unset	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	-	true	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	-	false	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Electric	unset	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Electric	true	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Electric	false	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Water	unset	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Water	true	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Water	false	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Stellar	unset	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Stellar	true	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Normal	Stellar	false	false	0	0	1,2,3,4	-immune	-
+D	nightshade	Flying	-	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	-	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	-	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Electric	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Electric	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Electric	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Water	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Water	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Water	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Stellar	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Stellar	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Flying	Stellar	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	-	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	-	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	-	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Electric	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Electric	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Electric	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Water	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Water	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Water	false	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Stellar	unset	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Stellar	true	100	0	0	1,2,3,4	-	-
+D	nightshade	Ghost	Stellar	false	100	0	0	1,2,3,4	-	-
+D	swordsdance	Water	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Water	Stellar	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ground	Stellar	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Electric	Stellar	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Normal	Stellar	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Flying	Stellar	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	-	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	-	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	-	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Electric	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Electric	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Electric	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Water	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Water	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Water	false	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Stellar	unset	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Stellar	true	undefined	0	0	1,2,3,4	-	-
+D	swordsdance	Ghost	Stellar	false	undefined	0	0	1,2,3,4	-	-
+N	0	-6	undefined	1,2,3,4
+C	0	-6	1	30982,33910,19571,50263
+N	0	0	undefined	1,2,3,4
+C	0	0	1	30982,33910,19571,50263
+N	0	6	undefined	1,2,3,4
+C	0	6	1	30982,33910,19571,50263
+N	0.5	-6	1	30982,33910,19571,50263
+C	0.5	-6	1	30982,33910,19571,50263
+N	0.5	0	2	30982,33910,19571,50263
+C	0.5	0	1	30982,33910,19571,50263
+N	0.5	6	5	30982,33910,19571,50263
+C	0.5	6	9	30982,33910,19571,50263
+N	40	-6	11	30982,33910,19571,50263
+C	40	-6	3	30982,33910,19571,50263
+N	40	0	40	30982,33910,19571,50263
+C	40	0	40	30982,33910,19571,50263
+N	40	6	159	30982,33910,19571,50263
+C	40	6	630	30982,33910,19571,50263
+N	100	-6	26	30982,33910,19571,50263
+C	100	-6	7	30982,33910,19571,50263
+N	100	0	99	30982,33910,19571,50263
+C	100	0	99	30982,33910,19571,50263
+N	100	6	394	30982,33910,19571,50263
+C	100	6	1574	30982,33910,19571,50263
+N	150	-6	38	30982,33910,19571,50263
+C	150	-6	10	30982,33910,19571,50263
+N	150	0	148	30982,33910,19571,50263
+C	150	0	148	30982,33910,19571,50263
+N	150	6	591	30982,33910,19571,50263
+C	150	6	2361	30982,33910,19571,50263
+N	65535	-6	15889	30982,33910,19571,50263
+C	65535	-6	3973	30982,33910,19571,50263
+N	65535	0	64437	30982,33910,19571,50263
+C	65535	0	3489	30982,33910,19571,50263
+N	65535	6	61138	30982,33910,19571,50263
+C	65535	6	55806	30982,33910,19571,50263
+N	NaN	-6	NaN	1,2,3,4
+C	NaN	-6	1	30982,33910,19571,50263
+N	NaN	0	NaN	1,2,3,4
+C	NaN	0	1	30982,33910,19571,50263
+N	NaN	6	NaN	1,2,3,4
+C	NaN	6	1	30982,33910,19571,50263
+N	Infinity	-6	0	1,2,3,4
+C	Infinity	-6	1	30982,33910,19571,50263
+N	Infinity	0	0	1,2,3,4
+C	Infinity	0	1	30982,33910,19571,50263
+N	Infinity	6	0	1,2,3,4
+C	Infinity	6	1	30982,33910,19571,50263
+M	uturn	0	0	-	static	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	-	hugepower	129	0	0	57890,13032,12358,42006
+M	uturn	0	0	-	adaptability	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	-	sniper	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	lifeorb	static	84	0	0	57890,13032,12358,42006
+M	uturn	0	0	lifeorb	hugepower	168	0	0	57890,13032,12358,42006
+M	uturn	0	0	lifeorb	adaptability	84	0	0	57890,13032,12358,42006
+M	uturn	0	0	lifeorb	sniper	84	0	0	57890,13032,12358,42006
+M	uturn	0	0	expertbelt	static	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	expertbelt	hugepower	129	0	0	57890,13032,12358,42006
+M	uturn	0	0	expertbelt	adaptability	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	expertbelt	sniper	65	0	0	57890,13032,12358,42006
+M	uturn	0	0	choiceband	static	97	0	0	57890,13032,12358,42006
+M	uturn	0	0	choiceband	hugepower	192	0	0	57890,13032,12358,42006
+M	uturn	0	0	choiceband	adaptability	97	0	0	57890,13032,12358,42006
+M	uturn	0	0	choiceband	sniper	97	0	0	57890,13032,12358,42006
+M	uturn	0	1	-	static	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	-	hugepower	64	0	0	57890,13032,12358,42006
+M	uturn	0	1	-	adaptability	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	-	sniper	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	lifeorb	static	42	0	0	57890,13032,12358,42006
+M	uturn	0	1	lifeorb	hugepower	83	0	0	57890,13032,12358,42006
+M	uturn	0	1	lifeorb	adaptability	42	0	0	57890,13032,12358,42006
+M	uturn	0	1	lifeorb	sniper	42	0	0	57890,13032,12358,42006
+M	uturn	0	1	expertbelt	static	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	expertbelt	hugepower	64	0	0	57890,13032,12358,42006
+M	uturn	0	1	expertbelt	adaptability	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	expertbelt	sniper	32	0	0	57890,13032,12358,42006
+M	uturn	0	1	choiceband	static	48	0	0	57890,13032,12358,42006
+M	uturn	0	1	choiceband	hugepower	96	0	0	57890,13032,12358,42006
+M	uturn	0	1	choiceband	adaptability	48	0	0	57890,13032,12358,42006
+M	uturn	0	1	choiceband	sniper	48	0	0	57890,13032,12358,42006
+M	uturn	1	0	-	static	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	-	hugepower	96	0	0	57890,13032,12358,42006
+M	uturn	1	0	-	adaptability	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	-	sniper	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	lifeorb	static	64	0	0	57890,13032,12358,42006
+M	uturn	1	0	lifeorb	hugepower	125	0	0	57890,13032,12358,42006
+M	uturn	1	0	lifeorb	adaptability	64	0	0	57890,13032,12358,42006
+M	uturn	1	0	lifeorb	sniper	64	0	0	57890,13032,12358,42006
+M	uturn	1	0	expertbelt	static	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	expertbelt	hugepower	96	0	0	57890,13032,12358,42006
+M	uturn	1	0	expertbelt	adaptability	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	expertbelt	sniper	49	0	0	57890,13032,12358,42006
+M	uturn	1	0	choiceband	static	73	0	0	57890,13032,12358,42006
+M	uturn	1	0	choiceband	hugepower	144	0	0	57890,13032,12358,42006
+M	uturn	1	0	choiceband	adaptability	73	0	0	57890,13032,12358,42006
+M	uturn	1	0	choiceband	sniper	73	0	0	57890,13032,12358,42006
+M	uturn	1	1	-	static	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	-	hugepower	48	0	0	57890,13032,12358,42006
+M	uturn	1	1	-	adaptability	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	-	sniper	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	lifeorb	static	31	0	0	57890,13032,12358,42006
+M	uturn	1	1	lifeorb	hugepower	62	0	0	57890,13032,12358,42006
+M	uturn	1	1	lifeorb	adaptability	31	0	0	57890,13032,12358,42006
+M	uturn	1	1	lifeorb	sniper	31	0	0	57890,13032,12358,42006
+M	uturn	1	1	expertbelt	static	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	expertbelt	hugepower	48	0	0	57890,13032,12358,42006
+M	uturn	1	1	expertbelt	adaptability	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	expertbelt	sniper	24	0	0	57890,13032,12358,42006
+M	uturn	1	1	choiceband	static	36	0	0	57890,13032,12358,42006
+M	uturn	1	1	choiceband	hugepower	72	0	0	57890,13032,12358,42006
+M	uturn	1	1	choiceband	adaptability	36	0	0	57890,13032,12358,42006
+M	uturn	1	1	choiceband	sniper	36	0	0	57890,13032,12358,42006
+M	thunderbolt	0	0	-	static	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	-	hugepower	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	-	adaptability	264	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	-	sniper	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	lifeorb	static	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	lifeorb	hugepower	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	lifeorb	adaptability	343	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	lifeorb	sniper	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	expertbelt	static	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	expertbelt	hugepower	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	expertbelt	adaptability	317	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	expertbelt	sniper	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	choiceband	static	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	choiceband	hugepower	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	choiceband	adaptability	264	0	1	57890,13032,12358,42006
+M	thunderbolt	0	0	choiceband	sniper	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	-	static	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	-	hugepower	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	-	adaptability	264	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	-	sniper	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	lifeorb	static	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	lifeorb	hugepower	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	lifeorb	adaptability	343	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	lifeorb	sniper	257	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	expertbelt	static	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	expertbelt	hugepower	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	expertbelt	adaptability	317	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	expertbelt	sniper	238	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	choiceband	static	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	choiceband	hugepower	198	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	choiceband	adaptability	264	0	1	57890,13032,12358,42006
+M	thunderbolt	0	1	choiceband	sniper	198	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	-	static	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	-	hugepower	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	-	adaptability	196	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	-	sniper	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	lifeorb	static	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	lifeorb	hugepower	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	lifeorb	adaptability	255	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	lifeorb	sniper	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	expertbelt	static	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	expertbelt	hugepower	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	expertbelt	adaptability	235	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	expertbelt	sniper	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	choiceband	static	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	choiceband	hugepower	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	choiceband	adaptability	196	0	1	57890,13032,12358,42006
+M	thunderbolt	1	0	choiceband	sniper	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	-	static	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	-	hugepower	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	-	adaptability	196	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	-	sniper	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	lifeorb	static	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	lifeorb	hugepower	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	lifeorb	adaptability	255	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	lifeorb	sniper	190	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	expertbelt	static	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	expertbelt	hugepower	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	expertbelt	adaptability	235	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	expertbelt	sniper	175	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	choiceband	static	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	choiceband	hugepower	146	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	choiceband	adaptability	196	0	1	57890,13032,12358,42006
+M	thunderbolt	1	1	choiceband	sniper	146	0	1	57890,13032,12358,42006
