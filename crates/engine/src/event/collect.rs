@@ -61,6 +61,11 @@ impl<L: LogSink> Battle<L> {
                 ] {
                     let (mons, len) = self.living_actives(side);
                     for a in mons[..len].iter().copied() {
+                        // side.ts:390-403: allies()/foes() also drop hp-0 Pokemon that are
+                        // queued to faint but not yet marked fainted.
+                        if self.state.pokemon[a.0 as usize].hp == 0 {
+                            continue;
+                        }
                         self.find_pokemon_event_handlers(
                             a,
                             HookSelector { rel, ..selector },

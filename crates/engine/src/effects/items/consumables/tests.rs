@@ -116,7 +116,6 @@ fn scenario_logs_and_prng_match_pinned_showdown() {
 /// Unnerve holder knocked out by a hit: the foe's berry must be eaten at the Update that runs
 /// before `|faint|`. Passes once `event/collect.rs` skips hp 0 actives for Ally/Foe/Any handlers.
 #[test]
-#[ignore = "needs core: Foe/Ally/Any listener collection must skip hp 0 actives (side.ts:393-403)"]
 fn scenarios_blocked_on_core_event_collection() {
     check_scenarios(true);
 }
