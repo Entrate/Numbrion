@@ -1,0 +1,8 @@
+chlorophyll	swiftswim	0	trace	-1	1,2,3,4
+chlorophyll	swiftswim	1	chlorophyll	0	30982,33910,19571,50263
+chlorophyll	asonespectrier	0	trace	-1	1,2,3,4
+chlorophyll	asonespectrier	1	chlorophyll	0	30982,33910,19571,50263
+asoneglastrier	swiftswim	0	trace	-1	1,2,3,4
+asoneglastrier	swiftswim	1	swiftswim	1	30982,33910,19571,50263
+asoneglastrier	asonespectrier	0	trace	-1	1,2,3,4
+asoneglastrier	asonespectrier	1	trace	-1	1,2,3,4
