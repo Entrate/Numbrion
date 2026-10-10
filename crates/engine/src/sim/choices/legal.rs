@@ -134,6 +134,11 @@ impl<L: LogSink> Battle<L> {
             side,
             ..LegalActions::default()
         };
+        // Side.choose and the typed boundary both reject before parsing when a
+        // prior choice revealed information. There are no accepted resubmissions.
+        if self.state.sides[side.0 as usize].choice.cant_undo {
+            return out;
+        }
         match self.side_request_kind(side) {
             RequestKind::Move => self.legal_move_slots(side, &mut out),
             RequestKind::Switch => self.legal_switch_slots(side, &mut out),

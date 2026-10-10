@@ -260,7 +260,9 @@ impl<L: LogSink> Battle<L> {
                                 return Err(self.conflicting_move_args(side, original));
                             }
                             target_loc = Some(loc);
-                            data = rest;
+                            // side.ts:1233 trims after consuming a target. This
+                            // matters when a modifier precedes extra whitespace.
+                            data = js_trim(rest);
                             continue;
                         }
                         let mut matched = false;

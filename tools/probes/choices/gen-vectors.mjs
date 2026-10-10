@@ -38,6 +38,7 @@ const STUNT_PROB = Number(opt('--stunt-prob', 0.35));
 const OPS = Number(opt('--ops', 14));
 const BRUTE = !flag('--no-brute');
 const START = Number(opt('--start-index', 0));
+const PARSER_PROBES = flag('--parser-probes');
 
 const sim = loadSim(psPath);
 
@@ -144,6 +145,8 @@ const requestText = side => JSON.stringify(side.activeRequest);
 function chooseNoCommit(session, side, input) {
 	session.events = [];
 	const battle = session.battle;
+	const seedBefore = battle.prng.getSeed();
+	const logBefore = JSON.stringify(battle.log);
 	let ok = side.choose(input);
 	if (!ok) {
 		if (!side.choice.error) {
@@ -163,7 +166,9 @@ function chooseNoCommit(session, side, input) {
 		else if (payload.startsWith('|request|')) resent = payload.slice('|request|'.length);
 	}
 	session.events = [];
-	void battle;
+	if (battle.prng.getSeed() !== seedBefore || JSON.stringify(battle.log) !== logBefore) {
+		throw new Error(`noncommitting choice changed PRNG or battle log: ${JSON.stringify(input)}`);
+	}
 	return { ok, error: errors.length ? errors[errors.length - 1] : null, resent };
 }
 
@@ -181,6 +186,9 @@ const ATOMS = [
 	',', ',,', '', ' ', 'foo', 'foo, move 1 1', 'move 1 1, foo', 'move 1 1, move 2 1, move 3 1', 'pass pass', 'pass 1', 'skip 2',
 	'auto, pass', 'default, default', 'pass, auto', 'move 1 1, auto', 'switch 3, auto', 'testfight, pass', 'move 1 mega, pass',
 	'move 1 1 mega', 'move 1 1 terastallize terastallize', 'switch\t3', 'move\t1\t1', 'move 1 1 ', ' move 1 1', 'move 1 1 ', 'move 1 1',
+	'move 1 mega  1', 'move 1 zmove\t1', 'move 1 terastallize \t+1',
+	'move 1  \uFEFF1', 'move 1 mega\u2028-2', 'move 1  1  2',
+	'move 1 1 terastallize, move 1 2 terastallize', 'switch 3, switch 3',
 ];
 
 function mutate(rng, s) {
@@ -209,7 +217,7 @@ function mutate(rng, s) {
 }
 
 function probeInputs(rng, req, battleSide) {
-	const inputs = [];
+	const inputs = PARSER_PROBES ? ATOMS.slice() : [];
 	const names = [];
 	if (req && req.active) {
 		for (const a of req.active) for (const m of a.moves) names.push(m.id, m.move);
@@ -363,7 +371,8 @@ function buildCase(session, id, seeds, teams, tags, stuntTag, rng) {
 	const requests = battle.sides.map(requestText);
 	const parsed = battle.sides.map(s => (s.activeRequest ? JSON.parse(requestText(s)) : null));
 	const out = {
-		id, seed: seeds.battleSeed, teams, names: PLAYER_NAMES, tags, stunt: stuntTag, state, requests,
+		id, seed: seeds.battleSeed, boundarySeed: battle.prng.getSeed().split(',').map(Number),
+		teams, names: PLAYER_NAMES, tags, stunt: stuntTag, state, requests,
 		initialFlags: battle.sides.map(flagString),
 		ops: [], afterOps: null, brute: null, afterBrute: null,
 	};
