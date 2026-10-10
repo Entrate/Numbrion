@@ -145,6 +145,43 @@ const SCENARIOS = [
 		must: ['move: Follow Me', 'move: Rage Powder'],
 	},
 	{
+		// Rage Powder: an Overcoat attacker is immune to powder (the Immunity event, not a type) and
+		// is not redirected while its partner is.
+		name: 'rage_powder_overcoat',
+		seed: [45, 46, 47, 48],
+		p1: team(
+			set('Clefairy', 'Friend Guard', ['calmmind', 'brickbreak'], { gender: 'F' }),
+			set('Amoonguss', 'Regenerator', ['ragepowder', 'calmmind', 'brickbreak'], { gender: 'F' })),
+		p2: team(
+			set('Kommoo', 'Overcoat', ['brickbreak', 'calmmind'], { level: 50 }),
+			set('Kingambit', 'Defiant', ['brickbreak', 'calmmind'], { level: 50 })),
+		script: [
+			turn('move 1', 'move 1', 'move 1 1', 'move 1 1'),
+			turn('move 1', 'move 1', 'move 1 1', 'move 1 1'),
+			turn('move 1', 'move 1', 'move 1 1', 'move 2'),
+		],
+		must: ['move: Rage Powder'],
+	},
+	{
+		// Heal Block (from Psychic Noise) stops Pollen Puff aimed at an ally with a `cant` line while
+		// foes can still be hit with it.
+		name: 'pollen_puff_heal_block',
+		seed: [49, 50, 51, 52],
+		p1: team(
+			set('Vivillon', 'Compound Eyes', ['pollenpuff', 'calmmind'], { gender: 'F' }),
+			set('Garchomp', 'Rough Skin', ['calmmind', 'brickbreak'])),
+		p2: team(
+			set('Gardevoir', 'Synchronize', ['psychicnoise', 'calmmind'], { gender: 'F', evs: '0,0,0,0,0,252' }),
+			set('Kingambit', 'Defiant', ['calmmind', 'brickbreak'], { level: 50 })),
+		script: [
+			turn('move 1 -2', 'move 1', 'move 1 1', 'move 1'),
+			turn('move 1 1', 'move 1', 'move 2', 'move 1'),
+			turn('move 1 2', 'move 1', 'move 2', 'move 2 1'),
+			turn('move 2', 'move 1', 'move 2', 'move 1'),
+		],
+		must: ['move: Heal Block', 'move: Heal Block|Pollen Puff'],
+	},
+	{
 		// Lightning Rod / Storm Drain: absorption (+1 SpA), redirection of Electric / Water moves
 		// aimed at the partner, and the -immune line once the boost is capped.
 		name: 'lightning_rod_storm_drain',

@@ -167,13 +167,28 @@ const MARKERS: &[(&str, &[&str])] = &[
     ),
     (
         "lightning_rod_storm_drain",
-        &["ability: Lightning Rod", "ability: Storm Drain", "|-immune|"],
+        &[
+            "ability: Lightning Rod",
+            "ability: Storm Drain",
+            "|-immune|",
+        ],
     ),
+    ("rage_powder_overcoat", &["move: Rage Powder"]),
     ("helping_hand_pollen_puff", &["Helping Hand", "|-heal|"]),
+    (
+        "pollen_puff_heal_block",
+        &[
+            "move: Heal Block",
+            "|cant|p1a: Vivillon|move: Heal Block|Pollen Puff",
+        ],
+    ),
     ("ally_damage_modifiers", &["|-damage|"]),
     ("armor_tail", &["ability: Armor Tail"]),
     ("queenly_majesty", &["ability: Queenly Majesty"]),
-    ("dragon_darts_into_protect", &["Dragon Darts", "|-singleturn|"]),
+    (
+        "dragon_darts_into_protect",
+        &["Dragon Darts", "|-singleturn|"],
+    ),
 ];
 
 #[test]
@@ -208,12 +223,22 @@ scenario_tests!(
     follow_me_rage_powder,
     redirection_ignored_by_tracking,
     lightning_rod_storm_drain,
+    rage_powder_overcoat,
     helping_hand_pollen_puff,
     ally_damage_modifiers,
     armor_tail,
     queenly_majesty,
     dragon_darts_into_protect
 );
+
+/// Psychic Noise puts Heal Block on the user of Pollen Puff before it moves: onTryMove stops the
+/// ally heal (`cant|...|move: Heal Block|Pollen Puff`). The Heal Block condition itself belongs to
+/// another effect batch, so this replay panics ("unimplemented effect hook") until that lands.
+#[test]
+#[ignore = "needs conditions:healblock (ported by another effect batch)"]
+fn pollen_puff_heal_block() {
+    replay("pollen_puff_heal_block");
+}
 
 // ---------------------------------------------------------------------------------
 // Vectors from tools/probes/protect_redirection/restart-vectors.mjs (direct handler calls).
@@ -233,9 +258,13 @@ fn vector_battle() -> Battle<TextLog> {
         set("Dondozo", "Unaware", "calmmind,brickbreak"),
     ]
     .join("]");
-    let mut b =
-        Battle::from_players([1, 2, 3, 4], ("Alice", &p1), ("Bob", &p2), TextLog::default())
-            .unwrap();
+    let mut b = Battle::from_players(
+        [1, 2, 3, 4],
+        ("Alice", &p1),
+        ("Bob", &p2),
+        TextLog::default(),
+    )
+    .unwrap();
     b.start().unwrap();
     let mut log = Vec::new();
     b.drain_log(&mut log);
@@ -296,7 +325,11 @@ fn vectors_stall_counter_triples_up_to_729_and_resets_the_duration() {
 fn vectors_stall_move_draws_one_random_chance_per_event() {
     let mut b = vector_battle();
     let mon = MonId(7);
-    assert_eq!(seed_text(&b), "43514,9542,40559,8561", "start-of-battle seed");
+    assert_eq!(
+        seed_text(&b),
+        "43514,9542,40559,8561",
+        "start-of-battle seed"
+    );
     b.remove_volatile(mon, dex::CONDITION_STALL);
     b.add_volatile(mon, dex::CONDITION_STALL, Attribution::NONE, None);
     // (counter before, success, seed after, volatile left) per StallMove event.
@@ -316,7 +349,10 @@ fn vectors_stall_move_draws_one_random_chance_per_event() {
     ];
     for (i, (counter, ok, seed_after, left)) in expected.into_iter().enumerate() {
         let cell = b.get_volatile(mon, dex::CONDITION_STALL).unwrap();
-        assert_eq!(b.state.effects.cells[cell.0 as usize].payload.words[0], counter);
+        assert_eq!(
+            b.state.effects.cells[cell.0 as usize].payload.words[0],
+            counter
+        );
         let r = b.run_event(
             EventId::StallMove,
             EventArg::Holder(Holder::mon(mon)),
