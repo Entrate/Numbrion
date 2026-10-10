@@ -27,3 +27,6 @@ Speed (Ryzen 5 3600, native release, NoLog, fuzz-2000): **942 battles/s on one t
 the paired one-thread baseline was 335 battles/s (2.81× improvement). All five optimization
 commits passed the full test and required replay gates. See [Performance 1](design/reports/perf-1.md)
 for measurements, before/after flamegraphs and remaining ideas.
+
+Portable build (default since 5c87aaa, no target-cpu tuning): 1,033 battles/s on one thread, same parity.
+CPU-specific tuning is intentionally skipped; training will move to another machine (Windows + GPU).
