@@ -51,9 +51,14 @@ over the same code without PGO (noisy; see [PGO.md](PGO.md)).
 
 **Steps.**
 
-1. Add a pyengine workload (a short `BatchEnv` and `GridExecutor` run) to the training step of
-   `tools/pgo.ps1`; it currently profiles only the difftest bench and search primitives.
-2. Build: `powershell -File tools/pgo.ps1 -Corpus <training battles, not fuzz-2000> -Maturin <maturin.exe>`.
+1. Profile the pyengine paths. The workload (`crates/pyengine/src/pgo.rs`: `BatchEnv` self-play with and
+   without TextLog, `GridExecutor`, clone/restore/`replace_hidden_set`) runs inside an instrumented wheel
+   in the training step of `tools/pgo.ps1` and `tools/pgo.sh`. Running it from a separate cargo binary
+   would not help, because that profile does not match the wheel's symbols (see [PGO.md](PGO.md)). Not yet
+   run on Windows.
+2. Build: `powershell -File tools/pgo.ps1 -Corpus <training battles, not fuzz-2000> -Maturin <maturin.exe>
+   [-Pool data/teams/pool-s1-200k.txt.gz]`, or on macOS/Linux `tools/pgo.sh --corpus <training battles>
+   [--pool ...]`.
 3. Validate the wheel in a throwaway venv: `pytest crates/pyengine/pytests`, plus a short training smoke run.
 4. Install into the training venv (`pip install --force-reinstall <wheel>`) only while no training runs.
 5. Re-run the script after every engine change (a stale profile is still correct, just slower).

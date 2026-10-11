@@ -8,6 +8,7 @@ pub mod action;
 pub mod env;
 pub mod game;
 pub mod mask;
+pub mod pgo;
 pub mod pool;
 pub mod search;
 

@@ -765,6 +765,15 @@ fn switch_action(party: u8) -> PyResult<usize> {
     Ok(action::switch_action(party))
 }
 
+/// `_pgo_workload(pool_paths, seconds=10.0, threads=1) -> str`: the PGO profile-collection workload
+/// (`pgo.rs`), run inside the extension so an instrumented wheel profiles its own code. Tooling only
+/// (`tools/pgo.sh`, `tools/pgo.ps1`), not part of the training API.
+#[pyfunction]
+#[pyo3(signature = (pool_paths, seconds=10.0, threads=1))]
+fn _pgo_workload(py: Python<'_>, pool_paths: Vec<String>, seconds: f64, threads: usize) -> PyResult<String> {
+    py.detach(|| crate::pgo::run(&pool_paths, seconds, threads)).map_err(PyRuntimeError::new_err)
+}
+
 #[pymodule]
 fn _numbrion(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Battle>()?;
@@ -778,6 +787,7 @@ fn _numbrion(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(decode_action, m)?)?;
     m.add_function(wrap_pyfunction!(move_action, m)?)?;
     m.add_function(wrap_pyfunction!(switch_action, m)?)?;
+    m.add_function(wrap_pyfunction!(_pgo_workload, m)?)?;
     m.add("N_ACTIONS", N_ACTIONS)?;
     m.add("N_MOVE_ACTIONS", action::N_MOVE_ACTIONS)?;
     m.add("SWITCH_BASE", action::SWITCH_BASE)?;
