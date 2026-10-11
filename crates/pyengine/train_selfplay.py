@@ -169,15 +169,17 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                                   rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip)
             optimizer.zero_grad()
             loss.backward()
-            stats["grad_norm"].append(clip_gradients(optimizer.parameters, args.max_grad_norm))
-            optimizer.step()
+            norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
+            stats["grad_norm"].append(norm)
+            optimizer.step(skip=~torch.isfinite(norm))  # a non-finite gradient leaves the weights as they were
             # Statistics stay on the device and are read back once per update (a .cpu() per value per minibatch
             # stalls the DirectML queue, ~10% of the update).
             for key, item in zip(("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac"), terms):
                 stats[key].append(item)
     stats = {k: torch.stack(v).cpu().numpy() if v else np.zeros(1) for k, v in stats.items()}
     if not np.isfinite(stats["policy_loss"]).all() or not np.isfinite(stats["grad_norm"]).all():
-        raise RuntimeError("Non-finite PPO loss or gradient norm (that step's update was skipped)")
+        raise RuntimeError("Non-finite PPO loss or gradient norm in this update (the optimizer skipped those steps, "
+                           "so the weights are still finite)")
     values, rets = data["value"].reshape(-1)[selected], returns_all[selected]
     summary = {k: round(float(np.mean(v)), 4) for k, v in stats.items()}
     summary["explained_variance"] = round(float(1 - np.var(rets - values) / (np.var(rets) + 1e-8)), 3)

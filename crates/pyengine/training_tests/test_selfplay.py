@@ -282,6 +282,52 @@ def test_adam_matches_torch_adam():
     torch.testing.assert_close(ours.detach(), reference.detach())
 
 
+@pytest.mark.parametrize("device", ["cpu", "mps"])
+@pytest.mark.parametrize("bad", [float("inf"), float("nan"), 1e30])
+def test_non_finite_gradient_step_changes_nothing(device, bad):
+    """A non-finite gradient norm (an inf or NaN gradient, or finite ones whose squares overflow) skips the step
+    on the device: the weights and Adam moments keep their values, and the next finite step proceeds."""
+    from training.ppo import Adam, clip_gradients
+
+    if device == "mps" and not torch.backends.mps.is_available():
+        pytest.skip("MPS unavailable")
+    torch.manual_seed(0)
+    params = [torch.randn(5, 3, device=device, requires_grad=True), torch.randn(4, device=device, requires_grad=True)]
+    optimizer = Adam(params, lr=1e-2)
+
+    def step(bad_value=None):
+        for p in params:
+            p.grad = torch.randn_like(p)
+        if bad_value is not None:
+            params[0].grad[1, 2] = bad_value
+        norm = clip_gradients(params, 0.5)
+        optimizer.step(skip=~torch.isfinite(norm))
+        return norm
+
+    for _ in range(3):  # non-zero moments: a step on zeroed gradients would still move the weights
+        step()
+    before = [x.detach().clone() for x in params + optimizer.m + optimizer.v]
+    assert not torch.isfinite(step(bad))
+    assert all(torch.equal(a, b) for a, b in zip(before, params + optimizer.m + optimizer.v))
+    assert torch.isfinite(step())
+    assert all(torch.isfinite(p).all() for p in params) and not torch.equal(params[0].detach(), before[0])
+
+
+def test_adam_skip_flag_leaves_finite_steps_unchanged():
+    from training.ppo import Adam
+
+    torch.manual_seed(0)
+    plain, flagged = torch.randn(5, 3, requires_grad=True), torch.randn(5, 3, requires_grad=True)
+    flagged.data.copy_(plain.data)
+    a, b = Adam([plain], lr=1e-2), Adam([flagged], lr=1e-2)
+    for _ in range(10):
+        grad = torch.randn(5, 3)
+        plain.grad, flagged.grad = grad.clone(), grad.clone()
+        a.step()
+        b.step(skip=torch.zeros((), dtype=torch.bool))
+    assert torch.equal(plain.detach(), flagged.detach()) and torch.equal(a.m[0], b.m[0]) and torch.equal(a.v[0], b.v[0])
+
+
 def test_expected_max_and_any_ko_over_possible_moves():
     from training.damage import any_ko, expected_max
 

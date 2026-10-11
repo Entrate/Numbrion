@@ -58,28 +58,41 @@ class Adam:
         self.step_count = 0
         self.m = [torch.zeros_like(p) for p in self.parameters]
         self.v = [torch.zeros_like(p) for p in self.parameters]
+        self._constants: dict = {}
 
     @torch.no_grad()
-    def step(self) -> None:
+    def step(self, skip: torch.Tensor | None = None) -> None:
+        """One Adam step. ``skip`` (a 0-dim bool device tensor, e.g. ``~torch.isfinite(norm)`` of the norm
+        ``clip_gradients`` returns) makes it a no-op on the device, without a CPU sync: the weights and moments keep
+        their values whatever the gradients hold, where a NaN gradient would turn all three into NaN. Only the step
+        counter advances."""
         self.step_count += 1
         b1, b2 = self.betas
         correction1 = 1 - b1 ** self.step_count
         correction2 = 1 - b2 ** self.step_count
         device = self.parameters[0].device
         if device.type == "mps":
-            self._step_fused()
+            self._step_fused(skip)
             return
         inverse2 = torch.full((), 1 / correction2, device=device)
         step_size = torch.full((), -self.lr / correction1, device=device)
+        decay1, decay2 = b1, b2
+        if skip is not None:  # skipped: zero gradient, no decay, zero step (cached constants, see the class doc)
+            if device not in self._constants:
+                self._constants[device] = tuple(torch.full((), x, device=device) for x in (1.0, 0.0, b1, b2))
+            one, zero, beta1, beta2 = self._constants[device]
+            decay1, decay2 = torch.where(skip, one, beta1), torch.where(skip, one, beta2)
+            step_size = torch.where(skip, zero, step_size)
         for p, m, v in zip(self.parameters, self.m, self.v):
             if p.grad is None:
                 continue
-            m.mul_(b1).add_(p.grad * (1 - b1))
-            v.mul_(b2).add_(p.grad.square().mul_(1 - b2))
+            grad = p.grad if skip is None else torch.where(skip, zero, p.grad)
+            m.mul_(decay1).add_(grad * (1 - b1))
+            v.mul_(decay2).add_(grad.square().mul_(1 - b2))
             denominator = (v * inverse2).sqrt_().add_(self.eps)
             p.add_(m.div(denominator).mul_(step_size))
 
-    def _step_fused(self) -> None:
+    def _step_fused(self, skip: torch.Tensor | None) -> None:
         """torch's fused Adam kernel on the same state: 1.4 ms per step on MPS against 4.8 ms for the loop (six
         launches per parameter tensor). Same update up to rounding: it forms ``m`` with ``lerp`` and divides by
         ``sqrt(c2)`` after the square root."""
@@ -90,7 +103,7 @@ class Adam:
         torch._fused_adam_([self.parameters[i] for i in live], [self.parameters[i].grad for i in live],
                            [self.m[i] for i in live], [self.v[i] for i in live], [], [step] * len(live),
                            amsgrad=False, lr=self.lr, beta1=self.betas[0], beta2=self.betas[1], weight_decay=0.0,
-                           eps=self.eps, maximize=False)
+                           eps=self.eps, maximize=False, found_inf=None if skip is None else skip.float())
 
     def zero_grad(self) -> None:
         for p in self.parameters:
@@ -114,8 +127,9 @@ def clip_gradients(parameters, max_norm: float) -> torch.Tensor:
     """Global-norm clipping from a scalar reduction (DirectML lacks the fused foreach/linalg kernels).
 
     Stays on the device (no CPU sync per minibatch; the caller reads the returned norms once per update). A
-    non-finite norm zeroes the gradients, so the step leaves the weights unchanged, and the returned norm lets the
-    caller raise afterwards. Constants are cached device tensors: DirectML keeps host memory for every op given a
+    non-finite norm (an inf or NaN gradient, or a sum that overflows) leaves the gradients unusable: pass
+    ``skip=~torch.isfinite(norm)`` to ``Adam.step`` so that step changes nothing, and raise afterwards (the trainer
+    does, once per update). Constants are cached device tensors: DirectML keeps host memory for every op given a
     Python scalar (see Adam).
     """
     grads = [p.grad for p in parameters if p.grad is not None]

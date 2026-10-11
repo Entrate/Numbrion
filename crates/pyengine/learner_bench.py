@@ -101,11 +101,11 @@ def breakdown(model, optimizer, data, args, device) -> dict:
             sync(device)
             phases["backward"] += time.perf_counter() - t
             t = time.perf_counter()
-            clip_gradients(optimizer.parameters, args.max_grad_norm)
+            norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
             sync(device)
             phases["clip"] += time.perf_counter() - t
             t = time.perf_counter()
-            optimizer.step()
+            optimizer.step(skip=~torch.isfinite(norm))
             sync(device)
             phases["step"] += time.perf_counter() - t
     return {k: round(v, 3) for k, v in phases.items()}
