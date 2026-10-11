@@ -95,8 +95,12 @@ def load_policy(path: Path, dex, device, rng, name=None, record_values=False, te
     return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature, guards)
 
 
-def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: int, log_games=False):
-    """``a`` is side 1 in the first copy and side 2 in the mirrored copy. Returns a's score and details."""
+def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: int, log_games=False, pairs=False):
+    """``a`` is side 1 in the first copy and side 2 in the mirrored copy. Returns a's score and details.
+
+    ``pairs=True`` adds a's score in every mirrored pair to the result: battle ``k`` of env ``e`` (a is player 1)
+    and of env ``e + envs_per_copy`` (a is player 2) share their teams and battle seed, and so does every matchup
+    played with the same ``seed``, ``envs_per_copy`` and ``workers``."""
     E = envs_per_copy
     n = 2 * E
     a_side = np.r_[np.zeros(E, dtype=int), np.ones(E, dtype=int)]  # side played by a in each env
@@ -139,7 +143,6 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
                 results[e].append(int(obs["winner"][e]))
         logs = env.finished_logs() if log_games else []
     games = wins = ties = 0
-    paired = []
     outcome = {}
     for e in range(n):
         for k, winner in enumerate(results[e][:rounds]):
@@ -153,14 +156,17 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
     for item in logs:
         if item["side"] == a_side[item["env"]]:
             item["choices"] = choices.get((item["env"], item["battle"]), {})
-    for e in range(E):  # duplicate pairs: same teams and seed, sides swapped
-        for k in range(min(rounds, len(results[e]), len(results[e + E]))):
-            paired.append(outcome[(e, k + 1)] + outcome[(e + E, k + 1)])
+    keys = [(e, k + 1) for e in range(E) for k in range(min(rounds, len(results[e]), len(results[e + E])))]
+    paired = [outcome[(e, k)] + outcome[(e + E, k)] for e, k in keys]  # duplicate pairs: same teams and seed
     score = (wins + 0.5 * ties) / max(games, 1)
     values = [(v, outcome[(e, battle)]) for e, battle, v in calibration if (e, battle) in outcome]
-    return dict(a=a.name, b=b.name, games=games, score=score, wins=wins, ties=ties,
-                pair_sweeps=sum(p == 2 for p in paired), pair_splits=sum(p == 1 for p in paired),
-                pair_losses=sum(p == 0 for p in paired), steps=steps), values, logs, a_side
+    result = dict(a=a.name, b=b.name, games=games, score=score, wins=wins, ties=ties,
+                  pair_sweeps=sum(p == 2 for p in paired), pair_splits=sum(p == 1 for p in paired),
+                  pair_losses=sum(p == 0 for p in paired), steps=steps)
+    if pairs:
+        result["pairs"] = dict(env=[e for e, _ in keys], battle=[k for _, k in keys],
+                               first=[outcome[key] for key in keys], mirrored=[outcome[(e + E, k)] for e, k in keys])
+    return result, values, logs, a_side
 
 
 def elo(score: float, games: int) -> tuple[float, float]:
