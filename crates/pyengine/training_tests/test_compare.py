@@ -1,7 +1,10 @@
-"""compare.py's pure parts (keep/drop rule, mirrored-pair interval, cache key) and play's per-pair outcomes."""
+"""compare.py: keep/drop rule, mirrored-pair interval, cache key and the whole flow with stubbed games; play's
+per-pair outcomes."""
+import json
 import math
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -146,3 +149,79 @@ def test_play_reports_per_pair_outcomes_only_when_asked(monkeypatch, tmp_path):
     assert (result["pair_sweeps"], result["pair_splits"], result["pair_losses"]) == (1, 1, 1)
     assert result["score"] == pytest.approx(4.5 / 8)
     assert compare.pair_interval(result)[0] < result["score"]
+
+
+def run_compare(monkeypatch, tmp_path, scores, **options):
+    """compare.main with stubbed checkpoints and games: ``scores`` maps (a, b, temperature) to a's score.
+    Returns the matchups played and the exit code."""
+    played = []
+
+    def fake_play(a, b, pool, envs, rounds, seed, workers, pairs=False):
+        played.append((a.name, b.name, a.temperature))
+        n = envs * rounds
+        k = round(scores.get((a.name, b.name, a.temperature), 0.5) * n)
+        result = result_from_pairs([1.0] * k + [0.0] * (n - k), [1.0] * k + [0.0] * (n - k))
+        return dict(result, a=a.name, b=b.name, steps=1), [], [], None
+
+    def fake_describe(path):
+        return dict(path=str(path), sha256=path.stem * 4, width=128, layers=3, action_features=27, token_features=16)
+
+    agent = lambda name: (lambda *args, **kwargs: SimpleNamespace(name=name, temperature=None))
+    monkeypatch.setattr(compare, "play", fake_play)
+    monkeypatch.setattr(compare, "describe", fake_describe)
+    monkeypatch.setattr(compare, "load_dex", lambda: None)
+    monkeypatch.setattr(compare, "SmartHeuristicAgent", agent("smart"))
+    monkeypatch.setattr(compare, "HeuristicAgent", agent("heuristic"))
+    # Policies are named after their checkpoint file, so the scores table can tell them apart.
+    monkeypatch.setattr(compare.Evaluator, "policy", lambda self, role, temperature, rng: SimpleNamespace(
+        name=Path(self.checkpoints[role]["path"]).stem, temperature=temperature))
+    pool = tmp_path / "pool.txt"
+    pool.write_text("team\n")
+    argv = ["compare.py", "--out", str(tmp_path / options.pop("out", "out")), "--pool", str(pool),
+            "--cache", str(tmp_path / "cache.json"), "--ref", str(tmp_path / "ref.pt"), "--run-flag", "",
+            "--device", "cpu", "--envs", "4", "--workers", "2", "--h2h-rounds", "5", "--panel-rounds", "5"]
+    for name, value in options.items():
+        argv += [f"--{name.replace('_', '-')}", *str(value).split()]
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(SystemExit) as exit_:
+        compare.main()
+    return played, exit_.value.code
+
+
+def test_compare_decides_and_reuses_cached_panels(monkeypatch, tmp_path):
+    scores = {("cand", "best", 0.5): 0.6, ("cand", "smart", 0.5): 0.7, ("best", "smart", 0.5): 0.75,
+              ("cand", "best", 1.0): 0.5}
+    played, code = run_compare(monkeypatch, tmp_path, scores, candidate=tmp_path / "cand.pt",
+                               best=tmp_path / "best.pt")
+    assert code == 0 and len(played) == 2 * 7 and played[0] == ("cand", "best", 0.5)
+    out = json.loads((tmp_path / "out/compare.json").read_text())
+    assert out["decision"]["verdict"] == "DROP" and "smart" in out["decision"]["reasons"][0]
+    assert [d["verdict"] for d in out["decisions"]] == ["DROP", "DROP"]  # T=1: h2h 0.5 < 0.53
+    assert all(len(m["pairs"]["env"]) == 20 for m in out["matchups"])
+    assert "DECISION at T=0.5: DROP" in (tmp_path / "out/compare.md").read_text()
+    # The next candidate faces the old candidate: its panel comes from the cache, and so does a rerun.
+    scores.update({("next", "cand", 0.5): 0.56, ("next", "smart", 0.5): 0.69})
+    played, code = run_compare(monkeypatch, tmp_path, scores, candidate=tmp_path / "next.pt",
+                               best=tmp_path / "cand.pt", out="next")
+    assert code == 0 and len(played) == 2 * 4 and all(a == "next" for a, _, _ in played)
+    out = json.loads((tmp_path / "next/compare.json").read_text())
+    assert out["decision"]["verdict"] == "KEEP"
+    assert [m["cached"] for m in out["matchups"][:7]] == [False] * 4 + [True] * 3
+    played, code = run_compare(monkeypatch, tmp_path, scores, candidate=tmp_path / "next.pt",
+                               best=tmp_path / "cand.pt", out="next")
+    assert code == 0 and played == []
+
+
+def test_compare_control_run_and_temperature_sweep(monkeypatch, tmp_path):
+    played, code = run_compare(monkeypatch, tmp_path, {}, candidate=tmp_path / "cand.pt", temperatures="1.0")
+    assert code == 0 and len(played) == 2 * 3  # the decision temperature 0.5 is added
+    out = json.loads((tmp_path / "out/compare.json").read_text())
+    assert out["decision"] is None and "best" not in out["manifest"]["checkpoints"]
+    played, code = run_compare(monkeypatch, tmp_path, {("ckpt", "smart", 0.0): 0.8},
+                               temperature_sweep=tmp_path / "ckpt.pt", out="sweep")
+    assert code == 0 and len(played) == 2 * 5
+    assert ("ckpt", "ckpt", 0.0) in played  # a at T=0 against itself (at T=1)
+    out = json.loads((tmp_path / "sweep/temperature-sweep.json").read_text())
+    assert [row["temperature"] for row in out["table"]] == compare.SWEEP_TEMPERATURES
+    assert out["table"][-1]["vs_smart"] == 0.8
+    assert all(m["b_temperature"] == 1.0 for m in out["matchups"] if m["b"] == "checkpoint")

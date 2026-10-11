@@ -236,7 +236,8 @@ class Evaluator:
                    cached=cached, seconds=entry["seconds"], played=entry["played"], commit=entry["commit"],
                    cache_key=key, pairs=entry["pairs"])
         low, high = out["pair_95pct_interval"]
-        against = opponent if opponent_temperature is None else f"{opponent} (T={opponent_temperature:g})"
+        same = opponent_temperature in (None, float(temperature))
+        against = opponent if same else f"{opponent} (T={opponent_temperature:g})"
         took = "cached" if cached else f"{entry['seconds']}s"
         print(f"{role} vs {against} at T={temperature:g}: {out['score']:.4f} [{low:.4f}, {high:.4f}] over "
               f"{out['games']} games ({took})", flush=True)
