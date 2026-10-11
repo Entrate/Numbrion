@@ -286,6 +286,172 @@ Two caveats:
   - a disguised Pokemon fainting unrevealed;
   - our own disguised Pokemon's boosts before the reveal.
 
+## Second run (2026-10-11)
+
+60 minutes with the learning setup above and all defaults (`--minutes 60`, four actors, 128 battles): 1,157 PPO
+updates and 287,769 battles (81 battles/s, 1,924 trained samples/s; the first run had 53 and 1,248). The plan was
+to stop at 30 minutes if it had plateaued; it had not (the training-time score against smart was still rising
+about 3 points per 5 minutes), so it ran the full hour. The trainer stayed at 520-670 MB for the whole run and
+the largest actor below 470 MB, so the leak fix holds.
+
+Training-time signals (5-minute windows; smart is the training opponent at temperature 0.05):
+
+| minutes | score vs smart | score vs PFSP snapshots | entropy (target) | self-play turns |
+|---:|---:|---:|---:|---:|
+| 0-5 | 9% | 99% | 2.8 (2.5) | 12.7 |
+| 10-15 | 20% | 55% | 2.3 (2.3) | 10.5 |
+| 25-30 | 26% | 60% | 2.1 (2.1) | 10.4 |
+| 40-45 | 32% | 59% | 1.8 (1.8) | 10.4 |
+| 55-60 | 36% | 60% | 1.6 (1.6) | 10.7 |
+
+The entropy controller tracked its target all run (the coefficient touched its 0.05 cap briefly around minutes
+7-10 and ended at 0.018). At the end its PFSP score against the pooled snapshots was 0.50-0.68 (the newest lowest).
+
+Evaluation (`evaluate.py`, temperature 1, duplicate games on `eval-s43-200`, 400 games per row, 1,000 for 60 min):
+
+| Snapshot | vs random | vs strongest-attack heuristic | vs smart | final (60 min) vs this snapshot |
+|---|---:|---:|---:|---:|
+| 0 min | 46.8% | 0% | 0% | 99.8% |
+| 10 min | 98.5% | 46.0% | 17.8% | 74.8% |
+| 20 min | 99.2% | 55.2% | 23.5% | 66.2% |
+| 30 min | 99.2% | 59.8% | 31.0% | 60.5% |
+| 40 min | 99.5% | 66.0% | 32.0% | 54.2% |
+| 50 min | 99.5% | 62.3% | 32.8% | 54.5% |
+| 60 min | 99.5% | 68.6% | 34.3% | |
+
+Smart itself scores 81.8% against the heuristic. Unlike the first run, the final model still beats its 40- and
+50-minute snapshots (about +30 Elo, error +/-35), so it was still learning slowly at the end.
+
+Against the first run (1,000 duplicate games each, same seeds for both runs):
+
+| Matchup | temperature 1 | temperature 0 |
+|---|---:|---:|
+| second run 60 min vs first run 60 min | 47.9% | 56.1% |
+| first run 60 min vs smart | 35.6% | 39.1% |
+| second run 60 min vs smart | 37.0% | 39.7% |
+
+So after an hour the two runs are about equally strong. The second run is slightly ahead when both play their
+most likely action, and slightly behind when both sample, which fits its higher entropy (1.6 against 0.7):
+more of its sampled moves are exploration. Neither beats smart.
+
+Behaviour of the final model (from the evaluation's logged games):
+
+- It now protects (0.76 times per battle against the heuristic, 1.13 against smart) and makes about one
+  voluntary switch per battle. In training, `use_protect` stayed at ~5% and `use_status` at ~10% of slot decisions.
+- It still terastallizes in every battle and almost never uses Fake Out (0.03 per battle, and two thirds of
+  those fail).
+- Against smart, 9.3% of its attacks hit a Protect, and 46% of its attacks at foes that could Protect were
+  blocked (first run: 8.8% and 38%).
+- 5.2% of its chosen single-target attacks go at a foe already fainted that turn (first run 5.4%).
+- The critic still ranks positions well but is underconfident against the heuristic (predicts 45% where 66% won).
+
+Outputs (git-ignored): `scratch/training/second-run/` with `metrics.jsonl`, `snapshots/`, `evaluation.json`,
+`midcheck-m030-m020.json` and replays. The cross-run checks are `scratch/training/h2h.py` and
+`scratch/training/vs_smart.py`.
+
+### Second hour
+
+The run continued from the 60-minute `latest.pt` for another hour (`--resume ... --minutes 120`), with more scripted
+games and schedules that continue from where the first hour ended:
+
+| Setting | First hour | Second hour |
+|---|---|---|
+| `--pool-fraction` / `--scripted-share` | 0.3 / 0.33 (10% smart, 20% snapshots) | 0.45 / 0.5 (22% smart, 23% snapshots) |
+| entropy target | 2.5 -> 1.5 | 1.5 -> 1.2 (`--entropy-target 1.8 --entropy-target-final 1.2` over 120 minutes) |
+| learning rate | 3e-4 -> 9e-5 | 1.05e-4 -> 6e-5 (`--lr 1.5e-4 --lr-final 0.4`) |
+
+`--minutes 120` with these start and end values makes the schedules continue at the 60-minute values instead of jumping
+back. 296,626 more battles (584,395 in total), 78-87 battles/s, trainer memory 580-710 MB. The training-time score
+against smart rose from 38% (minutes 60-65) to 42% (85-90) and 46% (115-120).
+
+Evaluation (`evaluate.py` on `scratch/training/second-run-2h`, which holds the 60-minute snapshot and the new ones):
+
+| Snapshot | vs heuristic | vs smart | 120 min vs this snapshot |
+|---|---:|---:|---:|
+| 60 min | 67.5% | 37.0% | 58.0% |
+| 70 min | 74.8% | 40.2% | 54.0% |
+| 80 min | 67.5% | 38.8% | 54.2% |
+| 90 min | 73.0% | 41.0% | 53.8% |
+| 100 min | 72.5% | 42.0% | 50.5% |
+| 110 min | 70.2% | 40.2% | 49.8% |
+| 120 min | 72.5% (1,000 games) | 42.7% (1,000 games) | |
+
+So the second hour added about +55 Elo, most of it by minute 90; the last 20 minutes were flat. Against the first
+run's final model (1,000 duplicate games): 59.3% at temperature 1, 60.8% at temperature 0. Against smart, four
+separate 1,000-game checks gave 39.9-45.3% (mean about 42%); the spread is larger than the duplicate games suggest, so
+single 1,000-game checks against smart are good to about +/-3 points.
+
+Its habits did not change: it terastallizes in every battle, uses Fake Out 0.02 times per battle (72-77% of them
+fail), and against smart 46% of its attacks at foes that could Protect are blocked. It switches a little more (1.1-1.3
+voluntary switches per battle). These are the actions the features did not describe; see the next section.
+
+## Action effects: Fake Out, Protect and Tera
+
+After two hours of training the policy still terastallized in every battle, almost never used Fake Out (0.02 per
+battle, and three quarters of those failed), and 46% of its attacks at foes that could Protect were blocked. The
+action features did not describe these actions:
+
+- Every code's damage features were the same with and without Tera, so the model never saw what Tera did.
+- Fake Out looked like a working 40-power priority attack on every turn. Only the user's `fresh` flag said it would
+  fail, and nothing said that a flinched foe loses its move.
+- Nothing tied a repeated Protect to its 1/3 success chance, or an attack to the chance that its target protects.
+
+`training/damage.py` now appends effect columns (`ACTION_COLUMNS`, `TOKEN_COLUMNS`) after the existing ones:
+23 action features (was 9) and 10 token features (was 6). Per move code:
+
+| Column | Meaning |
+|---|---|
+| `fail` | Fails outright: Fake Out or First Impression after the user's first move action since switching in; a priority move at a foe that Psychic Terrain (grounded) or Armor Tail, Dazzling or Queenly Majesty protects; a Prankster status move at a Dark-type foe |
+| `flinch_a`, `flinch_b` | Chance to flinch foe a/b before it acts: flinch chance (Serene Grace doubles it, Sheer Force removes it) x accuracy x acting first x the foe can flinch (no Inner Focus or Shield Dust unless the user has Mold Breaker, no Covert Cloak or Substitute; known or by belief) x not immune |
+| `stop_damage`, `stop_ko` | Damage and KO chance those flinches prevent this turn (each foe's best threat against our actives) |
+| `protect` | Success chance of a Protect-like move: 1, or 1/3 right after a successful one |
+| `protect_damage`, `protect_ko` | `protect` times the damage and KO chance it blocks this turn (what the user faces minus what gets through: moves without the `protect` flag and Unseen Fist contact moves) |
+| `foe_protect_a`, `foe_protect_b` | Chance that the targeted foe can Protect: it has a Protect move (revealed, or by the set belief) at full or 1/3 success; 0 for moves without the `protect` flag (Feint) and Unseen Fist contact moves |
+| `tera_damage`, `tera_ko` | Tera codes only: change of damage and KO chance on the foes from terastallizing (Tera STAB; Stellar 2x on the original types and 1.2x otherwise; Tera Blast takes the Tera type and the higher attacking stat) |
+| `tera_threat`, `tera_threat_ko` | Tera codes only: change of the damage and KO chance the user faces this turn (its Tera type) |
+
+"Acting first" uses the priority the move will have (Prankster status moves, Gale Wings at full HP, Grassy Glide in
+Grassy Terrain), then speed (Trick Room flips it), and a fresh foe that may have Fake Out goes first against anything
+below +3 and against a slower +3 move. The legacy `first` columns are unchanged and still treat any positive priority
+as first.
+
+Per Pokemon: `fake_out_ready` (active, fresh and has Fake Out, known or by belief), `flinchable`, `fake_out_threat`
+(an opposing active can Fake Out it this turn, on both sides) and `protect_ready`.
+
+Known gaps: after two successful Protects in a row the success chance is 1/9, but the columns still say 1/3 (the
+tracker only keeps "protected last turn"). Triple Arrows' flinch chance (30%) is hard-coded because `dex.json`'s
+`secondaryChance` is the largest of a move's secondaries (its Defense drop, 50%). King's Rock is ignored. The values
+are chances that a foe *can* do something (Protect, Fake Out), not that it will.
+
+The Tera rows ride along in the existing damage calls as two extra attackers and defenders, and the shared per-Pokemon
+state is computed once. The features take 12.9 ms per 32 rows on one thread (7.1 ms before), about 6 ms more per
+actor step. In 3-minute smoke runs four actors still kept ahead of the learner (rollout 2.96 s, training 3.56 s,
+1,888 trained samples/s); five actors gave 1,844 samples/s. Late in the second hour, with shorter battles and 22%
+smart games, rollouts (3.07 s) had caught up with training (3.0 s), so a long run with those settings may be
+actor-bound by about 10-15%.
+
+The tracker also had two errors that these columns depend on:
+
+- `|cant|X|flinch` (also par, slp, frz, recharge, Truant, Taunt) now counts as a move action. The engine counts
+  `activeMoveActions` before `BeforeMove`, so a Pokemon flinched by a Fake Out on its first turn could no longer
+  Fake Out, but the tracker still showed it as fresh. `cant` lines with `[of]` name the Pokemon whose ability blocked
+  the move, and are skipped.
+- A failed Protect (`|move|X|Protect||[still]`, then `|-fail|X`) resets the counter, so it no longer counts as
+  "protected last turn". Switching out also resets it. The smart baseline reads these flags too, and may now protect
+  again after a failed Protect, as it should.
+
+The first 9 action and 6 token columns are unchanged: on 3,840 rows of random play they are bit-identical to the
+old code. Only `fresh` (48 entries) and `protect_last` (244 entries) changed, from the tracker fixes. A model reads
+only the columns it was built with, and `Model.from_state` (used by `evaluate.py`) infers them from a checkpoint, so
+the first and second runs' models still play against new ones. They cannot be resumed with the new features.
+
+New training diagnostics: `fake_out_ready` (share of slot decisions with a legal Fake Out that would flinch a foe),
+`use_fake_out_when_ready`, `fake_out_stale` (share of Fake Outs by a Pokemon that already used a move action since
+switching in) and `protect_repeat` (share of Protects right after a successful one). Tests:
+`training_tests/test_effects.py`. A GPT-6.1-Sol review found nine issues; all but the 1/9 Protect chance are fixed
+and tested (Unseen Fist through Protect, Tera Blast and Stellar Tera, Prankster/Gale Wings/Grassy Glide priority,
+Fake Out against a faster Fake Out, Sheer Force/Serene Grace/Mold Breaker, Triple Arrows, and the diagnostics).
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.

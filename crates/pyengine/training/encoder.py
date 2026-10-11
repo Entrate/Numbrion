@@ -69,8 +69,11 @@ I_CAND_ITEMS = I_CAND_ABILITIES + K_ABILITIES
 N_IDS = I_CAND_ITEMS + K_ITEMS
 STAT_SCALE = 400.0
 CACHE_LIMIT = 50_000  # entries per static-feature cache (~60 MB); foe reveal states keep growing otherwise
-N_ACTION_FEATURES = 9
-N_TOKEN_FEATURES = 6
+# Damage-calc features (training.damage). The first LEGACY_* columns are the first run's features, unchanged, so
+# models trained on them still run on the wider observation (training.model reads only the columns it was built for).
+LEGACY_ACTION_FEATURES, LEGACY_TOKEN_FEATURES = 9, 6
+N_ACTION_FEATURES = 23
+N_TOKEN_FEATURES = 10
 
 
 def span(name: str, length: int) -> slice:
@@ -113,7 +116,8 @@ class Mon:
     volatiles: dict = field(default_factory=dict)
     switch_turn: int = 0
     moves_since_switch: int = 0
-    protect_turn: int = -10
+    protect_turn: int = -10  # turn of the last successful Protect-like move (a failed one resets it)
+    stall_pending: bool = False  # a Protect-like move was just used; the next line tells success (-singleturn) or -fail
     moves: list = field(default_factory=list)  # revealed move ids in order
     item: str | None = None  # None unknown, "" none/lost, else item id
     item_lost: bool = False
@@ -168,6 +172,11 @@ class Tracker:
             if side[:2] != self.own:
                 self.foe_order.append(key)
         return mon
+
+    def known(self, ident: str) -> Mon | None:
+        """The tracked Pokemon of ``ident``, without creating one (for lines that never introduce a Pokemon)."""
+        side, _, name = ident.partition(": ")
+        return self.mons.get((side[:2], name)) if name else None
 
     def feed(self, lines: list[str]) -> None:
         for line in lines:
@@ -225,6 +234,7 @@ class Tracker:
         if parts[1] != "replace":
             key_mon.boosts, key_mon.volatiles = {}, {}
             key_mon.switch_turn, key_mon.moves_since_switch = self.turn, 0
+            key_mon.protect_turn, key_mon.stall_pending = -10, False  # switching out clears the Protect counter
         self.active[position[:3]] = (position[:2], parts[2].split(": ", 1)[1])
 
     def _reveal_illusion(self, position: str, ident: str) -> None:
@@ -348,7 +358,7 @@ class Tracker:
         move = to_id(parts[3])
         mon.moves_since_switch += 1
         if move in self.stalling:
-            mon.protect_turn = self.turn
+            mon.protect_turn, mon.stall_pending = self.turn, True
         if move == "struggle" or "[from]" in "".join(parts[4:]):
             return
         if move not in mon.stint_moves:
@@ -431,6 +441,30 @@ class Tracker:
     def _turn(self, parts):
         self.turn = int(parts[2])
 
+    def _cant(self, parts):
+        """``|cant|X|flinch`` (also par, slp, frz, recharge, Truant, Taunt...): X used up a move action without a
+        ``|move|`` line, so Fake Out and First Impression fail from now on (the engine counts activeMoveActions before
+        BeforeMove). With ``[of]``, X is the Pokemon whose ability blocked another's move (Armor Tail, Queenly
+        Majesty, Dazzling); that move's user already has its ``|move|`` line."""
+        if any(p.startswith("[of]") for p in parts[3:]):
+            return
+        mon = self.known(parts[2])
+        if mon is not None:
+            mon.moves_since_switch += 1
+
+    def _singleturn(self, parts):
+        mon = self.known(parts[2])
+        if mon is not None:
+            mon.stall_pending = False
+
+    def _fail(self, parts):
+        """A Protect-like move that fails (the 1/3 chance after a successful one) resets the counter."""
+        mon = self.known(parts[2])
+        if mon is not None and mon.stall_pending and mon.protect_turn == self.turn:
+            mon.protect_turn = -10
+        if mon is not None:
+            mon.stall_pending = False
+
     def _swap(self, parts):
         side = parts[2][:2]
         a, b = self.active.get(side + "a"), self.active.get(side + "b")
@@ -450,6 +484,7 @@ HANDLERS = {
     "-terastallize": Tracker._terastallize, "-start": Tracker._start, "-end": Tracker._end,
     "-weather": Tracker._weather, "-fieldstart": Tracker._fieldstart, "-fieldend": Tracker._fieldend,
     "-sidestart": Tracker._sidestart, "-sideend": Tracker._sideend, "turn": Tracker._turn, "swap": Tracker._swap,
+    "cant": Tracker._cant, "-singleturn": Tracker._singleturn, "-fail": Tracker._fail,
 }
 VOLATILE_SET = frozenset(VOLATILES)
 
