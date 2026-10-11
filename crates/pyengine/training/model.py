@@ -63,8 +63,22 @@ def bag(ids: torch.Tensor, table: torch.Tensor, weights: torch.Tensor | None = N
 
 
 def lookup(ids: torch.Tensor, table: torch.Tensor) -> torch.Tensor:
-    """table[ids] (one row per id) with a matmul backward, see ``bag``."""
+    """table[ids] (one row per id) with a matmul backward, see ``bag``. Also kept on MPS: ``F.embedding`` is faster
+    alone there but made a whole PPO update ~1.5% slower, and its atomic backward makes runs non-reproducible."""
     return bag(ids.unsqueeze(-1), table)
+
+
+def move_combination() -> torch.Tensor:
+    """[40, 11] 0/1 matrix: move code (i * 5 + j) * 2 + k sums actor, move i, target j and (if k) the Tera vector,
+    from the terms stacked as (actor, 4 moves, 5 targets, tera)."""
+    combination = torch.zeros(40, 11)
+    for i in range(4):
+        for j in range(5):
+            for k in range(2):
+                row = (i * 5 + j) * 2 + k
+                combination[row, (0, 1 + i, 5 + j)] = 1.0
+                combination[row, 10] = float(k)
+    return combination
 
 
 def masked_log_softmax(logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
@@ -106,6 +120,7 @@ class Model(nn.Module):
         self.act_context = nn.Linear(W, W)
         self.act_previous = nn.Linear(W, W)
         self.vectors = nn.Parameter(torch.randn(6, W) * 0.02)  # no target, tera, switch, pass, slot a, slot b
+        self.register_buffer("move_combination", move_combination(), persistent=False)
         self.score = nn.Sequential(nn.ReLU(), nn.Linear(W, W // 2), nn.ReLU(), nn.Linear(W // 2, 1))
         # Oracle critic.
         self.partner_proj = nn.Linear(W, W)
@@ -191,9 +206,16 @@ class Model(nn.Module):
         target_tokens = torch.stack([h[:, t] if t >= 0 else no_target.expand(B, W) for t in TARGET_TOKENS], 1)
         targets = self.act_target(target_tokens)  # [B, 5, W]
         tera = tera_vec + self.act_tera(lookup(ids[:, slot, I_TERA], self.type_embedding.weight))  # [B, W]
-        tera_flag = torch.tensor([0.0, 1.0], device=h.device).view(1, 1, 1, 2, 1)
-        move_vectors = (actor.view(B, 1, 1, 1, W) + moves.view(B, 4, 1, 1, W) + targets.view(B, 1, 5, 1, W)
-                        + tera.view(B, 1, 1, 1, W) * tera_flag).reshape(B, 40, W)
+        # Code (move i, target j, tera k) = actor + moves[i] + targets[j] + k * tera. On MPS a constant 0/1 matrix sums
+        # them, so the backward pass is a matmul: MPS reduces over broadcast axes ~15x slower (45 -> 3 ms per 1024
+        # rows). The broadcast stays elsewhere: it is faster on the CPU and DirectML has not been measured.
+        if h.device.type == "mps":
+            terms = torch.cat((actor.unsqueeze(1), moves, targets, tera.unsqueeze(1)), 1)  # [B, 11, W]
+            move_vectors = self.move_combination @ terms  # [B, 40, W]
+        else:
+            tera_flag = torch.tensor([0.0, 1.0], device=h.device).view(1, 1, 1, 2, 1)
+            move_vectors = (actor.view(B, 1, 1, 1, W) + moves.view(B, 4, 1, 1, W) + targets.view(B, 1, 5, 1, W)
+                            + tera.view(B, 1, 1, 1, W) * tera_flag).reshape(B, 40, W)
         move_vectors = move_vectors + self.act_damage(state["action_features"][:, slot])
         switches = self.act_switch(h[:, 0:6]) + switch_vec + actor.unsqueeze(1)  # [B, 6, W]
         passes = pass_vec.expand(B, 1, W)

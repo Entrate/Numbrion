@@ -88,8 +88,35 @@ def _process_memory_api():
     return kernel32, Counters
 
 
+@lru_cache(maxsize=1)
+def _darwin_memory_api():
+    """``proc_pid_rusage`` (libproc) with ``rusage_info_v2``: a uuid, then 18 uint64 counters."""
+    import ctypes
+
+    class RusageInfoV2(ctypes.Structure):
+        _fields_ = [("uuid", ctypes.c_uint8 * 16)] + [(name, ctypes.c_uint64) for name in (
+            "user_time", "system_time", "pkg_idle_wkups", "interrupt_wkups", "pageins", "wired_size", "resident_size",
+            "phys_footprint", "proc_start_abstime", "proc_exit_abstime", "child_user_time", "child_system_time",
+            "child_pkg_idle_wkups", "child_interrupt_wkups", "child_pageins", "child_elapsed_abstime",
+            "diskio_bytesread", "diskio_byteswritten")]
+
+    libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+    libproc.proc_pid_rusage.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.POINTER(RusageInfoV2)]
+    return libproc, RusageInfoV2
+
+
 def memory_mb() -> dict:
-    """Working set and private bytes of this process (Windows), for leak checks."""
+    """Resident and private memory of this process (Windows: working set and private bytes; macOS: resident size
+    and physical footprint, which includes Metal allocations), for leak checks."""
+    if sys.platform == "darwin":
+        import ctypes
+        import os
+
+        libproc, RusageInfoV2 = _darwin_memory_api()
+        info = RusageInfoV2()
+        if libproc.proc_pid_rusage(os.getpid(), 2, ctypes.byref(info)) != 0:  # 2 = RUSAGE_INFO_V2
+            return {}
+        return {"rss_mb": info.resident_size >> 20, "private_mb": info.phys_footprint >> 20}
     if sys.platform != "win32":
         return {}
     import ctypes

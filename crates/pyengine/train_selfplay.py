@@ -31,6 +31,7 @@ import argparse
 import json
 import os
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -89,6 +90,35 @@ def opponent_results(collected: dict, info: dict) -> dict:
     return out
 
 
+def ppo_loss(model, batch: dict, partner_ids, partner_floats, a0, a1, mask0, mask1, old_logp, weight, returns,
+             value_coef, entropy_weight, aux_coef, clip: float):
+    """One minibatch's PPO loss and its logged terms (policy, value, entropy and auxiliary losses, KL, clip
+    fraction), all on the device. ``--compile`` compiles this function."""
+    state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
+    lp0, vectors0 = model.slot0(state, mask0)
+    lp1 = model.slot1(state, vectors0, a0, mask1)
+    new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
+    ratio = (new_logp - old_logp).exp()
+    policy_loss = -torch.minimum(ratio * weight, ratio.clamp(1 - clip, 1 + clip) * weight).mean()
+    value = model.value(state, partner_ids, partner_floats)
+    value_loss = (value - returns).square().mean()
+    entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
+    aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
+    loss = policy_loss + value_coef * value_loss - entropy_weight * entropy + aux_coef * aux_loss
+    r, log_ratio = ratio.detach(), (new_logp - old_logp).detach()
+    kl, clipfrac = ((r - 1) - log_ratio).mean(), ((r - 1).abs() > clip).float().mean()
+    return loss, (policy_loss.detach(), value_loss.detach(), entropy.detach(), aux_loss.detach(), kl, clipfrac)
+
+
+@lru_cache(maxsize=1)
+def compiled_ppo_loss():
+    import torch._inductor.config
+
+    # Metal allows 31 buffer arguments per kernel; unbounded fusion generated kernels with more (torch 2.14.1).
+    torch._inductor.config.max_fusion_unique_io_buffers = 24
+    return torch.compile(ppo_loss)
+
+
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device) -> tuple[dict, int]:
     """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays."""
     steps, R = data["a0"].shape
@@ -99,49 +129,48 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     partner_index = (np.arange(steps)[:, None] * R + partner[None, :]).reshape(-1)
     adv = advantages.reshape(-1)[selected]
     adv = (adv - adv.mean()) / (adv.std() + 1e-8)
-    a0_all, a1_all = data["a0"].reshape(-1), data["a1"].reshape(-1)
-    mask0_all, mask1_all = data["mask0"].reshape(-1, N_ACTIONS), data["mask1"].reshape(-1, N_ACTIONS)
-    logp_all, returns_all = data["logp"].reshape(-1), returns.reshape(-1)
+    returns_all = returns.reshape(-1)
+    columns = dict(flat, a0=data["a0"].reshape(-1), a1=data["a1"].reshape(-1),
+                   mask0=data["mask0"].reshape(-1, N_ACTIONS), mask1=data["mask1"].reshape(-1, N_ACTIONS),
+                   logp=data["logp"].reshape(-1), returns=returns_all.astype(np.float32))
+    weights = adv.astype(np.float32)
     stats = {k: [] for k in ("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac", "grad_norm")}
     # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
     # memory for every op given a new Python scalar (see training.ppo.Adam).
     value_coef, entropy_weight, aux_coef = (torch.full((), float(x), device=device)
                                             for x in (args.value_coef, entropy_coef, args.aux_coef))
+    loss_fn = compiled_ppo_loss() if getattr(args, "compile", False) else ppo_loss
 
     def up(array):
         return torch.from_numpy(np.ascontiguousarray(array)).to(device)
 
+    # MPS shares memory with the CPU: copy the whole rollout once per update and gather the minibatches on the
+    # device, instead of gathering them with NumPy and copying each (0.14 s of a 2.3 s update).
+    resident = device.type == "mps"
+    if resident:
+        columns, weights = {k: up(v) for k, v in columns.items()}, up(weights)
+
+    def rows(key, index, extra=()):
+        return columns[key][(index, *extra)] if resident else up(columns[key][(index, *extra)])
+
     for _ in range(args.epochs):
         for pick in minibatches(rng.permutation(len(selected)), args.minibatch):
-            index = selected[pick]
-            batch = upload(flat, index, device)
-            partner_ids, partner_floats = partner_view(flat, partner_index[index], device)
-            a0, a1 = up(a0_all[index]), up(a1_all[index])
-            state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
-            lp0, vectors0 = model.slot0(state, up(mask0_all[index]))
-            lp1 = model.slot1(state, vectors0, a0, up(mask1_all[index]))
-            new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
-            old_logp = up(logp_all[index])
-            ratio = (new_logp - old_logp).exp()
-            weight = up(adv[pick].astype(np.float32))
-            policy_loss = -torch.minimum(ratio * weight, ratio.clamp(1 - args.clip, 1 + args.clip) * weight).mean()
-            value = model.value(state, partner_ids, partner_floats)
-            value_loss = (value - up(returns_all[index].astype(np.float32))).square().mean()
-            entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
-            aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
-            loss = policy_loss + value_coef * value_loss - entropy_weight * entropy + aux_coef * aux_loss
+            index, partner_rows = selected[pick], partner_index[selected[pick]]
+            if resident:
+                pick, index, partner_rows = up(pick), up(index), up(partner_rows)
+            batch = {k: rows(k, index) for k in OBS_KEYS}
+            loss, terms = loss_fn(model, batch, rows("ids", partner_rows), rows("floats", partner_rows, (slice(0, 6),)),
+                                  rows("a0", index), rows("a1", index), rows("mask0", index), rows("mask1", index),
+                                  rows("logp", index), weights[pick] if resident else up(weights[pick]),
+                                  rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip)
             optimizer.zero_grad()
             loss.backward()
             stats["grad_norm"].append(clip_gradients(optimizer.parameters, args.max_grad_norm))
             optimizer.step()
             # Statistics stay on the device and are read back once per update (a .cpu() per value per minibatch
             # stalls the DirectML queue, ~10% of the update).
-            with torch.no_grad():
-                stats["kl"].append(((ratio - 1) - (new_logp - old_logp)).mean())
-                stats["clipfrac"].append(((ratio - 1).abs() > args.clip).float().mean())
-            for key, item in (("policy_loss", policy_loss), ("value_loss", value_loss), ("entropy", entropy),
-                              ("aux_loss", aux_loss)):
-                stats[key].append(item.detach())
+            for key, item in zip(("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac"), terms):
+                stats[key].append(item)
     stats = {k: torch.stack(v).cpu().numpy() if v else np.zeros(1) for k, v in stats.items()}
     if not np.isfinite(stats["policy_loss"]).all() or not np.isfinite(stats["grad_norm"]).all():
         raise RuntimeError("Non-finite PPO loss or gradient norm (that step's update was skipped)")
@@ -206,6 +235,8 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=REPO / "scratch/training/selfplay")
     parser.add_argument("--resume", type=Path)
+    parser.add_argument("--compile", action="store_true",
+                        help="torch.compile the minibatch loss (~12 s of compiling per minibatch size at the start)")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -321,6 +352,7 @@ def main():
                 "entropy_target": round(controller.target(progress), 3) if controller is not None else None,
                 "ko_bonus": round(collected_info["ko_bonus"], 4), "pool_size": len(pool), **stats, **behaviour,
                 "pfsp": pool.summary(), **memory_mb(),
+                **({"mps_mb": torch.mps.driver_allocated_memory() >> 20} if device.type == "mps" else {}),
                 **{k: v for k, v in collected.items() if k.startswith("actor_")},  # largest actor's memory
             }
             print(json.dumps(metrics), flush=True)
