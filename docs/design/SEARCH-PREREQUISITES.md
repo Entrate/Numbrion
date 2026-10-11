@@ -7,7 +7,8 @@ is not a `WorldBuilder` world; set the variable (and update this status line) on
 
 Search support is an **opt-in cargo feature** (`search`, engine and pyengine). It is off by default because
 its PRNG hook adds a counter and a compare to every draw and 152 bytes to `BattleState`; a default build is
-unchanged. Build a search wheel with `maturin develop --release --features python,search` (maturin replaces
+unchanged (grid cells at ~27 us/cell for the base commit, the default build and the search build alike on an
+M1 Pro, within noise). Build a search wheel with `maturin develop --release --features python,search` (maturin replaces
 the `pyproject.toml` feature list, so `python` must be named too); `numbrion.SEARCH` tells which wheel is
 installed.
 
@@ -75,15 +76,15 @@ Pokemon transformed into an opponent reveals that opponent's move order through 
   builds pairs of real battles whose opponent teams differ only in what the viewer never saw (never-revealed
   bench sets, including BattleStart species when drawn; unused moves, items, abilities and Tera types of
   revealed Pokemon), checks that the viewer's observations are identical, and requires identical builder
-  statistics, sampled teams, world states and simulated futures. 299 of 300 battles gave such a pair, all
+  statistics, sampled teams, world states and simulated futures. 300 of 300 battles gave such a pair, all
   identical (`NUMBRION_TEST_BATTLES=300`).
 - *No live worlds:* worlds come only from the builder; `Battle.is_world` marks them (and copies of them), and
   `GridExecutor.run` warns on any other root unless `allow_live=True`.
 
 **Quality and cost** (Apple M1 Pro, one thread, pool-400 test pool, 8 worlds, random play): worlds reproduce
-the viewer's request exactly at every checked boundary; 97-98% of decisions get worlds (292 of 299 random
-positions from scratch; about 95% when maintained incrementally through whole battles, failures clustering in
-a few battles). Incremental cost per decision: median about 9 ms, mean about 60 ms, p90 about 160 ms (tail:
+the viewer's request exactly at every checked boundary; about 95-96% of decisions get worlds (287 of 299
+random positions from scratch with the default budgets, 292 of 299 with budgets twice as large; about 95% when
+maintained incrementally through whole battles, failures clustering in a few battles). Incremental cost per decision: median about 9 ms, mean about 60 ms, p90 about 160 ms (tail:
 fresh worlds replay the whole history). When no world is found the builder raises a clear error with the
 reason (`last_failure`); fall back to the policy for that decision.
 
