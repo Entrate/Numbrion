@@ -285,6 +285,105 @@ Two caveats:
   - a disguised Pokemon fainting unrevealed;
   - our own disguised Pokemon's boosts before the reveal.
 
+## Second run (2026-10-11)
+
+60 minutes with the learning setup above and all defaults (`--minutes 60`, four actors, 128 battles): 1,157 PPO
+updates and 287,769 battles (81 battles/s, 1,924 trained samples/s; the first run had 53 and 1,248). The plan was
+to stop at 30 minutes if it had plateaued; it had not (the training-time score against smart was still rising
+about 3 points per 5 minutes), so it ran the full hour. The trainer stayed at 520-670 MB for the whole run and
+the largest actor below 470 MB, so the leak fix holds.
+
+Training-time signals (5-minute windows; smart is the training opponent at temperature 0.05):
+
+| minutes | score vs smart | score vs PFSP snapshots | entropy (target) | self-play turns |
+|---:|---:|---:|---:|---:|
+| 0-5 | 9% | 99% | 2.8 (2.5) | 12.7 |
+| 10-15 | 20% | 55% | 2.3 (2.3) | 10.5 |
+| 25-30 | 26% | 60% | 2.1 (2.1) | 10.4 |
+| 40-45 | 32% | 59% | 1.8 (1.8) | 10.4 |
+| 55-60 | 36% | 60% | 1.6 (1.6) | 10.7 |
+
+The entropy controller tracked its target all run (the coefficient touched its 0.05 cap briefly around minutes
+7-10 and ended at 0.018). At the end its PFSP score against the pooled snapshots was 0.50-0.68 (the newest lowest).
+
+Evaluation (`evaluate.py`, temperature 1, duplicate games on `eval-s43-200`, 400 games per row, 1,000 for 60 min):
+
+| Snapshot | vs random | vs strongest-attack heuristic | vs smart | final (60 min) vs this snapshot |
+|---|---:|---:|---:|---:|
+| 0 min | 46.8% | 0% | 0% | 99.8% |
+| 10 min | 98.5% | 46.0% | 17.8% | 74.8% |
+| 20 min | 99.2% | 55.2% | 23.5% | 66.2% |
+| 30 min | 99.2% | 59.8% | 31.0% | 60.5% |
+| 40 min | 99.5% | 66.0% | 32.0% | 54.2% |
+| 50 min | 99.5% | 62.3% | 32.8% | 54.5% |
+| 60 min | 99.5% | 68.6% | 34.3% | |
+
+Smart itself scores 81.8% against the heuristic. Unlike the first run, the final model still beats its 40- and
+50-minute snapshots (about +30 Elo, error +/-35), so it was still learning slowly at the end.
+
+Against the first run (1,000 duplicate games each, same seeds for both runs):
+
+| Matchup | temperature 1 | temperature 0 |
+|---|---:|---:|
+| second run 60 min vs first run 60 min | 47.9% | 56.1% |
+| first run 60 min vs smart | 35.6% | 39.1% |
+| second run 60 min vs smart | 37.0% | 39.7% |
+
+So after an hour the two runs are about equally strong. The second run is slightly ahead when both play their
+most likely action, and slightly behind when both sample, which fits its higher entropy (1.6 against 0.7):
+more of its sampled moves are exploration. Neither beats smart.
+
+Behaviour of the final model (from the evaluation's logged games):
+
+- It now protects (0.76 times per battle against the heuristic, 1.13 against smart) and makes about one
+  voluntary switch per battle. In training, `use_protect` stayed at ~5% and `use_status` at ~10% of slot decisions.
+- It still terastallizes in every battle and almost never uses Fake Out (0.03 per battle, and two thirds of
+  those fail).
+- Against smart, 9.3% of its attacks hit a Protect, and 46% of its attacks at foes that could Protect were
+  blocked (first run: 8.8% and 38%).
+- 5.2% of its chosen single-target attacks go at a foe already fainted that turn (first run 5.4%).
+- The critic still ranks positions well but is underconfident against the heuristic (predicts 45% where 66% won).
+
+Outputs (git-ignored): `scratch/training/second-run/` with `metrics.jsonl`, `snapshots/`, `evaluation.json`,
+`midcheck-m030-m020.json` and replays. The cross-run checks are `scratch/training/h2h.py` and
+`scratch/training/vs_smart.py`.
+
+### Second hour
+
+The run continued from the 60-minute `latest.pt` for another hour (`--resume ... --minutes 120`), with more scripted
+games and schedules that continue from where the first hour ended:
+
+| Setting | First hour | Second hour |
+|---|---|---|
+| `--pool-fraction` / `--scripted-share` | 0.3 / 0.33 (10% smart, 20% snapshots) | 0.45 / 0.5 (22% smart, 23% snapshots) |
+| entropy target | 2.5 -> 1.5 | 1.5 -> 1.2 (`--entropy-target 1.8 --entropy-target-final 1.2` over 120 minutes) |
+| learning rate | 3e-4 -> 9e-5 | 1.05e-4 -> 6e-5 (`--lr 1.5e-4 --lr-final 0.4`) |
+
+`--minutes 120` with these start and end values makes the schedules continue at the 60-minute values instead of jumping
+back. 296,626 more battles (584,395 in total), 78-87 battles/s, trainer memory 580-710 MB. The training-time score
+against smart rose from 38% (minutes 60-65) to 42% (85-90) and 46% (115-120).
+
+Evaluation (`evaluate.py` on `scratch/training/second-run-2h`, which holds the 60-minute snapshot and the new ones):
+
+| Snapshot | vs heuristic | vs smart | 120 min vs this snapshot |
+|---|---:|---:|---:|
+| 60 min | 67.5% | 37.0% | 58.0% |
+| 70 min | 74.8% | 40.2% | 54.0% |
+| 80 min | 67.5% | 38.8% | 54.2% |
+| 90 min | 73.0% | 41.0% | 53.8% |
+| 100 min | 72.5% | 42.0% | 50.5% |
+| 110 min | 70.2% | 40.2% | 49.8% |
+| 120 min | 72.5% (1,000 games) | 42.7% (1,000 games) | |
+
+So the second hour added about +55 Elo, most of it by minute 90; the last 20 minutes were flat. Against the first
+run's final model (1,000 duplicate games): 59.3% at temperature 1, 60.8% at temperature 0. Against smart, four
+separate 1,000-game checks gave 39.9-45.3% (mean about 42%); the spread is larger than the duplicate games suggest, so
+single 1,000-game checks against smart are good to about +/-3 points.
+
+Its habits did not change: it terastallizes in every battle, uses Fake Out 0.02 times per battle (72-77% of them
+fail), and against smart 46% of its attacks at foes that could Protect are blocked. It switches a little more (1.1-1.3
+voluntary switches per battle). These are the actions the features did not describe; see the action-effects changes.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.
