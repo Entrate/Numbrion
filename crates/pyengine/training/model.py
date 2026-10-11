@@ -6,6 +6,8 @@
 * Actions are scored from their own features, DouZero style: a move code combines the user, the move (embedding,
   properties, PP), its target token, the Tera flag and the damage-calc features of exactly that move and target.
   Slot b's scores are conditioned on slot a's chosen action.
+* Partner-aware slot b (``joint_features=True``): slot b's move codes also get ``JOINT_COLUMNS``, computed from
+  slot a's chosen code and the per-foe damage/KO columns of both slots (see ``Model.partner_features``).
 * Oracle critic (training only): the value head also sees the opponent's full team, taken from the opponent row's
   own request. Auxiliary heads predict each revealed foe's hidden item, ability, Tera type and moves.
 
@@ -21,7 +23,7 @@ from torch import nn
 
 import torch.nn.functional as F
 
-from .damage import N_ACTION_FEATURES, N_TOKEN_FEATURES
+from .damage import ACTION_COLUMNS, LEGACY_ACTION_FEATURES, N_ACTION_FEATURES, N_TOKEN_FEATURES, ROLL
 from .dex import Dex
 from .encoder import (I_ABILITY, I_CAND_ABILITIES, I_CAND_ITEMS, I_CAND_MOVES, I_ITEM, I_MOVE0, I_SPECIES, I_TERA,
                       I_TYPE1, I_TYPE2, K_ABILITIES, K_ITEMS, K_MOVES, N_FIELD_FLOATS, N_POKEMON_FLOATS, PF)
@@ -29,6 +31,14 @@ from .encoder import (I_ABILITY, I_CAND_ABILITIES, I_CAND_ITEMS, I_CAND_MOVES, I
 N_ACTIONS = 47
 PASS = 46
 TARGET_TOKENS = (1, 0, -1, 6, 7)  # target code -> token (code 2 = no target)
+# Slot b's partner-aware features (Model.partner_features), per slot-b move code; _a/_b = foe a/b.
+JOINT_COLUMNS = ("left_a", "left_b", "damage_a", "damage_b", "overkill_a", "overkill_b", "ko_a", "ko_b",
+                 "finish_a", "finish_b", "wasted_a", "wasted_b", "helping_hand")
+N_JOINT_FEATURES = len(JOINT_COLUMNS)
+FOE_COLUMNS = LEGACY_ACTION_FEATURES + ACTION_COLUMNS.index("foe_a_damage")  # foe_a/b_damage, then foe_a/b_ko
+assert ACTION_COLUMNS[FOE_COLUMNS - LEGACY_ACTION_FEATURES:][:4] == ("foe_a_damage", "foe_b_damage", "foe_a_ko",
+                                                                     "foe_b_ko")
+HELPING_HAND = 1.5
 
 
 class Block(nn.Module):
@@ -85,13 +95,25 @@ def masked_log_softmax(logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor
     return torch.log_softmax(logits.masked_fill(~mask, -1e9), dim=-1)
 
 
+def ko_reach(damage: torch.Tensor, hp: torch.Tensor) -> torch.Tensor:
+    """Chance that a hit of expected ``damage`` KOs a target with ``hp`` left (fractions of max HP): training.damage's
+    KO estimate (rolls spread over 0.85-1 of the top roll) applied to the expected damage."""
+    top = damage / ROLL
+    return ((top - hp) / (0.15 * top).clamp(min=1e-3)).clamp(0, 1)
+
+
 class Model(nn.Module):
     def __init__(self, dex: Dex, width: int = 128, layers: int = 3, heads: int = 4,
-                 action_features: int = N_ACTION_FEATURES, token_features: int = N_TOKEN_FEATURES):
+                 action_features: int = N_ACTION_FEATURES, token_features: int = N_TOKEN_FEATURES,
+                 joint_features: bool = False):
         super().__init__()
         W = width
         self.width = W
         self.n_action_features, self.n_token_features = action_features, token_features
+        self.joint_features = joint_features
+        if joint_features and action_features < FOE_COLUMNS + 4:
+            raise ValueError(f"joint features need the per-foe damage columns ({FOE_COLUMNS + 4} action features)")
+        self.helping_hand = dex.move_index.get("helpinghand", -1)
         self.species = nn.Embedding(dex.n_species, W)
         self.item = nn.Embedding(dex.n_items, W)
         self.ability = nn.Embedding(dex.n_abilities, W)
@@ -132,12 +154,20 @@ class Model(nn.Module):
         self.aux_tera = nn.Linear(W, 20)
         self.aux_moves = nn.Linear(W, dex.n_moves)
         self.n_moves = dex.n_moves
+        if joint_features:
+            # Created last so every other weight draws the same random numbers as without it. Zero: a fresh model's
+            # policy equals the one without joint features.
+            self.act_joint = nn.Linear(N_JOINT_FEATURES, W)
+            nn.init.zeros_(self.act_joint.weight)
+            nn.init.zeros_(self.act_joint.bias)
 
     @classmethod
     def from_state(cls, dex: Dex, state: dict, width: int = 128, layers: int = 3) -> "Model":
-        """A model shaped for the state dict ``state`` (its feature column counts), with the weights loaded."""
+        """A model shaped for the state dict ``state`` (its feature column counts, joint features or not), with the
+        weights loaded."""
         model = cls(dex, width, layers, action_features=state["act_damage.weight"].shape[1],
-                    token_features=state["float_proj.weight"].shape[1] - N_POKEMON_FLOATS)
+                    token_features=state["float_proj.weight"].shape[1] - N_POKEMON_FLOATS,
+                    joint_features="act_joint.weight" in state)
         model.load_state_dict(state)
         return model
 
@@ -194,7 +224,9 @@ class Model(nn.Module):
         weights = present[:, :12].unsqueeze(-1)
         pooled = (h[:, :12] * weights).sum(1) / weights.sum(1).clamp(min=1)
         g = self.global_proj(torch.cat((pooled, h[:, 12]), -1))
-        return dict(h=h, g=g, moves=moves, action_features=action_features, ids=ids, tables=tables)
+        foe_alive = floats[:, 6:8, PF["present"]] * (1 - floats[:, 6:8, PF["fainted"]])
+        return dict(h=h, g=g, moves=moves, action_features=action_features, ids=ids, tables=tables,
+                    foe_hp=floats[:, 6:8, PF["hp"]] * foe_alive, foe_alive=foe_alive)
 
     # ---- policy -----------------------------------------------------------------------------------------------
     def action_vectors(self, state: dict, slot: int) -> torch.Tensor:
@@ -221,8 +253,10 @@ class Model(nn.Module):
         passes = pass_vec.expand(B, 1, W)
         return torch.cat((move_vectors, switches, passes), 1)  # [B, 47, W]
 
-    def logits(self, state: dict, slot: int, previous: torch.Tensor | None = None):
+    def logits(self, state: dict, slot: int, previous: torch.Tensor | None = None, joint: torch.Tensor | None = None):
         vectors = self.action_vectors(state, slot)
+        if joint is not None:  # [B, 40, W] for the move codes
+            vectors = torch.cat((vectors[:, :40] + joint, vectors[:, 40:]), 1)
         context = self.act_context(state["g"]) + self.vectors[4 + slot]
         if previous is not None:
             context = context + self.act_previous(previous)
@@ -236,8 +270,40 @@ class Model(nn.Module):
     def slot1(self, state: dict, vectors0: torch.Tensor, a0: torch.Tensor, mask1: torch.Tensor):
         onehot = (a0.view(-1, 1) == torch.arange(vectors0.shape[1], device=a0.device)).float()
         chosen = (onehot.unsqueeze(-1) * vectors0).sum(1)
-        logits1, _ = self.logits(state, 1, chosen)
+        joint = self.act_joint(self.partner_features(state, onehot)) if self.joint_features else None
+        logits1, _ = self.logits(state, 1, chosen, joint)
         return masked_log_softmax(logits1, mask1)
+
+    def partner_features(self, state: dict, onehot0: torch.Tensor) -> torch.Tensor:
+        """``JOINT_COLUMNS`` for each slot-b move code: [B, 40, N_JOINT_FEATURES], from slot a's chosen code
+        (``onehot0``: [B, 47] one-hot) and the per-foe damage/KO columns of both slots.
+
+        Per foe f, with hp its current HP (0 when absent or fainted), A = slot a's chosen code (zero for a switch or
+        PASS, which have no feature rows, and for status moves) and B = this slot-b code, all fractions of max HP:
+        ``left`` max(hp - A_dmg, 0); ``damage`` min(hp, A_dmg + B_dmg); ``overkill`` max(A_dmg + B_dmg - hp, 0);
+        ``ko`` 1 - (1 - A_ko)(1 - B_ko); ``finish`` the same with B's KO chance against the HP left after A's
+        expected damage (ko_reach) when that is higher; ``wasted`` A_ko * B_dmg. ``helping_hand``: slot a's chosen
+        move is Helping Hand, which multiplies B_dmg by 1.5 in the combined terms and raises B_ko to the KO chance of
+        the boosted damage when higher. Estimates: slot a is the decoding order, not the execution order.
+        """
+        af = state["action_features"][..., FOE_COLUMNS:FOE_COLUMNS + 4]  # [B, 2, 40, 4]: damage a/b, KO a/b
+        B = af.shape[0]
+        chosen = onehot0[:, :40].to(af.dtype)
+        mine = (chosen.unsqueeze(1) @ af[:, 0]).squeeze(1)  # [B, 4], a one-hot matmul gather
+        move_slot = chosen.view(B, 4, 10).sum(-1)  # [B, 4]: slot a's chosen move slot (all zero for switch/PASS)
+        helping = (state["ids"][:, 0, I_MOVE0:I_MOVE0 + 4] == self.helping_hand).to(af.dtype)
+        hh = (move_slot * helping).sum(-1).view(B, 1, 1)
+        hp, alive = state["foe_hp"].unsqueeze(1), state["foe_alive"].unsqueeze(1)  # [B, 1, 2]
+        a_dmg, a_ko = mine[:, None, 0:2], mine[:, None, 2:4]  # [B, 1, 2]
+        b_dmg = af[:, 1, :, 0:2] * (1 + (HELPING_HAND - 1) * hh)  # [B, 40, 2]
+        b_ko = af[:, 1, :, 2:4]
+        b_ko = b_ko + hh * (ko_reach(b_dmg, hp) - b_ko).clamp(min=0)
+        total = a_dmg + b_dmg
+        left = (hp - a_dmg).clamp(min=0)
+        finish = torch.maximum(b_ko, ko_reach(b_dmg, left))
+        per_foe = torch.cat((left.expand_as(b_dmg), torch.minimum(total, hp), (total - hp).clamp(min=0),
+                             1 - (1 - a_ko) * (1 - b_ko), 1 - (1 - a_ko) * (1 - finish), a_ko * b_dmg), -1)
+        return torch.cat((per_foe * alive.repeat(1, 1, 6), hh.expand(B, 40, 1)), -1)
 
     # ---- critic and auxiliary heads --------------------------------------------------------------------------
     def value(self, state: dict, partner_ids, partner_floats) -> torch.Tensor:

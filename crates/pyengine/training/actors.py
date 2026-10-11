@@ -171,8 +171,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     weights = SharedArrays({"learner": ((model_config["size"],), np.float32),
                             "opponent": ((model_config["size"],), np.float32)}, weight_names)
     dex = load_dex()
-    learner = Model(dex, model_config["width"], model_config["layers"]).eval()
-    opponent = Model(dex, model_config["width"], model_config["layers"]).eval()
+    learner = Model(dex, model_config["width"], model_config["layers"], joint_features=model_config["joint_features"]).eval()
+    opponent = Model(dex, model_config["width"], model_config["layers"], joint_features=model_config["joint_features"]).eval()
     guards = MoveGuards(**model_config["guards"])
     layout = weight_layout(learner)
     count = end - begin
@@ -331,8 +331,8 @@ class Actors:
         size = sum(int(np.prod(shape)) for _, shape, _ in self.layout)
         self.weights = SharedArrays({"learner": ((size,), np.float32), "opponent": ((size,), np.float32)})
         self.versions = {"learner": 0, "opponent": 0}
-        config = dict(size=size, width=model.width, layers=len(model.blocks), scripted=scripted,
-                      scripted_temperature=scripted_temperature, guards=asdict(guards))
+        config = dict(size=size, width=model.width, layers=len(model.blocks), joint_features=model.joint_features,
+                      scripted=scripted, scripted_temperature=scripted_temperature, guards=asdict(guards))
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])

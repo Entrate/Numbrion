@@ -6,7 +6,8 @@ Run from the repository root:
 
 * Observations: training.encoder (own request + player-view protocol only), damage features (training.damage).
 * Model: training.model (token transformer, per-action scoring, slot b conditioned on slot a, oracle critic,
-  auxiliary hidden-information heads).
+  auxiliary hidden-information heads). ``--joint-features`` also gives slot b's move codes partner-aware damage/KO
+  features from slot a's chosen code (training.model.JOINT_COLUMNS).
 * Rollouts: actor processes (training.actors) play the battles with CPU copies of the policy and fill one of two
   shared-memory buffers while the GPU trains on the other, so each rollout is collected with the weights from one
   update earlier. PPO's ratio uses the stored behaviour log-probs.
@@ -212,6 +213,8 @@ def main():
     parser.add_argument("--minibatch", type=int, default=1024)
     parser.add_argument("--width", type=int, default=128)
     parser.add_argument("--layers", type=int, default=3)
+    parser.add_argument("--joint-features", action="store_true",
+                        help="slot b's move codes see damage/KO features combined with slot a's chosen code")
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--lr-final", type=float, default=0.3, help="final learning-rate multiplier")
     parser.add_argument("--gamma", type=float, default=0.995)
@@ -265,7 +268,7 @@ def main():
     rng = np.random.default_rng(args.seed)
     device, adapter = training_device(args.device, args.adapter)
     dex = load_dex()
-    model = Model(dex, args.width, args.layers).to(device)
+    model = Model(dex, args.width, args.layers, joint_features=args.joint_features).to(device)
     optimizer = Adam(model.parameters(), lr=args.lr)
     pool = SnapshotPool(args.pool_size, args.pfsp_power, args.pfsp_floor, args.pfsp_alpha)
     controller = (EntropyController(args.entropy, args.entropy_target, args.entropy_target_final, args.entropy_rate,
@@ -279,6 +282,9 @@ def main():
         if saved != (model.act_damage.in_features, model.float_proj.in_features):
             raise SystemExit(f"{args.resume} was trained on other damage-calc feature columns (training.damage); "
                              "start a new run (evaluate.py still plays it against new models)")
+        if ("act_joint.weight" in state["model"]) != args.joint_features:
+            raise SystemExit(f"{args.resume} was trained {'without' if args.joint_features else 'with'} "
+                             "--joint-features; resume it with the flag it was trained with")
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         pool.load_state_dict(state["pool"])
