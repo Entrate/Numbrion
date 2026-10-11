@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from .dex import BOOSTS, NO_ITEM, STATUSES, Dex, load_dex, to_id
+from .guards import FIRST_TURN_ONLY, REPEAT_PROTECT, STALE
 
 N_TOKENS = 12
 OWN, FOE_A, FOE_B = 0, 6, 7
@@ -356,7 +357,8 @@ class Tracker:
         if mon is None:
             return
         move = to_id(parts[3])
-        mon.moves_since_switch += 1
+        if "Magic Bounce" not in "".join(parts[4:]):  # a bounced move is not a move action (Dancer's copy is)
+            mon.moves_since_switch += 1
         if move in self.stalling:
             mon.protect_turn, mon.stall_pending = self.turn, True
         if move == "struggle" or "[from]" in "".join(parts[4:]):
@@ -510,6 +512,7 @@ class Buffers:
         # Training-only: for foe tokens 6-11, the index of the same Pokemon among the opponent row's own tokens.
         self.foe_match = np.full((rows, 6), -1, dtype=np.int64)
         self.fainted = np.zeros((rows, 2), dtype=np.float32)  # own, foe (reward shaping)
+        self.guard = np.zeros((rows, 2, 4, 2), dtype=np.bool_)  # training-only move guards
         # Damage-calc features (training.damage), filled by Encoder.encode_batch.
         self.action_features = np.zeros((rows, 2, 40, N_ACTION_FEATURES), dtype=np.float32)
         self.token_features = np.zeros((rows, N_TOKENS, N_TOKEN_FEATURES), dtype=np.float32)
@@ -672,11 +675,13 @@ class Encoder:
         tracker.feed(observation["log"])
         request = json.loads(observation["request"]) if observation["request"] else {}
         b = self.buffers
+        b.guard[row].fill(False)
         dyn_rows, static_rows, id_rows = [], [], []
         turn = tracker.turn
         own_side = tracker.own
         foe_side = "p2" if own_side == "p1" else "p1"
         actives = request.get("active") or []
+        move_request = not request.get("wait") and not request.get("forceSwitch")
         own_names = []
         own_fainted = 0
         team = request.get("side", {}).get("pokemon", [])[:6]
@@ -691,7 +696,8 @@ class Encoder:
             dyn = _ZERO_DYNAMIC.copy()
             dyn[D_PRESENT] = dyn[D_OWN] = 1.0
             is_active = index < 2 and bool(pokemon.get("active"))
-            self._dynamic(dyn, hp / max_hp, status, tracker.mons.get((own_side, name)), turn, is_active, index)
+            mon = tracker.mons.get((own_side, name))
+            self._dynamic(dyn, hp / max_hp, status, mon, turn, is_active, index)
             dyn[D_STAT_HP] = max_hp / STAT_SCALE
             dyn[D_TERASTALLIZED] = float(bool(pokemon.get("terastallized")))
             moves = pokemon.get("moves", ())[:4]
@@ -699,6 +705,15 @@ class Encoder:
                 dyn[D_PP0 + m] = 1.0
             if is_active and index < len(actives) and actives[index]:
                 active = actives[index]
+                # Guards only for a Pokemon the tracker places in this slot: our disguised Zoroark is on record under
+                # the disguise, so its own record (if any) holds a past stint's timing.
+                if (move_request and mon is not None and status != "fnt"
+                        and tracker.active.get(own_side + "ab"[index]) == (own_side, name)):
+                    for m, info in enumerate(active.get("moves", ())[:4]):
+                        move = info.get("id", "")
+                        b.guard[row, index, m, STALE] = move in FIRST_TURN_ONLY and mon.moves_since_switch > 0
+                        b.guard[row, index, m, REPEAT_PROTECT] = (
+                            self.dex.move_stalling[self.dex.move_index.get(move, 0)] and mon.protect_turn >= turn - 1)
                 dyn[D_TERA_AVAILABLE] = float(bool(active.get("canTerastallize")))
                 dyn[D_TRAPPED] = float(bool(active.get("trapped") or active.get("maybeTrapped")))
                 by_id = {m.get("id"): m for m in active.get("moves", ())}

@@ -10,6 +10,9 @@ Run from the repository root:
 * Rollouts: actor processes (training.actors) play the battles with CPU copies of the policy and fill one of two
   shared-memory buffers while the GPU trains on the other, so each rollout is collected with the weights from one
   update earlier. PPO's ratio uses the stored behaviour log-probs.
+* Move guards: the policy's masks block stale Fake Out / First Impression and repeated Protect-like moves unless
+  no other move is legal (training.guards); scripted players keep the engine masks. ``--allow-repeat-protect``
+  allows the repeat.
 * Opponents (training.league): the learner plays both sides of most battles; ``--pool-fraction`` of the battles
   (fixed envs) put another player on side 2: ``--scripted-share`` of them a scripted player (``--scripted``: the
   doubles-aware smart player by default, or the strongest-attack heuristic), the rest an older snapshot (added every ``--pool-minutes``) chosen per rollout by prioritized
@@ -40,6 +43,7 @@ from training.actors import Actors, memory_mb
 from training.device import BACKENDS, training_device
 from training.diagnostics import ActionUsage
 from training.dex import load_dex
+from training.guards import MoveGuards
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
 from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches
@@ -160,6 +164,9 @@ def main():
     parser.add_argument("--envs", type=int, default=128)
     parser.add_argument("--workers", type=int, default=4, help="actor processes (the learner is the bottleneck; leave cores for it)")
     parser.add_argument("--steps", type=int, default=32, help="decision boundaries per rollout")
+    parser.add_argument("--allow-repeat-protect", action="store_true",
+                        help="allow a Protect-like move right after a successful one, blocked by default since it "
+                             "works one time in three")
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--minibatch", type=int, default=1024)
     parser.add_argument("--width", type=int, default=128)
@@ -271,7 +278,8 @@ def main():
                     snapshot_minutes=None if snapshot is None else snapshot["minutes"])
 
     with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model,
-                scripted=args.scripted, scripted_temperature=args.scripted_temperature) as actors:
+                scripted=args.scripted, scripted_temperature=args.scripted_temperature,
+                guards=MoveGuards(repeat_protect=not args.allow_repeat_protect)) as actors:
         start = time.perf_counter() - elapsed_before
         current = 0
         info = launch(actors, current, elapsed_before)
@@ -316,6 +324,7 @@ def main():
                 "cycle_s": round(cycle, 2), "train_s": round(train_seconds, 2), "wait_s": round(cycle - train_seconds, 2),
                 "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
+                "guarded_slots": collected["guarded"],
                 **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
                 "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5),
                 "entropy_target": round(controller.target(progress), 3) if controller is not None else None,

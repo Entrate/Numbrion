@@ -22,6 +22,7 @@ import argparse
 import json
 import math
 import time
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -29,6 +30,7 @@ import torch
 
 from training.device import BACKENDS, training_device
 from training.dex import load_dex, to_id
+from training.guards import MoveGuards
 from training.model import Model
 from training.ppo import PASS, sample
 from training.scripted import HeuristicAgent, RandomAgent, legal_random  # noqa: F401 (re-exported)
@@ -51,13 +53,18 @@ def tempered(logprobs: np.ndarray, temperature: float) -> np.ndarray:
 
 
 class PolicyAgent:
-    def __init__(self, model, device, rng, name, record_values=False, temperature=1.0):
+    def __init__(self, model, device, rng, name, record_values=False, temperature=1.0,
+                 guards: MoveGuards | None = None):
         self.model, self.device, self.rng, self.name = model, device, rng, name
         self.record_values = record_values
         self.temperature = temperature
+        self.guards = guards
         self.values: list = []
 
     def first(self, arrays, rows, mask0):
+        self.guard = arrays["guard"][rows].copy() if self.guards is not None and "guard" in arrays else None
+        if self.guard is not None:
+            mask0, _ = self.guards.apply(mask0, self.guard, 0)
         up = lambda a: torch.from_numpy(np.ascontiguousarray(a)).to(self.device)
         with torch.no_grad():
             batch = {k: up(arrays[k][rows]) for k in OBS_KEYS}
@@ -72,17 +79,20 @@ class PolicyAgent:
         return self.a0
 
     def second(self, rows, mask1):
+        if self.guard is not None:
+            mask1, _ = self.guards.apply(mask1, self.guard, 1)
         with torch.no_grad():
             a0 = torch.from_numpy(self.a0.astype(np.int64)).to(self.device)
             lp1 = self.model.slot1(self.state, self.vectors0, a0, torch.from_numpy(mask1).to(self.device))
         return sample(tempered(lp1.cpu().numpy(), self.temperature), self.rng)
 
 
-def load_policy(path: Path, dex, device, rng, name=None, record_values=False, temperature=1.0) -> PolicyAgent:
+def load_policy(path: Path, dex, device, rng, name=None, record_values=False, temperature=1.0,
+                guards: MoveGuards | None = None) -> PolicyAgent:
     state = torch.load(path, map_location="cpu", weights_only=False)
     model = Model.from_state(dex, state["model"], state.get("width", 128), state.get("layers", 3)).to(device)
     model.eval()
-    return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature)
+    return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature, guards)
 
 
 def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: int, log_games=False):
@@ -350,7 +360,11 @@ def main():
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--temperature", type=float, default=1.0,
                         help="policy sampling temperature (1 = as trained, 0 = most likely legal code)")
+    parser.add_argument("--allow-repeat-protect", action="store_true",
+                        help="allow a Protect-like move right after a successful one, blocked by default since it "
+                             "works one time in three")
     args = parser.parse_args()
+    guards = MoveGuards(repeat_protect=not args.allow_repeat_protect)
     torch.set_num_threads(2)
     device, _ = training_device(args.device)
     dex = load_dex()
@@ -358,7 +372,7 @@ def main():
     snapshots = sorted((args.run / "snapshots").glob("m*.pt"))
     final = snapshots[-1]
     chosen = [s for s in snapshots if int(s.stem[1:]) % args.every == 0 and s != final] + [final]
-    out = dict(run=str(args.run), pool=str(args.pool), temperature=args.temperature, matchups=[],
+    out = dict(run=str(args.run), pool=str(args.pool), temperature=args.temperature, guards=asdict(guards), matchups=[],
                started=time.strftime("%Y-%m-%d %H:%M:%S"))
     output = args.run / "evaluation.json"
 
@@ -382,7 +396,7 @@ def main():
         if logs:
             out["smart_mistakes"] = mistakes([x for x in logs if x["side"] == a_side[x["env"]]], dex)
     for snapshot in chosen:
-        policy = load_policy(snapshot, dex, device, rng, temperature=args.temperature)
+        policy = load_policy(snapshot, dex, device, rng, temperature=args.temperature, guards=guards)
         rounds = args.final_rounds if snapshot == final else args.rounds
         for opponent in (random_agent, heuristic, smart):
             if opponent is smart:
@@ -409,10 +423,10 @@ def main():
                 out["calibration"] = calibration_table(values)
                 out["replays"] = write_replays(logs, a_side, args.run / "replays", "final-vs-heuristic",
                                                f"{final.stem} vs strongest-attack heuristic", args.replays)
-    final_policy = load_policy(final, dex, device, rng, name=final.stem, temperature=args.temperature)
+    final_policy = load_policy(final, dex, device, rng, name=final.stem, temperature=args.temperature, guards=guards)
     for snapshot in chosen[:-1]:
         seed += 1
-        older = load_policy(snapshot, dex, device, rng, temperature=args.temperature)
+        older = load_policy(snapshot, dex, device, rng, temperature=args.temperature, guards=guards)
         result, *_ = play(final_policy, older, args.pool, args.envs, args.rounds, seed, args.workers)
         result["minutes"] = int(snapshot.stem[1:])
         record(result)

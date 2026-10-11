@@ -51,12 +51,12 @@ from .dex import TARGETS, Dex
 from .encoder import (FF, I_ABILITY, I_CAND_ABILITIES, I_CAND_ITEMS, I_CAND_MOVES, I_ITEM,  # noqa: F401
                       I_MOVE0, I_SPECIES, I_TERA, I_TYPE1, K_ABILITIES, K_ITEMS, K_MOVES, LEGACY_ACTION_FEATURES,
                       LEGACY_TOKEN_FEATURES, N_ACTION_FEATURES, N_TOKEN_FEATURES, PF, STAT_SCALE)
+from .guards import FIRST_TURN_ONLY
 
 ROLL = 0.925  # mean damage roll
 SPREAD = 0.75
 OWN_TOKENS = (0, 1)
 FOE_TOKENS = (6, 7)
-FIRST_TURN_ONLY = ("fakeout", "firstimpression")
 FLINCH_BLOCK = ("innerfocus", "shielddust")
 PRIORITY_BLOCK = ("armortail", "dazzling", "queenlymajesty")
 REPEAT_PROTECT = 1 / 3  # success chance of a Protect-like move right after a successful one (1/9 after two: not tracked)

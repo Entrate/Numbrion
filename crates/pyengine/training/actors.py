@@ -13,6 +13,7 @@ from __future__ import annotations
 import multiprocessing as mp
 import sys
 import time
+from dataclasses import asdict
 from functools import lru_cache
 from multiprocessing import shared_memory
 from pathlib import Path
@@ -20,6 +21,7 @@ from pathlib import Path
 import numpy as np
 
 from .encoder import N_ACTION_FEATURES, N_FIELD_FLOATS, N_IDS, N_POKEMON_FLOATS, N_TOKEN_FEATURES, N_TOKENS
+from .guards import MoveGuards
 
 N_ACTIONS = 47
 PASS = 46
@@ -144,6 +146,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     dex = load_dex()
     learner = Model(dex, model_config["width"], model_config["layers"]).eval()
     opponent = Model(dex, model_config["width"], model_config["layers"]).eval()
+    guards = MoveGuards(**model_config["guards"])
     layout = weight_layout(learner)
     count = end - begin
     rows = slice(2 * begin, 2 * end)
@@ -190,21 +193,25 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             snapshot_rows[1::2] = kinds == SNAPSHOT
             opp_index = np.flatnonzero(snapshot_rows)  # rows the opponent snapshot plays
             scripted_index = np.flatnonzero(opp_rows & ~snapshot_rows)  # rows the heuristic plays
+            policy_rows = ~opp_rows | snapshot_rows  # learner and pool snapshot rows
             # Per-env finished games, side-1 score (win 1, tie 0.5) and battle turns; "clean" games began during
             # this rollout, so they were played entirely against this rollout's opponent.
             results = {k: np.zeros(count) for k in RESULT_KEYS}
             began_here = np.zeros(count, dtype=bool)
             # ---- end opponent assignment
             ko_bonus = argument["ko_bonus"]
-            stats = dict(completed=0, turns=0)
+            stats = dict(completed=0, turns=0, guarded=0)
             inference = 0.0
             for t in range(steps):
                 for k in OBS_KEYS:
                     out[k][t, rows] = getattr(b, k)
                 active = result["needs_action"].reshape(-1).copy()
+                train_rows = active & ~opp_rows
                 mask0 = result["mask0"].reshape(-1, N_ACTIONS).copy()
                 mask0[~active] = False
                 mask0[~active, PASS] = True
+                mask0[policy_rows], guarded = guards.apply(mask0[policy_rows], b.guard[policy_rows], 0)
+                stats["guarded"] += int((guarded & train_rows[policy_rows]).sum())
                 t0 = time.perf_counter()
                 with torch.no_grad():
                     x = tensors(b)
@@ -224,6 +231,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     mask1 = env.mask_slot1(np.where(active, a0, -1).reshape(count, 2).astype(np.int32)).reshape(-1, N_ACTIONS).copy()
                     mask1[~active] = False
                     mask1[~active, PASS] = True
+                    mask1[policy_rows], guarded = guards.apply(mask1[policy_rows], b.guard[policy_rows], 1)
+                    stats["guarded"] += int((guarded & train_rows[policy_rows]).sum())
                     lp1 = learner.slot1(state, vectors0, torch.from_numpy(a0.astype(np.int64)), torch.from_numpy(mask1)).numpy().copy()
                     if len(opp_index):
                         lp1[opp_index] = opponent.slot1(opp_state, opp_vectors0, torch.from_numpy(a0[opp_index].astype(np.int64)),
@@ -238,7 +247,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 out["a0"][t, rows], out["a1"][t, rows] = a0, a1
                 out["logp"][t, rows] = lp0[np.arange(len(a0)), a0] + lp1[np.arange(len(a1)), a1]
                 out["value"][t, rows] = value
-                out["train"][t, rows] = active & ~opp_rows
+                out["train"][t, rows] = train_rows
                 result = env.step(actions)
                 if result["illegal"].any():
                     raise RuntimeError("A sampled action violated the exact mask")
@@ -285,7 +294,7 @@ class Actors:
     """``n_envs`` battles over ``workers`` actor processes, two rollout buffers of ``steps`` boundaries."""
 
     def __init__(self, n_envs: int, steps: int, pools: list[Path], seed: int, workers: int, model,
-                 scripted: str = "heuristic", scripted_temperature: float = 0.0):
+                 scripted: str = "heuristic", scripted_temperature: float = 0.0, guards: MoveGuards = MoveGuards()):
         self.n_envs, self.steps = n_envs, steps
         self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs)) for _ in range(2)]
         self.layout = weight_layout(model)
@@ -293,7 +302,7 @@ class Actors:
         self.weights = SharedArrays({"learner": ((size,), np.float32), "opponent": ((size,), np.float32)})
         self.versions = {"learner": 0, "opponent": 0}
         config = dict(size=size, width=model.width, layers=len(model.blocks), scripted=scripted,
-                      scripted_temperature=scripted_temperature)
+                      scripted_temperature=scripted_temperature, guards=asdict(guards))
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])
@@ -329,7 +338,7 @@ class Actors:
         for reply in replies:
             if isinstance(reply, tuple) and reply and reply[0] == "error":
                 raise RuntimeError("actor failed:\n" + reply[1])
-        totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns")}
+        totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns", "guarded")}
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
