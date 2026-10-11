@@ -20,9 +20,10 @@ Run from the repository root:
   trained on.
 * Reward: +1 win, -1 loss, plus a potential-based KO-difference bonus (sums to zero over a battle) that decays
   linearly to zero at ``--ko-bonus-end`` of the run.
-* Exploration: the entropy-bonus coefficient adapts so the summed slot-a + slot-b policy entropy tracks a target
+* Exploration: the entropy-bonus coefficient adapts so the summed slot-a + slot-b base-choice entropy tracks a target
   that falls linearly from ``--entropy-target`` to ``--entropy-target-final`` (``--entropy-target 0``: the fixed
-  ``--entropy`` -> ``--entropy-final`` schedule instead).
+  ``--entropy`` -> ``--entropy-final`` schedule instead). Tera gets no entropy bonus by default;
+  ``--tera-entropy-weight 1`` restores the joint entropy bonus. ``tera_entropy`` logs its conditional contribution.
 * Schedule: the learning rate anneals over the time budget; snapshots every ``--snapshot-minutes`` feed
   evaluate.py. ``latest.pt`` (with optimizer, opponent-pool and entropy-controller state) supports ``--resume``.
 * Metrics: besides the losses, win rates against snapshots and against the heuristic, the PFSP table, and the
@@ -47,7 +48,7 @@ from training.dex import load_dex
 from training.guards import MoveGuards
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
-from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches
+from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches, tera_choice_entropy
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -95,8 +96,8 @@ def opponent_results(collected: dict, info: dict) -> dict:
 
 
 def ppo_loss(model, batch: dict, partner_ids, partner_floats, a0, a1, mask0, mask1, old_logp, weight, returns,
-             value_coef, entropy_weight, aux_coef, clip: float):
-    """One minibatch's PPO loss and its logged terms (policy, value, entropy and auxiliary losses, KL, clip
+             value_coef, entropy_weight, aux_coef, clip: float, tera_entropy_weight=0.0):
+    """One minibatch's PPO loss and its logged terms (policy, value, base/Tera entropy and auxiliary losses, KL, clip
     fraction), all on the device. ``--compile`` compiles this function."""
     state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
     lp0, vectors0 = model.slot0(state, mask0)
@@ -106,12 +107,17 @@ def ppo_loss(model, batch: dict, partner_ids, partner_floats, a0, a1, mask0, mas
     policy_loss = -torch.minimum(ratio * weight, ratio.clamp(1 - clip, 1 + clip) * weight).mean()
     value = model.value(state, partner_ids, partner_floats)
     value_loss = (value - returns).square().mean()
-    entropy = -((lp0.exp() * lp0).sum(-1) + (lp1.exp() * lp1).sum(-1)).mean()
+    base0, tera0 = tera_choice_entropy(lp0)
+    base1, tera1 = tera_choice_entropy(lp1)
+    entropy = (base0 + base1).mean()
+    tera_entropy = (tera0 + tera1).mean()
     aux_loss = model.aux_loss(state, batch["floats"], batch["foe_match"], partner_ids)
-    loss = policy_loss + value_coef * value_loss - entropy_weight * entropy + aux_coef * aux_loss
+    bonus = entropy + tera_entropy_weight * tera_entropy
+    loss = policy_loss + value_coef * value_loss - entropy_weight * bonus + aux_coef * aux_loss
     r, log_ratio = ratio.detach(), (new_logp - old_logp).detach()
     kl, clipfrac = ((r - 1) - log_ratio).mean(), ((r - 1).abs() > clip).float().mean()
-    return loss, (policy_loss.detach(), value_loss.detach(), entropy.detach(), aux_loss.detach(), kl, clipfrac)
+    return loss, (policy_loss.detach(), value_loss.detach(), entropy.detach(), tera_entropy.detach(),
+                  aux_loss.detach(), kl, clipfrac)
 
 
 @lru_cache(maxsize=1)
@@ -138,11 +144,14 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                    mask0=data["mask0"].reshape(-1, N_ACTIONS), mask1=data["mask1"].reshape(-1, N_ACTIONS),
                    logp=data["logp"].reshape(-1), returns=returns_all.astype(np.float32))
     weights = adv.astype(np.float32)
-    stats = {k: [] for k in ("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac", "grad_norm")}
+    terms_keys = ("policy_loss", "value_loss", "entropy", "tera_entropy", "aux_loss", "kl", "clipfrac")
+    stats = {k: [] for k in (*terms_keys, "grad_norm")}
     # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
     # memory for every op given a new Python scalar (see training.ppo.Adam).
-    value_coef, entropy_weight, aux_coef = (torch.full((), float(x), device=device)
-                                            for x in (args.value_coef, entropy_coef, args.aux_coef))
+    dtype = next(model.parameters()).dtype
+    value_coef, entropy_weight, aux_coef, tera_entropy_weight = (
+        torch.full((), float(x), device=device, dtype=dtype)
+        for x in (args.value_coef, entropy_coef, args.aux_coef, args.tera_entropy_weight))
     loss_fn = compiled_ppo_loss() if getattr(args, "compile", False) else ppo_loss
 
     def up(array):
@@ -166,7 +175,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
             loss, terms = loss_fn(model, batch, rows("ids", partner_rows), rows("floats", partner_rows, (slice(0, 6),)),
                                   rows("a0", index), rows("a1", index), rows("mask0", index), rows("mask1", index),
                                   rows("logp", index), weights[pick] if resident else up(weights[pick]),
-                                  rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip)
+                                  rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip,
+                                  tera_entropy_weight)
             optimizer.zero_grad()
             loss.backward()
             norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
@@ -174,7 +184,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
             optimizer.step(skip=~torch.isfinite(norm))  # a non-finite gradient leaves the weights as they were
             # Statistics stay on the device and are read back once per update (a .cpu() per value per minibatch
             # stalls the DirectML queue, ~10% of the update).
-            for key, item in zip(("policy_loss", "value_loss", "entropy", "aux_loss", "kl", "clipfrac"), terms):
+            for key, item in zip(terms_keys, terms):
                 stats[key].append(item)
     stats = {k: torch.stack(v).cpu().numpy() if v else np.zeros(1) for k, v in stats.items()}
     if not np.isfinite(stats["policy_loss"]).all() or not np.isfinite(stats["grad_norm"]).all():
@@ -211,8 +221,10 @@ def main():
                         help="entropy-bonus coefficient (the starting value of the adaptive coefficient)")
     parser.add_argument("--entropy-final", type=float, default=0.003,
                         help="final coefficient of the fixed linear schedule (only with --entropy-target 0)")
+    parser.add_argument("--tera-entropy-weight", type=float, default=0.0,
+                        help="conditional Tera entropy weight in the bonus (0: base only; 1: old joint bonus)")
     parser.add_argument("--entropy-target", type=float, default=2.5,
-                        help="target for the summed slot-a + slot-b entropy at the start (0: fixed schedule)")
+                        help="target for summed slot-a + slot-b base entropy at the start (0: fixed schedule)")
     parser.add_argument("--entropy-target-final", type=float, default=1.5, help="entropy target at the end of the run")
     parser.add_argument("--entropy-rate", type=float, default=0.2,
                         help="change of log(coefficient) per update and nat of entropy error")

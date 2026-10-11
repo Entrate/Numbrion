@@ -31,6 +31,10 @@ def outputs(buffers):
 def check_buffers(reference, actual):
     for name in OUTPUT_KEYS:
         expected, got = getattr(reference, name), getattr(actual, name)
+        if name in ("action_features", "token_features"):
+            width = layout.REFERENCE_ACTION_FEATURES if name == "action_features" else layout.REFERENCE_TOKEN_FEATURES
+            assert not expected[..., width:].any()  # Rust-only columns remain zero in the frozen reference.
+            expected, got = expected[..., :width], got[..., :width]
         if expected.dtype.kind in "ib":
             np.testing.assert_array_equal(got, expected, err_msg=name)
         else:
@@ -50,7 +54,7 @@ def test_layout_matches_python():
     for name in ("VOLATILES", "TERRAINS", "SIDE_CONDITIONS", "TIMED_SIDE", "EXTREME_WEATHER", "STATUSES", "BOOSTS"):
         assert native[name] == list(getattr(layout, name)), name
     for name, value in vars(layout).items():
-        if name.startswith(("N_", "I_", "K_", "LEGACY_")) or name in ("OWN", "FOE_A", "FOE_B", "STAT_SCALE", "CACHE_LIMIT"):
+        if name.startswith(("N_", "I_", "K_", "LEGACY_", "REFERENCE_")) or name in ("OWN", "FOE_A", "FOE_B", "STAT_SCALE", "CACHE_LIMIT"):
             assert native[name] == value, name
 
 

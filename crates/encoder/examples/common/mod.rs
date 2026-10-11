@@ -38,13 +38,14 @@ impl Array {
 }
 
 pub fn load(dir: &Path) -> std::collections::HashMap<String, Array> {
-    let meta = Json::parse(&fs::read_to_string(dir.join("meta.json")).expect("meta.json")).expect("meta.json");
+    let text = fs::read_to_string(dir.join("meta.json")).expect("meta.json");
+    let meta = Json::parse(&text).expect("meta.json");
     let mut out = std::collections::HashMap::new();
     for (name, spec) in meta.members() {
         let dtype = spec.items()[0].str_or_empty().to_string();
         let shape = spec.items()[1].items().iter().map(|x| x.as_f64().unwrap() as usize).collect();
         let bytes = fs::read(dir.join(format!("{name}.bin"))).expect("array file");
-        out.insert(name.clone(), Array { dtype, shape, bytes });
+        out.insert(name.to_string(), Array { dtype, shape, bytes });
     }
     out
 }

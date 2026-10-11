@@ -36,6 +36,26 @@ def status_position(move, slot=0):
     return arrays
 
 
+@pytest.mark.parametrize("backend", ("python", "rust"))
+def test_smart_leaves_callers_random_stream_unchanged(backend):
+    from training.smart import PySmartHeuristicAgent, RustSmartHeuristicAgent
+
+    if backend == "rust" and not hasattr(nb, "SmartAgent"):
+        pytest.skip("wheel lacks the Rust smart player")
+    agent_type = PySmartHeuristicAgent if backend == "python" else RustSmartHeuristicAgent
+    rng = np.random.default_rng(827)
+    reference = np.random.default_rng(827)
+    agent = agent_type(rng)
+    np.testing.assert_array_equal(rng.integers(2**63, size=64), reference.integers(2**63, size=64))
+    arrays = status_position("spore")
+    mask = np.zeros((1, N_ACTIONS), dtype=bool)
+    mask[0, PASS] = True
+    rows = np.array([0])
+    agent.first(arrays, rows, mask)
+    agent.second(rows, mask)
+    np.testing.assert_array_equal(rng.random(64), reference.random(64))
+
+
 @pytest.mark.parametrize("slot", (0, 1))
 def test_spore_never_targets_ally(slot):
     arrays = status_position("spore", slot)

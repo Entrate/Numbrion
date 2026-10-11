@@ -12,7 +12,7 @@ import pytest
 import numbrion as nb
 from training.diagnostics import ActionUsage
 from training.dex import load_dex
-from training.encoder import I_MOVE0, N_IDS, Encoder
+from training.encoder import FF, I_MOVE0, N_FIELD_FLOATS, N_IDS, Encoder
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds, pfsp_weights
 from training.ppo import PASS, EntropyController, ko_shaping, sample
 from training.scripted import HeuristicAgent, RandomAgent, forced_logprobs
@@ -253,7 +253,9 @@ def test_action_usage_shares():
     mask1[0, 2] = False
     mask1[0, 2, PASS] = True  # row 2: slot b has nothing to do (not a move decision)
     train = np.array([[True, True, True, False]])  # row 3 is an opponent row: ignored
-    data = dict(a0=a0, a1=a1, mask0=mask0, mask1=mask1, ids=ids, train=train)
+    field = np.zeros((1, rows, N_FIELD_FLOATS), dtype=np.float32)
+    field[..., FF["turn"]] = 1 / 30
+    data = dict(a0=a0, a1=a1, mask0=mask0, mask1=mask1, ids=ids, field=field, train=train)
     out = ActionUsage(dex)(data)
     assert out["use_decisions"] == 5
     assert out["use_protect"] == pytest.approx(1 / 5) and out["use_status"] == pytest.approx(1 / 5)

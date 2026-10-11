@@ -29,6 +29,10 @@ Outputs:
   - Tera codes only: ``tera_damage``/``tera_ko``, the change of damage and KO chance on the foes from terastallizing
     (STAB), and ``tera_threat``/``tera_threat_ko``, the change of the damage and KO chance the user faces this turn
     (its defensive type). Zero without Tera.
+  - Rust-only: ``protect_chance_a``/``protect_chance_b`` estimate whether each targeted foe protects this turn
+    from its ability to Protect and the damage/KO threat from our actives. ``damage_after_protect``/
+    ``ko_after_protect`` discount the legacy damage/KO shares by those chances. These four columns are zero
+    in this frozen Python reference, and identical with and without Tera in Rust.
 
 * ``token``: [B, 12, N_TOKEN_FEATURES] for every Pokemon: expected damage and KO chance from each opposing active,
   and whether it outspeeds each opposing active. For damage from an opponent, each possible move is assumed present
@@ -37,6 +41,10 @@ Outputs:
   Then (``TOKEN_COLUMNS``): ``fake_out_ready`` (active, has not used a move action since switching in, and has Fake
   Out: known, or by the set belief), ``flinchable`` (a Fake Out on it would flinch it), ``fake_out_threat`` (an
   opposing active can Fake Out it this turn) and ``protect_ready`` (active and can Protect successfully).
+  Rust-only: ``offense_a``/``offense_b`` and ``offense_ko_a``/``offense_ko_b`` give each own Pokemon's best
+  damage/KO chance against the foe actives, including bench Pokemon as if on the field. ``entry_damage`` gives
+  own-side hazard damage on entry (Boots/Magic Guard, grounding and current HP included). ``protect_now`` gives
+  the foe actives' Protect prior before per-move blocking. These six columns are zero in the Python reference.
 
 The first LEGACY_ACTION_FEATURES and LEGACY_TOKEN_FEATURES columns are exactly the first run's features, so older
 models still run (training.model reads only the columns a model was built with).
@@ -50,7 +58,8 @@ from torch import nn
 from .dex import TARGETS, Dex
 from .encoder import (FF, I_ABILITY, I_CAND_ABILITIES, I_CAND_ITEMS, I_CAND_MOVES, I_ITEM,  # noqa: F401
                       I_MOVE0, I_SPECIES, I_TERA, I_TYPE1, K_ABILITIES, K_ITEMS, K_MOVES, LEGACY_ACTION_FEATURES,
-                      LEGACY_TOKEN_FEATURES, N_ACTION_FEATURES, N_TOKEN_FEATURES, PF, STAT_SCALE)
+                      LEGACY_TOKEN_FEATURES, N_ACTION_FEATURES, N_TOKEN_FEATURES, PF, REFERENCE_ACTION_FEATURES,
+                      REFERENCE_TOKEN_FEATURES, STAT_SCALE)
 from .guards import FIRST_TURN_ONLY
 
 ROLL = 0.925  # mean damage roll
@@ -64,8 +73,10 @@ FLINCH_CHANCE = {"triplearrows": 0.3}  # dex.json's secondaryChance is the large
 MOLD_BREAKER = ("moldbreaker", "teravolt", "turboblaze")
 STELLAR = 19
 ACTION_COLUMNS = ("fail", "flinch_a", "flinch_b", "stop_damage", "stop_ko", "protect", "protect_damage", "protect_ko",
-                  "foe_protect_a", "foe_protect_b", "tera_damage", "tera_ko", "tera_threat", "tera_threat_ko")
-TOKEN_COLUMNS = ("fake_out_ready", "flinchable", "fake_out_threat", "protect_ready")
+                  "foe_protect_a", "foe_protect_b", "tera_damage", "tera_ko", "tera_threat", "tera_threat_ko",
+                  "protect_chance_a", "protect_chance_b", "damage_after_protect", "ko_after_protect")
+TOKEN_COLUMNS = ("fake_out_ready", "flinchable", "fake_out_threat", "protect_ready", "offense_a", "offense_b",
+                 "offense_ko_a", "offense_ko_b", "entry_damage", "protect_now")
 assert LEGACY_ACTION_FEATURES + len(ACTION_COLUMNS) == N_ACTION_FEATURES
 assert LEGACY_TOKEN_FEATURES + len(TOKEN_COLUMNS) == N_TOKEN_FEATURES
 
@@ -200,6 +211,7 @@ class DamageFeatures(nn.Module):
             spe=spe, hp=col("hp") * max_hp, hp_frac=col("hp"), max_hp=max_hp.clamp(min=1), alive=alive,
             burned=col("brn"), base_types=base_types, def_types=def_types, tera=tera,
             terastallized=terastallized, type_mult=floats[..., PF["type_mult0"]:PF["type_mult0"] + 20],
+            stellar=((terastallized > 0.5) & stellar).float(),  # Stellar STAB once Stellar-terastallized (damage())
             weight=self.species_weight[ids[..., I_SPECIES]], item=item,
             screen_phys=torch.maximum(reflect, veil), screen_spec=torch.maximum(light, veil),
         )
@@ -226,8 +238,9 @@ class DamageFeatures(nn.Module):
         tera_match = (att["terastallized"] > 0.5) & (att["tera"] == mtype)
         orig_match = (att["base_types"][..., 0] == mtype) | (att["base_types"][..., 1] == mtype)
         stab = 1 + 0.5 * orig_match.float() + 0.5 * tera_match.float()
-        if "stellar" in att:  # Tera rows: Stellar gives 2x on the original types' moves and 1.2x on the others
-            stab = torch.where(att["stellar"] > 0.5, torch.where(orig_match, 2.0, 1.2), stab)
+        # Stellar Tera: 2x on the original types' moves and 1.2x on the others (every use: random battles give
+        # Stellar only to Terapagos, whose boost is not used up).
+        stab = torch.where(att["stellar"] > 0.5, torch.where(orig_match, 2.0, 1.2), stab)
         n = self.n_types
         flat = self.typechart.reshape(-1)
         eff = flat[mtype * n + dfn["def_types"][..., 0]] * flat[mtype * n + dfn["def_types"][..., 1]]
@@ -263,6 +276,7 @@ class DamageFeatures(nn.Module):
         moves = torch.cat((ids[:, foe_tokens, I_MOVE0:I_MOVE0 + 4], ids[:, foe_tokens, I_CAND_MOVES:I_CAND_MOVES + K_MOVES]), -1)
         probs = torch.cat((floats[:, foe_tokens, PF["move_known0"]:PF["move_known0"] + 4],
                            floats[:, foe_tokens, PF["cand_move_p0"]:PF["cand_move_p0"] + K_MOVES]), -1) * (moves > 0)
+        on_field = t["alive"][:, foe_tokens].unsqueeze(-1)  # a fainted foe still in its slot attacks no one
         stab_types = torch.cat((t["base_types"][:, foe_tokens], t["tera"][:, foe_tokens].unsqueeze(-1)
                                 * (t["terastallized"][:, foe_tokens] > 0.5).long().unsqueeze(-1)), -1)  # [B, 2, 3]
         better = torch.where(t["atk"][:, foe_tokens] >= t["spa"][:, foe_tokens], 1, 2).unsqueeze(-1)
@@ -277,7 +291,7 @@ class DamageFeatures(nn.Module):
             cat(self.move_power[moves], 80 * ones), cat(self.move_accuracy[moves], ones),
             cat(self.move_hits[moves], ones), cat(self.move_special[moves], torch.zeros_like(stab_types)), field,
             modifier=cat(torch.where(spread, SPREAD, 1.0), ones))
-        return dealt, ko, torch.cat((probs, fallback), -1)
+        return dealt, ko, torch.cat((probs, fallback), -1) * on_field
 
     def forward(self, ids: torch.Tensor, floats: torch.Tensor, field: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         B = ids.shape[0]
@@ -292,7 +306,6 @@ class DamageFeatures(nn.Module):
         # Own actives with their real moves against every token.
         own = {k: torch.cat((v[:, list(OWN_TOKENS)], tera_t[k]), 1).reshape(B, 4, 1, 1, *v.shape[2:])
                for k, v in t.items()}
-        own["stellar"] = torch.cat((torch.zeros_like(tera_t["stellar"]), tera_t["stellar"]), 1).view(B, 4, 1, 1)
         moves = ids[:, list(OWN_TOKENS), I_MOVE0:I_MOVE0 + 4]  # [B, 2, 4]
         mv = lambda table: table[torch.cat((moves, moves), 1)].unsqueeze(-1)  # [B, 4, 4, 1]
         # Tera Blast takes the Tera type, and is physical when Attack is higher.
@@ -337,7 +350,9 @@ class DamageFeatures(nn.Module):
         foe_mask = torch.zeros(12, device=ids.device)
         foe_mask[6:12] = 1
         own_mask = 1 - foe_mask
-        main = (hit.argmax(-1, keepdim=True) == torch.arange(12, device=ids.device)).float()  # [B, 2, 4, 5, 12]
+        # Main target: the first token with the largest share, a foe on ties (Earthquake and Surf hit the ally too).
+        tie_break = hit + 1e-3 * foe_mask * (hit > 0).float()
+        main = (tie_break.argmax(-1, keepdim=True) == torch.arange(12, device=ids.device)).float()  # [B, 2, 4, 5, 12]
         eff_main = (main * own_eff.unsqueeze(3)).sum(-1)
         any_hit = (hit.sum(-1) > 0).float()
         priority = self.move_priority[moves].unsqueeze(-1)  # [B, 2, 4, 1]
@@ -366,8 +381,10 @@ class DamageFeatures(nn.Module):
                                  threat_from_foe, ko_from_foe, threat_all[:, 12:], ko_all[:, 12:])
         both = torch.cat((action, effects), -1).unsqueeze(4).expand(-1, -1, -1, -1, 2, -1)  # same with and without Tera
         tera = torch.stack((torch.zeros_like(tera), tera), 4)  # Tera columns only on Tera codes
-        action = torch.cat((both, tera), -1).reshape(B, 2, 40, N_ACTION_FEATURES)
+        action = torch.cat((both, tera), -1).reshape(B, 2, 40, REFERENCE_ACTION_FEATURES)
         token = torch.cat((token, self.token_effects(ids, floats, t, p)), -1)
+        action = torch.cat((action, action.new_zeros(B, 2, 40, N_ACTION_FEATURES - REFERENCE_ACTION_FEATURES)), -1)
+        token = torch.cat((token, token.new_zeros(B, 12, N_TOKEN_FEATURES - REFERENCE_TOKEN_FEATURES)), -1)
         return action, token
 
     # ---- effects beyond damage ---------------------------------------------------------------------------------

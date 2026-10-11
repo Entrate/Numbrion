@@ -10,6 +10,27 @@ import torch
 PASS = 46
 
 
+def tera_choice_entropy(logprobs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return base entropy and expected conditional Tera entropy per slot, shaped ``[...]``.
+
+    The joint masked policy is ``[..., 47]``: codes 0..39 are 20 adjacent (no Tera, Tera) pairs;
+    codes 40..46 are six switches and PASS. Logsumexp merges each pair into its base choice,
+    giving 27 options. The Tera term is E_b[H(Tera | b)], weighted by the move pair's joint
+    probabilities; switches/PASS contribute zero. Their sum is the original joint entropy.
+
+    Replace -inf masks with the model's finite sentinel before reducing: an entirely illegal
+    pair otherwise has undefined logsumexp gradients and 0 * -inf terms. Its probability still
+    underflows to zero. Reshapes/slices and reductions avoid DirectML's int64 indexing fallback.
+    """
+    lp = logprobs.clamp_min(-1e9)
+    moves = lp[..., :40].reshape(*lp.shape[:-1], 20, 2)
+    move_base = torch.logsumexp(moves, dim=-1)
+    base = torch.cat((move_base, lp[..., 40:]), dim=-1)
+    base_entropy = -(base.exp() * base).sum(-1)
+    tera_entropy = -(moves.exp() * (moves - move_base.unsqueeze(-1))).sum(-1).sum(-1)
+    return base_entropy, tera_entropy
+
+
 def sample(logprobs: np.ndarray, rng: np.random.Generator) -> np.ndarray:
     """Gumbel-max sampling from masked log-probabilities ([rows, 47]; illegal codes are ~-1e9)."""
     return np.argmax(logprobs + rng.gumbel(size=logprobs.shape), axis=-1).astype(np.int32)
@@ -71,15 +92,17 @@ class Adam:
         correction1 = 1 - b1 ** self.step_count
         correction2 = 1 - b2 ** self.step_count
         device = self.parameters[0].device
+        dtype = self.parameters[0].dtype  # DirectML's torch.full defaults to float64 without an explicit dtype.
         if device.type == "mps":
             self._step_fused(skip)
             return
-        inverse2 = torch.full((), 1 / correction2, device=device)
-        step_size = torch.full((), -self.lr / correction1, device=device)
+        inverse2 = torch.full((), 1 / correction2, device=device, dtype=dtype)
+        step_size = torch.full((), -self.lr / correction1, device=device, dtype=dtype)
         decay1, decay2 = b1, b2
         if skip is not None:  # skipped: zero gradient, no decay, zero step (cached constants, see the class doc)
             if device not in self._constants:
-                self._constants[device] = tuple(torch.full((), x, device=device) for x in (1.0, 0.0, b1, b2))
+                self._constants[device] = tuple(torch.full((), x, device=device, dtype=dtype)
+                                                for x in (1.0, 0.0, b1, b2))
             one, zero, beta1, beta2 = self._constants[device]
             decay1, decay2 = torch.where(skip, one, beta1), torch.where(skip, one, beta2)
             step_size = torch.where(skip, zero, step_size)
@@ -137,9 +160,10 @@ def clip_gradients(parameters, max_norm: float) -> torch.Tensor:
         norm = torch.cat([g.reshape(-1) for g in grads]).square().sum().sqrt()
     else:
         norm = torch.stack([g.square().sum() for g in grads]).sum().sqrt()
-    key = (norm.device, float(max_norm))
+    key = (norm.device, norm.dtype, float(max_norm))
     if key not in _CLIP_CONSTANTS:
-        _CLIP_CONSTANTS[key] = tuple(torch.full((), x, device=norm.device) for x in (max_norm, 1e-6, 1.0, 0.0))
+        _CLIP_CONSTANTS[key] = tuple(torch.full((), x, device=norm.device, dtype=norm.dtype)
+                                     for x in (max_norm, 1e-6, 1.0, 0.0))
     limit, eps, one, zero = _CLIP_CONSTANTS[key]
     scale = torch.minimum(one, limit / (norm + eps))
     scale = torch.where(torch.isfinite(norm), scale, zero)
@@ -154,9 +178,10 @@ def clip_gradients(parameters, max_norm: float) -> torch.Tensor:
 class EntropyController:
     """Entropy-bonus coefficient that keeps the policy entropy near a target schedule (an exploration floor).
 
-    The entropy is the batch mean of the slot-a plus slot-b masked policy entropies, as logged by the trainer
-    (forced decisions such as PASS count as zero). The target falls linearly from ``start`` to ``final`` over the
-    run. After every update, ``log(coef)`` moves by ``rate * (target - entropy)`` (the error clipped to +-1 nat), so
+    The entropy is the batch mean of the slot-a plus slot-b base-choice entropies, with the Tera bit marginalized
+    out, as logged by the trainer (forced decisions such as PASS count as zero). The target falls linearly from
+    ``start`` to ``final`` over the run. After every update, ``log(coef)`` moves by ``rate * (target - entropy)``
+    (the error clipped to +-1 nat), so
     the coefficient grows by up to ~22% per update while the entropy is below target and shrinks while it is above;
     it stays within ``[low, high]``.
     """

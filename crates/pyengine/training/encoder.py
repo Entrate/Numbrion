@@ -74,8 +74,11 @@ CACHE_LIMIT = 50_000  # entries per static-feature cache (~60 MB); foe reveal st
 # Damage-calc features (training.damage). The first LEGACY_* columns are the first run's features, unchanged, so
 # models trained on them still run on the wider observation (training.model reads only the columns it was built for).
 LEGACY_ACTION_FEATURES, LEGACY_TOKEN_FEATURES = 9, 6
-N_ACTION_FEATURES = 23
-N_TOKEN_FEATURES = 10
+# The frozen Python reference computes these widths; later columns are Rust-only.
+REFERENCE_ACTION_FEATURES = 23
+REFERENCE_TOKEN_FEATURES = 10
+N_ACTION_FEATURES = 27
+N_TOKEN_FEATURES = 16
 
 
 def span(name: str, length: int) -> slice:
@@ -580,7 +583,8 @@ class PyEncoder:
 
     # ---- static parts, cached per Pokemon state --------------------------------------------------------------
     def _own_static(self, pokemon: dict):
-        key = (pokemon["details"], pokemon.get("item", ""), pokemon.get("ability", ""), pokemon.get("teraType", ""),
+        key = (pokemon["details"], pokemon.get("item", ""), pokemon.get("ability", ""), pokemon.get("baseAbility", ""),
+               pokemon.get("teraType", ""),
                tuple(pokemon.get("moves", ())), tuple(pokemon.get("stats", {}).values()))
         cached = self._own_cache.get(key)
         if cached is not None:

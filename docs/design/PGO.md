@@ -56,7 +56,12 @@ difftest). The default build, and the one to profile for training, has it off.
 - difftest `search_bench` runs restore, clone, reset and leaf turns for 2 s each.
 - The pyengine workload (`crates/pyengine/src/pgo.rs`, 10 s) runs inside the instrumented wheel. It plays
   a TextLog `BatchEnv` the way the trainers drive it (`random_actions`, `mask_slot1`, `step`, `observe` for
-  every env and side), then a NoLog `BatchEnv` (`run_random`, `step`, `clone_game`). Next come
+  every env and side), then a NoLog `BatchEnv` (`run_random`, `step`, `clone_game`). A further 15% of the
+  time budget runs TextLog smart self-play: every step encodes both sides (`encode_row`, partner matching,
+  and damage/token features) and calls `SmartAgent.first`/`second` with conditional legal masks. This
+  profiles the observation and scripted-player fast paths inside the wheel too. The dex is loaded from
+  the build's source checkout (`data/training/dex.json`), which must remain available for this workload.
+  Next come
   `GridExecutor` calls on mid-battle NoLog and TextLog roots (both stop modes, reseeded cells, requests on,
   multi-world calls on determinized worlds), and finally per-cell clone, `restore_from` and
   `replace_hidden_set`. Teams come from `--pool` / `-Pool` (the real training pools are

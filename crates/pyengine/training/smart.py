@@ -89,7 +89,8 @@ class PySmartHeuristicAgent:
     name = "smart"
 
     def __init__(self, rng: np.random.Generator, dex: Dex | None = None, temperature: float = 0.0):
-        self.rng = rng
+        # Smart decisions must not consume the stream shared by the other agents.
+        self.rng = rng.spawn(1)[0]
         self.temperature = temperature
         self.dex = dex or load_dex()
         self.damage = DamageFeatures(self.dex)
@@ -647,7 +648,7 @@ class RustSmartHeuristicAgent:
         self.rng = rng
         self.dex = dex or load_dex()
         self.temperature = temperature
-        self._agent = SmartAgent(str(self.dex.path), int(rng.integers(2**63)), temperature=temperature,
+        self._agent = SmartAgent(str(self.dex.path), int(rng.spawn(1)[0].integers(2**63)), temperature=temperature,
                                  noise=NOISE, protect_skip=PROTECT_SKIP, protect_share=PROTECT_SHARE)
         self._rows = None
 

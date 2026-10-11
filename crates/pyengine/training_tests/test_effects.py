@@ -153,7 +153,7 @@ def test_models_read_only_the_columns_they_were_built_with():
 
 def test_action_usage_reports_fake_out_and_protect_use():
     from training.diagnostics import ActionUsage
-    from training.encoder import I_MOVE0, N_ACTION_FEATURES, N_IDS
+    from training.encoder import I_MOVE0, N_ACTION_FEATURES, N_FIELD_FLOATS, N_IDS
     dex = load_dex()
     m = dex.move_index
     rows = 2
@@ -167,7 +167,8 @@ def test_action_usage_reports_fake_out_and_protect_use():
     floats[0, 0, 0:2, PF["fresh"]] = 1  # ... because only row 0's actives are fresh
     features[0, 1, 1, 0:10, A["protect"]] = 1 / 3  # row 1, slot b: Protect right after a successful one
     data = dict(a0=np.array([[code(1, 3), code(1, 3)]]), a1=np.array([[code(2, 4), code(0, 2)]]), mask0=mask,
-                mask1=mask, ids=ids, floats=floats, train=np.ones((1, rows), dtype=bool), action_features=features)
+                mask1=mask, ids=ids, floats=floats, field=np.zeros((1, rows, N_FIELD_FLOATS), dtype=np.float32),
+                train=np.ones((1, rows), dtype=bool), action_features=features)
     out = ActionUsage(dex)(data)
     assert out["use_decisions"] == 4 and out["fake_out_ready"] == pytest.approx(0.5)
     assert out["use_fake_out_when_ready"] == pytest.approx(0.5)  # row 0 slot a used it, slot b did not

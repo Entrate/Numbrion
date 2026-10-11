@@ -13,7 +13,7 @@ use crate::{
     layout::*,
     tracker::{self, Key, Mon, Tracker},
 };
-use std::{collections::HashMap, fmt::Write as _, sync::Arc};
+use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
 /// Per-row sizes of the output arrays (`Buffers` in encoder.py).
 pub const IDS_PER_ROW: usize = N_TOKENS * N_IDS;
@@ -123,36 +123,40 @@ struct FoeKey {
 
 /// Appends a serialization of `v` that is equal for values Python's `==` treats as equal (True == 1 == 1.0,
 /// 0.0 == -0.0), for the own-static cache key.
-fn canon(v: &Json, out: &mut String) {
-    let num = |x: f64, out: &mut String| {
+fn canon(v: &Json<'_>, out: &mut Vec<u8>) {
+    let num = |x: f64, out: &mut Vec<u8>| {
         let x = if x == 0.0 { 0.0 } else { x };
-        let _ = write!(out, "d{:x};", x.to_bits());
+        out.push(b'd');
+        out.extend_from_slice(&x.to_bits().to_le_bytes());
     };
     match v {
-        Json::Null => out.push('n'),
+        Json::Null => out.push(b'n'),
         Json::Bool(b) => num(f64::from(u8::from(*b)), out),
         Json::Num(x) => num(*x, out),
         Json::Str(s) => {
-            let _ = write!(out, "s{}:", s.len());
-            out.push_str(s);
+            out.push(b's');
+            out.extend_from_slice(&(s.len() as u64).to_le_bytes());
+            out.extend_from_slice(s.as_bytes());
         }
         Json::Arr(items) => {
-            out.push('[');
+            out.push(b'[');
             items.iter().for_each(|x| canon(x, out));
-            out.push(']');
+            out.push(b']');
         }
         Json::Obj(members) => {
-            out.push('{');
+            out.push(b'{');
             for (k, x) in members {
-                let _ = write!(out, "{}:{k}", k.len());
+                out.push(b'k'); // distinguish a member from the closing tag, even if its length starts with b'}'
+                out.extend_from_slice(&(k.len() as u64).to_le_bytes());
+                out.extend_from_slice(k.as_bytes());
                 canon(x, out);
             }
-            out.push('}');
+            out.push(b'}');
         }
     }
 }
 
-static EMPTY_STR: Json = Json::Str(String::new());
+static EMPTY_STR: Json<'static> = Json::Str(Cow::Borrowed(""));
 
 /// Python's `==` between two JSON scalars (strings by content, numbers and booleans by value, None == None).
 fn py_eq(a: &Json, b: &Json) -> bool {
@@ -172,27 +176,27 @@ fn max1(x: f64) -> f64 {
 /// The static-feature caches of `Encoder` (`_own_cache`, `_foe_cache`), shared by all rows.
 #[derive(Default)]
 struct Statics {
-    own: HashMap<String, Static>,
+    own: HashMap<Vec<u8>, Static>,
     foe: HashMap<FoeKey, Static>,
-    key: String,
+    key: Vec<u8>,
 }
 
 impl Statics {
     /// `_own_static(pokemon)`: ids, static floats and estimated max HP of one of our request's Pokemon. Cached under
-    /// Python's key, which leaves out `baseAbility` and the stat names, so a cached entry wins exactly as in Python.
+    /// Python's key (including `baseAbility` after `ability`), with stat values in dict order and no stat names.
     fn own(&mut self, dex: &Dex, pokemon: &Json) -> Static {
         let key = &mut self.key;
         key.clear();
         canon(pokemon.at("details"), key);
-        for field in ["item", "ability", "teraType"] {
+        for field in ["item", "ability", "baseAbility", "teraType"] {
             canon(pokemon.get(field).unwrap_or(&EMPTY_STR), key);
         }
-        key.push('(');
+        key.push(b'(');
         pokemon.at("moves").items().iter().for_each(|m| canon(m, key));
-        key.push_str(")(");
+        key.extend_from_slice(b")(");
         pokemon.at("stats").dict().into_iter().for_each(|(_, v)| canon(v, key));
-        key.push(')');
-        if let Some(cached) = self.own.get(key.as_str()) {
+        key.push(b')');
+        if let Some(cached) = self.own.get(key.as_slice()) {
             return cached.clone();
         }
         let (species, level, _) = tracker::details(pokemon.at("details").str_or_empty());
@@ -661,6 +665,56 @@ mod tests {
 
     fn dex() -> Arc<Dex> {
         Dex::shared(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data/training/dex.json")).expect("dex.json")
+    }
+
+    #[test]
+    fn byte_cache_key_preserves_numeric_equality_and_value_boundaries() {
+        let key = |text: &str| {
+            let mut bytes = Vec::new();
+            canon(&Json::parse(text).unwrap(), &mut bytes);
+            bytes
+        };
+        for (a, b) in [("true", "1.0"), ("false", "-0.0"), ("0", "-0"), ("1e2", "100"),
+            (r#""雪""#, r#""\u96ea""#), ("[true, -0.0]", "[1, false]"), ("NaN", "NaN")] {
+            assert_eq!(key(a), key(b), "{a} == {b}");
+        }
+        for (a, b) in [("null", "false"), ("1", r#""1""#), (r#"["a", "b"]"#, r#"["ab"]"#),
+            ("[]", "{}"), ("Infinity", "-Infinity"), (r#"{"a": 1, "b": 2}"#, r#"{"b": 2, "a": 1}"#),
+            (r#"{"a": 1, "a": 2}"#, r#"{"a": 2}"#)] {
+            assert_ne!(key(a), key(b), "{a} != {b}");
+        }
+    }
+
+    #[test]
+    fn own_cache_keeps_ordered_stat_values_defaults_and_base_ability() {
+        let dex = dex();
+        let text = r#"{"details":"Gengar, L80", "item":"lifeorb", "ability":"", "baseAbility":"levitate",
+            "teraType":"Ghost", "moves":["shadowball"], "stats":{"atk":1,"def":2}}"#;
+        let mut cache = Statics::default();
+        let first = cache.own(&dex, &Json::parse(text).unwrap());
+        let renamed = text.replace(r#""atk":1,"def":2"#, r#""spe":true,"spa":2.0"#);
+        let same = cache.own(&dex, &Json::parse(&renamed).unwrap());
+        assert_eq!(same.row, first.row); // names are intentionally omitted; True == 1
+        assert_eq!(cache.own.len(), 1);
+        let duplicate = text.replace(r#""atk":1,"def":2"#, r#""atk":99,"def":2,"atk":1"#);
+        cache.own(&dex, &Json::parse(&duplicate).unwrap());
+        assert_eq!(cache.own.len(), 1); // first position, last value, as a Python dict
+        let reordered = text.replace(r#""atk":1,"def":2"#, r#""def":2,"atk":1"#);
+        cache.own(&dex, &Json::parse(&reordered).unwrap());
+        assert_eq!(cache.own.len(), 2);
+        let changed = text.replace("levitate", "cursedbody");
+        let changed = cache.own(&dex, &Json::parse(&changed).unwrap());
+        assert_eq!(changed.ids[I_ABILITY], dex.ability_idx("cursedbody"));
+        assert_ne!(changed.ids[I_ABILITY], first.ids[I_ABILITY]);
+        assert_eq!(cache.own.len(), 3);
+        let missing = text.replace(r#", "baseAbility":"levitate""#, "");
+        cache.own(&dex, &Json::parse(&missing).unwrap());
+        let empty = text.replace("levitate", "");
+        cache.own(&dex, &Json::parse(&empty).unwrap());
+        assert_eq!(cache.own.len(), 4); // missing baseAbility and empty string share a key
+        let null = text.replace(r#""levitate""#, "null");
+        cache.own(&dex, &Json::parse(&null).unwrap());
+        assert_eq!(cache.own.len(), 5); // explicit null is distinct from the missing-field default
     }
 
     struct Buffers(Vec<i64>, Vec<f32>, Vec<f32>, Vec<i64>, Vec<f32>, Vec<bool>, Vec<f32>, Vec<f32>);

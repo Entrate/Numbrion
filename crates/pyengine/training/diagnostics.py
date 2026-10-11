@@ -9,7 +9,7 @@ import numpy as np
 
 from .damage import ACTION_COLUMNS
 from .dex import Dex
-from .encoder import I_MOVE0, LEGACY_ACTION_FEATURES, PF
+from .encoder import FF, I_MOVE0, LEGACY_ACTION_FEATURES, PF
 
 FAIL, FLINCH_A, FLINCH_B, PROTECT = (LEGACY_ACTION_FEATURES + ACTION_COLUMNS.index(k)
                                      for k in ("fail", "flinch_a", "flinch_b", "protect"))
@@ -25,6 +25,8 @@ class ActionUsage:
     PASS are excluded. A move code's move is the own active's move in that slot (tokens 0/1, ids ``I_MOVE0..+3``),
     the same mapping the model scores actions with. ``choice_slots`` is the mean number of slots per trained row
     with two or more legal codes; it shows how much forced decisions dilute the logged entropy.
+    ``tera_turn1`` and ``tera_mean_turn`` describe the timing of Tera uses (None when none were used),
+    recovering battle turns from the field's turn/30 feature.
 
     From the action features: ``fake_out_ready`` (share of slot decisions with a legal Fake Out that would flinch a
     foe), ``use_fake_out_when_ready`` (how often one is then used), ``fake_out_stale`` (share of Fake Outs by a
@@ -61,6 +63,10 @@ class ActionUsage:
         n = max(int(decision.sum()), 1)
         out = {f"use_{k}": round(float((v & decision).sum()) / n, 4) for k, v in kinds.items()}
         out["use_tera_when_legal"] = round(float(tera[tera_legal].mean()), 4) if tera_legal.any() else None
+        turns = data["field"].reshape(steps * rows, -1)[train, FF["turn"]] * 30
+        tera_turns = np.broadcast_to(turns[:, None], codes.shape)[tera & decision]
+        out["tera_turn1"] = round(float(np.isclose(tera_turns, 1).mean()), 4) if tera_turns.size else None
+        out["tera_mean_turn"] = round(float(tera_turns.mean()), 4) if tera_turns.size else None
         out["use_decisions"] = int(decision.sum())
         if "action_features" in data:
             features = data["action_features"].reshape(steps * rows, 2, 40, -1)[train]  # [N, 2, 40, F]

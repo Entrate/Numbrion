@@ -3,21 +3,24 @@
 //! Values follow Python's `json.loads`: an object keeps its keys in source order and a repeated key resolves to its
 //! last value; [`Json::truthy`] is Python's `bool()` of the loaded value.
 
+use std::borrow::Cow;
+
 #[derive(Clone, Debug, PartialEq)]
-pub enum Json {
+pub enum Json<'a> {
     Null,
     Bool(bool),
     Num(f64),
-    Str(String),
-    Arr(Vec<Json>),
-    Obj(Vec<(String, Json)>),
+    Str(Cow<'a, str>),
+    Arr(Vec<Json<'a>>),
+    Obj(Vec<(Cow<'a, str>, Json<'a>)>),
 }
 
-static NULL: Json = Json::Null;
+static NULL: Json<'static> = Json::Null;
 
-impl Json {
-    pub fn parse(text: &str) -> Result<Json, String> {
-        let mut p = Parser { s: text.as_bytes(), i: 0 };
+impl<'a> Json<'a> {
+    /// Borrow unescaped strings and object keys; only escape decoding allocates string storage.
+    pub fn parse(text: &'a str) -> Result<Json<'a>, String> {
+        let mut p = Parser { text, s: text.as_bytes(), i: 0 };
         p.ws();
         let v = p.value(0)?;
         p.ws();
@@ -28,7 +31,7 @@ impl Json {
     }
 
     /// Object member `key` (the last one if repeated); None for a missing key or a non-object.
-    pub fn get(&self, key: &str) -> Option<&Json> {
+    pub fn get(&self, key: &str) -> Option<&Json<'a>> {
         match self {
             Json::Obj(members) => members.iter().rev().find(|(k, _)| k == key).map(|(_, v)| v),
             _ => None,
@@ -36,7 +39,7 @@ impl Json {
     }
 
     /// `get(key)`, with a missing member read as `null` (Python's `d.get(key)`).
-    pub fn at(&self, key: &str) -> &Json {
+    pub fn at(&self, key: &str) -> &Json<'a> {
         self.get(key).unwrap_or(&NULL)
     }
 
@@ -85,7 +88,7 @@ impl Json {
     }
 
     /// Array items; empty for anything else.
-    pub fn items(&self) -> &[Json] {
+    pub fn items(&self) -> &[Json<'a>] {
         match self {
             Json::Arr(a) => a,
             _ => &[],
@@ -93,7 +96,7 @@ impl Json {
     }
 
     /// Object members in source order (repeated keys included); empty for anything else.
-    pub fn members(&self) -> &[(String, Json)] {
+    pub fn members(&self) -> &[(Cow<'a, str>, Json<'a>)] {
         match self {
             Json::Obj(o) => o,
             _ => &[],
@@ -101,12 +104,12 @@ impl Json {
     }
 
     /// Object members with repeated keys resolved like a Python dict: the first position, the last value.
-    pub fn dict(&self) -> Vec<(&str, &Json)> {
-        let mut out: Vec<(&str, &Json)> = Vec::with_capacity(self.members().len());
+    pub fn dict(&self) -> Vec<(&str, &Json<'a>)> {
+        let mut out: Vec<(&str, &Json<'a>)> = Vec::with_capacity(self.members().len());
         for (k, v) in self.members() {
-            match out.iter_mut().find(|(key, _)| *key == k.as_str()) {
+            match out.iter_mut().find(|(key, _)| *key == k.as_ref()) {
                 Some(slot) => slot.1 = v,
-                None => out.push((k.as_str(), v)),
+                None => out.push((k.as_ref(), v)),
             }
         }
         out
@@ -116,11 +119,12 @@ impl Json {
 const MAX_DEPTH: usize = 256;
 
 struct Parser<'a> {
+    text: &'a str,
     s: &'a [u8],
     i: usize,
 }
 
-impl Parser<'_> {
+impl<'a> Parser<'a> {
     fn err(&self, what: &str) -> String {
         format!("invalid JSON at byte {}: {what}", self.i)
     }
@@ -144,7 +148,7 @@ impl Parser<'_> {
         }
     }
 
-    fn value(&mut self, depth: usize) -> Result<Json, String> {
+    fn value(&mut self, depth: usize) -> Result<Json<'a>, String> {
         if depth > MAX_DEPTH {
             return Err(self.err("nested too deeply"));
         }
@@ -216,7 +220,7 @@ impl Parser<'_> {
         }
     }
 
-    fn number(&mut self) -> Result<Json, String> {
+    fn number(&mut self) -> Result<Json<'a>, String> {
         let start = self.i;
         while let Some(&c) = self.s.get(self.i) {
             if c.is_ascii_digit() || matches!(c, b'-' | b'+' | b'.' | b'e' | b'E') {
@@ -238,11 +242,13 @@ impl Parser<'_> {
     }
 
     /// A string starting at the opening quote.
-    fn string(&mut self) -> Result<String, String> {
+    fn string(&mut self) -> Result<Cow<'a, str>, String> {
         self.i += 1;
-        let mut out = String::new();
+        let string_start = self.i;
+        let mut decoded: Option<String> = None;
         loop {
-            // Copy the run up to the next quote or backslash in one go.
+            // ASCII quotes/backslashes cannot occur inside a UTF-8 code point. Both ends of each
+            // run are therefore character boundaries in the original &str, even for non-ASCII names.
             let start = self.i;
             while let Some(&c) = self.s.get(self.i) {
                 if c == b'"' || c == b'\\' {
@@ -250,14 +256,21 @@ impl Parser<'_> {
                 }
                 self.i += 1;
             }
-            out.push_str(std::str::from_utf8(&self.s[start..self.i]).map_err(|_| self.err("invalid UTF-8"))?);
+            if let Some(out) = &mut decoded {
+                out.push_str(&self.text[start..self.i]);
+            }
             match self.s.get(self.i) {
                 None => return Err(self.err("unterminated string")),
                 Some(b'"') => {
+                    let text = &self.text[string_start..self.i];
                     self.i += 1;
-                    return Ok(out);
+                    return Ok(match decoded {
+                        Some(out) => Cow::Owned(out),
+                        None => Cow::Borrowed(text),
+                    });
                 }
                 Some(_) => {
+                    let out = decoded.get_or_insert_with(|| self.text[string_start..self.i].to_owned());
                     self.i += 1;
                     let Some(&e) = self.s.get(self.i) else { return Err(self.err("unterminated escape")) };
                     self.i += 1;
@@ -295,6 +308,69 @@ impl Parser<'_> {
 #[cfg(test)]
 mod tests {
     use super::Json;
+    use std::borrow::Cow;
+
+    #[test]
+    fn borrows_unescaped_keys_and_unicode_strings_from_input() {
+        let text = String::from(r#"{"Pokémon😀": "Flabébé雪", "empty": ""}"#);
+        let v = Json::parse(&text).unwrap();
+        let (key, value) = &v.members()[0];
+        assert!(matches!(key, Cow::Borrowed(_)));
+        let Json::Str(Cow::Borrowed(s)) = value else { panic!("unescaped string was copied") };
+        assert_eq!(*s, "Flabébé雪");
+        let start = text.find(s).unwrap();
+        assert_eq!(s.as_ptr(), text[start..].as_ptr());
+        assert!(matches!(v.at("empty"), Json::Str(Cow::Borrowed(""))));
+    }
+
+    #[test]
+    fn owns_only_escaped_strings_and_preserves_escape_decoding() {
+        let v = Json::parse(r#"{"\u006b": "é\"\\\/\b\f\n\r\t\u96ea\uD83D\uDE00end", "plain": "雪"}"#).unwrap();
+        assert!(matches!(&v.members()[0].0, Cow::Owned(_)));
+        assert!(matches!(v.at("k"), Json::Str(Cow::Owned(_))));
+        assert_eq!(v.at("k").as_str(), Some("é\"\\/\u{8}\u{c}\n\r\t雪😀end"));
+        assert!(matches!(v.at("plain"), Json::Str(Cow::Borrowed(_))));
+        // Preserve the existing replacement-character treatment of unpaired surrogates.
+        let lone = Json::parse(r#"["\uD800", "\uDC00", "\uD800\u0061"]"#).unwrap();
+        assert_eq!(lone.items().iter().map(Json::str_or_empty).collect::<Vec<_>>(), ["�", "�", "�a"]);
+    }
+
+    #[test]
+    fn malformed_input_retains_clear_byte_errors() {
+        for (text, error) in [
+            ("", "invalid JSON at byte 0: unexpected end"),
+            (r#""abc"#, "invalid JSON at byte 4: unterminated string"),
+            ("\"a\\", "invalid JSON at byte 3: unterminated escape"),
+            (r#""\x""#, "invalid JSON at byte 3: bad escape"),
+            (r#""\u12""#, "invalid JSON at byte 3: short \\u escape"),
+            (r#""\uZZZZ""#, "invalid JSON at byte 3: bad \\u escape"),
+            (r#"{"a":}"#, "invalid JSON at byte 5: unexpected character"),
+            ("[1,]", "invalid JSON at byte 3: unexpected character"),
+            ("1e+", "invalid JSON at byte 3: bad number"),
+            ("[1] x", "invalid JSON at byte 4: trailing characters"),
+        ] {
+            assert_eq!(Json::parse(text).unwrap_err(), error, "{text:?}");
+        }
+        let text = r#"{"雪😀": ["é\n\uD83D\uDE00", {"n": 1e9999}]}"#;
+        for (end, _) in text.char_indices() {
+            assert!(Json::parse(&text[..end]).is_err(), "truncated at {end}");
+        }
+        let deep = format!("{}0{}", "[".repeat(257), "]".repeat(257));
+        assert!(Json::parse(&deep).unwrap_err().contains("nested too deeply"));
+    }
+
+    #[test]
+    fn huge_numbers_and_python_nonfinite_constants_still_parse() {
+        let text = format!("[{}, 1e9999, -1e9999, NaN, Infinity, -Infinity]", "9".repeat(400));
+        let v = Json::parse(&text).unwrap();
+        assert_eq!(v.items()[0].as_f64(), Some(f64::INFINITY));
+        assert_eq!(v.items()[1].as_f64(), Some(f64::INFINITY));
+        assert_eq!(v.items()[2].as_f64(), Some(f64::NEG_INFINITY));
+        assert!(v.items()[3].as_f64().unwrap().is_nan());
+        assert!(v.items()[3].truthy());
+        assert_eq!(v.items()[4].as_f64(), Some(f64::INFINITY));
+        assert_eq!(v.items()[5].as_f64(), Some(f64::NEG_INFINITY));
+    }
 
     #[test]
     fn parses_requests_like_python() {

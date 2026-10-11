@@ -8,10 +8,12 @@
 //! `pgo_workload` example runs the same code from cargo (smoke test, timing, difftest-style profiles).
 //!
 //! Phases, each a share of `seconds`:
-//! - `selfplay-log` (35%): a TextLog `BatchEnv` driven the way the trainers drive it: `random_actions`,
+//! - `selfplay-log` (25%): a TextLog `BatchEnv` driven the way the trainers drive it: `random_actions`,
 //!   `mask_slot1`, `step`, then `observe` (request JSON + player-view lines) for every env and side.
 //! - `selfplay-nolog` (15%): a NoLog `BatchEnv`: `run_random`, a `step` loop and `clone_game`.
-//! - `grid` (35%): `GridExecutor` over mid-battle roots (NoLog and TextLog): both stop modes, every cell
+//! - `selfplay-smart` (15%): encode every row at every boundary, including partner matching and damage
+//!   features, then play both slots with `SmartAgent` and the engine's conditional legal masks.
+//! - `grid` (30%): `GridExecutor` over mid-battle roots (NoLog and TextLog): both stop modes, every cell
 //!   reseeded, requests on (masks and logs on alternate calls), plus multi-world calls on determinized worlds.
 //! - `primitives` (15%): per cell `Game::fork` (clone), `restore_from`, or `restore_from` +
 //!   `replace_hidden_set` of every hidden opponent set, each followed by the cell's turn and both requests.
@@ -23,9 +25,16 @@ use crate::{
     pool::{SplitMix, TeamPool},
     search::{GridExecutor, Options, Seeds, Stop},
 };
+use encoder::{
+    Dex,
+    encode::{Encoder, Observation, Outputs, IDS_PER_ROW, FLOATS_PER_ROW, FIELD_PER_ROW, FOE_MATCH_PER_ROW,
+        FAINTED_PER_ROW, GUARD_PER_ROW, ACTION_PER_ROW, TOKEN_FEATURES_PER_ROW},
+    smart::{ObsRows, SmartAgent, SmartConfig},
+};
 use std::{
     fmt::Write,
     hint::black_box,
+    path::Path,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -191,6 +200,51 @@ fn selfplay(pool: &Arc<TeamPool>, threads: usize, log: bool, budget: Duration) -
     Ok(t)
 }
 
+fn selfplay_smart(pool: &Arc<TeamPool>, threads: usize, budget: Duration) -> Result<Tally, String> {
+    let cfg = Config { n_envs: 16, seed: 13, threads, log: true, joint_mask: false, on_illegal: OnIllegal::Raise };
+    let rows: Vec<usize> = (0..2 * cfg.n_envs).collect();
+    let n = rows.len();
+    let mut env = BatchEnv::new(cfg, Arc::clone(pool))?;
+    // Both the cargo example and wheel workload run from a source checkout (tools/pgo.*).
+    let dex = Dex::shared(Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../../data/training/dex.json")))?;
+    let mut encoder = Encoder::new(dex.clone(), n);
+    let mut smart = SmartAgent::new(dex, 14, SmartConfig::default());
+    let mut ids = vec![0; n * IDS_PER_ROW];
+    let mut floats = vec![0.0; n * FLOATS_PER_ROW];
+    let mut field = vec![0.0; n * FIELD_PER_ROW];
+    let mut foe_match = vec![0; n * FOE_MATCH_PER_ROW];
+    let mut fainted = vec![0.0; n * FAINTED_PER_ROW];
+    let mut guard = vec![false; n * GUARD_PER_ROW];
+    let mut action_features = vec![0.0; n * ACTION_PER_ROW];
+    let mut token_features = vec![0.0; n * TOKEN_FEATURES_PER_ROW];
+    let mut out = Outputs { ids: &mut ids, floats: &mut floats, field: &mut field, foe_match: &mut foe_match,
+        fainted: &mut fainted, guard: &mut guard, action_features: &mut action_features, token_features: &mut token_features };
+    let mut step = env.reset()?;
+    let mut t = Tally::default();
+    let start = Instant::now();
+    while start.elapsed() < budget {
+        for &row in &rows {
+            let o = env.observe(row / 2, row % 2)?;
+            encoder.encode_row(row, &Observation { battle_id: o.battle_id, request: o.request.as_deref(), log: &o.log }, &mut out)?;
+        }
+        encoder.match_partners(&mut out);
+        encoder.damage_features(&mut out);
+        let obs = ObsRows { ids: out.ids, floats: out.floats, field: out.field,
+            action_features: out.action_features, token_features: out.token_features };
+        let mask0: Vec<bool> = step.mask0.iter().map(|&x| x != 0).collect();
+        let first = smart.first(&obs, &rows, &mask0);
+        let mask1: Vec<bool> = env.mask_slot1(&first)?.iter().map(|&x| x != 0).collect();
+        let second = smart.second(&mask1);
+        let actions: Vec<i32> = first.into_iter().zip(second).flat_map(|(a, b)| [a, b]).collect();
+        t.sink += black_box(&actions).iter().map(|&x| x as usize).sum::<usize>();
+        black_box(&out);
+        step = env.step(&actions)?;
+        t.items += n as u64;
+        t.calls += 1;
+    }
+    Ok(t)
+}
+
 fn grid(roots: &[Root], ex: &mut GridExecutor, budget: Duration) -> Result<Tally, String> {
     let mut t = Tally::default();
     let start = Instant::now();
@@ -277,15 +331,17 @@ pub fn run(pool_paths: &[String], seconds: f64, threads: usize) -> Result<String
     };
 
     let start = Instant::now();
-    line("selfplay-log", "battles", &selfplay(&pool, threads, true, share(0.35))?, start);
+    line("selfplay-log", "battles", &selfplay(&pool, threads, true, share(0.25))?, start);
     let start = Instant::now();
     line("selfplay-nolog", "battles", &selfplay(&pool, threads, false, share(0.15))?, start);
+    let start = Instant::now();
+    line("selfplay-smart", "rows", &selfplay_smart(&pool, threads, share(0.15))?, start);
 
     let mut all = roots(&pool, 12, false, 2027)?;
     all.extend(roots(&pool, 12, true, 2028)?);
     let mut ex = GridExecutor::new(threads)?;
     let start = Instant::now();
-    line("grid", "cells", &grid(&all, &mut ex, share(0.35))?, start);
+    line("grid", "cells", &grid(&all, &mut ex, share(0.30))?, start);
     let start = Instant::now();
     line("primitives", "cells", &primitives(&all, share(0.15))?, start);
     let _ = writeln!(report, "pgo workload: done in {:.1} s", total.elapsed().as_secs_f64());

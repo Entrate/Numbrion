@@ -124,7 +124,7 @@ def test_smart_forwards_full_arrays_and_checks_second_rows(monkeypatch):
     np.testing.assert_array_equal(calls[1][-2], rows)
     assert calls[1][-2].dtype == np.int64 and calls[1][-2].flags.c_contiguous
     assert calls[0][0] == "dex.json"
-    assert calls[0][1] == int(np.random.default_rng(4).integers(2**63))
+    assert calls[0][1] == int(np.random.default_rng(4).spawn(1)[0].integers(2**63))  # a spawned stream
     assert calls[0][2] == dict(temperature=0.2, noise=smart.NOISE, protect_skip=smart.PROTECT_SKIP,
                              protect_share=smart.PROTECT_SHARE)
     with pytest.raises(ValueError, match="same rows"):

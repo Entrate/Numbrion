@@ -24,8 +24,11 @@ pub const I_CAND_ITEMS: usize = 24;
 pub const N_IDS: usize = 28;
 pub const LEGACY_ACTION_FEATURES: usize = 9;
 pub const LEGACY_TOKEN_FEATURES: usize = 6;
-pub const N_ACTION_FEATURES: usize = 23;
-pub const N_TOKEN_FEATURES: usize = 10;
+/// Widths computed by the frozen Python reference; later columns are Rust-only.
+pub const REFERENCE_ACTION_FEATURES: usize = 23;
+pub const REFERENCE_TOKEN_FEATURES: usize = 10;
+pub const N_ACTION_FEATURES: usize = 27;
+pub const N_TOKEN_FEATURES: usize = 16;
 pub const CACHE_LIMIT: usize = 50000;
 pub const STAT_SCALE: f32 = 400.0;
 /// Move codes per active slot with action features (4 move slots x 5 targets x Tera bit).

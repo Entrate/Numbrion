@@ -35,6 +35,14 @@ pub const PRIORITY_BLOCK: [&str; 3] = ["armortail", "dazzling", "queenlymajesty"
 pub const MOLD_BREAKER: [&str; 3] = ["moldbreaker", "teravolt", "turboblaze"];
 /// `REPEAT_PROTECT`: success chance of a Protect-like move right after a successful one.
 pub const REPEAT_PROTECT: f64 = 1.0 / 3.0;
+/// Protect choice prior's baseline; the model learns how far to trust this prior.
+pub const PROTECT_BASE: f32 = 0.1;
+/// Protect choice prior's damage weight; the model learns how far to trust this prior.
+pub const PROTECT_PER_DAMAGE: f32 = 0.2;
+/// Protect choice prior's KO weight; the model learns how far to trust this prior.
+pub const PROTECT_PER_KO: f32 = 0.3;
+/// Protect choice prior's upper bound; the model learns how far to trust this prior.
+pub const PROTECT_MAX: f32 = 0.8;
 /// `guards.FIRST_TURN_ONLY`: moves that fail after the user's first move action since it switched in.
 pub const FIRST_TURN_ONLY: [&str; 2] = ["fakeout", "firstimpression"];
 /// `FLINCH_CHANCE`: flinch chances that override dex.json's `secondaryChance` (the largest of a move's secondaries).
@@ -71,8 +79,7 @@ pub struct Tok {
     pub item: i64,
     pub screen_phys: f32,
     pub screen_spec: f32,
-    /// Only the own actives' Tera rows of `forward` set this (`att["stellar"]` in damage.py); 0 elsewhere, which is
-    /// the same as damage.py's missing key.
+    /// 1 when already Stellar-terastallized, or for an own active's prospective Stellar Tera row.
     pub stellar: f32,
 }
 
@@ -235,6 +242,11 @@ pub fn stage(boost: f32) -> f32 {
     (2.0 + boost.max(0.0)) / (2.0 + (-boost).max(0.0))
 }
 
+/// Chance of choosing and successfully using Protect, before a move's blocking factor.
+pub fn protect_prior(can_protect: f32, damage: f32, ko: f32) -> f32 {
+    can_protect * (PROTECT_BASE + PROTECT_PER_DAMAGE * damage + PROTECT_PER_KO * ko).clamp(0.0, PROTECT_MAX)
+}
+
 /// `_terastallized` for one own active: `t` as `tokens` gives it once terastallized: `terastallized` 1, the Tera
 /// type alone as the defensive type (`[tera, 0]`) when the Tera type is known and not Stellar (else the base types),
 /// and `stellar` 1 for a Stellar Tera type. Every other attribute is unchanged.
@@ -282,7 +294,7 @@ pub struct DamageFeatures {
     typechart: Vec<f32>,
     n_types: usize,
     hit: Box<[[[[f32; 12]; 5]; 2]; 15]>,
-    /// `hit.argmax(-1)` (first maximum) per target class, actor slot and target code.
+    /// First maximum per target class, actor slot and target code, preferring foes on positive ties.
     hit_main: [[[usize; 5]; 2]; 15],
     /// `hit.sum(-1) > 0` per target class, actor slot and target code.
     hit_any: [[[bool; 5]; 2]; 15],
@@ -304,6 +316,9 @@ pub struct DamageFeatures {
     grassy_glide: i64,
     covert_cloak: i64,
     air_balloon: i64,
+    boots: i64,
+    magic_guard: i64,
+    rock: i64,
     flying: i64,
     normal: i64,
     dark: i64,
@@ -363,7 +378,7 @@ impl DamageFeatures {
                     let row = &hit[c][s][code];
                     let mut best = 0;
                     for (k, &x) in row.iter().enumerate() {
-                        if x > row[best] {
+                        if x > row[best] || (x > 0.0 && x == row[best] && k >= 6 && best < 6) {
                             best = k;
                         }
                     }
@@ -400,6 +415,9 @@ impl DamageFeatures {
             grassy_glide: or_missing(dex.move_index("grassyglide")),
             covert_cloak: item("covertcloak"),
             air_balloon: item("airballoon"),
+            boots: item("heavydutyboots"),
+            magic_guard: ability("magicguard"),
+            rock: dex.type_idx("Rock"),
             flying: dex.type_idx("Flying"),
             normal: dex.type_idx("Normal"),
             dark: dex.type_idx("Dark"),
@@ -414,7 +432,8 @@ impl DamageFeatures {
     /// `hp_frac * max_hp` with `max_hp` (stored clamped to >= 1) `stat_hp * STAT_SCALE`; `alive` is
     /// `present * (1 - fainted)`; `def_types` is `[tera, 0]` when terastallized (> 0.5) into a known non-Stellar
     /// type, else the base types; `item_phys`/`item_spec` are Choice Band/Specs 1.5 times Life Orb 1.3; the screens
-    /// are its side's `max(reflect, auroraveil)` and `max(lightscreen, auroraveil)`; `stellar` is 0.
+    /// are its side's `max(reflect, auroraveil)` and `max(lightscreen, auroraveil)`; `stellar` is 1 when already
+    /// terastallized (> 0.5) into Stellar, else 0.
     pub fn tokens(&self, ids: &[i64], floats: &[f32], field: &[f32]) -> [Tok; 12] {
         let mut out = [Tok::default(); 12];
         for (i, tok) in out.iter_mut().enumerate() {
@@ -473,7 +492,7 @@ impl DamageFeatures {
             item,
             screen_phys: reflect.max(veil),
             screen_spec: light.max(veil),
-            stellar: 0.0,
+            stellar: f32::from(terastallized > 0.5 && tera == STELLAR),
         }
     }
 
@@ -575,7 +594,8 @@ impl DamageFeatures {
     /// its K_MOVES belief candidates (probability `cand_move_p`), both times `move id > 0`, then three generic
     /// attacks of its two base types and its Tera type (only once terastallized; type 0 deals nothing): power 80,
     /// accuracy 1, physical when `atk >= spa` else special, probability 1 only when the revealed and candidate
-    /// probabilities sum to 0. Spread moves get the [`SPREAD`] modifier. `dealt`/`ko` are
+    /// probabilities sum to 0 before masking by `att.alive`. All move probabilities are times `att.alive`.
+    /// Spread moves get the [`SPREAD`] modifier. `dealt`/`ko` are
     /// [`DamageFeatures::damage`] of each move against every `defenders` entry; `probs` are not clamped.
     pub fn foe_attacks(&self, ids: &[i64], floats: &[f32], t: &[Tok; 12], defenders: &[Tok], field: &[f32]) -> FoeAttacks {
         let n_def = defenders.len();
@@ -618,8 +638,9 @@ impl DamageFeatures {
             let mut sum = 0.0f32;
             for (m, &mid) in moves.iter().enumerate() {
                 let p = if m < 4 { fl[pf::MOVE_KNOWN0 + m] } else { fl[pf::CAND_MOVE_P0 + m - 4] };
-                probs[f][m] = p * f32::from(mid > 0);
-                sum += probs[f][m];
+                let p = p * f32::from(mid > 0);
+                sum += p;
+                probs[f][m] = p * att.alive;
             }
             let stab_types = [att.base_types[0], att.base_types[1], att.tera * i64::from(att.terastallized > 0.5)];
             let better = if att.atk >= att.spa { 1 } else { 2 };
@@ -633,7 +654,7 @@ impl DamageFeatures {
                 }
             }
             for (j, &stab) in stab_types.iter().enumerate() {
-                probs[f][M_IDS + j] = f32::from(sum == 0.0) * f32::from(stab > 0);
+                probs[f][M_IDS + j] = f32::from(sum == 0.0) * f32::from(stab > 0) * att.alive;
                 inputs[M_IDS + j] =
                     MoveIn { mtype: stab, category: better * i64::from(stab > 0), power: 80.0, accuracy: 1.0, hits: 1.0, special: 0 };
             }
@@ -734,6 +755,25 @@ impl DamageFeatures {
         p
     }
 
+    /// Own-side entry hazards as a fraction of max HP, capped at current HP. Immunities are known ids only.
+    fn entry_damage(&self, t: &Tok, ability: i64, grounded: f32, field: &[f32]) -> f32 {
+        if t.item == self.boots || ability == self.magic_guard || t.alive == 0.0 {
+            return 0.0;
+        }
+        let row = self.rock as usize * self.n_types;
+        let rock = field[ff::OWN_STEALTHROCK] / 8.0
+            * self.typechart[row + t.def_types[0] as usize]
+            * self.typechart[row + t.def_types[1] as usize];
+        let layers = (field[ff::OWN_SPIKES] * 3.0).round() as usize;
+        let spikes = match layers {
+            0 => 0.0,
+            1 => 1.0 / 8.0,
+            2 => 1.0 / 6.0,
+            _ => 1.0 / 4.0,
+        };
+        (rock + spikes * grounded).min(t.hp_frac)
+    }
+
     /// `forward` for one row: writes `action` `[2 * 40 * N_ACTION_FEATURES]` and `token` `[12 * N_TOKEN_FEATURES]`.
     ///
     /// `action[slot][code]` (code = move_slot * 10 + target_code * 2 + tera_bit): damage dealt to the foe and own
@@ -741,7 +781,8 @@ impl DamageFeatures {
     /// foe active, priority / 5, then the ACTION_COLUMNS of damage.py (fail, flinch a/b, stop damage/KO, protect
     /// and the damage/KO it blocks, foe a/b can Protect; the Tera deltas only on tera_bit 1 codes, zero otherwise).
     /// `token[i]`: threat and KO chance from each opposing active, outspeeding each, then fake_out_ready,
-    /// flinchable, fake_out_threat, protect_ready; all times `present`.
+    /// flinchable, fake_out_threat, protect_ready; all times `present`. Rust-only columns append own-side offense
+    /// (including switching vision for the bench), entry damage, and the foe actives' Protect choice prior.
     pub fn row(&self, ids: &[i64], floats: &[f32], field: &[f32], action: &mut [f32], token: &mut [f32]) {
         assert_eq!(action.len(), 2 * N_CODES * N_ACTION_FEATURES, "action buffer");
         assert_eq!(token.len(), N_TOKENS * N_TOKEN_FEATURES, "token buffer");
@@ -836,6 +877,38 @@ impl DamageFeatures {
 
         // What still lands through Protect: moves without the protect flag, and Unseen Fist contact moves.
         let p = self.per_token(ids, floats, field, &t);
+        // Switching vision: reuse the actives' damage and the hit-table shares, including spread reduction.
+        // Bench Pokemon use the same formula with their current stats, moves, types and items.
+        let mut offense = [[0.0f32; 2]; 6];
+        let mut offense_ko = [[0.0f32; 2]; 6];
+        for i in 0..6 {
+            if !is_own[i] || t[i].alive == 0.0 {
+                continue;
+            }
+            for k in 0..4 {
+                let m = ids[i * N_IDS + I_MOVE0 + k];
+                let row = &self.moves[m as usize];
+                for (f, &foe) in FOE_TOKENS.iter().enumerate() {
+                    let share = self.hit[row.target][i.min(1)].iter().map(|h| h[foe]).fold(0.0f32, f32::max);
+                    if share == 0.0 {
+                        continue;
+                    }
+                    let (d, ko) = if i < 2 {
+                        (all_dealt[i][k][foe], all_ko[i][k][foe])
+                    } else {
+                        let (d, ko, _) = self.damage_with(&t[i], &t[foe], &row.input, sun, rain, 1.0);
+                        (d, ko)
+                    };
+                    offense[i][f] = offense[i][f].max(d * share);
+                    offense_ko[i][f] = offense_ko[i][f].max(ko * share);
+                }
+            }
+        }
+        let protect_now: [f32; 2] = std::array::from_fn(|f| {
+            let damage = (offense[0][f] * p.on[0] + offense[1][f] * p.on[1]).min(1.0);
+            let ko = 1.0 - (1.0 - offense_ko[0][f] * p.on[0]) * (1.0 - offense_ko[1][f] * p.on[1]);
+            protect_prior(p.can_protect[FOE_TOKENS[f]], damage, ko)
+        });
         let mut through = [[0.0f32; 2]; 2]; // [user slot][foe]
         let mut through_ko = [[0.0f32; 2]; 2];
         for (f, &foe) in FOE_TOKENS.iter().enumerate() {
@@ -964,6 +1037,11 @@ impl DamageFeatures {
                     });
                     let foe_protect: [f32; 2] =
                         std::array::from_fn(|f| on_target[f] * p.can_protect[FOE_TOKENS[f]] * blockable);
+                    let protect_chance: [f32; 2] = std::array::from_fn(|f| on_target[f] * protect_now[f] * blockable);
+                    let after_damage: f32 = FOE_TOKENS.iter().enumerate()
+                        .map(|(f, &foe)| h[foe] * dealt[foe] * (1.0 - protect_chance[f])).sum();
+                    let after_ko: f32 = FOE_TOKENS.iter().enumerate()
+                        .map(|(f, &foe)| h[foe] * kos[foe] * (1.0 - protect_chance[f])).sum();
 
                     let columns = [
                         dealt_foe,
@@ -992,10 +1070,13 @@ impl DamageFeatures {
                         let out = &mut action[(s * N_CODES + code) * N_ACTION_FEATURES..(s * N_CODES + code + 1) * N_ACTION_FEATURES];
                         out[..columns.len()].copy_from_slice(&columns);
                         if tera_bit == 1 {
-                            out[columns.len()..].copy_from_slice(&tera);
+                            out[columns.len()..REFERENCE_ACTION_FEATURES].copy_from_slice(&tera);
                         } else {
-                            out[columns.len()..].fill(0.0);
+                            out[columns.len()..REFERENCE_ACTION_FEATURES].fill(0.0);
                         }
+                        out[REFERENCE_ACTION_FEATURES..].copy_from_slice(&[
+                            protect_chance[0], protect_chance[1], after_damage, after_ko,
+                        ]);
                     }
                 }
             }
@@ -1012,8 +1093,17 @@ impl DamageFeatures {
                 * t[i].type_mult[self.normal as usize];
             let flinchable = p.flinch_ok[i] * p.priority_ok[i] * f32::from(normal > 0.0) * t[i].alive;
             let threat = flinchable * p.on[i] * if p.own[i] { from_foe } else { from_own };
-            let out = &mut token[i * N_TOKEN_FEATURES + LEGACY_TOKEN_FEATURES..(i + 1) * N_TOKEN_FEATURES];
+            let out = &mut token[i * N_TOKEN_FEATURES + LEGACY_TOKEN_FEATURES..i * N_TOKEN_FEATURES + REFERENCE_TOKEN_FEATURES];
             out.copy_from_slice(&[ready[i] * present[i], flinchable * present[i], threat * present[i], p.can_protect[i] * present[i]]);
+            let out = &mut token[i * N_TOKEN_FEATURES + REFERENCE_TOKEN_FEATURES..(i + 1) * N_TOKEN_FEATURES];
+            out.fill(0.0);
+            if i < 6 && is_own[i] {
+                out[..2].copy_from_slice(&offense[i]);
+                out[2..4].copy_from_slice(&offense_ko[i]);
+                out[4] = self.entry_damage(&t[i], ids[i * N_IDS + I_ABILITY], p.grounded[i], field);
+            } else if i == FOE_A || i == FOE_B {
+                out[5] = protect_now[i - FOE_A];
+            }
         }
     }
 }
@@ -1022,6 +1112,47 @@ impl DamageFeatures {
 mod tests {
     use super::*;
     use std::path::Path;
+
+    #[test]
+    fn protect_prior_tracks_threat_and_success() {
+        assert_eq!(protect_prior(0.0, 1.0, 1.0), 0.0);
+        assert_eq!(protect_prior(1.0, 0.0, 0.0), PROTECT_BASE);
+        assert!((protect_prior(1.0, 1.0, 1.0) - 0.6).abs() < 1e-6);
+        assert!((protect_prior(REPEAT_PROTECT as f32, 1.0, 1.0) - 0.2).abs() < 1e-6);
+        assert_eq!(protect_prior(1.0, 10.0, 10.0), PROTECT_MAX);
+        assert_eq!(protect_prior(1.0, -10.0, -10.0), 0.0);
+    }
+
+    #[test]
+    fn entry_hazards_use_types_grounding_immunities_and_hp() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data/training/dex.json");
+        let dex = Dex::shared(&path).expect("dex.json");
+        let dm = DamageFeatures::new(&dex);
+        let fire = dex.type_idx("Fire");
+        let flying = dex.type_idx("Flying");
+        let mut t = Tok { def_types: [fire, flying], hp_frac: 1.0, alive: 1.0, ..Tok::default() };
+        let mut field = [0.0; N_FIELD_FLOATS];
+        field[ff::OWN_STEALTHROCK] = 1.0;
+        assert_eq!(dm.entry_damage(&t, 0, 0.0, &field), 0.5);
+        t.def_types = [fire, 0];
+        assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), 0.25);
+        t.def_types = [dex.type_idx("Fighting"), dex.type_idx("Steel")];
+        assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), 1.0 / 32.0);
+        t.item = dm.boots;
+        assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), 0.0);
+        t.item = 0;
+        assert_eq!(dm.entry_damage(&t, dm.magic_guard, 1.0, &field), 0.0);
+        field[ff::OWN_STEALTHROCK] = 0.0;
+        for (layers, loss) in [(1, 0.125), (2, 1.0 / 6.0), (3, 0.25)] {
+            field[ff::OWN_SPIKES] = layers as f32 / 3.0;
+            assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), loss);
+            assert_eq!(dm.entry_damage(&t, 0, 0.0, &field), 0.0);
+        }
+        t.hp_frac = 0.05;
+        assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), 0.05);
+        t.alive = 0.0;
+        assert_eq!(dm.entry_damage(&t, 0, 1.0, &field), 0.0);
+    }
 
     #[test]
     fn hit_table_entries() {
@@ -1039,6 +1170,81 @@ mod tests {
             let random = &hit[class("randomNormal")][s][2];
             assert_eq!((random[6], random[7]), (0.5, 0.5));
             assert!(hit[class("self")][s].iter().flatten().all(|&x| x == 0.0));
+        }
+    }
+
+    #[test]
+    fn hit_main_prefers_the_first_foe_on_positive_ties() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data/training/dex.json");
+        let dex = Dex::shared(&path).expect("dex.json");
+        let dm = DamageFeatures::new(&dex);
+        let class = |name: &str| TARGETS.iter().position(|t| *t == name).unwrap();
+        for s in 0..2 {
+            for name in ["allAdjacent", "allAdjacentFoes", "randomNormal"] {
+                assert_eq!(dm.hit_main[class(name)][s][2], 6, "{name}, slot {s}");
+            }
+            for name in ["normal", "any", "adjacentFoe", "adjacentAlly", "adjacentAllyOrSelf"] {
+                assert_eq!(dm.hit_main[class(name)][s], [1, 0, 0, 6, 7], "{name}, slot {s}");
+            }
+            assert_eq!(dm.hit_main[class("self")][s], [0; 5]);
+        }
+    }
+
+    #[test]
+    fn foe_attacks_mask_fainted_and_empty_slots() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data/training/dex.json");
+        let dex = Dex::shared(&path).expect("dex.json");
+        let dm = DamageFeatures::new(&dex);
+        let mut ids = [0; N_TOKENS * N_IDS];
+        let mut floats = [0.0; N_TOKENS * N_POKEMON_FLOATS];
+        let field = [0.0; N_FIELD_FLOATS];
+        let defender = Tok { dfn: 100.0, spd: 100.0, hp: 1.0, max_hp: 100.0, alive: 1.0, type_mult: [1.0; 20], ..Tok::default() };
+        for token in FOE_TOKENS {
+            let id = &mut ids[token * N_IDS..(token + 1) * N_IDS];
+            id[I_TYPE1] = dex.type_idx("Normal");
+            id[I_TYPE2] = dex.type_idx("Fire");
+            id[I_TERA] = dex.type_idx("Water");
+            let fl = &mut floats[token * N_POKEMON_FLOATS..(token + 1) * N_POKEMON_FLOATS];
+            fl[pf::LEVEL] = 1.0;
+            fl[pf::STAT_ATK] = 100.0 / STAT_SCALE;
+            fl[pf::STAT_SPA] = 100.0 / STAT_SCALE;
+            fl[pf::TERASTALLIZED] = 1.0;
+        }
+        // Foe a has a revealed move and a candidate; foe b uses all three generic fallback attacks.
+        ids[FOE_A * N_IDS + I_MOVE0] = dex.move_index("fakeout");
+        ids[FOE_A * N_IDS + I_CAND_MOVES] = dex.move_index("flamethrower");
+        floats[FOE_A * N_POKEMON_FLOATS + pf::MOVE_KNOWN0] = 1.0;
+        floats[FOE_A * N_POKEMON_FLOATS + pf::CAND_MOVE_P0] = 0.25;
+        for (present, fainted) in [(1.0, 0.0), (1.0, 1.0), (0.0, 0.0)] {
+            for token in FOE_TOKENS {
+                floats[token * N_POKEMON_FLOATS + pf::PRESENT] = present;
+                floats[token * N_POKEMON_FLOATS + pf::FAINTED] = fainted;
+            }
+            let t = dm.tokens(&ids, &floats, &field);
+            let attacks = dm.foe_attacks(&ids, &floats, &t, &[defender], &field);
+            let alive = present * (1.0 - fainted);
+            assert_eq!((attacks.probs[0][0], attacks.probs[0][4]), (alive, 0.25 * alive));
+            assert_eq!(&attacks.probs[0][M_IDS..], &[0.0; 3]);
+            assert_eq!(&attacks.probs[1][..M_IDS], &[0.0; M_IDS]);
+            assert_eq!(&attacks.probs[1][M_IDS..], &[alive; 3]);
+            let mut dealt = [-1.0; 2 * M_FOE];
+            let mut ko = [-1.0; 2 * M_FOE];
+            let mut probs = [[0.0; M_FOE]; 2];
+            dm.foe_attacks_into(&ids, &floats, &t, &[defender], &field, &[], true, &mut dealt, &mut ko, &mut probs);
+            assert_eq!(probs, attacks.probs);
+            for f in 0..2 {
+                let range = f * M_FOE..(f + 1) * M_FOE;
+                let expected = expected_max(&attacks.dealt[range.clone()], &attacks.probs[f]);
+                let risk = any_ko(&attacks.ko[range.clone()], &attacks.probs[f]);
+                assert_eq!(expected_max(&dealt[range.clone()], &probs[f]), expected);
+                assert_eq!(any_ko(&ko[range], &probs[f]), risk);
+                if alive == 0.0 {
+                    assert!(attacks.probs[f].iter().all(|&p| p == 0.0));
+                    assert_eq!((expected, risk), (0.0, 0.0));
+                } else {
+                    assert!(expected > 0.0 && risk > 0.0);
+                }
+            }
         }
     }
 
