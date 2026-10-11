@@ -32,6 +32,7 @@ def layout(n_envs: int) -> dict:
         "action_features": ((rows, 2, 40, N_ACTION_FEATURES), np.float32),
         "token_features": ((rows, N_TOKENS, N_TOKEN_FEATURES), np.float32),
         "fainted": ((rows, 2), np.float32),
+        "guard": ((rows, 2, 4, 2), np.bool_),
         "needs_action": ((n_envs, 2), np.bool_),
         "mask0": ((n_envs, 2, N_ACTIONS), np.bool_),
         "mask1": ((n_envs, 2, N_ACTIONS), np.bool_),
@@ -121,6 +122,7 @@ def _worker(connection, names, n_envs, begin, end, pools, seed, threads, log_gam
         a["action_features"][rows] = b.action_features
         a["token_features"][rows] = b.token_features
         a["fainted"][rows] = b.fainted
+        a["guard"][rows] = b.guard
 
     try:
         while True:

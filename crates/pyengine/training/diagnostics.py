@@ -29,7 +29,9 @@ class ActionUsage:
     From the action features: ``fake_out_ready`` (share of slot decisions with a legal Fake Out that would flinch a
     foe), ``use_fake_out_when_ready`` (how often one is then used), ``fake_out_stale`` (share of Fake Outs by a
     Pokemon that already used a move action since switching in, so they fail) and ``protect_repeat`` (share of
-    Protects right after a successful one, which work one time in three).
+    Protects right after a successful one, which work one time in three). With the move guards (training.guards)
+    on, these two only count what the guards let through: the only-move exception, and Pokemon the tracker can't
+    place (our disguised Zoroark), whose ``fresh`` reads 0. They should sit near zero.
     """
 
     def __init__(self, dex: Dex):
