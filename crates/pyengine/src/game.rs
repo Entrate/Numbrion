@@ -76,6 +76,9 @@ pub struct Game {
     names: Arc<[String; 2]>,
     seed0: [u16; 4],
     views: Option<LogViews>,
+    /// Built by a fair-information `WorldBuilder` (or copied from such a battle), not from a live
+    /// battle's true state. Search roots should be worlds (docs/design/SEARCH-PREREQUISITES.md).
+    world: bool,
 }
 
 macro_rules! with {
@@ -122,7 +125,7 @@ impl Game {
             Sink::No(build::<NoLog>(seed, &packed, &names)?)
         };
         let views = log.then(|| LogViews { keep_omni, ..LogViews::default() });
-        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views })
+        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views, world: false })
     }
 
     pub fn from_team_defs(
@@ -136,7 +139,7 @@ impl Game {
             Sink::No(Battle::from_team_defs(seed, p1, p2, names.clone(), NoLog).map_err(|e| e.0)?)
         };
         let views = log.then(|| LogViews { keep_omni, ..LogViews::default() });
-        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views })
+        Ok(Game { sink, packed, names: Arc::new(names), seed0: seed, views, world: false })
     }
 
     /// Reset to pre-start, retaining names, log mode and worker allocations.
@@ -144,6 +147,7 @@ impl Game {
         if self.packed[0] == p1 && self.packed[1] == p2 {
             with_mut!(self, b => b.reset_seed(seed)).map_err(|e| e.0)?;
             self.seed0 = seed;
+            self.world = false;
             self.clear_views();
             return Ok(());
         }
@@ -156,6 +160,7 @@ impl Game {
         with_mut!(self, b => b.reset_from_team_defs(seed, p1, p2)).map_err(|e| e.0)?;
         self.packed = packed;
         self.seed0 = seed;
+        self.world = false;
         self.clear_views();
         Ok(())
     }
@@ -283,7 +288,22 @@ impl Game {
     pub fn fork(&self, keep_omni: bool) -> Game {
         let sink = match &self.sink { Sink::No(b) => Sink::No(b.clone()), Sink::Text(b) => Sink::Text(b.clone()) };
         Game { sink, packed: self.packed.clone(), names: Arc::clone(&self.names), seed0: self.seed0,
-            views: self.views.as_ref().map(|_| LogViews { keep_omni, ..LogViews::default() }) }
+            views: self.views.as_ref().map(|_| LogViews { keep_omni, ..LogViews::default() }), world: self.world }
+    }
+
+    /// A started world from `engine::search::world::WorldBuilder` at a decision boundary. Its packed teams are
+    /// the resolved definitions, its "initial seed" the PRNG state it was given.
+    pub fn from_world(sink: Sink) -> Game {
+        let (teams, names, seed, text) = match &sink {
+            Sink::No(b) => (b.teams().clone(), [b.player_name(SideId(0)).to_owned(), b.player_name(SideId(1)).to_owned()], b.seed(), false),
+            Sink::Text(b) => (b.teams().clone(), [b.player_name(SideId(0)).to_owned(), b.player_name(SideId(1)).to_owned()], b.seed(), true),
+        };
+        let packed = [Arc::from(teams.sides[0].pack()), Arc::from(teams.sides[1].pack())];
+        Game { sink, packed, names: Arc::new(names), seed0: seed, views: text.then(LogViews::default), world: true }
+    }
+
+    pub fn is_world(&self) -> bool {
+        self.world
     }
 
     /// Adopt a root's immutable context as well as its state, reusing this worker's scratch. Unlike
@@ -298,6 +318,7 @@ impl Game {
         self.packed = other.packed.clone();
         self.names = Arc::clone(&other.names);
         self.seed0 = other.seed0;
+        self.world = other.world;
         self.clear_views();
         Ok(())
     }
@@ -310,6 +331,7 @@ impl Game {
             (Sink::Text(b), Sink::Text(o)) => b.restore_from(o),
             _ => panic!("restore requires matching log modes"),
         }
+        self.world = other.world;
         self.clear_views();
     }
 

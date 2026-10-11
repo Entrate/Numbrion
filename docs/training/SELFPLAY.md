@@ -452,6 +452,20 @@ switching in) and `protect_repeat` (share of Protects right after a successful o
 and tested (Unseen Fist through Protect, Tera Blast and Stellar Tera, Prankster/Gale Wings/Grassy Glide priority,
 Fake Out against a faster Fake Out, Sheer Force/Serene Grace/Mold Breaker, Triple Arrows, and the diagnostics).
 
+## Move guards
+
+The policy's masks (training.guards) block two kinds of move code. Fake Out and First Impression after the user's
+first move action since it switched in always fail. A Protect-like move right after a successful one works one
+time in three. The facts come from the encoder's tracker (`Buffers.guard`), and only for a Pokemon it places in
+that slot. If blocking would leave a slot with no legal move, the mask stays as it is even when switches are
+legal (Choice lock, Encore, the last move with PP). Failures that depend on the target (immunities, Prankster into
+Dark, priority into Psychic Terrain) stay legal, because the foe can switch before the move lands; the `fail`
+feature flags them. The guards apply to the learner and pool snapshots in training and to the policies in
+`evaluate.py`; scripted players keep the engine's masks. The stored masks are the guarded ones, so the PPO update
+scores the same choices the actors sampled from. `--allow-repeat-protect` (both scripts) turns the Protect guard
+off. Per update, `guarded_slots` counts the trained slot decisions the guards changed; `fake_out_stale` and
+`protect_repeat` should stay near zero.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.

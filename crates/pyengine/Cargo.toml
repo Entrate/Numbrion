@@ -16,6 +16,9 @@ default = []
 # Everything that touches Python. `maturin develop/build` enables it (pyproject.toml); plain `cargo build/test`
 # does not, so the Rust tests never need libpython.
 python = ["dep:pyo3", "dep:numpy"]
+# Fair-information search (WorldBuilder, SetPool, RevealTracker). Off by default because it makes
+# every engine PRNG draw slightly slower; build with `maturin develop --release --features search`.
+search = ["engine/search"]
 
 [dependencies]
 engine = { path = "../engine" }

@@ -8,8 +8,12 @@ pub mod action;
 pub mod env;
 pub mod game;
 pub mod mask;
+pub mod pgo;
 pub mod pool;
 pub mod search;
 
 #[cfg(feature = "python")]
 mod py;
+
+#[cfg(all(feature = "python", feature = "search"))]
+mod py_search;

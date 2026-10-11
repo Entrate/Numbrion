@@ -74,6 +74,24 @@ impl<L: LogSink> Battle<L> {
     pub fn teams(&self) -> &TeamDefs {
         &self.teams
     }
+
+    /// Copy at a flushed boundary (or before start) into a battle with another log sink, e.g. a
+    /// search world replayed with a recording sink into a `TextLog` or `NoLog` root. Shares the
+    /// team definitions; the new sink starts empty; PRNG and state are copied without draws.
+    pub fn clone_with_log<M: LogSink>(&self, log: M) -> Battle<M> {
+        self.assert_boundary();
+        let mut result = Battle {
+            state: self.state,
+            teams: Arc::clone(&self.teams),
+            parsed: Arc::clone(&self.parsed),
+            names: Arc::clone(&self.names),
+            log,
+            scratch: crate::event::Scratch::default(),
+        };
+        result.scratch.reset(result.state.started);
+        result.invalidate_derived_caches();
+        result
+    }
     pub fn with_log(
         seed: [u16; 4],
         p1_packed: &str,

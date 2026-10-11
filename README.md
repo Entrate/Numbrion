@@ -2,8 +2,6 @@
 
 # Numbrion
 
-Created in [T3 Code](https://t3.codes).
-
 Numbrion is a Rust battle engine for Gen 9 Random Doubles, with a differential-test
 harness and a Python self-play API. Active development is on `main`.
 See [engine validation](docs/STATUS.md) and [the training API](docs/design/TRAINING-API.md).
@@ -21,6 +19,12 @@ cargo build -p engine --all-features --locked --release
 cargo build --manifest-path crates/difftest/Cargo.toml --all-features --locked --release
 ```
 
+Fair-information search support (world builder, set sampler, revealed-information
+tracker) is the opt-in `search` feature (`cargo build -p engine --features search`;
+Python wheel: `maturin develop --release --features python,search`). It is off by
+default because it adds a small cost to every PRNG draw; see
+[the search prerequisites](docs/design/SEARCH-PREREQUISITES.md).
+
 The harness executable is `crates/difftest/target/release/difftest` (`.exe` on
 Windows). The engine is a library, with artifacts in `target/release`.
 
@@ -37,9 +41,9 @@ npm ci
 npm run build
 ```
 
-From the Numbrion root, Windows users can build both release artifacts, run both
-test suites, replay the committed fixtures with the real engine, and run the
-harness fault-injection checks in one command:
+From the Numbrion root, Windows users can build both release artifacts, run the
+engine, pyengine (with and without search), and harness tests, replay the
+committed fixtures, and run the harness fault-injection checks in one command:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
@@ -50,11 +54,17 @@ set `NUMBRION_SHOWDOWN` to use another pinned, built checkout. It also discovers
 Rust under `%USERPROFILE%\.cargo\bin` and the local Node 24 installation under
 `%LOCALAPPDATA%\Programs\numbrion-tools` when the shell's PATH is outdated.
 
+The `reveal-audit` diagnostic runs on battle integration tests and fixture
+replays because synthetic unit fixtures bypass reveal bookkeeping.
+
 On other platforms, set `NUMBRION_SHOWDOWN` to the checkout's absolute path and
 run:
 
 ```sh
-cargo test -p engine --all-features --locked
+cargo test -p engine --features trace-hooks,event-probes,event-trace,search --locked
+cargo test -p engine --all-features --locked --test '*'
+cargo test -p pyengine --release --locked
+cargo test -p pyengine --release --locked --features search
 cargo test --manifest-path crates/difftest/Cargo.toml --all-features --locked
 crates/difftest/target/release/difftest replay data/fixtures/sample-50.jsonl.gz --sim engine
 crates/difftest/target/release/difftest replay data/fixtures/directed-smoke.jsonl.gz --sim engine

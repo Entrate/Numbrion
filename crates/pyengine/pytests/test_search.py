@@ -7,6 +7,9 @@ import numbrion as nb
 from conftest import n_battles
 from test_battle import make, rng_step, signature
 
+# These tests exercise the executor itself on live battles.
+pytestmark = pytest.mark.filterwarnings("ignore:numbrion.GridExecutor.run")
+
 
 def random_pairs(b, side, rng, k):
     """Up to ``k`` random legal (a0, a1) pairs of ``side``; ``[[-1, -1]]`` if it needs no action."""

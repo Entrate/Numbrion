@@ -48,8 +48,11 @@ try {
 
     Invoke-Checked cargo @('build', '-p', 'engine', '--all-features', '--locked', '--release')
     Invoke-Checked cargo @('build', '--manifest-path', 'crates/difftest/Cargo.toml', '--all-features', '--locked', '--release')
-    Invoke-Checked cargo @('test', '-p', 'engine', '--all-features', '--locked')
+    # Synthetic unit fixtures bypass reveal bookkeeping; audit real battle integration tests instead.
+    Invoke-Checked cargo @('test', '-p', 'engine', '--features', 'trace-hooks,event-probes,event-trace,search', '--locked')
+    Invoke-Checked cargo @('test', '-p', 'engine', '--all-features', '--locked', '--test', '*')
     Invoke-Checked cargo @('test', '-p', 'pyengine', '--release', '--locked')
+    Invoke-Checked cargo @('test', '-p', 'pyengine', '--release', '--locked', '--features', 'search')
     Invoke-Checked cargo @('test', '--manifest-path', 'crates/difftest/Cargo.toml', '--all-features', '--locked')
     $difftest = Join-Path $repoRoot 'crates\difftest\target\release\difftest.exe'
     foreach ($fixture in @('sample-50', 'directed-smoke')) {

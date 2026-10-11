@@ -324,12 +324,46 @@ NoLog mode (default) offers the request only; the opponent side of the board is 
 tracker of *revealed* information (so a NoLog environment could provide a public board state) does not exist
 in the engine yet.
 
+## Fair-information worlds (`--features python,search`)
+
+Opt-in: build the wheel with `maturin develop --release --features python,search` (`numbrion.SEARCH` is then
+True). Default wheels do not contain these classes and their engine is unchanged. Background and limits:
+[SEARCH-PREREQUISITES.md](SEARCH-PREREQUISITES.md) item 1.
+
+```python
+pool = numbrion.SetPool(["data/teams/pool-s1-200k.txt.gz"])        # generated teams (deduplicated sets)
+wb = numbrion.WorldBuilder(viewer, own_packed_team, pool, names=("Alice", "Bob"), seed=0)
+wb.push_lines(battle.drain_player_log(viewer))                       # every player-view line, in order
+# at each boundary where the viewer acts:
+wb.push_request(battle.request_json(viewer))                         # optional, strengthens the check
+worlds = wb.worlds(4, seed=rng_seed, log=True)                       # started Battles at this boundary
+wb.push_action(a0, a1)                                               # or push_choice("move 1 +2, switch 3")
+# ... then push the lines that choice produced
+```
+
+* `SetPool(team_pool_paths=(), max_teams_per_file=None, teams=None)`: packed-team files and/or teams; `len()`
+  sets, `distinct`. Sampling follows the generator's empirical distribution.
+* `WorldBuilder(viewer, team, pool, names=None, seed=0, particles=8, segment_budget=1000, rebuild_budget=16,
+  fresh_per_update=1)`: `team` is the viewer's own packed team with genders resolved (the pools' teams are).
+  Inputs are only the viewer's lines, requests and choices; the real battle is never consulted, so the same
+  object works on a ladder stream. Results depend only on the inputs, `seed` and the call sequence. Push a
+  request after the lines that led to it (a ladder client receives it before them).
+* `worlds(k, seed, log=False)` (GIL released): `k` worlds drawn by weight, each reseeded from
+  `seed`; raises `RuntimeError` (with the last failure reason) when no world reproduces the observations.
+  `update()` does the work without returning worlds. `alive`, `weights` (`(weights, ess)`), `stats()`,
+  `last_failure` and `public_state()` (the tracker's view) are diagnostics.
+* `RevealTracker()`: `feed(lines)`, `state()` -> dict of the public information per Pokemon of both sides
+  (moves used, item / ability / Tera shown, HP, status). This is the "public tracker" of request 2 below, for
+  log-enabled streams.
+* Worlds are ordinary `Battle`s with `is_world == True` (copies keep it); `GridExecutor.run` warns on roots
+  that are not worlds unless `allow_live=True`. Build grid candidates from the world's own mask.
+
 ## Search (`numbrion.GridExecutor`)
 
-> **Not ready for training targets or strength claims yet.** Read
-> [SEARCH-PREREQUISITES.md](SEARCH-PREREQUISITES.md) first: worlds must come from fair-information
-> determinization, not from the live battle. `numbrion.GridExecutor` warns until
-> `NUMBRION_SEARCH_PREREQS_DONE=1` is set.
+> **Roots must be fair-information worlds** (`WorldBuilder` above, search wheels only), not live battles or
+> their clones. Read [SEARCH-PREREQUISITES.md](SEARCH-PREREQUISITES.md) first. `numbrion.GridExecutor` warns
+> until `NUMBRION_SEARCH_PREREQS_DONE=1` is set, and on every `run` whose roots are not worlds unless
+> `allow_live=True`.
 
 One-turn search evaluates a grid of joint actions: per decision ~10 candidate pairs per side, optionally
 several determinized worlds, each cell = restore the root, submit both sides' choices, advance to the next
@@ -483,4 +517,5 @@ Revival Blessing); the Python run used the full pools.
 1. Done: `impl Clone for Battle`, `Battle::restore_from` and `Battle::reset` (used by `clone`, `restore_from`,
    `copy_from`, `reset`, `BatchEnv` auto-reset and `GridExecutor`).
 2. A public tracker of revealed information, so NoLog environments can offer a public board state.
-   (`Battle::revealed_mons` covers only which Pokemon were ever switched in or used as a disguise.)
+   (`Battle::revealed_mons` covers only which Pokemon were ever switched in or used as a disguise.) Partly
+   done: `RevealTracker` (search wheels) builds it from player-view lines, so it needs `log=True` streams.
