@@ -202,7 +202,7 @@ struct SmartState {
     last_rows: Option<usize>,
 }
 
-/// Stateful two-slot scripted player. `second` uses the rows and context of the preceding `first`.
+/// Stateful two-slot scripted player. `second` and `second_given` use the rows and context of the preceding `first`.
 #[pyclass(frozen, module = "numbrion")]
 struct SmartAgent {
     state: Mutex<SmartState>,
@@ -272,6 +272,29 @@ impl SmartAgent {
             let expected = state.last_rows.ok_or_else(|| "second requires a preceding first call".to_string())?;
             if count != expected { return Err(format!("mask1 has {count} rows, expected {expected} from first")); }
             Ok(state.agent.second(mask))
+        }).map_err(PyValueError::new_err)?;
+        Ok(PyArray1::from_vec(py, result))
+    }
+
+    /// `second` for the caller's slot-a codes `a0` (int64, one per row of the preceding `first`, in order) instead of
+    /// this agent's own: slot-b teacher labels conditioned on a learner's slot a.
+    fn second_given<'py>(&self, py: Python<'py>, a0: &Bound<'py, PyAny>, mask1: &Bound<'py, PyAny>)
+        -> PyResult<Bound<'py, PyArray1<i32>>>
+    {
+        let count = mask1.cast::<PyArrayDyn<bool>>().ok().filter(|a| a.ndim() == 2).map(|a| a.shape()[0])
+            .ok_or_else(|| PyValueError::new_err("mask1 must be a bool numpy array of shape [n, 47]"))?;
+        let mask = readable::<bool>(mask1, "mask1", "bool", &[count, N_ACTIONS])?;
+        let a0 = readable::<i64>(a0, "a0", "int64", &[count])?;
+        let a0: Vec<usize> = a0.as_slice()?.iter().map(|&code| {
+            usize::try_from(code).ok().filter(|&code| code < N_ACTIONS)
+                .ok_or_else(|| PyValueError::new_err(format!("a0 code {code} outside 0..{N_ACTIONS}")))
+        }).collect::<PyResult<_>>()?;
+        let mask = mask.as_slice()?;
+        let result = py.detach(|| {
+            let mut state = lock(&self.state);
+            let expected = state.last_rows.ok_or_else(|| "second_given requires a preceding first call".to_string())?;
+            if count != expected { return Err(format!("mask1 has {count} rows, expected {expected} from first")); }
+            Ok(state.agent.second_given(&a0, mask))
         }).map_err(PyValueError::new_err)?;
         Ok(PyArray1::from_vec(py, result))
     }

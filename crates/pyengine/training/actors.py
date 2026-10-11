@@ -7,6 +7,12 @@ trains on buffer ``k`` while the actors fill buffer ``1 - k``; PPO's ratio uses 
 the data being one update old is accounted for. Weights travel through shared memory after every update.
 Side 2 of each env is played by the learner, the pool snapshot or the scripted heuristic (training.league); the
 actors report per-env results so the trainer can attribute them to the opponent it assigned.
+
+Teacher labels (``Actors(teacher=True)``, rollouts started with ``teacher=True``): a separate smart player
+(training.smart) labels every decision the learner trains on, DAgger-style, on the learner's own states:
+``teacher_a0`` is its slot-a choice under the learner's guarded slot-a mask, ``teacher_a1`` its slot-b choice for the
+learner's sampled slot-a code under the learner's guarded slot-b mask (the same slot-a code the learner's slot-b
+log-probs are conditioned on), -1 for rows without a label. The labels change nothing the learner plays or samples.
 """
 from __future__ import annotations
 
@@ -29,7 +35,8 @@ OBS_KEYS = ("ids", "floats", "field", "foe_match", "action_features", "token_fea
 RESULT_KEYS = ("games", "score", "clean_games", "clean_score", "battle_turns")  # per-env opponent results
 
 
-def buffer_layout(steps: int, rows: int) -> dict:
+def buffer_layout(steps: int, rows: int, teacher: bool = False) -> dict:
+    """Rollout arrays; ``teacher`` adds the teacher labels (see the module docstring)."""
     return {
         "ids": ((steps, rows, N_TOKENS, N_IDS), np.int64),
         "floats": ((steps, rows, N_TOKENS, N_POKEMON_FLOATS), np.float32),
@@ -47,6 +54,7 @@ def buffer_layout(steps: int, rows: int) -> dict:
         "done": ((steps, rows), np.bool_),
         "train": ((steps, rows), np.bool_),
         "bootstrap": ((rows,), np.float32),
+        **({"teacher_a0": ((steps, rows), np.int64), "teacher_a1": ((steps, rows), np.int64)} if teacher else {}),
     }
 
 
@@ -167,7 +175,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
 
     torch.set_num_threads(1)
     R = 2 * n_envs
-    buffers = [SharedArrays(buffer_layout(steps, R), names) for names in buffer_names]
+    buffers = [SharedArrays(buffer_layout(steps, R, model_config.get("teacher", False)), names)
+               for names in buffer_names]
     weights = SharedArrays({"learner": ((model_config["size"],), np.float32),
                             "opponent": ((model_config["size"],), np.float32)}, weight_names)
     dex = load_dex()
@@ -186,6 +195,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         heuristic = SmartHeuristicAgent(rng, dex, temperature=model_config.get("scripted_temperature", 0.0))
     else:
         heuristic = HeuristicAgent(rng)
+    teacher = None  # the smart player labelling the learner's decisions, made for the first teaching rollout
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
 
@@ -230,8 +240,16 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             began_here = np.zeros(count, dtype=bool)
             # ---- end opponent assignment
             ko_bonus = argument["ko_bonus"]
+            teach = bool(argument.get("teacher")) and "teacher_a0" in out
+            if teach and teacher is None:
+                from training.smart import SmartHeuristicAgent
+
+                # Its own instance (first/second keep per-call context) and random stream, so labelling never moves
+                # the actor's sampling stream or the scripted opponent's.
+                teacher = SmartHeuristicAgent(np.random.default_rng([seed, 1]), dex,
+                                              temperature=model_config.get("teacher_temperature", 0.0))
             stats = dict(completed=0, turns=0, guarded=0)
-            inference = 0.0
+            inference = teaching = 0.0
             for t in range(steps):
                 for k in OBS_KEYS:
                     out[k][t, rows] = getattr(b, k)
@@ -271,6 +289,17 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                         lp1[scripted_index] = forced_logprobs(heuristic.second(scripted_index, mask1[scripted_index]))
                     a1 = sample(lp1, rng)
                 inference += time.perf_counter() - t0
+                if "teacher_a0" in out:  # -1: no label
+                    labels = np.full((2, 2 * count), -1, dtype=np.int64)
+                    index = np.flatnonzero(train_rows)
+                    if teach and len(index):
+                        t2 = time.perf_counter()
+                        # Guarded masks: the labels are legal where the policy's log-probs are. Slot b answers the
+                        # learner's own slot-a code, so its label needs no extra forward pass in the PPO loss.
+                        labels[0, index] = teacher.first(b.arrays(), index, mask0[index])
+                        labels[1, index] = teacher.second_given(index, a0[index], mask1[index])
+                        teaching += time.perf_counter() - t2
+                    out["teacher_a0"][t, rows], out["teacher_a1"][t, rows] = labels
                 actions = np.stack((a0, a1), -1).reshape(count, 2, 2).astype(np.int32)
                 actions[~result["needs_action"]] = -1
                 out["mask0"][t, rows], out["mask1"][t, rows] = mask0, mask1
@@ -307,6 +336,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 out["bootstrap"][rows] = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
             stats["seconds"] = time.perf_counter() - started
             stats["inference_seconds"] = inference
+            stats["teacher_seconds"] = teaching
             stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
             stats.update(memory_mb())
             connection.send(stats)
@@ -324,15 +354,19 @@ class Actors:
     """``n_envs`` battles over ``workers`` actor processes, two rollout buffers of ``steps`` boundaries."""
 
     def __init__(self, n_envs: int, steps: int, pools: list[Path], seed: int, workers: int, model,
-                 scripted: str = "heuristic", scripted_temperature: float = 0.0, guards: MoveGuards = MoveGuards()):
-        self.n_envs, self.steps = n_envs, steps
-        self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs)) for _ in range(2)]
+                 scripted: str = "heuristic", scripted_temperature: float = 0.0, guards: MoveGuards = MoveGuards(),
+                 teacher: bool = False, teacher_temperature: float = 0.0):
+        """``teacher``: the buffers hold teacher labels, written in rollouts started with ``teacher=True`` (smart
+        player with Gumbel noise ``teacher_temperature``)."""
+        self.n_envs, self.steps, self.teacher = n_envs, steps, teacher
+        self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs, teacher)) for _ in range(2)]
         self.layout = weight_layout(model)
         size = sum(int(np.prod(shape)) for _, shape, _ in self.layout)
         self.weights = SharedArrays({"learner": ((size,), np.float32), "opponent": ((size,), np.float32)})
         self.versions = {"learner": 0, "opponent": 0}
         config = dict(size=size, width=model.width, layers=len(model.blocks), joint_features=model.joint_features,
-                      scripted=scripted, scripted_temperature=scripted_temperature, guards=asdict(guards))
+                      scripted=scripted, scripted_temperature=scripted_temperature, guards=asdict(guards),
+                      teacher=teacher, teacher_temperature=teacher_temperature)
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])
@@ -354,10 +388,14 @@ class Actors:
         write_weights(self.weights.arrays[key], self.layout, state)
         self.versions[key] += 1
 
-    def start(self, buffer: int, opponents: np.ndarray, ko_bonus: float) -> None:
-        """``opponents``: per-env opponent kind (training.league SELF / SNAPSHOT / HEURISTIC) for this rollout."""
+    def start(self, buffer: int, opponents: np.ndarray, ko_bonus: float, teacher: bool = False) -> None:
+        """``opponents``: per-env opponent kind (training.league SELF / SNAPSHOT / HEURISTIC) for this rollout.
+        ``teacher``: label the learner's decisions (otherwise the labels are all -1)."""
+        if teacher and not self.teacher:
+            raise ValueError("teacher labels need Actors(teacher=True)")
         argument = dict(buffer=buffer, opponents=np.asarray(opponents).tolist(), ko_bonus=ko_bonus,
-                        learner_version=self.versions["learner"], opponent_version=self.versions["opponent"])
+                        learner_version=self.versions["learner"], opponent_version=self.versions["opponent"],
+                        teacher=bool(teacher))
         for connection in self.connections:
             connection.send(("collect", argument))
         self.pending = True
@@ -371,6 +409,7 @@ class Actors:
         totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns", "guarded")}
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
+        totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
         for key in RESULT_KEYS:
             totals[key] = np.concatenate([np.asarray(r[key], dtype=np.float64) for r in replies])

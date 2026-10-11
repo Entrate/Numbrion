@@ -538,14 +538,28 @@ impl SmartAgent {
 
     /// Re-picks slot b using its exact mask, conditioned on the previous slot-a choice.
     pub fn second(&mut self, mask1: &[bool]) -> Vec<i32> {
+        self.slot_b(None, mask1)
+    }
+
+    /// `second` answering the caller's slot-a codes (one per row of the preceding `first`, in order) instead of this
+    /// agent's own: slot-b teacher labels for a learner's slot a. A replacement request treats the given code as the
+    /// slot already taken. With `a0` equal to `first`'s result and the same random state, it returns `second`'s codes.
+    pub fn second_given(&mut self, a0: &[usize], mask1: &[bool]) -> Vec<i32> {
+        assert_eq!(a0.len(), self.ctx.len());
+        assert!(a0.iter().all(|&code| code < N_ACTIONS));
+        self.slot_b(Some(a0), mask1)
+    }
+
+    fn slot_b(&mut self, given: Option<&[usize]>, mask1: &[bool]) -> Vec<i32> {
         assert_eq!(mask1.len(), self.ctx.len() * N_ACTIONS);
         let contexts = std::mem::take(&mut self.ctx); let mut out = Vec::with_capacity(contexts.len());
         for (i, c) in contexts.iter().enumerate() {
+            let a0 = given.map_or(c.a0, |codes| codes[i]);
             let codes = codes_of(&mask1[i * N_ACTIONS..(i + 1) * N_ACTIONS]);
             let code = match codes.len() {
-                0 => PASS, 1 => codes[0], _ if !c.request_move => self.replacement(c, &codes, c.a0),
+                0 => PASS, 1 => codes[0], _ if !c.request_move => self.replacement(c, &codes, a0),
                 _ => {
-                    let xs = Self::candidates(c, 0, &[c.a0]); let ys = Self::candidates(c, 1, &codes);
+                    let xs = Self::candidates(c, 0, &[a0]); let ys = Self::candidates(c, 1, &codes);
                     let (_, b) = self.choose(c, &xs, &ys); ys[b]
                 }
             };
@@ -627,6 +641,31 @@ mod tests {
         assert_eq!(agent.first(&obs, &[0], &mask), [6]);
         mask.fill(false); mask[PASS] = true;
         assert_eq!(agent.second(&mask), [PASS as i32]);
+    }
+
+    #[test]
+    fn second_given_replaces_around_the_callers_slot_a() {
+        let dex = Dex::shared(std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../../data/training/dex.json"))).unwrap();
+        let mut agent = SmartAgent::new(dex, 0, SmartConfig { noise: 0.0, protect_skip: 0.0,
+            protect_share: (0.7, 0.7), temperature: 0.0 });
+        // A replacement request with two healthy bench Pokemon; token 3 has more HP, so the better matchup.
+        let mut ids = vec![0; 12 * N_IDS]; let mut floats = vec![0.0; 12 * N_POKEMON_FLOATS];
+        for (t, hp) in [(6, 1.0), (2, 0.5), (3, 1.0)] {
+            for col in [pf::STAT_HP, pf::STAT_ATK, pf::STAT_DEF, pf::STAT_SPA, pf::STAT_SPD, pf::STAT_SPE, pf::LEVEL] {
+                floats[t * N_POKEMON_FLOATS + col] = 0.5;
+            }
+            floats[t * N_POKEMON_FLOATS + pf::PRESENT] = 1.0; floats[t * N_POKEMON_FLOATS + pf::HP] = hp;
+        }
+        floats[6 * N_POKEMON_FLOATS + pf::ACTIVE_A] = 1.0;
+        ids[6 * N_IDS + I_TYPE1] = agent.dex.type_idx("Normal");
+        let field = vec![0.0; N_FIELD_FLOATS];
+        let action = vec![0.0; 2 * 40 * N_ACTION_FEATURES]; let token = vec![0.0; 12 * N_TOKEN_FEATURES];
+        let obs = ObsRows { ids: &ids, floats: &floats, field: &field, action_features: &action, token_features: &token };
+        let mut mask = vec![false; N_ACTIONS]; mask[42] = true; mask[43] = true;
+        assert_eq!(agent.first(&obs, &[0], &mask), [43]);
+        assert_eq!(agent.second(&mask), [42]);  // never the Pokemon slot a already sends in
+        assert_eq!(agent.second_given(&[43], &mask), [42]);
+        assert_eq!(agent.second_given(&[42], &mask), [43]);  // the caller's slot a took the other one
     }
 
     #[test]
