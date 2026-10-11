@@ -8,6 +8,10 @@
   Slot b's scores are conditioned on slot a's chosen action.
 * Oracle critic (training only): the value head also sees the opponent's full team, taken from the opponent row's
   own request. Auxiliary heads predict each revealed foe's hidden item, ability, Tera type and moves.
+
+A model reads only the first ``action_features``/``token_features`` columns of the damage-calc features (the counts
+it was built with; ``Model.from_state`` infers them from a checkpoint), so models from before training.damage grew
+new columns still run on today's observations.
 """
 from __future__ import annotations
 
@@ -68,10 +72,12 @@ def masked_log_softmax(logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor
 
 
 class Model(nn.Module):
-    def __init__(self, dex: Dex, width: int = 128, layers: int = 3, heads: int = 4):
+    def __init__(self, dex: Dex, width: int = 128, layers: int = 3, heads: int = 4,
+                 action_features: int = N_ACTION_FEATURES, token_features: int = N_TOKEN_FEATURES):
         super().__init__()
         W = width
         self.width = W
+        self.n_action_features, self.n_token_features = action_features, token_features
         self.species = nn.Embedding(dex.n_species, W)
         self.item = nn.Embedding(dex.n_items, W)
         self.ability = nn.Embedding(dex.n_abilities, W)
@@ -84,7 +90,7 @@ class Model(nn.Module):
         self.move_proj = nn.Linear(dex.move_features.shape[1], W)
         self.move_state = nn.Linear(3, W)
         self.tera_proj = nn.Linear(20, W)
-        self.float_proj = nn.Linear(N_POKEMON_FLOATS + N_TOKEN_FEATURES, W)
+        self.float_proj = nn.Linear(N_POKEMON_FLOATS + token_features, W)
         self.token_norm = nn.LayerNorm(W)
         self.field_proj = nn.Linear(N_FIELD_FLOATS, W)
         self.blocks = nn.ModuleList(Block(W, heads) for _ in range(layers))
@@ -94,7 +100,7 @@ class Model(nn.Module):
         self.act_actor = nn.Linear(W, W)
         self.act_move = nn.Linear(W, W)
         self.act_target = nn.Linear(W, W)
-        self.act_damage = nn.Linear(N_ACTION_FEATURES, W)
+        self.act_damage = nn.Linear(action_features, W)
         self.act_tera = nn.Linear(W, W)
         self.act_switch = nn.Linear(W, W)
         self.act_context = nn.Linear(W, W)
@@ -111,6 +117,14 @@ class Model(nn.Module):
         self.aux_tera = nn.Linear(W, 20)
         self.aux_moves = nn.Linear(W, dex.n_moves)
         self.n_moves = dex.n_moves
+
+    @classmethod
+    def from_state(cls, dex: Dex, state: dict, width: int = 128, layers: int = 3) -> "Model":
+        """A model shaped for the state dict ``state`` (its feature column counts), with the weights loaded."""
+        model = cls(dex, width, layers, action_features=state["act_damage.weight"].shape[1],
+                    token_features=state["float_proj.weight"].shape[1] - N_POKEMON_FLOATS)
+        model.load_state_dict(state)
+        return model
 
     # ---- embeddings -----------------------------------------------------------------------------------------
     def _tables(self):
@@ -152,6 +166,8 @@ class Model(nn.Module):
     def trunk(self, ids, floats, field, action_features, token_features):
         """Damage-calc features come precomputed from the CPU (training.damage) with the observation."""
         tables = self._tables()
+        action_features = action_features[..., :self.n_action_features]
+        token_features = token_features[..., :self.n_token_features]
         tokens = self.embed_tokens(ids, floats, token_features, tables)
         moves = self.active_moves(ids, floats, tables[1])
         x = torch.cat((tokens, self.field_proj(field).unsqueeze(1)), 1)  # [B, 13, W]
@@ -204,7 +220,7 @@ class Model(nn.Module):
     # ---- critic and auxiliary heads --------------------------------------------------------------------------
     def value(self, state: dict, partner_ids, partner_floats) -> torch.Tensor:
         own = partner_floats[:, 0:6]
-        zeros = torch.zeros(*own.shape[:-1], N_TOKEN_FEATURES, device=own.device)
+        zeros = torch.zeros(*own.shape[:-1], self.n_token_features, device=own.device)
         tokens = self.embed_tokens(partner_ids[:, 0:6], own, zeros, state["tables"])
         x = self.partner_proj(tokens)
         present = own[..., PF["present"]].unsqueeze(-1)

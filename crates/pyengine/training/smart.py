@@ -32,7 +32,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from .damage import SPREAD, DamageFeatures, _hit_table, any_ko, expected_max
+from .damage import (FIRST_TURN_ONLY, FLINCH_BLOCK, PRIORITY_BLOCK, SPREAD, DamageFeatures, _hit_table, any_ko,
+                     expected_max)
 from .dex import TARGETS, Dex, load_dex
 from .encoder import (FF, I_ABILITY, I_CAND_ABILITIES, I_CAND_MOVES, I_ITEM, I_MOVE0, I_TERA, I_TYPE1, K_ABILITIES,
                       K_MOVES, PF)
@@ -58,9 +59,6 @@ NOISE = 0.005
 
 PROTECT_MOVES = ("protect", "detect", "spikyshield", "kingsshield", "banefulbunker", "obstruct", "silktrap",
                  "burningbulwark")
-FIRST_TURN_ONLY = ("fakeout", "firstimpression")
-FLINCH_BLOCK = ("innerfocus", "shielddust")
-PRIORITY_BLOCK = ("armortail", "dazzling", "queenlymajesty")
 SLEEP_MOVES = ("spore", "sleeppowder", "hypnosis", "sing", "lovelykiss", "grasswhistle", "darkvoid", "yawn")
 SLEEP_BLOCK = ("insomnia", "vitalspirit", "sweetveil", "comatose", "purifyingsalt")
 OFFENSIVE_SETUP = ("swordsdance", "nastyplot", "calmmind", "dragondance", "quiverdance", "shellsmash", "bulkup", "coil",

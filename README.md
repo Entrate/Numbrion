@@ -2,13 +2,12 @@
 
 # Numbrion
 
-Created in [T3 Code](https://t3.codes).
-
 Numbrion is a Rust battle engine for Gen 9 Random Doubles, with a differential-test
 harness and a Python self-play API. Active development is on `main`.
 See [engine validation](docs/STATUS.md) and [the training API](docs/design/TRAINING-API.md).
 
 For AMD GPU training on Windows, follow [the setup and training guide](docs/training/WINDOWS-GPU.md).
+For Apple silicon Macs, see [GPU training on Apple silicon](docs/training/MAC.md).
 
 ## Build
 

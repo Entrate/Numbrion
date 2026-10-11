@@ -212,17 +212,19 @@ def test_never_protects_twice_in_a_row(trajectory):
                     blocked += 1
                     assert not is_protect or only_protect
     assert protects > 20 and blocked > 10, (protects, blocked)
-    # The same from the player-view logs: no own Pokemon uses a Protect move on two consecutive turns.
+    # The same from the player-view logs: no own Pokemon uses a Protect move the turn after a successful one (after
+    # a failed one the counter is reset, so a repeat is fine).
     names = {dex.moves[m - 1]["name"] for m in protect_ids}
     for lines in battles:
         turn, last = 0, {}
-        for line in lines:
+        for i, line in enumerate(lines):
             parts = line.split("|")
             if len(parts) > 2 and parts[1] == "turn":
                 turn = int(parts[2])
             elif len(parts) > 3 and parts[1] == "move" and parts[2].startswith("p1") and parts[3] in names:
                 assert last.get(parts[2]) != turn - 1, f"repeated Protect on turn {turn}: {line}"
-                last[parts[2]] = turn
+                if i + 1 < len(lines) and lines[i + 1].startswith("|-singleturn|"):
+                    last[parts[2]] = turn
 
 
 def test_no_double_target_overkill(trajectory):

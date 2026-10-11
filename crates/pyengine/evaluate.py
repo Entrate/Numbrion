@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from training.device import training_device
+from training.device import BACKENDS, training_device
 from training.dex import load_dex, to_id
 from training.model import Model
 from training.ppo import PASS, sample
@@ -80,8 +80,7 @@ class PolicyAgent:
 
 def load_policy(path: Path, dex, device, rng, name=None, record_values=False, temperature=1.0) -> PolicyAgent:
     state = torch.load(path, map_location="cpu", weights_only=False)
-    model = Model(dex, state.get("width", 128), state.get("layers", 3)).to(device)
-    model.load_state_dict(state["model"])
+    model = Model.from_state(dex, state["model"], state.get("width", 128), state.get("layers", 3)).to(device)
     model.eval()
     return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature)
 
@@ -341,7 +340,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--run", type=Path, default=REPO / "scratch/training/selfplay")
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/eval-s43-200.txt")
-    parser.add_argument("--device", choices=["auto", "directml", "cuda", "cpu"], default="auto")
+    parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--envs", type=int, default=50, help="battles per mirrored copy at a time")
     parser.add_argument("--rounds", type=int, default=4, help="battles per env: games = 2 * envs * rounds")
     parser.add_argument("--final-rounds", type=int, default=10, help="rounds for the final snapshot's baselines")

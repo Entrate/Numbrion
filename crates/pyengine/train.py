@@ -15,7 +15,7 @@ import numpy as np
 import torch
 
 import numbrion as nb
-from training.device import training_device
+from training.device import BACKENDS, training_device
 from training.observations import PublicEncoder
 from training.policy import N_ACTIONS, Policy, masked_logprobs
 
@@ -87,7 +87,7 @@ def save_checkpoint(path, model, optimizer, args, update, battles, rng):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--device", choices=["auto", "directml", "cuda", "cpu"], default="auto")
+    parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/train-s42-2000.txt")
     parser.add_argument("--envs", type=int, default=32)
