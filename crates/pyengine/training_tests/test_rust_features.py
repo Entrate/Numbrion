@@ -136,8 +136,8 @@ def test_protect_prior_by_belief_reveal_and_threat():
     assert again.floats[0, 6, PF["protect_last"]] == 1
     assert again.token_features[0, 6, T["protect_now"]] == pytest.approx(prior / 3)
     assert again.action_features[0, 0, code(0), A["protect_chance_a"]] == pytest.approx(prior / 3)
-    np.testing.assert_array_equal(high.action_features[0, :, 0::2, A["protect_chance_a"]:],
-                                  high.action_features[0, :, 1::2, A["protect_chance_a"]:])
+    np.testing.assert_array_equal(high.action_features[0, :, 0::2, A["protect_chance_a"]:A["own_ko"] + 1],
+                                  high.action_features[0, :, 1::2, A["protect_chance_a"]:A["own_ko"] + 1])
     assert high.action_features[0, 0, code(0, 4), A["protect_chance_a"]] == 0  # targets only foe b
 
 
@@ -173,3 +173,49 @@ def test_spread_discounts_each_foes_legacy_share():
     assert surf[2] == pytest.approx(sum(kos))
     assert surf[A["damage_after_protect"]] == pytest.approx(sum(d * (1 - p) for d, p in zip(dealt, chances)))
     assert surf[A["ko_after_protect"]] == pytest.approx(sum(k * (1 - p) for k, p in zip(kos, chances)))
+
+
+def low_foes(hp="5/100"):
+    return [f"|-damage|p2a: Inteleon|{hp}", f"|-damage|p2b: Ditto|{hp}"]
+
+
+def test_fixed_columns_match_legacy_for_single_target_moves():
+    af = encode().action_features[0]
+    for slot in range(2):
+        for m in range(4):
+            for target in (3, 4):
+                for tera in (False, True):
+                    row = af[slot, code(m, target, tera)]
+                    assert row[A["foe_a_damage"]] + row[A["foe_b_damage"]] == pytest.approx(row[0], abs=1e-6)
+                    assert row[A["foe_a_ko"]] + row[A["foe_b_ko"]] == pytest.approx(row[2], abs=1e-6)
+                    assert row[A["own_damage"]] == pytest.approx(row[1], abs=1e-6)
+                    assert row[A["own_ko"]] == pytest.approx(row[3], abs=1e-6)
+                    assert row[A["tera_damage_fixed"]] == pytest.approx(row[A["tera_damage"]], abs=1e-6)
+                    assert row[A["tera_ko_fixed"]] == pytest.approx(row[A["tera_ko"]], abs=1e-6)
+
+
+def test_spread_reduction_comes_before_the_hp_cap_and_ko_chance():
+    b = encode(low_foes(), moves=["dazzlinggleam", "protect"], attack=250)
+    af, tf = b.action_features[0], b.token_features[0]
+    spread = af[0, code(0, 2)]
+    # Both foes at 5%: the reduced Dazzling Gleam still KOs each for sure and deals their remaining HP.
+    assert spread[A["foe_a_ko"]] == pytest.approx(1.0, abs=1e-5)
+    assert spread[A["foe_b_ko"]] == pytest.approx(1.0, abs=1e-5)
+    assert spread[A["foe_a_damage"]] == pytest.approx(0.05, abs=1e-3)
+    # The legacy columns scale the capped damage and the KO chance by the 0.75 share.
+    assert spread[2] == pytest.approx(1.5, abs=1e-5)
+    assert spread[0] == pytest.approx(0.75 * 2 * 0.05, abs=1e-3)
+    assert tf[0, T["offense_ko_a_fixed"]] == pytest.approx(1.0, abs=1e-5)
+    assert tf[0, T["offense_ko_a"]] == pytest.approx(0.75, abs=1e-5)
+    assert not spread[A["tera_damage_fixed"]] and not spread[A["tera_ko_fixed"]]  # Tera deltas on Tera codes only
+
+
+def test_spread_ko_needs_the_reduced_damage():
+    # Fixed KO chances use the reduced damage, so they never exceed the full-power ones the legacy column scales.
+    for hp in ("20/100", "40/100", "60/100"):
+        b = encode(low_foes(hp), moves=["dazzlinggleam", "protect"], attack=200)
+        spread = b.action_features[0][0, code(0, 2)]
+        assert spread[A["foe_a_ko"]] + spread[A["foe_b_ko"]] <= spread[2] / 0.75 + 1e-6
+        for f in "ab":
+            assert spread[A[f"foe_{f}_damage"]] <= float(hp.split("/")[0]) / 100 + 1e-6
+        assert spread[A["foe_a_damage"]] + spread[A["foe_b_damage"]] >= spread[0] - 1e-6

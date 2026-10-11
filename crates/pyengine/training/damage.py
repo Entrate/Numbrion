@@ -45,6 +45,13 @@ Outputs:
   damage/KO chance against the foe actives, including bench Pokemon as if on the field. ``entry_damage`` gives
   own-side hazard damage on entry (Boots/Magic Guard, grounding and current HP included). ``protect_now`` gives
   the foe actives' Protect prior before per-move blocking. These six columns are zero in the Python reference.
+  Rust-only spread fix: the legacy damage/KO columns scale the HP-capped damage and the KO chance of a spread move
+  by its 0.75 hit share, so a sure spread KO reads 0.75 and a KO only without the reduction reads up to 0.75. They
+  stay as they were for the models trained on them. ``foe_a_damage``/``foe_b_damage``/``foe_a_ko``/``foe_b_ko``
+  (per foe) and ``own_damage``/``own_ko`` apply the 0.75 before the HP cap and the KO chance, and count a spread
+  move as hitting each of its targets for sure; ``tera_damage_fixed``/``tera_ko_fixed`` are the Tera deltas the
+  same way (Tera codes only). Token columns ``offense_*_fixed`` and ``protect_now_fixed`` are the fixed versions
+  of ``offense_*`` and ``protect_now``. All zero in the Python reference.
 
 The first LEGACY_ACTION_FEATURES and LEGACY_TOKEN_FEATURES columns are exactly the first run's features, so older
 models still run (training.model reads only the columns a model was built with).
@@ -74,9 +81,12 @@ MOLD_BREAKER = ("moldbreaker", "teravolt", "turboblaze")
 STELLAR = 19
 ACTION_COLUMNS = ("fail", "flinch_a", "flinch_b", "stop_damage", "stop_ko", "protect", "protect_damage", "protect_ko",
                   "foe_protect_a", "foe_protect_b", "tera_damage", "tera_ko", "tera_threat", "tera_threat_ko",
-                  "protect_chance_a", "protect_chance_b", "damage_after_protect", "ko_after_protect")
+                  "protect_chance_a", "protect_chance_b", "damage_after_protect", "ko_after_protect",
+                  "foe_a_damage", "foe_b_damage", "foe_a_ko", "foe_b_ko", "own_damage", "own_ko", "tera_damage_fixed",
+                  "tera_ko_fixed")
 TOKEN_COLUMNS = ("fake_out_ready", "flinchable", "fake_out_threat", "protect_ready", "offense_a", "offense_b",
-                 "offense_ko_a", "offense_ko_b", "entry_damage", "protect_now")
+                 "offense_ko_a", "offense_ko_b", "entry_damage", "protect_now", "offense_a_fixed", "offense_b_fixed",
+                 "offense_ko_a_fixed", "offense_ko_b_fixed", "protect_now_fixed")
 assert LEGACY_ACTION_FEATURES + len(ACTION_COLUMNS) == N_ACTION_FEATURES
 assert LEGACY_TOKEN_FEATURES + len(TOKEN_COLUMNS) == N_TOKEN_FEATURES
 

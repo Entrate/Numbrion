@@ -828,6 +828,29 @@ impl DamageFeatures {
                 }
             }
         }
+        // Spread moves deal SPREAD times their damage to every token they hit, so the reduction belongs before the HP
+        // cap and the KO chance. The legacy columns instead scale the capped damage and the KO chance by the
+        // hit-table share (a sure spread KO reads 0.75, a KO only without the reduction up to 0.75); they stay as
+        // they were for the models trained on them, and the fixed columns use these tables.
+        let mut fixed_dealt = all_dealt;
+        let mut fixed_ko = all_ko;
+        for (a, att) in attackers.iter().enumerate() {
+            let s = a % 2;
+            for k in 0..4 {
+                let m = moves[s][k];
+                if !self.moves[m as usize].spread {
+                    continue;
+                }
+                let mv = self.move_in(m);
+                for d in [0, 1, 6, 7] {
+                    if a < 2 || d >= 6 {
+                        let (x, ko, _) = self.damage_with(att, &t[d], &mv, sun, rain, SPREAD);
+                        fixed_dealt[a][k][d] = x;
+                        fixed_ko[a][k][d] = ko;
+                    }
+                }
+            }
+        }
 
         // The foes' moves against the 12 tokens and the own actives terastallized (12, 13). Needed: the own actives
         // (effects), their Tera versions, and the present own tokens (token threat).
@@ -881,6 +904,9 @@ impl DamageFeatures {
         // Bench Pokemon use the same formula with their current stats, moves, types and items.
         let mut offense = [[0.0f32; 2]; 6];
         let mut offense_ko = [[0.0f32; 2]; 6];
+        // The same with the spread reduction applied before the HP cap and KO chance (see fixed_dealt).
+        let mut offense_fixed = [[0.0f32; 2]; 6];
+        let mut offense_ko_fixed = [[0.0f32; 2]; 6];
         for i in 0..6 {
             if !is_own[i] || t[i].alive == 0.0 {
                 continue;
@@ -893,22 +919,35 @@ impl DamageFeatures {
                     if share == 0.0 {
                         continue;
                     }
-                    let (d, ko) = if i < 2 {
-                        (all_dealt[i][k][foe], all_ko[i][k][foe])
+                    let (d, ko, fixed_d, fixed_ko_) = if i < 2 {
+                        (all_dealt[i][k][foe], all_ko[i][k][foe], fixed_dealt[i][k][foe], fixed_ko[i][k][foe])
                     } else {
                         let (d, ko, _) = self.damage_with(&t[i], &t[foe], &row.input, sun, rain, 1.0);
-                        (d, ko)
+                        let (fd, fk) = if row.spread {
+                            let (fd, fk, _) = self.damage_with(&t[i], &t[foe], &row.input, sun, rain, SPREAD);
+                            (fd, fk)
+                        } else {
+                            (d, ko)
+                        };
+                        (d, ko, fd, fk)
                     };
                     offense[i][f] = offense[i][f].max(d * share);
                     offense_ko[i][f] = offense_ko[i][f].max(ko * share);
+                    let weight = if row.spread { 1.0 } else { share };
+                    offense_fixed[i][f] = offense_fixed[i][f].max(fixed_d * weight);
+                    offense_ko_fixed[i][f] = offense_ko_fixed[i][f].max(fixed_ko_ * weight);
                 }
             }
         }
-        let protect_now: [f32; 2] = std::array::from_fn(|f| {
-            let damage = (offense[0][f] * p.on[0] + offense[1][f] * p.on[1]).min(1.0);
-            let ko = 1.0 - (1.0 - offense_ko[0][f] * p.on[0]) * (1.0 - offense_ko[1][f] * p.on[1]);
-            protect_prior(p.can_protect[FOE_TOKENS[f]], damage, ko)
-        });
+        let prior = |offense: &[[f32; 2]; 6], offense_ko: &[[f32; 2]; 6]| -> [f32; 2] {
+            std::array::from_fn(|f| {
+                let damage = (offense[0][f] * p.on[0] + offense[1][f] * p.on[1]).min(1.0);
+                let ko = 1.0 - (1.0 - offense_ko[0][f] * p.on[0]) * (1.0 - offense_ko[1][f] * p.on[1]);
+                protect_prior(p.can_protect[FOE_TOKENS[f]], damage, ko)
+            })
+        };
+        let protect_now = prior(&offense, &offense_ko);
+        let protect_now_fixed = prior(&offense_fixed, &offense_ko_fixed);
         let mut through = [[0.0f32; 2]; 2]; // [user slot][foe]
         let mut through_ko = [[0.0f32; 2]; 2];
         for (f, &foe) in FOE_TOKENS.iter().enumerate() {
@@ -959,6 +998,8 @@ impl DamageFeatures {
                 let hits = &self.hit[row.target][s];
                 let (dealt, kos, eff) = (&all_dealt[s][k], &all_ko[s][k], &own_eff[s][k]);
                 let (tera_dealt, tera_kos) = (&all_dealt[2 + s][k], &all_ko[2 + s][k]);
+                let (fixed_d, fixed_k) = (&fixed_dealt[s][k], &fixed_ko[s][k]);
+                let (fixed_tera_d, fixed_tera_k) = (&fixed_dealt[2 + s][k], &fixed_ko[2 + s][k]);
 
                 // Legacy columns: raw move priority against the speed order.
                 let legacy_first: [f32; 2] = std::array::from_fn(|f| {
@@ -1042,6 +1083,17 @@ impl DamageFeatures {
                         .map(|(f, &foe)| h[foe] * dealt[foe] * (1.0 - protect_chance[f])).sum();
                     let after_ko: f32 = FOE_TOKENS.iter().enumerate()
                         .map(|(f, &foe)| h[foe] * kos[foe] * (1.0 - protect_chance[f])).sum();
+                    // Fixed columns: a spread move hits each of its tokens for sure (with reduced damage); the
+                    // hit-table share is the chance of hitting a token only for single-target and random moves.
+                    let hit_chance = |d: usize| if row.spread { f32::from(h[d] > 0.0) } else { h[d] };
+                    let foe_damage: [f32; 2] = std::array::from_fn(|f| hit_chance(FOE_TOKENS[f]) * fixed_d[FOE_TOKENS[f]]);
+                    let foe_ko: [f32; 2] = std::array::from_fn(|f| hit_chance(FOE_TOKENS[f]) * fixed_k[FOE_TOKENS[f]]);
+                    let own_damage: f32 = (0..6).map(|d| hit_chance(d) * fixed_d[d]).sum();
+                    let own_ko: f32 = (0..6).map(|d| hit_chance(d) * fixed_k[d]).sum();
+                    let fixed_tera: [f32; 2] = [
+                        FOE_TOKENS.iter().map(|&foe| hit_chance(foe) * (fixed_tera_d[foe] - fixed_d[foe])).sum::<f32>() * can_tera,
+                        FOE_TOKENS.iter().map(|&foe| hit_chance(foe) * (fixed_tera_k[foe] - fixed_k[foe])).sum::<f32>() * can_tera,
+                    ];
 
                     let columns = [
                         dealt_foe,
@@ -1074,8 +1126,11 @@ impl DamageFeatures {
                         } else {
                             out[columns.len()..REFERENCE_ACTION_FEATURES].fill(0.0);
                         }
+                        let tera_bit_f = tera_bit as f32;
                         out[REFERENCE_ACTION_FEATURES..].copy_from_slice(&[
                             protect_chance[0], protect_chance[1], after_damage, after_ko,
+                            foe_damage[0], foe_damage[1], foe_ko[0], foe_ko[1], own_damage, own_ko,
+                            fixed_tera[0] * tera_bit_f, fixed_tera[1] * tera_bit_f,
                         ]);
                     }
                 }
@@ -1101,8 +1156,11 @@ impl DamageFeatures {
                 out[..2].copy_from_slice(&offense[i]);
                 out[2..4].copy_from_slice(&offense_ko[i]);
                 out[4] = self.entry_damage(&t[i], ids[i * N_IDS + I_ABILITY], p.grounded[i], field);
+                out[6..8].copy_from_slice(&offense_fixed[i]);
+                out[8..10].copy_from_slice(&offense_ko_fixed[i]);
             } else if i == FOE_A || i == FOE_B {
                 out[5] = protect_now[i - FOE_A];
+                out[10] = protect_now_fixed[i - FOE_A];
             }
         }
     }

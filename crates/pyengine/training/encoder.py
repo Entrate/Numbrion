@@ -77,8 +77,8 @@ LEGACY_ACTION_FEATURES, LEGACY_TOKEN_FEATURES = 9, 6
 # The frozen Python reference computes these widths; later columns are Rust-only.
 REFERENCE_ACTION_FEATURES = 23
 REFERENCE_TOKEN_FEATURES = 10
-N_ACTION_FEATURES = 27
-N_TOKEN_FEATURES = 16
+N_ACTION_FEATURES = 35
+N_TOKEN_FEATURES = 21
 
 
 def span(name: str, length: int) -> slice:
