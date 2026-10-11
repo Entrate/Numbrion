@@ -3,6 +3,7 @@
 
 pub mod math;
 pub mod prng;
+pub mod search;
 
 pub mod actions;
 pub mod battle;
