@@ -346,8 +346,9 @@ wb.push_action(a0, a1)                                               # or push_c
 * `WorldBuilder(viewer, team, pool, names=None, seed=0, particles=8, segment_budget=1000, rebuild_budget=16,
   fresh_per_update=1)`: `team` is the viewer's own packed team with genders resolved (the pools' teams are).
   Inputs are only the viewer's lines, requests and choices; the real battle is never consulted, so the same
-  object works on a ladder stream. Results depend only on the inputs and `seed`.
-* `worlds(k, seed, log=False)` (GIL released): `k` worlds drawn by likelihood weight, each reseeded from
+  object works on a ladder stream. Results depend only on the inputs, `seed` and the call sequence. Push a
+  request after the lines that led to it (a ladder client receives it before them).
+* `worlds(k, seed, log=False)` (GIL released): `k` worlds drawn by weight, each reseeded from
   `seed`; raises `RuntimeError` (with the last failure reason) when no world reproduces the observations.
   `update()` does the work without returning worlds. `alive`, `weights` (`(weights, ess)`), `stats()`,
   `last_failure` and `public_state()` (the tracker's view) are diagnostics.

@@ -248,7 +248,7 @@ impl WorldBuilder {
         .map_err(PyRuntimeError::new_err)
     }
 
-    /// `k` worlds at the current boundary, drawn by likelihood weight, each reseeded from `seed`. `log` selects
+    /// `k` worlds at the current boundary, drawn by weight, each reseeded from `seed`. `log` selects
     /// `TextLog` battles (player-view logs in `GridExecutor`) over `NoLog`. GIL released.
     #[pyo3(signature = (k, seed, log=false))]
     fn worlds(&self, py: Python<'_>, k: usize, seed: u64, log: bool) -> PyResult<Vec<Battle>> {

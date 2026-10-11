@@ -47,8 +47,8 @@ _LIVE_ROOTS = (
 class GridExecutor:
     """``numbrion._numbrion.GridExecutor`` plus a check that search roots are fair-information worlds.
 
-    ``run(roots, actions, ..., allow_live=False)`` warns when a root is not a ``WorldBuilder`` world
-    (``Battle.is_world``); everything else is passed through unchanged.
+    In search wheels (``numbrion.SEARCH``), ``run(roots, actions, ..., allow_live=False)`` warns when a root
+    is not a ``WorldBuilder`` world (``Battle.is_world``); everything else is passed through unchanged.
     """
 
     def __init__(self, threads=0):
@@ -59,7 +59,7 @@ class GridExecutor:
         return self._ex.threads
 
     def run(self, roots, actions, *args, allow_live=False, **kwargs):
-        if not allow_live:
+        if SEARCH and not allow_live:
             listed = roots if isinstance(roots, (list, tuple)) else [roots]
             if not all(getattr(r, "is_world", False) for r in listed):
                 warnings.warn(_LIVE_ROOTS, UserWarning, stacklevel=2)

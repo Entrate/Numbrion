@@ -108,8 +108,10 @@ if [ "$wheel" -eq 1 ]; then
         || die "$python is not a working Python >= 3.9; pass --python <path>"
 fi
 
+# Flags go through CARGO_ENCODED_RUSTFLAGS (0x1f-separated) so paths with spaces stay one argument.
+sep=$(printf '\037')
 extra=''
-if [ "$native" -eq 1 ]; then extra=' -Ctarget-cpu=native'; fi
+if [ "$native" -eq 1 ]; then extra="${sep}-Ctarget-cpu=native"; fi
 raw="$out/profraw"
 merged="$out/merged.profdata"
 gen_dir="$out/target-gen"
@@ -125,10 +127,11 @@ if [ "$search" -eq 1 ]; then
 fi
 
 echo "pgo.sh: target $target, corpus $corpus, out $out${extra:+, native CPU}"
+unset CARGO_ENCODED_RUSTFLAGS
 
 # 1. Instrumented builds.
 rm -rf "$raw"
-export RUSTFLAGS="-Cprofile-generate=$raw$extra"
+export CARGO_ENCODED_RUSTFLAGS="-Cprofile-generate=$raw$extra"
 cargo "${difftest_build[@]}" --target-dir "$gen_dir"
 gen="$gen_dir/$target/release"
 if [ "$wheel" -eq 1 ]; then
@@ -152,7 +155,7 @@ fi
 "$profdata" merge -o "$merged" "$raw"
 
 # 4. Optimized build. Profile mismatch warnings for code the workload never runs are harmless.
-export RUSTFLAGS="-Cprofile-use=$merged$extra"
+export CARGO_ENCODED_RUSTFLAGS="-Cprofile-use=$merged$extra"
 cargo "${difftest_build[@]}" --target-dir "$use_dir"
 echo "PGO binaries: $use_dir/$target/release"
 
@@ -164,4 +167,4 @@ if [ "$wheel" -eq 1 ]; then
     [ -n "$built" ] || die "maturin finished but no wheel was found in $out/wheels"
     echo "PGO wheel: $built"
 fi
-unset RUSTFLAGS
+unset CARGO_ENCODED_RUSTFLAGS

@@ -49,9 +49,10 @@ if ($Search) {
     $wheelBuild += @('--features', 'python,search')
 }
 
-# 1. Instrumented build. RUSTFLAGS with --target leaves build scripts uninstrumented.
+# 1. Instrumented build. Rust flags with --target leave build scripts uninstrumented. They go through
+#    CARGO_ENCODED_RUSTFLAGS so a profile path with spaces (C:\Users\First Last) stays one argument.
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $raw
-$env:RUSTFLAGS = "-Cprofile-generate=$raw"
+$env:CARGO_ENCODED_RUSTFLAGS = "-Cprofile-generate=$raw"
 Invoke-Checked cargo ($build + @('--target-dir', (Join-Path $Out 'target-gen')))
 $gen = Join-Path $Out "target-gen\$target\release"
 # The wheel is profiled through itself: a profile only applies to code built exactly like the
@@ -80,7 +81,7 @@ if ($Maturin) {
 Invoke-Checked $profdata @('merge', '-o', $merged, $raw)
 
 # 4. Optimized build. Profile mismatch warnings for code the workload never runs are harmless.
-$env:RUSTFLAGS = "-Cprofile-use=$merged"
+$env:CARGO_ENCODED_RUSTFLAGS = "-Cprofile-use=$merged"
 Invoke-Checked cargo ($build + @('--target-dir', (Join-Path $Out 'target-use')))
 "PGO binaries: $(Join-Path $Out "target-use\$target\release")"
 
@@ -91,4 +92,4 @@ if ($Maturin) {
     "PGO wheel: $(Join-Path $Out 'wheels')"
     Remove-Item Env:RUSTUP_TOOLCHAIN
 }
-Remove-Item Env:RUSTFLAGS
+Remove-Item Env:CARGO_ENCODED_RUSTFLAGS

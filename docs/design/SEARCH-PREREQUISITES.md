@@ -65,8 +65,10 @@ How the replay finds the hidden randomness: on a mismatching line the draws behi
 to earlier lines when one keeps failing; a line that resampling cannot fix marks a wrong hypothesis and the
 world is dropped. The opponent's choices are read off the protocol (move, shown target, Tera, switch target,
 Instruct and Encore-style mismatches covered by a small exploration probability). Worlds are kept
-incrementally between decisions and weighted by about 1/attempts per segment (an estimate of how likely the
-observations were under the world's hypothesis); `worlds(k, seed)` draws by weight and reseeds every world.
+incrementally between decisions and weighted by 1/attempts per segment, a search-effort heuristic (not a
+likelihood estimate) that makes hypotheses needing far more luck count less; `worlds(k, seed)` draws by
+weight and reseeds every world. Pushed viewer requests are checked at every boundary a world reaches,
+including the current decision.
 A newly seen opponent Pokemon is swapped into a never-revealed slot with `replace_hidden_set`; a viewer
 Pokemon transformed into an opponent reveals that opponent's move order through the viewer's request.
 
@@ -84,12 +86,13 @@ Pokemon transformed into an opponent reveals that opponent's move order through 
 **Quality and cost** (Apple M1 Pro, one thread, pool-400 test pool, 8 worlds, random play): worlds reproduce
 the viewer's request exactly at every checked boundary; about 95-96% of decisions get worlds (287 of 299
 random positions from scratch with the default budgets, 292 of 299 with budgets twice as large; about 95% when
-maintained incrementally through whole battles, failures clustering in a few battles). Incremental cost per decision: median about 9 ms, mean about 60 ms, p90 about 160 ms (tail:
+maintained incrementally through whole battles, failures clustering in a few battles). Incremental cost per decision: median about 9 ms, mean about 60 ms, p90 about 180 ms (tail:
 fresh worlds replay the whole history). When no world is found the builder raises a clear error with the
 reason (`last_failure`); fall back to the policy for that decision.
 
-**Known limits.** Weights are an approximation of the posterior, not exact likelihoods (the opponent's
-policy is modelled as uniform over choices consistent with the protocol). Generator team rules other than
+**Known limits.** The world distribution is not a calibrated posterior: weights are a search-effort
+heuristic, and the opponent's policy is modelled as uniform over choices consistent with the protocol.
+Worlds also depend on when `update`/`worlds` are called, not only on the inputs and seed. Generator team rules other than
 the species clause are not modelled. Illusion stints that end without a `replace` line stay attributed to the
 disguise. Viewer request content beyond what the engine itself writes (Showdown's `rqid`) is ignored;
 ladder-specific protocol lines are excluded from comparison by `search::protocol::is_compared`. The pool

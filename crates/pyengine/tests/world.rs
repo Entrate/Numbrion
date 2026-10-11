@@ -442,3 +442,60 @@ fn identical_public_information_gives_identical_worlds() {
     eprintln!("leak test: {pairs} pairs ({differed} with different hidden opponent info), {discarded} discarded, {failed} without worlds");
     assert!(differed >= n / 6, "too few informative pairs: {differed}");
 }
+
+/// Worlds requested at every decision of a battle, as a self-play actor would: each must reproduce the
+/// viewer's current request (pushed before asking), including after Transform and late pushes.
+#[test]
+fn worlds_follow_a_battle_decision_by_decision() {
+    let pool = common::test_pool();
+    let sets = set_pool(&pool);
+    let mut rng = SplitMix64(23);
+    let (mut ok, mut failed) = (0usize, 0usize);
+    let n = common::n_battles(12);
+    for battle in 0..n {
+        let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
+        let viewer = SideId(battle as u8 % 2);
+        let Ok(mut b) = B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
+        else {
+            continue;
+        };
+        b.start().unwrap();
+        let own = Arc::new((*b.teams().sides[viewer.0 as usize]).clone());
+        let mut w = WorldBuilder::new(viewer, own, names(), sets.clone(), WorldConfig::default(), rng.next_u64()).unwrap();
+        w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
+        let mut cursor = b.log.entries.len();
+        let mut broken = false;
+        while !b.state.ended && b.turn() <= 10 {
+            for side in [viewer, SideId(1 - viewer.0)] {
+                if !needs(&b, side) {
+                    continue;
+                }
+                let choice = pick(&b, side, &mut rng);
+                if side == viewer {
+                    w.push_request(&b.request_json(viewer.0 as usize).unwrap());
+                    if !broken {
+                        match w.worlds::<TextLog>(2, rng.next_u64()) {
+                            Ok(worlds) => {
+                                ok += 1;
+                                for x in &worlds {
+                                    assert_eq!(x.request_json(viewer.0 as usize), b.request_json(viewer.0 as usize));
+                                }
+                            }
+                            Err(e) => {
+                                failed += 1;
+                                broken = true;
+                                eprintln!("battle {battle} turn {}: {e}: {}", b.turn(), w.last_failure());
+                            }
+                        }
+                    }
+                    w.push_choice(&choice_text(&b, side, &choice));
+                }
+                b.choose_typed(side, &choice).unwrap();
+            }
+            w.push_lines(player_view(&b.log.entries, cursor, viewer).iter().map(String::as_str));
+            cursor = b.log.entries.len();
+        }
+    }
+    eprintln!("incremental: {ok} decisions with worlds, {failed} battles lost their worlds");
+    assert!(ok > 0 && failed * 3 <= n, "{failed} of {n} battles lost their worlds");
+}

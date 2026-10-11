@@ -134,9 +134,11 @@ enum Obs {
     ItemNow(ItemKnowledge),
     Ability(EffectId),
     AbilityChange(Option<EffectId>),
+    /// `permanent`: a `detailschange` (kept through switches), not a `-formechange`.
     Forme {
         species: EffectId,
         abilities_differ: bool,
+        permanent: bool,
     },
     Tera(TypeId),
     Transform(Option<EffectId>),
@@ -321,9 +323,15 @@ impl MonInfo {
             Obs::Forme {
                 species,
                 abilities_differ,
+                permanent,
             } => {
                 self.set_species_text(species);
-                if species == self.species {
+                if permanent && abilities_differ {
+                    // The new forme's ability stays after switching out (Terapagos-Terastal).
+                    self.ability_changed = true;
+                    self.ability_temporary = false;
+                    self.ability = None;
+                } else if species == self.species {
                     if self.ability_temporary && !self.transformed {
                         self.ability = self.starting_ability;
                         self.ability_temporary = false;
@@ -878,6 +886,7 @@ impl RevealTracker {
             Obs::Forme {
                 species,
                 abilities_differ,
+                permanent: l.cmd() == "detailschange",
             },
         );
         if let Some(t) = d.tera.and_then(dex::type_id) {
@@ -1599,6 +1608,21 @@ mod tests {
             (None, Some(ab("Insomnia")))
         );
         assert_eq!(mon(&t, P1, "Gardevoir").starting_ability, None);
+    }
+
+    #[test]
+    fn permanent_forme_abilities_survive_switching_out() {
+        let t = track(
+            "|switch|p2a: Terapagos|Terapagos, L73, M|100/100
+            |-activate|p2a: Terapagos|ability: Tera Shift
+            |detailschange|p2a: Terapagos|Terapagos-Terastal, L73, M
+            |-activate|p2a: Terapagos|ability: Tera Shell
+            |switch|p2a: Muk|Muk, L82, M|100/100
+            |switch|p2a: Terapagos|Terapagos-Terastal, L73, M|100/100",
+        );
+        let m = mon(&t, P2, "Terapagos");
+        assert_eq!(m.starting_ability, dex::lookup(EffectKind::Ability, "terashift"));
+        assert_eq!(m.ability, dex::lookup(EffectKind::Ability, "terashell"));
     }
 
     #[test]

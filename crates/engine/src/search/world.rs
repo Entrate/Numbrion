@@ -15,10 +15,10 @@
 //!   draw kept), backing off to earlier lines when that keeps failing, within a per-segment
 //!   budget. Wrong hidden hypotheses (an item, stat spread or exact HP that cannot reproduce the
 //!   observed order or damage) therefore die instead of being reported.
-//! * every world carries a likelihood weight: a segment its hypothesis reproduced after `n`
-//!   attempts multiplies it by about `1/n` (the attempts estimate how improbable the observed
-//!   outcomes are under that hypothesis), so a hypothesis that needs extreme luck to explain the
-//!   observations does not count as much as a natural one. `worlds` draws worlds in proportion.
+//! * every world carries a weight: a segment its hypothesis reproduced after `n` attempts
+//!   multiplies it by `1/n`. This is a search-effort heuristic, not a likelihood estimate (the
+//!   guided search keeps matched prefixes, so effort undercounts joint improbability); it only
+//!   makes hypotheses that needed far more luck count less. `worlds` draws worlds in proportion.
 //! * worlds are maintained incrementally: each new segment extends the surviving ones; an
 //!   opponent Pokemon seen for the first time is swapped into a never-revealed bench slot with
 //!   `replace_hidden_set` (exact by its contract); dead worlds are rebuilt from scratch within a
@@ -26,8 +26,9 @@
 //! * `worlds` returns copies at the current decision boundary, reseeded from the caller's seed (the
 //!   PRNG state is hidden information too).
 //!
-//! Everything depends only on the inputs, the pool and the builder seed: two observers with the same
-//! public information get the same worlds (tests/world.rs, the leak test).
+//! Everything depends only on the inputs, the pool, the builder seed and when `update`/`worlds` are
+//! called (worlds are maintained incrementally): two observers with the same public information
+//! and the same call sequence get the same worlds (tests/world.rs, the leak test).
 use super::{
     SplitMix64,
     protocol::{self, Line, parse_ident},
@@ -154,7 +155,7 @@ struct Particle {
     /// Viewer choices replayed so far.
     choice: usize,
     rng: SplitMix64,
-    /// Log likelihood weight (sum of `-ln attempts` over reproduced segments).
+    /// Log weight (sum of `-ln attempts` over reproduced segments; a search-effort heuristic).
     log_w: f64,
     /// Why the world was dropped (diagnostics).
     why: String,
@@ -240,6 +241,16 @@ impl WorldBuilder {
     ) -> Result<Self, WorldError> {
         assert!(viewer.0 < 2, "viewer must be side 0 or 1");
         own.validate().map_err(|e| WorldError::Team(e.0))?;
+        // An unresolved random gender would be drawn at construction, where no resampling reaches it.
+        if let Some(set) = own.sets[..own.len as usize].iter().find(|s| {
+            s.gender == crate::teams::Gender::Unspecified
+                && !matches!(dex::species(s.species).gender, "M" | "F" | "N")
+        }) {
+            return Err(WorldError::Team(format!(
+                "{}: the viewer's genders must be resolved (as its requests show them)",
+                set.name
+            )));
+        }
         Ok(Self {
             viewer,
             own,
@@ -306,12 +317,15 @@ impl WorldBuilder {
         }
     }
 
-    /// Optional: the viewer's request JSON at the boundary it is about to answer (push it before the
-    /// choice). Worlds must then reproduce it exactly, which checks what only the request shows
-    /// (own exact HP and PP, disabled moves, trapping). A Showdown server's `rqid` field is ignored.
+    /// Optional: the viewer's request JSON at the boundary it is about to answer (push it after the
+    /// lines that led there and before the choice; a Showdown server sends the request first, so a
+    /// ladder client should hold it until the turn's lines arrived). Worlds must then reproduce it
+    /// exactly, which checks what only the request shows (own exact HP and PP, disabled moves,
+    /// trapping); whitespace and Showdown's `rqid` field are ignored.
     pub fn push_request(&mut self, json: &str) {
         // A transformed Pokemon's request lists the copied opponent's move slots in order.
-        for (k, ids) in active_move_ids(json).into_iter().enumerate().take(2) {
+        let json = normalize_request(json);
+        for (k, ids) in active_move_ids(&json).into_iter().enumerate().take(2) {
             let Some(i) = self.tracker.active(self.viewer, k as u8) else { continue };
             let m = &self.tracker.mons(self.viewer)[i];
             if !m.transformed {
@@ -328,7 +342,7 @@ impl WorldBuilder {
         }
         let at = self.choices.len();
         self.requests.resize(at + 1, None);
-        self.requests[at] = Some(strip_rqid(json));
+        self.requests[at] = Some(json);
         self.synced = false;
     }
 
@@ -424,6 +438,8 @@ impl WorldBuilder {
         for i in picks {
             let mut copy = alive[i].clone();
             copy.rng = self.rng.fork();
+            // Copies share a hypothesis; a fresh PRNG (hidden anyway) at least lets them diverge.
+            copy.battle.state.prng = crate::prng::Prng::from_seed(copy.rng.seed());
             alive.push(copy);
             self.stats.copies += 1;
         }
@@ -433,7 +449,7 @@ impl WorldBuilder {
     }
 
     /// `k` worlds at the current boundary, drawn from the surviving worlds in proportion to their
-    /// likelihood weights (systematic resampling driven by `seed`), each reseeded from `seed` (one
+    /// weights (systematic resampling driven by `seed`), each reseeded from `seed` (one
     /// PRNG stream per world). Each is an independent battle with a fresh sink.
     pub fn worlds<M: LogSink + Default>(
         &mut self,
@@ -468,7 +484,31 @@ impl WorldBuilder {
     }
 }
 
-/// A Showdown server's request carries a changing `"rqid":N` field; the engine's does not.
+/// Request JSON in the engine's form: whitespace outside strings removed (clients may re-serialize),
+/// and a Showdown server's changing `"rqid":N` field dropped.
+fn normalize_request(json: &str) -> String {
+    let mut out = String::with_capacity(json.len());
+    let (mut in_string, mut escaped) = (false, false);
+    for c in json.chars() {
+        if in_string {
+            out.push(c);
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                in_string = false;
+            }
+        } else if c == '"' {
+            in_string = true;
+            out.push(c);
+        } else if !c.is_whitespace() {
+            out.push(c);
+        }
+    }
+    strip_rqid(&out)
+}
+
 fn strip_rqid(json: &str) -> String {
     match json.find("\"rqid\":") {
         None => json.to_owned(),
@@ -562,8 +602,9 @@ fn sample_revealed(cx: &Ctx<'_>, index: usize, rng: &mut SplitMix64) -> Result<S
     Ok(set)
 }
 
-/// Move ids of each `active` entry of a request JSON, in slot order (a minimal scan: the engine's and
-/// Showdown's requests list `"id":"..."` per move inside `"moves":[...]`).
+/// Move ids of each `active` entry of a normalized request JSON, in slot order (a minimal scan: the
+/// engine's and Showdown's requests list `"id":"..."` per move inside `"moves":[...]`); empty for an
+/// entry that is not a full moveset.
 fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
     let Some(start) = json.find("\"active\":[") else { return Vec::new() };
     let rest = &json[start..];
@@ -573,11 +614,13 @@ fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
         .skip(1)
         .map(|entry| {
             let entry = &entry[..entry.find(']').unwrap_or(entry.len())];
-            entry
+            let ids: Vec<EffectId> = entry
                 .split("\"id\":\"")
                 .skip(1)
                 .filter_map(|t| dex::lookup(EffectKind::Move, &t[..t.find('"').unwrap_or(t.len())]))
-                .collect()
+                .collect();
+            // A locked or charging move's request lists only that move, without PP: not the moveset.
+            if entry.matches("\"pp\":").count() == ids.len() { ids } else { Vec::new() }
         })
         .collect()
 }
@@ -588,7 +631,7 @@ fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
 fn sample_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError> {
     let opp = cx.opp();
     let seen = cx.tracker.mons(opp);
-    let size = (cx.tracker.team_size(opp).unwrap_or(6) as usize).clamp(seen.len().max(1), 6);
+    let size = (cx.tracker.team_size(opp).unwrap_or(6) as usize).max(seen.len().max(1)).min(6);
     let mut slots: [Option<SetDef>; 6] = Default::default();
     let leads = cx.tracker.leads(opp);
     for (pos, lead) in leads.iter().enumerate() {
@@ -685,6 +728,15 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
     } else {
         viewer_acts = needs(&p.battle, viewer);
         opp_acts = needs(&p.battle, opp);
+        // The request pushed for this decision (also when the world got here before it was pushed,
+        // and at the current boundary, which has no choice yet).
+        if viewer_acts
+            && let Some(Some(want)) = cx.requests.get(p.choice)
+            && p.battle.request_json(viewer.0 as usize).as_deref() != Some(want.as_str())
+        {
+            p.why = format!("request differs at line {} (choice {})", p.cursor, p.choice);
+            return Err(Dead::Desync);
+        }
         if viewer_acts {
             match mark {
                 None if p.cursor == end => return Ok(false),
@@ -937,6 +989,7 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
     let mut tera = false;
     // Uses forced by Instruct (announced by `-singleturn|X|move: Instruct`) carry no `[from]`.
     let mut instructed = 0;
+    let mut dancing = 0;
     for line in window {
         let Some(l) = Line::parse(line) else { continue };
         let ident = parse_ident(l.arg(0));
@@ -967,6 +1020,10 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
                     instructed -= 1;
                     continue;
                 }
+                if dancing > 0 {
+                    dancing -= 1;
+                    continue;
+                }
                 let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else { return SlotSpec::AnyMove { tera } };
                 let loc = if l.has_tag("spread") || l.has_tag("notarget") || l.has_tag("still") {
                     None
@@ -980,13 +1037,22 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
             }
             "cant" => {
                 acted = true;
-                if mine {
+                // `|cant|HOLDER|ability: Armor Tail|MOVE|[of] USER`: the holder blocked USER's move.
+                let blocked = protocol::effect_kind(l.arg(1)).0 == "ability";
+                let actor = if blocked { l.tag("of").and_then(parse_ident) } else { ident };
+                let actor_mine = actor.is_some_and(|id| id.side == opp && id.name == name);
+                if actor_mine && dancing == 0 {
                     return match dex::lookup(EffectKind::Move, l.arg(2)) {
                         Some(id) if !l.arg(2).is_empty() => SlotSpec::Move { id, loc: None, tera },
                         _ => SlotSpec::AnyMove { tera },
                     };
                 }
+                if actor_mine {
+                    dancing -= 1;
+                }
             }
+            // A Dancer copy that fails (choice lock) prints `move|X|MOVE||[still]` without `[from]`.
+            "-activate" if mine && l.arg(1) == "ability: Dancer" => dancing += 1,
             "faint" if mine => return SlotSpec::AnyMove { tera },
             _ => {}
         }
@@ -1077,10 +1143,15 @@ fn slot_choice(
         }
         SlotSpec::Move { id, loc, tera } => {
             // A forced move (lock, charge, Recharge, Struggle) is the only option anyway.
-            let m = moves
+            let Some(m) = moves
                 .iter()
                 .find(|m| m.move_slot == 255)
-                .or_else(|| moves.iter().find(|m| m.move_id == *id))?;
+                .or_else(|| moves.iter().find(|m| m.move_id == *id))
+            else {
+                // Not in this world's moveset (or misread): any legal move keeps the world alive;
+                // the replay decides.
+                return slot_choice(cx, b, legal, k, &SlotSpec::AnyMove { tera: *tera }, rng);
+            };
             if *tera && m.move_slot != 255 && !m.can_terastallize {
                 return None;
             }
@@ -1121,4 +1192,72 @@ fn slot_choice(
             SlotChoice { kind: ChoiceKind::Switch, switch_to: party[p], ..SlotChoice::default() }
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn lines(text: &str) -> Vec<String> {
+        text.lines().map(|l| l.trim().to_owned()).filter(|l| !l.is_empty()).collect()
+    }
+
+    fn move_id(name: &str) -> EffectId {
+        dex::lookup(EffectKind::Move, name).unwrap()
+    }
+
+    #[test]
+    fn blocked_moves_belong_to_the_user_not_the_ability_holder() {
+        let window = lines(
+            "|cant|p2a: Tsareena|ability: Queenly Majesty|Fake Out|[of] p1a: Incineroar
+             |move|p2a: Tsareena|Power Whip|p1b: Pelipper",
+        );
+        let opp = SideId(1);
+        assert_eq!(
+            infer_move(opp, 0, "Tsareena", &window),
+            SlotSpec::Move { id: move_id("powerwhip"), loc: Some(2), tera: false }
+        );
+        // From the other side: the blocked user chose Fake Out.
+        assert_eq!(
+            infer_move(SideId(0), 0, "Incineroar", &window),
+            SlotSpec::Move { id: move_id("fakeout"), loc: None, tera: false }
+        );
+    }
+
+    #[test]
+    fn dancer_copies_instructed_uses_and_flinches_are_not_choices() {
+        let opp = SideId(1);
+        let window = lines(
+            "|-terastallize|p2a: Kommo-o|Steel
+             |cant|p2a: Kommo-o|flinch",
+        );
+        assert_eq!(infer_move(opp, 0, "Kommo-o", &window), SlotSpec::AnyMove { tera: true });
+        let window = lines(
+            "|-activate|p2a: Oricorio|ability: Dancer
+             |move|p2a: Oricorio|Swords Dance||[still]
+             |-singleturn|p2a: Oricorio|move: Instruct|[of] p2b: Indeedee
+             |move|p2a: Oricorio|Revelation Dance|p1a: X
+             |move|p2a: Oricorio|Hurricane|p1b: Y",
+        );
+        assert_eq!(
+            infer_move(opp, 0, "Oricorio", &window),
+            SlotSpec::Move { id: move_id("hurricane"), loc: Some(2), tera: false }
+        );
+    }
+
+    #[test]
+    fn requests_compare_modulo_whitespace_and_rqid() {
+        let engine = r#"{"active":[{"moves":[{"move":"Protect","id":"protect","pp":16,"maxpp":16}]}],"side":{"name":"A B"}}"#;
+        let client = "{\"active\": [{\"moves\": [{\"move\": \"Protect\", \"id\": \"protect\", \"pp\": 16, \"maxpp\": 16}]}],\n \"side\": {\"name\": \"A B\"}, \"rqid\": 7}";
+        assert_eq!(normalize_request(client), engine);
+        assert_eq!(normalize_request(engine), engine);
+    }
+
+    #[test]
+    fn only_full_movesets_reveal_a_move_order() {
+        let full = r#"{"active":[{"moves":[{"move":"Body Slam","id":"bodyslam","pp":24,"maxpp":24},{"move":"Curse","id":"curse","pp":16,"maxpp":16}]},{"moves":[{"move":"Outrage","id":"outrage"}]}],"side":{}}"#;
+        let ids = active_move_ids(full);
+        assert_eq!(ids[0], vec![move_id("bodyslam"), move_id("curse")]);
+        assert!(ids[1].is_empty(), "a locked move's single entry is not a moveset");
+    }
 }
