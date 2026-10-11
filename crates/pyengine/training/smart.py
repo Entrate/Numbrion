@@ -25,7 +25,8 @@ setup and recovery when safe, screens, hazards); other status moves are only use
 The foes' targets are guessed from the threat features (a foe more likely attacks where it does more damage), and a
 foe that has revealed Protect (or likely has it, per the set belief) may protect, which blocks both of our attacks at
 once. Slot b's mask depends on slot a's choice, so ``first`` plans the pair with an estimate of slot b's options and
-``second`` re-picks slot b over its exact mask given slot a's code.
+``second`` re-picks slot b over its exact mask given slot a's code. ``second_given(rows, a0, mask1)`` re-picks slot b
+for slot-a codes chosen by someone else (the self-play learner's, for its teacher labels in training.actors).
 """
 from __future__ import annotations
 
@@ -636,6 +637,19 @@ class PySmartHeuristicAgent:
                 out[i] = Y["code"][b]
         return out
 
+    def second_given(self, rows, a0, mask1):
+        """``second`` answering the given slot-a codes ``a0`` (one per row of the preceding ``first``) instead of its
+        own: slot-b teacher labels conditioned on a learner's slot a. ``first``'s choices stay for a later
+        ``second``."""
+        own, a0 = getattr(self, "a0", None), np.asarray(a0, dtype=np.int32)
+        if own is None or a0.shape != own.shape:
+            raise ValueError("second_given requires one slot-a code per row of the preceding first")
+        self.a0 = a0
+        try:
+            return self.second(rows, mask1)
+        finally:
+            self.a0 = own
+
 
 class RustSmartHeuristicAgent:
     """Rust scripted player; second must receive the same rows, in order, as first."""
@@ -664,6 +678,14 @@ class RustSmartHeuristicAgent:
         if self._rows is None or not np.array_equal(rows, self._rows):
             raise ValueError("second requires the same rows, in order, as the preceding first")
         return self._agent.second(np.ascontiguousarray(mask1, dtype=np.bool_))
+
+    def second_given(self, rows, a0, mask1):
+        """``second`` answering the given slot-a codes ``a0`` instead of its own (see the Python agent)."""
+        rows = np.asarray(rows, dtype=np.int64)
+        if self._rows is None or not np.array_equal(rows, self._rows):
+            raise ValueError("second_given requires the same rows, in order, as the preceding first")
+        return self._agent.second_given(np.ascontiguousarray(a0, dtype=np.int64),
+                                        np.ascontiguousarray(mask1, dtype=np.bool_))
 
 
 def _has_rust_smart():
