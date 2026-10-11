@@ -37,7 +37,7 @@ import numpy as np
 import torch
 
 from training.actors import Actors, memory_mb
-from training.device import training_device
+from training.device import BACKENDS, training_device
 from training.diagnostics import ActionUsage
 from training.dex import load_dex
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
@@ -154,7 +154,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--minutes", type=float, default=60.0, help="training wall-clock budget")
-    parser.add_argument("--device", choices=["auto", "directml", "cuda", "cpu"], default="auto")
+    parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/train-s42-2000.txt")
     parser.add_argument("--envs", type=int, default=128)

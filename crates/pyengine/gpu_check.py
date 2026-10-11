@@ -8,12 +8,12 @@ from pathlib import Path
 
 import torch
 
-from training.device import training_device
+from training.device import BACKENDS, training_device
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--device", choices=["auto", "directml", "cuda", "cpu"], default="auto")
+    parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--steps", type=int, default=50)
     parser.add_argument("--output", type=Path)

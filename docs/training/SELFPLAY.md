@@ -1,7 +1,8 @@
 # Transformer self-play (first TIPS-based run)
 
 This pipeline implements the first round of [training tips](TIPS.md) on top of the
-[training API](../design/TRAINING-API.md) and the [Windows GPU setup](WINDOWS-GPU.md).
+[training API](../design/TRAINING-API.md) and the [Windows GPU setup](WINDOWS-GPU.md)
+([Apple silicon setup](MAC.md)).
 The older `train.py` MLP baseline is unchanged.
 
 | Piece | File |

@@ -1,0 +1,6 @@
+# Apple silicon: PyTorch's macOS arm64 wheels include the MPS (Metal) backend.
+# Verified with torch 2.14.1, NumPy 2.5.4 and Python 3.14 on an M1 Pro.
+torch>=2.14,<3
+numpy>=2
+maturin>=1.5,<2
+pytest>=8,<10
