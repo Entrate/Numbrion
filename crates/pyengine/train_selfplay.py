@@ -223,6 +223,10 @@ def main():
     update = battles = samples_total = 0
     if args.resume:
         state = torch.load(args.resume, map_location="cpu", weights_only=False)
+        saved = state["model"]["act_damage.weight"].shape[1], state["model"]["float_proj.weight"].shape[1]
+        if saved != (model.act_damage.in_features, model.float_proj.in_features):
+            raise SystemExit(f"{args.resume} was trained on other damage-calc feature columns (training.damage); "
+                             "start a new run (evaluate.py still plays it against new models)")
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         pool.load_state_dict(state["pool"])

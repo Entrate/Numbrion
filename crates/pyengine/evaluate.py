@@ -80,8 +80,7 @@ class PolicyAgent:
 
 def load_policy(path: Path, dex, device, rng, name=None, record_values=False, temperature=1.0) -> PolicyAgent:
     state = torch.load(path, map_location="cpu", weights_only=False)
-    model = Model(dex, state.get("width", 128), state.get("layers", 3)).to(device)
-    model.load_state_dict(state["model"])
+    model = Model.from_state(dex, state["model"], state.get("width", 128), state.get("layers", 3)).to(device)
     model.eval()
     return PolicyAgent(model, device, rng, name or path.stem, record_values, temperature)
 

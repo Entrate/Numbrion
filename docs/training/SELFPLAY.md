@@ -382,7 +382,74 @@ single 1,000-game checks against smart are good to about +/-3 points.
 
 Its habits did not change: it terastallizes in every battle, uses Fake Out 0.02 times per battle (72-77% of them
 fail), and against smart 46% of its attacks at foes that could Protect are blocked. It switches a little more (1.1-1.3
-voluntary switches per battle). These are the actions the features did not describe; see the action-effects changes.
+voluntary switches per battle). These are the actions the features did not describe; see the next section.
+
+## Action effects: Fake Out, Protect and Tera
+
+After two hours of training the policy still terastallized in every battle, almost never used Fake Out (0.02 per
+battle, and three quarters of those failed), and 46% of its attacks at foes that could Protect were blocked. The
+action features did not describe these actions:
+
+- Every code's damage features were the same with and without Tera, so the model never saw what Tera did.
+- Fake Out looked like a working 40-power priority attack on every turn. Only the user's `fresh` flag said it would
+  fail, and nothing said that a flinched foe loses its move.
+- Nothing tied a repeated Protect to its 1/3 success chance, or an attack to the chance that its target protects.
+
+`training/damage.py` now appends effect columns (`ACTION_COLUMNS`, `TOKEN_COLUMNS`) after the existing ones:
+23 action features (was 9) and 10 token features (was 6). Per move code:
+
+| Column | Meaning |
+|---|---|
+| `fail` | Fails outright: Fake Out or First Impression after the user's first move action since switching in; a priority move at a foe that Psychic Terrain (grounded) or Armor Tail, Dazzling or Queenly Majesty protects; a Prankster status move at a Dark-type foe |
+| `flinch_a`, `flinch_b` | Chance to flinch foe a/b before it acts: flinch chance (Serene Grace doubles it, Sheer Force removes it) x accuracy x acting first x the foe can flinch (no Inner Focus or Shield Dust unless the user has Mold Breaker, no Covert Cloak or Substitute; known or by belief) x not immune |
+| `stop_damage`, `stop_ko` | Damage and KO chance those flinches prevent this turn (each foe's best threat against our actives) |
+| `protect` | Success chance of a Protect-like move: 1, or 1/3 right after a successful one |
+| `protect_damage`, `protect_ko` | `protect` times the damage and KO chance it blocks this turn (what the user faces minus what gets through: moves without the `protect` flag and Unseen Fist contact moves) |
+| `foe_protect_a`, `foe_protect_b` | Chance that the targeted foe can Protect: it has a Protect move (revealed, or by the set belief) at full or 1/3 success; 0 for moves without the `protect` flag (Feint) and Unseen Fist contact moves |
+| `tera_damage`, `tera_ko` | Tera codes only: change of damage and KO chance on the foes from terastallizing (Tera STAB; Stellar 2x on the original types and 1.2x otherwise; Tera Blast takes the Tera type and the higher attacking stat) |
+| `tera_threat`, `tera_threat_ko` | Tera codes only: change of the damage and KO chance the user faces this turn (its Tera type) |
+
+"Acting first" uses the priority the move will have (Prankster status moves, Gale Wings at full HP, Grassy Glide in
+Grassy Terrain), then speed (Trick Room flips it), and a fresh foe that may have Fake Out goes first against anything
+below +3 and against a slower +3 move. The legacy `first` columns are unchanged and still treat any positive priority
+as first.
+
+Per Pokemon: `fake_out_ready` (active, fresh and has Fake Out, known or by belief), `flinchable`, `fake_out_threat`
+(an opposing active can Fake Out it this turn, on both sides) and `protect_ready`.
+
+Known gaps: after two successful Protects in a row the success chance is 1/9, but the columns still say 1/3 (the
+tracker only keeps "protected last turn"). Triple Arrows' flinch chance (30%) is hard-coded because `dex.json`'s
+`secondaryChance` is the largest of a move's secondaries (its Defense drop, 50%). King's Rock is ignored. The values
+are chances that a foe *can* do something (Protect, Fake Out), not that it will.
+
+The Tera rows ride along in the existing damage calls as two extra attackers and defenders, and the shared per-Pokemon
+state is computed once. The features take 12.9 ms per 32 rows on one thread (7.1 ms before), about 6 ms more per
+actor step. In 3-minute smoke runs four actors still kept ahead of the learner (rollout 2.96 s, training 3.56 s,
+1,888 trained samples/s); five actors gave 1,844 samples/s. Late in the second hour, with shorter battles and 22%
+smart games, rollouts (3.07 s) had caught up with training (3.0 s), so a long run with those settings may be
+actor-bound by about 10-15%.
+
+The tracker also had two errors that these columns depend on:
+
+- `|cant|X|flinch` (also par, slp, frz, recharge, Truant, Taunt) now counts as a move action. The engine counts
+  `activeMoveActions` before `BeforeMove`, so a Pokemon flinched by a Fake Out on its first turn could no longer
+  Fake Out, but the tracker still showed it as fresh. `cant` lines with `[of]` name the Pokemon whose ability blocked
+  the move, and are skipped.
+- A failed Protect (`|move|X|Protect||[still]`, then `|-fail|X`) resets the counter, so it no longer counts as
+  "protected last turn". Switching out also resets it. The smart baseline reads these flags too, and may now protect
+  again after a failed Protect, as it should.
+
+The first 9 action and 6 token columns are unchanged: on 3,840 rows of random play they are bit-identical to the
+old code. Only `fresh` (48 entries) and `protect_last` (244 entries) changed, from the tracker fixes. A model reads
+only the columns it was built with, and `Model.from_state` (used by `evaluate.py`) infers them from a checkpoint, so
+the first and second runs' models still play against new ones. They cannot be resumed with the new features.
+
+New training diagnostics: `fake_out_ready` (share of slot decisions with a legal Fake Out that would flinch a foe),
+`use_fake_out_when_ready`, `fake_out_stale` (share of Fake Outs by a Pokemon that already used a move action since
+switching in) and `protect_repeat` (share of Protects right after a successful one). Tests:
+`training_tests/test_effects.py`. A GPT-6.1-Sol review found nine issues; all but the 1/9 Protect chance are fixed
+and tested (Unseen Fist through Protect, Tera Blast and Stellar Tera, Prankster/Gale Wings/Grassy Glide priority,
+Fake Out against a faster Fake Out, Sheer Force/Serene Grace/Mold Breaker, Triple Arrows, and the diagnostics).
 
 ## Not implemented yet
 
