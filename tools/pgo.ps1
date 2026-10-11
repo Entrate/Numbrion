@@ -46,7 +46,7 @@ $build = @("+$toolchain", 'build', '--manifest-path', $manifest, '--release', '-
 $wheelBuild = @('build', '--release', '--locked', '-m', 'crates/pyengine/Cargo.toml', '--target', $target)
 if ($Search) {
     $build += @('--features', 'engine/search')
-    $wheelBuild += @('--features', 'search')
+    $wheelBuild += @('--features', 'python,search')
 }
 
 # 1. Instrumented build. RUSTFLAGS with --target leaves build scripts uninstrumented.

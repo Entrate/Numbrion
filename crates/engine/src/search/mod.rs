@@ -33,7 +33,7 @@ impl SplitMix64 {
     #[inline]
     pub fn below(&mut self, n: usize) -> usize {
         debug_assert!(n > 0);
-        ((self.next_u64() >> 32) * n as u64 >> 32) as usize
+        (((self.next_u64() >> 32) * n as u64) >> 32) as usize
     }
 
     /// True with probability `p`.

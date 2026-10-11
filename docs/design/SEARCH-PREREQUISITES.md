@@ -1,8 +1,15 @@
 # Before adding search: prerequisites
 
-**Status: NOT DONE.** Do items 1 and 2 before search produces training targets, evaluation results or
-ladder moves. `numbrion.GridExecutor` warns until `NUMBRION_SEARCH_PREREQS_DONE=1` is set; set it (and update
-this status line) only when both are done.
+**Status: item 1 implemented (opt-in), item 2 scripted but not yet built on the Windows training machine.**
+Do items 1 and 2 before search produces training targets, evaluation results or ladder moves.
+`numbrion.GridExecutor` warns until `NUMBRION_SEARCH_PREREQS_DONE=1` is set, and separately whenever a root
+is not a `WorldBuilder` world; set the variable (and update this status line) only when both items are done.
+
+Search support is an **opt-in cargo feature** (`search`, engine and pyengine). It is off by default because
+its PRNG hook adds a counter and a compare to every draw and 152 bytes to `BattleState`; a default build is
+unchanged. Build a search wheel with `maturin develop --release --features python,search` (maturin replaces
+the `pyproject.toml` feature list, so `python` must be named too); `numbrion.SEARCH` tells which wheel is
+installed.
 
 ## 1. Fair-information determinization (required)
 
@@ -43,6 +50,50 @@ sends the opponent's team, so search there must build worlds from samples anyway
 Until then: use `GridExecutor` / `replace_hidden_set` for experiments and benchmarks only, not for training
 targets or strength claims.
 
+### Implementation (2026-10-11, `crates/engine/src/search`, feature `search`)
+
+| Step | Where |
+|---|---|
+| 1. Revealed-information tracker | `search::reveal::RevealTracker` (Python `numbrion.RevealTracker`): public facts per Pokemon of both sides from player-view lines: moves chosen, item / ability (starting and current, frozen after Trick/Skill Swap-style changes), Tera, HP, status, Illusion attribution |
+| 2. Set sampler | `search::sets::SetPool` (Python `numbrion.SetPool`): generated packed teams, deduplicated with counts, sampled by count among the sets satisfying the most revealed facts; unrevealed slots from the pool's distribution under the species clause |
+| 3. World builder | `search::world::WorldBuilder` (Python `numbrion.WorldBuilder`): constructs battles from the viewer's team and a sampled opponent team and replays the history; rejects worlds whose replayed player view (and, when pushed, the viewer's requests) differs from the observed one |
+| 4. Protocol-only input | the builder's only inputs are the viewer's team, its choices, its requests and its player-view lines; it never sees a `Battle` |
+
+How the replay finds the hidden randomness: on a mismatching line the draws behind it are resampled
+(`Prng::set_resample` replaces the PRNG stream from a draw index on, keeping every earlier draw), backing off
+to earlier lines when one keeps failing; a line that resampling cannot fix marks a wrong hypothesis and the
+world is dropped. The opponent's choices are read off the protocol (move, shown target, Tera, switch target,
+Instruct and Encore-style mismatches covered by a small exploration probability). Worlds are kept
+incrementally between decisions and weighted by about 1/attempts per segment (an estimate of how likely the
+observations were under the world's hypothesis); `worlds(k, seed)` draws by weight and reseeds every world.
+A newly seen opponent Pokemon is swapped into a never-revealed slot with `replace_hidden_set`; a viewer
+Pokemon transformed into an opponent reveals that opponent's move order through the viewer's request.
+
+**Done-when status.**
+
+- *Leak test:* `crates/pyengine/tests/world.rs` (`identical_public_information_gives_identical_worlds`)
+  builds pairs of real battles whose opponent teams differ only in what the viewer never saw (never-revealed
+  bench sets, including BattleStart species when drawn; unused moves, items, abilities and Tera types of
+  revealed Pokemon), checks that the viewer's observations are identical, and requires identical builder
+  statistics, sampled teams, world states and simulated futures. 299 of 300 battles gave such a pair, all
+  identical (`NUMBRION_TEST_BATTLES=300`).
+- *No live worlds:* worlds come only from the builder; `Battle.is_world` marks them (and copies of them), and
+  `GridExecutor.run` warns on any other root unless `allow_live=True`.
+
+**Quality and cost** (Apple M1 Pro, one thread, pool-400 test pool, 8 worlds, random play): worlds reproduce
+the viewer's request exactly at every checked boundary; 97-98% of decisions get worlds (292 of 299 random
+positions from scratch; about 95% when maintained incrementally through whole battles, failures clustering in
+a few battles). Incremental cost per decision: median about 9 ms, mean about 60 ms, p90 about 160 ms (tail:
+fresh worlds replay the whole history). When no world is found the builder raises a clear error with the
+reason (`last_failure`); fall back to the policy for that decision.
+
+**Known limits.** Weights are an approximation of the posterior, not exact likelihoods (the opponent's
+policy is modelled as uniform over choices consistent with the protocol). Generator team rules other than
+the species clause are not modelled. Illusion stints that end without a `replace` line stay attributed to the
+disguise. Viewer request content beyond what the engine itself writes (Showdown's `rqid`) is ignored;
+ladder-specific protocol lines are excluded from comparison by `search::protocol::is_compared`. The pool
+must contain the opponent's species (`UnknownSpecies` otherwise); use the 600k-team pools for real runs.
+
 ## 2. MSVC + PGO build for training (do together with search)
 
 **Why.** Ordinary self-play is network-bound (~200 battles/s), but search inside training (Gumbel AlphaZero,
@@ -71,5 +122,9 @@ confirms the gain.
 - Idle-machine 6/12-thread benchmarks of the engine and of `GridExecutor` (not yet re-measured at the
   current head).
 - `GridExecutor(stop="turn")` answers mid-turn replacements with the first eligible party member; decide
-  whether search needs its own replacement policy.
+  whether search needs its own replacement policy. (Not changed: `stop="boundary"` plus `keep_leaves` already
+  lets the search answer replacements itself.)
+- Candidate actions for a search grid must come from the world's (or the request's) legal mask, not from the
+  live battle's: the live mask contains hidden trapping / Imprison facts (see "Hidden information in the
+  mask" in TRAINING-API.md).
 - The training-only oracle critic: confirm the policy network never receives oracle (opponent-row) inputs.

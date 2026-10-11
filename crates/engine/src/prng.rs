@@ -37,11 +37,15 @@ pub struct Prng {
     points: [(u32, u32); RESAMPLE_CAPACITY],
 }
 
+/// LCG state, and while points are pending: key, draw position, points.
+#[cfg(feature = "search")]
+type Stream<'a> = (u64, Option<(u64, u32, &'a [(u32, u32)])>);
+
 #[cfg(feature = "search")]
 impl Prng {
     /// What determines the future stream: the LCG state and, while resample points are pending,
     /// the key, the draw position and the points.
-    fn stream(&self) -> (u64, Option<(u64, u32, &[(u32, u32)])>) {
+    fn stream(&self) -> Stream<'_> {
         let pending = self.pending();
         (self.state, (!pending.is_empty()).then_some((self.key, self.draws, pending)))
     }

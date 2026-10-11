@@ -20,6 +20,12 @@ cargo build -p engine --all-features --locked --release
 cargo build --manifest-path crates/difftest/Cargo.toml --all-features --locked --release
 ```
 
+Fair-information search support (world builder, set sampler, revealed-information
+tracker) is the opt-in `search` feature (`cargo build -p engine --features search`;
+Python wheel: `maturin develop --release --features python,search`). It is off by
+default because it adds a small cost to every PRNG draw; see
+[the search prerequisites](docs/design/SEARCH-PREREQUISITES.md).
+
 The harness executable is `crates/difftest/target/release/difftest` (`.exe` on
 Windows). The engine is a library, with artifacts in `target/release`.
 

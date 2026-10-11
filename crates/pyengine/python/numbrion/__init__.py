@@ -33,7 +33,7 @@ if SEARCH:
 
 _SEARCH_PREREQUISITES = (
     "numbrion.GridExecutor: search prerequisites are not all done - see docs/design/SEARCH-PREREQUISITES.md. "
-    "Search roots must be fair-information worlds (numbrion.WorldBuilder, wheel built with --features search), "
+    "Search roots must be fair-information worlds (numbrion.WorldBuilder, wheel built with --features python,search), "
     "and training wheels should be PGO builds. Set NUMBRION_SEARCH_PREREQS_DONE=1 once both are done."
 )
 

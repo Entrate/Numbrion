@@ -170,7 +170,7 @@ impl RevealTracker {
 
 /// Fair-information determinized worlds for search, from one player's observations only.
 ///
-/// `WorldBuilder(viewer, team, pool, names=None, seed=0, particles=8, segment_budget=2000, rebuild_budget=16)`:
+/// `WorldBuilder(viewer, team, pool, names=None, seed=0, particles=8, segment_budget=1000, rebuild_budget=16, fresh_per_update=1)`:
 /// `viewer` is the player's side (0/1); `team` its own packed team with genders resolved (`BatchEnv.team` /
 /// `Battle.teams` of a battle built from explicit-gender pools); `pool` a `SetPool`. Feed, in order, every
 /// player-view line (`push_lines`), and at each boundary where the player acts optionally its request
@@ -185,7 +185,7 @@ pub(crate) struct WorldBuilder {
 #[pymethods]
 impl WorldBuilder {
     #[new]
-    #[pyo3(signature = (viewer, team, pool, names=None, seed=0, particles=8, segment_budget=2000, rebuild_budget=16))]
+    #[pyo3(signature = (viewer, team, pool, names=None, seed=0, particles=8, segment_budget=1000, rebuild_budget=16, fresh_per_update=1))]
     #[allow(clippy::too_many_arguments)]
     fn new(
         viewer: usize,
@@ -196,6 +196,7 @@ impl WorldBuilder {
         particles: usize,
         segment_budget: u32,
         rebuild_budget: usize,
+        fresh_per_update: usize,
     ) -> PyResult<Self> {
         if viewer >= 2 {
             return Err(PyValueError::new_err("viewer must be 0 or 1"));
@@ -205,7 +206,7 @@ impl WorldBuilder {
         }
         let team = TeamDef::unpack(team).map_err(|e| PyValueError::new_err(e.0))?;
         let names = names.unwrap_or(["Player 1".to_string(), "Player 2".to_string()]);
-        let config = WorldConfig { particles, segment_budget, rebuild_budget, ..WorldConfig::default() };
+        let config = WorldConfig { particles, segment_budget, rebuild_budget, fresh_per_update, ..WorldConfig::default() };
         let w = Builder::new(SideId(viewer as u8), Arc::new(team), names, pool.pool.clone(), config, seed)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(WorldBuilder { w: Mutex::new(w) })
@@ -240,7 +241,11 @@ impl WorldBuilder {
     /// Bring the worlds up to date (also done by `worlds`). GIL released. Raises `RuntimeError` when no world
     /// reproduces the observations within the budgets.
     fn update(&self, py: Python<'_>) -> PyResult<()> {
-        py.detach(|| lock(&self.w).update()).map_err(|e| PyRuntimeError::new_err(e.to_string()))
+        py.detach(|| {
+            let mut w = lock(&self.w);
+            w.update().map_err(|e| format!("{e} (last failure: {})", w.last_failure()))
+        })
+        .map_err(PyRuntimeError::new_err)
     }
 
     /// `k` worlds at the current boundary, drawn by likelihood weight, each reseeded from `seed`. `log` selects
@@ -250,6 +255,7 @@ impl WorldBuilder {
         let games = py
             .detach(|| -> Result<Vec<Game>, String> {
                 let mut w = lock(&self.w);
+                w.update().map_err(|e| format!("{e} (last failure: {})", w.last_failure()))?;
                 Ok(if log {
                     w.worlds::<TextLog>(k, seed).map_err(|e| e.to_string())?.into_iter().map(|b| Game::from_world(Sink::Text(b))).collect()
                 } else {
@@ -258,6 +264,12 @@ impl WorldBuilder {
             })
             .map_err(PyRuntimeError::new_err)?;
         Ok(games.into_iter().map(|g| Battle { g: Mutex::new(g) }).collect())
+    }
+
+    /// Why the most recently dropped world was dropped (diagnostics; empty if none was).
+    #[getter]
+    fn last_failure(&self) -> String {
+        lock(&self.w).last_failure().to_owned()
     }
 
     /// Worlds currently alive.

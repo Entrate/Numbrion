@@ -121,7 +121,7 @@ difftest_build=(build --manifest-path crates/difftest/Cargo.toml --release --loc
 wheel_build=(build --release --locked -m crates/pyengine/Cargo.toml --target "$target")
 if [ "$search" -eq 1 ]; then
     difftest_build+=(--features engine/search)
-    wheel_build+=(--features search)
+    wheel_build+=(--features python,search)
 fi
 
 echo "pgo.sh: target $target, corpus $corpus, out $out${extra:+, native CPU}"

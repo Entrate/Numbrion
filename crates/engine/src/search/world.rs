@@ -52,8 +52,10 @@ pub struct WorldConfig {
     pub particles: usize,
     /// Replay attempts per world and segment before the world is dropped.
     pub segment_budget: u32,
-    /// Worlds rebuilt from scratch per `update`, at most.
+    /// Worlds built from scratch per `update` when none survived, at most.
     pub rebuild_budget: usize,
+    /// Worlds built from scratch per `update` otherwise (diversity; copies of survivors fill up).
+    pub fresh_per_update: usize,
     /// Probability of choosing the target shown in a `|move|` line (redirection and retargeting
     /// make the shown target differ from the chosen one).
     pub shown_target: f64,
@@ -61,7 +63,7 @@ pub struct WorldConfig {
 
 impl Default for WorldConfig {
     fn default() -> Self {
-        Self { particles: 8, segment_budget: 2000, rebuild_budget: 16, shown_target: 0.85 }
+        Self { particles: 8, segment_budget: 1000, rebuild_budget: 16, fresh_per_update: 1, shown_target: 0.85 }
     }
 }
 
@@ -185,6 +187,7 @@ struct Ctx<'a> {
     lines: &'a [String],
     choices: &'a [(usize, String)],
     requests: &'a [Option<String>],
+    move_orders: &'a [(String, Vec<EffectId>)],
     tracker: &'a RevealTracker,
     pool: &'a SetPool,
     config: &'a WorldConfig,
@@ -210,6 +213,11 @@ pub struct WorldBuilder {
     choices: Vec<(usize, String)>,
     /// Viewer request JSON by the index of the choice that answered it (`None`: not pushed).
     requests: Vec<Option<String>>,
+    /// Viewer Pokemon name -> the opponent Pokemon it is transformed into (`-transform` lines).
+    transformed: Vec<(String, String)>,
+    /// Opponent Pokemon name -> its exact moves in slot order, read off the viewer's request while a
+    /// viewer Pokemon was transformed into it (Transform copies the move slots in order).
+    move_orders: Vec<(String, Vec<EffectId>)>,
     particles: Vec<Particle>,
     /// Why the most recently dropped world was dropped.
     last_failure: String,
@@ -243,6 +251,8 @@ impl WorldBuilder {
             lines: Vec::new(),
             choices: Vec::new(),
             requests: Vec::new(),
+            transformed: Vec::new(),
+            move_orders: Vec::new(),
             particles: Vec::new(),
             last_failure: String::new(),
             synced: false,
@@ -280,6 +290,15 @@ impl WorldBuilder {
             {
                 self.names[side.0 as usize] = l.arg(1).to_owned();
             }
+            if let Some(l) = Line::parse(line)
+                && l.cmd() == "-transform"
+                && let (Some(user), Some(target)) = (parse_ident(l.arg(0)), parse_ident(l.arg(1)))
+                && user.side == self.viewer
+                && target.side != self.viewer
+            {
+                self.transformed.retain(|(u, _)| u != user.name);
+                self.transformed.push((user.name.to_owned(), target.name.to_owned()));
+            }
             if protocol::is_compared(line) {
                 self.lines.push(line.to_owned());
                 self.synced = false;
@@ -291,6 +310,22 @@ impl WorldBuilder {
     /// choice). Worlds must then reproduce it exactly, which checks what only the request shows
     /// (own exact HP and PP, disabled moves, trapping). A Showdown server's `rqid` field is ignored.
     pub fn push_request(&mut self, json: &str) {
+        // A transformed Pokemon's request lists the copied opponent's move slots in order.
+        for (k, ids) in active_move_ids(json).into_iter().enumerate().take(2) {
+            let Some(i) = self.tracker.active(self.viewer, k as u8) else { continue };
+            let m = &self.tracker.mons(self.viewer)[i];
+            if !m.transformed {
+                continue;
+            }
+            if let Some((_, target)) = self.transformed.iter().find(|(u, _)| *u == m.name)
+                && !ids.is_empty()
+                && ids.len() <= 4
+            {
+                let target = target.clone();
+                self.move_orders.retain(|(t, _)| *t != target);
+                self.move_orders.push((target, ids));
+            }
+        }
         let at = self.choices.len();
         self.requests.resize(at + 1, None);
         self.requests[at] = Some(strip_rqid(json));
@@ -318,6 +353,7 @@ impl WorldBuilder {
             lines: &self.lines,
             choices: &self.choices,
             requests: &self.requests,
+            move_orders: &self.move_orders,
             tracker: &self.tracker,
             pool: &self.pool,
             config: &self.config,
@@ -332,17 +368,36 @@ impl WorldBuilder {
                 }
             }
         }
+        // Fresh worlds: as many as it takes (within `rebuild_budget`) when none survived, otherwise a
+        // few per update (`fresh_per_update`) to keep hypotheses diverse; copies fill the rest. When
+        // a few worlds carry nearly all the weight, fresh worlds replace the lightest ones.
+        let ess = |alive: &[Particle]| 1.0 / weights(alive).iter().map(|w| w * w).sum::<f64>();
+        let (target, budget) = if alive.is_empty() {
+            (self.config.particles.div_ceil(2), self.config.rebuild_budget)
+        } else {
+            let collapsed = alive.len() >= 2 && ess(&alive) < self.config.particles as f64 / 4.0;
+            let want = if collapsed || alive.len() < self.config.particles { self.config.fresh_per_update } else { 0 };
+            (alive.len() + want, want)
+        };
         let mut builds = 0;
         let mut error = None;
-        while alive.len() < self.config.particles && builds < self.config.rebuild_budget {
+        while alive.len() < target.max(1) && builds < budget {
             builds += 1;
             match build(&cx, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) {
                 Ok(mut p) => match advance(&cx, &mut p, &mut self.stats) {
-                    Ok(()) => alive.push(p),
+                    Ok(()) => {
+                        if alive.len() >= self.config.particles {
+                            let lightest = (0..alive.len())
+                                .min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w))
+                                .unwrap();
+                            alive.swap_remove(lightest);
+                        }
+                        alive.push(p);
+                    }
                     Err(d) => {
-                    self.stats.deaths += 1;
-                    self.last_failure = format!("{d:?}: {}", p.why);
-                }
+                        self.stats.deaths += 1;
+                        self.last_failure = format!("{d:?}: {}", p.why);
+                    }
                 },
                 Err(e @ (WorldError::UnknownSpecies(_) | WorldError::Team(_))) => {
                     error = Some(e);
@@ -353,31 +408,6 @@ impl WorldBuilder {
         }
         if alive.is_empty() {
             return Err(error.unwrap_or(WorldError::NoConsistentWorld));
-        }
-        // Rejuvenate: when a few worlds carry nearly all the weight, replace the lightest with fresh
-        // hypotheses (copies of a survivor share its hidden sets and cannot restore diversity).
-        let ess = |alive: &[Particle]| 1.0 / weights(alive).iter().map(|w| w * w).sum::<f64>();
-        if error.is_none() && alive.len() >= 2 && ess(&alive) < self.config.particles as f64 / 4.0 {
-            let mut fresh = 0;
-            while fresh < self.config.particles / 4 && builds < self.config.rebuild_budget {
-                builds += 1;
-                let Ok(mut p) = build(&cx, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) else {
-                    break;
-                };
-                if let Err(d) = advance(&cx, &mut p, &mut self.stats) {
-                    self.stats.deaths += 1;
-                    self.last_failure = format!("{d:?}: {}", p.why);
-                    continue;
-                }
-                if alive.len() >= self.config.particles {
-                    let lightest = (0..alive.len())
-                        .min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w))
-                        .unwrap();
-                    alive.swap_remove(lightest);
-                }
-                alive.push(p);
-                fresh += 1;
-            }
         }
         // Refill by copying survivors in proportion to their weights; copies split the weight.
         let missing = self.config.particles.saturating_sub(alive.len());
@@ -519,10 +549,37 @@ fn constraints<'a>(cx: &'a Ctx<'_>, index: usize) -> SetConstraints<'a> {
 
 fn sample_revealed(cx: &Ctx<'_>, index: usize, rng: &mut SplitMix64) -> Result<SetDef, WorldError> {
     let c = constraints(cx, index);
-    cx.pool
+    let mut set = cx
+        .pool
         .sample(&c, rng)
         .map(|s| s.set)
-        .ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))
+        .ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
+    if let Some((_, order)) = cx.move_orders.iter().find(|(n, _)| *n == c.name) {
+        set.moves = [EffectId::NONE; 4];
+        set.moves[..order.len()].copy_from_slice(order);
+        set.move_count = order.len() as u8;
+    }
+    Ok(set)
+}
+
+/// Move ids of each `active` entry of a request JSON, in slot order (a minimal scan: the engine's and
+/// Showdown's requests list `"id":"..."` per move inside `"moves":[...]`).
+fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
+    let Some(start) = json.find("\"active\":[") else { return Vec::new() };
+    let rest = &json[start..];
+    let end = rest.find("\"side\":").unwrap_or(rest.len());
+    rest[..end]
+        .split("\"moves\":[")
+        .skip(1)
+        .map(|entry| {
+            let entry = &entry[..entry.find(']').unwrap_or(entry.len())];
+            entry
+                .split("\"id\":\"")
+                .skip(1)
+                .filter_map(|t| dex::lookup(EffectKind::Move, &t[..t.find('"').unwrap_or(t.len())]))
+                .collect()
+        })
+        .collect()
 }
 
 /// The opponent's team: revealed Pokemon get sets consistent with what was seen (leads at their
@@ -939,7 +996,7 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
 
 /// Consecutive failures at one line after which a world is dropped (the backoff has resampled the
 /// whole segment, and the opponent's open choices, many times by then).
-const STUCK: u32 = 400;
+const STUCK: u32 = 200;
 
 /// One concrete legal choice consistent with `specs`, sampling what the protocol left open. With
 /// `explore`, a slot read as a specific move is instead any legal move with probability
@@ -956,7 +1013,7 @@ fn sample_choice(
     let opp = cx.opp();
     let legal = b.legal_actions(opp);
     for _ in 0..32 {
-        let mut pick = |k: usize, rng: &mut SplitMix64| {
+        let pick = |k: usize, rng: &mut SplitMix64| {
             let spec = match &specs[k] {
                 SlotSpec::Move { tera, .. } if explore && rng.chance(EXPLORE) => {
                     if *tera { &SlotSpec::AnyMove { tera: true } } else { &SlotSpec::AnyMove { tera: false } }
