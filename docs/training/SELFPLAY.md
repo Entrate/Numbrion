@@ -93,6 +93,22 @@ Tera 15%), the "always use the strongest attack" heuristic, and earlier snapshot
 also reports mistake counters (attacks into Protect, failed Fake Outs, moves with no target, own-side hits,
 Tera and switch frequency), calibration of the critic, and Showdown HTML replays.
 
+### Rust observation encoding and scripted play
+
+Wheels expose `numbrion.ObsEncoder` and `numbrion.SmartAgent`; `numbrion.ENCODER` marks support.
+`training.encoder.Encoder` and `training.smart.SmartHeuristicAgent` select these implementations when
+available. Actors and vecenv workers use `encode_env` to drain player-view logs and fill the existing NumPy
+buffers in Rust, with the GIL released. `keep_logs=True` preserves vecenv's finished-game replay bookkeeping.
+Set `NUMBRION_PY_ENCODER=1` or `NUMBRION_PY_SMART=1` before starting Python to use the reference
+`PyEncoder` or `PySmartHeuristicAgent`; both references remain directly importable.
+
+On a built wheel, run `python -m pytest crates/pyengine/training_tests/test_rust_parity.py -q` for layout,
+integer/float encoding, fast-path log and deterministic smart-decision parity over real self-play.
+`python crates/pyengine/encoder_bench.py --envs 32 --boundaries 256` reports ms per row and speed-ups for
+Python/Rust batch encoding, Rust `encode_env`, and both smart players (both action slots). Concurrent callers
+must not mutate the arrays while Rust is using them. Random draws use different generators; deterministic
+parity disables noise and Protect skipping and fixes the Protect share.
+
 ## First run (2026-10-10)
 
 60 minutes of training on the Ryzen 5 3600 + RX 5500 with the defaults above: 712 PPO updates and

@@ -29,6 +29,8 @@ once. Slot b's mask depends on slot a's choice, so ``first`` plans the pair with
 """
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import torch
 
@@ -77,7 +79,7 @@ def _codes_of(mask: np.ndarray) -> np.ndarray:
     return np.flatnonzero(mask)
 
 
-class SmartHeuristicAgent:
+class PySmartHeuristicAgent:
     """Doubles-aware scripted baseline; see the module docstring.
 
     ``first`` keeps per-row state for the following ``second`` call on the same rows. ``temperature`` > 0 adds Gumbel
@@ -632,3 +634,45 @@ class SmartHeuristicAgent:
                 _, b = self._choose(self._pair_values(c, i, X, Y))
                 out[i] = Y["code"][b]
         return out
+
+
+class RustSmartHeuristicAgent:
+    """Rust scripted player; second must receive the same rows, in order, as first."""
+
+    name = "smart"
+
+    def __init__(self, rng: np.random.Generator, dex: Dex | None = None, temperature: float = 0.0):
+        from numbrion import SmartAgent
+
+        self.rng = rng
+        self.dex = dex or load_dex()
+        self.temperature = temperature
+        self._agent = SmartAgent(str(self.dex.path), int(rng.integers(2**63)), temperature=temperature,
+                                 noise=NOISE, protect_skip=PROTECT_SKIP, protect_share=PROTECT_SHARE)
+        self._rows = None
+
+    def first(self, arrays, rows, mask0):
+        rows = np.ascontiguousarray(rows, dtype=np.int64)
+        result = self._agent.first(*(np.ascontiguousarray(arrays[k]) for k in OBS_KEYS), rows,
+                                   np.ascontiguousarray(mask0, dtype=np.bool_))
+        self._rows = rows.copy()
+        return result
+
+    def second(self, rows, mask1):
+        rows = np.asarray(rows, dtype=np.int64)
+        if self._rows is None or not np.array_equal(rows, self._rows):
+            raise ValueError("second requires the same rows, in order, as the preceding first")
+        return self._agent.second(np.ascontiguousarray(mask1, dtype=np.bool_))
+
+
+def _has_rust_smart():
+    try:
+        import numbrion
+    except ImportError:
+        return False
+    return hasattr(numbrion, "SmartAgent")
+
+
+SmartHeuristicAgent = (RustSmartHeuristicAgent
+                       if os.environ.get("NUMBRION_PY_SMART") != "1" and _has_rust_smart()
+                       else PySmartHeuristicAgent)

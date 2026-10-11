@@ -442,8 +442,8 @@ fn stats_dict<'py>(py: Python<'py>, s: RunStats, seconds: f64) -> PyResult<Bound
 /// `BatchEnv(n_envs, team_pool_paths, seed=0, threads=0, log=False, joint_mask=False, on_illegal="raise",
 /// max_teams_per_file=None, teams=None)`
 #[pyclass(frozen, module = "numbrion")]
-struct BatchEnv {
-    env: Mutex<Env>,
+pub(crate) struct BatchEnv {
+    pub(crate) env: Mutex<Env>,
     n_envs: usize,
     threads: usize,
     pool_size: usize,
@@ -778,6 +778,7 @@ fn _pgo_workload(py: Python<'_>, pool_paths: Vec<String>, seconds: f64, threads:
 fn _numbrion(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Battle>()?;
     m.add_class::<BatchEnv>()?;
+    crate::py_encoder::register(m)?;
     m.add_class::<GridExecutor>()?;
     #[cfg(feature = "search")]
     crate::py_search::register(m)?;

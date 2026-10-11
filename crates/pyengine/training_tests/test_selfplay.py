@@ -12,7 +12,7 @@ import torch
 import numbrion as nb
 from training.damage import DamageFeatures
 from training.dex import load_dex, to_id
-from training.encoder import FF, I_ABILITY, I_CAND_MOVES, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, K_MOVES, PF, Encoder
+from training.encoder import FF, I_ABILITY, I_CAND_MOVES, I_ITEM, I_MOVE0, I_SPECIES, I_TERA, K_MOVES, PF, PyEncoder as Encoder
 from training.model import TARGET_TOKENS, Model, bag
 from training.ppo import PASS, gae, sample
 

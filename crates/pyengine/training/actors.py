@@ -190,6 +190,9 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     partner = np.arange(2 * count) ^ 1
 
     def observe(result):
+        if hasattr(encoder, "encode_env"):
+            encoder.encode_env(env)
+            return encoder.buffers
         observations = [env.observe(e, s) for e in range(count) for s in (0, 1)]
         return encoder.encode_batch(observations)
 

@@ -24,6 +24,11 @@ from ._numbrion import (  # noqa: F401
     move_action,
     switch_action,
 )
+from . import _numbrion as _native
+
+ENCODER = getattr(_native, "ENCODER", False)
+if ENCODER:
+    from ._numbrion import ObsEncoder, SmartAgent  # noqa: F401
 from ._numbrion import SEARCH  # noqa: F401  (built with the opt-in `search` feature)
 from ._numbrion import GridExecutor as _GridExecutor
 from .utils import grid_actions, sample_masked, sample_uniform  # noqa: F401
@@ -82,6 +87,7 @@ del GridExecutor
 
 __all__ = [
     "BatchEnv",
+    "ENCODER",
     "Battle",
     "ChoiceError",
     "GridExecutor",
@@ -100,3 +106,6 @@ __all__ = [
     "sample_uniform",
     "switch_action",
 ]
+
+if ENCODER:
+    __all__ += ["ObsEncoder", "SmartAgent"]

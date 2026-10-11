@@ -16,7 +16,7 @@ from test_effects import INFERNAPE, SWITCH_IN, code, encode, request
 from test_selfplay import POOL, request as team_request
 from training.actors import Actors, buffer_layout
 from training.dex import load_dex, to_id
-from training.encoder import Buffers, Encoder
+from training.encoder import Buffers, PyEncoder as Encoder
 from training.guards import FIRST_TURN_ONLY, REPEAT_PROTECT, STALE, MoveGuards
 from training.league import HEURISTIC, SELF, SNAPSHOT
 from training.model import Model

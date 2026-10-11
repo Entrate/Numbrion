@@ -1,0 +1,9 @@
+[package]
+name = "encoder"
+description = "Training observation pipeline in Rust: the token encoder, damage-calc features and the scripted smart player (ports of crates/pyengine/training/{encoder,damage,smart}.py)"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+# No dependencies on purpose: the crate builds and tests offline in seconds, without the engine.
+[dependencies]

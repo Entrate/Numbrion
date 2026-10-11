@@ -14,6 +14,7 @@ opponent-row pairing used by the training-only oracle critic and auxiliary targe
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -538,7 +539,7 @@ _BOOST_INDEX = {b: PF["boost_" + b] for b in BOOSTS}
 _VOLATILE_INDEX = {v: PF[v] for v in VOLATILES}
 
 
-class Encoder:
+class PyEncoder:
     """Encodes rows ``2 * env + side`` of a ``BatchEnv`` (or any source of observe() dicts)."""
 
     def __init__(self, rows: int, dex: Dex | None = None):
@@ -828,3 +829,39 @@ class Encoder:
                     dyn[index] = 1.0
             if "perish" in mon.volatiles:
                 dyn[D_PERISH] = (mon.volatiles["perish"] + 1) / 4
+
+
+class RustEncoder:
+    """Rust implementation using the same preallocated buffers as the Python reference."""
+
+    def __init__(self, rows: int, dex: Dex | None = None):
+        from numbrion import ObsEncoder
+
+        self.dex = dex or load_dex()
+        self.buffers = Buffers(rows)
+        self._encoder = ObsEncoder(str(self.dex.path), rows)
+
+    def _outputs(self):
+        b = self.buffers
+        return (b.ids, b.floats, b.field, b.foe_match, b.fainted, b.guard, b.action_features, b.token_features)
+
+    def encode_batch(self, observations: list[dict]) -> Buffers:
+        self._encoder.encode_batch(observations, *self._outputs())
+        return self.buffers
+
+    def encode(self, row: int, observation: dict) -> None:
+        self._encoder.encode_row(row, observation, *self._outputs())
+
+    def encode_env(self, env, keep_logs: bool = False):
+        return self._encoder.encode_env(env, *self._outputs(), keep_logs=keep_logs)
+
+
+def _has_rust_encoder():
+    try:
+        import numbrion
+    except ImportError:
+        return False
+    return hasattr(numbrion, "ObsEncoder")
+
+
+Encoder = RustEncoder if os.environ.get("NUMBRION_PY_ENCODER") != "1" and _has_rust_encoder() else PyEncoder

@@ -52,7 +52,8 @@ def to_id(text: str) -> str:
 
 class Dex:
     def __init__(self, path: Path = DEX_PATH):
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        self.path = Path(path)
+        data = json.loads(self.path.read_text(encoding="utf-8"))
         self.types = data["types"]  # 19 including Stellar
         self.type_index = {name: i + 1 for i, name in enumerate(self.types)}
         self.n_types = len(self.types) + 1
@@ -255,7 +256,8 @@ class Dex:
         abilities = prior["abilities"]  # team-generator marginals; the generator does not pick set abilities uniformly
         if not tera_probs:
             tera_probs = prior["tera"]
-        top_moves = sorted(moves.items(), key=lambda kv: -kv[1])
+        # Ties go to the lower move index, not to frozenset iteration order, so the Rust port (crates/encoder) matches.
+        top_moves = sorted(moves.items(), key=lambda kv: (-kv[1], kv[0]))
         return tuple(top_moves), tuple(abilities.items()), tuple(tera_probs.items()), tuple(prior["items"].items())
 
 

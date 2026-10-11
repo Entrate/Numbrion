@@ -6,7 +6,7 @@ main process reads as one batch (rows ``2 * env + side``). A decision boundary t
 1. main computes slot-a actions and calls ``mask_slot1(a0)``; workers answer with the conditional slot-b masks,
 2. main computes slot-b actions and calls ``step(actions)``; workers step, auto-reset and encode the next boundary.
 
-Python encoding is the expensive CPU part (training.encoder), so it runs in parallel across workers.
+Each worker encodes its rows with training.encoder; native wheels use the Rust encode_env fast path.
 """
 from __future__ import annotations
 
@@ -102,19 +102,24 @@ def _worker(connection, names, n_envs, begin, end, pools, seed, threads, log_gam
         a["final_turns"][envs] = result["final_turns"]
         a["battle_id"][envs] = result["battle_id"]
         a["turn"][envs] = result["turn"]
-        observations = [env.observe(e, s) for e in range(count) for s in (0, 1)]
+        if hasattr(encoder, "encode_env"):
+            logs = encoder.encode_env(env, keep_logs=log_games)
+            b = encoder.buffers
+        else:
+            observations = [env.observe(e, s) for e in range(count) for s in (0, 1)]
+            b = encoder.encode_batch(observations)
+            logs = [(o["log"], o["prev_log"]) for o in observations] if log_games else None
         if log_games:  # full player-view logs of finished battles, both sides
             for e in range(count):
                 for side in (0, 1):
-                    observation = observations[2 * e + side]
+                    log, prev_log = logs[2 * e + side]
                     if result["done"][e]:
                         saved.append(dict(env=begin + e, side=side, winner=int(result["winner"][e]),
                                           battle=int(result["battle_id"][e]) - 1,
-                                          log=history[e][side] + list(observation["prev_log"])))
-                        history[e][side] = list(observation["log"])
+                                          log=history[e][side] + list(prev_log)))
+                        history[e][side] = list(log)
                     else:
-                        history[e][side].extend(observation["log"])
-        b = encoder.encode_batch(observations)
+                        history[e][side].extend(log)
         a["ids"][rows] = b.ids
         a["floats"][rows] = b.floats
         a["field"][rows] = b.field

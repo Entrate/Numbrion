@@ -4,12 +4,13 @@
 >= 3.9). It exposes the engine to AlphaZero/PPO-style self-play through a **fixed discrete action space with
 exact legality masks**, **hidden-information-safe observation streams**, and a **batched, auto-resetting
 environment** that runs battles in parallel Rust threads with the GIL released. Everything here uses only the
-public API of `crates/engine`; feature engineering (turning requests and logs into tensors) is out of scope.
+public API of `crates/engine`; observation encoding and scripted play use `crates/encoder`.
 
 | Piece | Where |
 |---|---|
 | `numbrion.Battle` | one battle: debugging, scripted play, search (`clone`, `restore_from`, `reset`, `reseed`) |
 | `numbrion.BatchEnv` | N battles, `step(actions)` with auto-reset, masks, rewards |
+| `numbrion.ObsEncoder`, `numbrion.SmartAgent` | in-place NumPy observation encoding and two-slot scripted play; `ENCODER=True` ([training integration](../training/SELFPLAY.md#rust-observation-encoding-and-scripted-play)) |
 | `numbrion.GridExecutor` | one-decision search grids (restore root, both choices, next boundary) on Rust threads |
 | action codes, masks | `src/action.rs`, `src/mask.rs` |
 | search executor | `src/search.rs` (see "Search" below) |
