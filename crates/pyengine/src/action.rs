@@ -83,6 +83,29 @@ pub fn encode(act: Act) -> usize {
     }
 }
 
+/// Showdown choice text of a code pair, from the codes alone (no battle needed): what
+/// `SideActions::text` renders for a legal pair, `move 1` for `FORCED_MOVE`. `None` for a bad code.
+pub fn pair_text(a0: usize, a1: usize) -> Option<String> {
+    let one = |a: usize| -> Option<String> {
+        Some(match decode(a)? {
+            Act::Pass => "pass".into(),
+            Act::Switch(p) => format!("switch {}", p + 1),
+            Act::Move { slot, target, tera } => {
+                let loc = target_loc(target);
+                let mut s = format!("move {}", slot + 1);
+                if loc != 0 {
+                    s.push_str(&format!(" {loc:+}"));
+                }
+                if tera {
+                    s.push_str(" terastallize");
+                }
+                s
+            }
+        })
+    };
+    Some(format!("{}, {}", one(a0)?, one(a1)?))
+}
+
 /// Signed Showdown target location of a target code.
 #[inline]
 pub const fn target_loc(code: u8) -> i8 {

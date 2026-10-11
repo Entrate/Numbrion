@@ -136,6 +136,32 @@ fn player_view(entries: &[String], from: usize, viewer: SideId) -> Vec<String> {
     out
 }
 
+/// Showdown choice text of a typed choice (the player's own record of what it sent).
+fn choice_text(b: &B, side: SideId, choice: &[SlotChoice]) -> String {
+    let party = &b.state.sides[side.0 as usize].party;
+    choice
+        .iter()
+        .map(|c| match c.kind {
+            ChoiceKind::Pass => "pass".to_string(),
+            ChoiceKind::Switch | ChoiceKind::Revival => {
+                format!("switch {}", party.iter().position(|&m| m == c.switch_to).unwrap() + 1)
+            }
+            ChoiceKind::Move if c.move_slot == 255 => "move 1".to_string(),
+            ChoiceKind::Move => {
+                let mut t = format!("move {}", c.move_slot + 1);
+                if c.target_loc != 0 {
+                    t.push_str(&format!(" {:+}", c.target_loc));
+                }
+                if c.tera {
+                    t.push_str(" terastallize");
+                }
+                t
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 /// What one player observes, in order.
 #[derive(Clone, Debug, PartialEq)]
 enum Event {
@@ -176,11 +202,9 @@ fn play(
             };
             if side == viewer {
                 events.push(Event::Request(b.request_json(viewer.0 as usize).unwrap()));
+                events.push(Event::Choice(choice_text(&b, side, &choice)));
             }
             b.choose_typed(side, &choice).ok()?;
-            if side == viewer {
-                events.push(Event::Choice(b.choice_text(viewer)));
-            }
             boundary.push((side, choice));
         }
         if let Some(h) = history
@@ -245,7 +269,13 @@ fn worlds_reproduce_the_viewer_state() {
             }
             Err(e) => {
                 failed += 1;
-                eprintln!("battle {battle}: turn {}: {e}", b.turn());
+                eprintln!("battle {battle}: turn {}: {e}: {}", b.turn(), w.last_failure());
+                if std::env::var("NUMBRION_WORLD_DUMP").is_ok_and(|v| v == battle.to_string()) {
+                    for e in &events {
+                        eprintln!("  {e:?}");
+                    }
+                    eprintln!("  real opponent: {}", b.teams().sides[1 - viewer.0 as usize].pack());
+                }
             }
         }
         let s = w.stats;
@@ -291,35 +321,36 @@ fn disguise(
             }
         }
     }
+    // One kind of change per variant, so most variants stay invisible to the viewer.
+    let kind = rng.below(5);
     for m in 0..t.len as usize {
         let mon = opp.0 as usize * 6 + m;
         let other = &sets[rng.below(sets.len())];
         if revealed & (1 << mon) == 0 {
             // Pool sets carry explicit genders, so construction draws the same as before.
-            t.sets[m] = other.clone();
+            if kind == 0 || rng.chance(0.5) {
+                t.sets[m] = other.clone();
+            }
+            continue;
+        }
+        if !rng.chance(0.5) {
             continue;
         }
         let set = &mut t.sets[m];
-        for slot in 0..set.move_count as usize {
-            if !used[m][slot] && rng.chance(0.7) {
-                let candidate = other.moves[rng.below(other.move_count.max(1) as usize)];
-                if candidate != engine::ids::EffectId::NONE && !set.moves.contains(&candidate) {
-                    set.moves[slot] = candidate;
+        match kind {
+            1 => {
+                for slot in 0..set.move_count as usize {
+                    if !used[m][slot] {
+                        let candidate = other.moves[rng.below(other.move_count.max(1) as usize)];
+                        if candidate != engine::ids::EffectId::NONE && !set.moves.contains(&candidate) {
+                            set.moves[slot] = candidate;
+                        }
+                    }
                 }
             }
-        }
-        if rng.chance(0.5) {
-            set.item = other.item;
-        }
-        if rng.chance(0.3) {
-            set.ability = other.ability;
-        }
-        if rng.chance(0.5) {
-            set.tera_type = other.tera_type;
-        }
-        if rng.chance(0.3) {
-            set.evs = other.evs;
-            set.ivs = other.ivs;
+            2 => set.item = other.item,
+            3 => set.ability = other.ability,
+            _ => set.tera_type = other.tera_type,
         }
     }
     t
@@ -344,27 +375,34 @@ fn identical_public_information_gives_identical_worlds() {
         let opp = SideId(1 - viewer.0);
         let seed = rng.seed();
         let turns = 1 + rng.below(6) as u32;
-        let mut teams = [teams_of(&pool, i), teams_of(&pool, j)];
+        let teams = [teams_of(&pool, i), teams_of(&pool, j)];
         let Some((a, events_a, played)) = play(teams.clone(), seed, viewer, turns, &mut rng, None) else {
             continue;
         };
         if a.state.ended || !needs(&a, viewer) {
             continue;
         }
-        let hidden = disguise(&teams[opp.0 as usize], &a, opp, &played, &all_sets, &mut rng);
-        if hidden.validate().is_err() {
-            discarded += 1;
-            continue;
+        // Try a few disguises; keep the first the viewer cannot tell apart from the real team.
+        let mut found = None;
+        for _ in 0..12 {
+            let hidden = disguise(&teams[opp.0 as usize], &a, opp, &played, &all_sets, &mut rng);
+            if hidden.validate().is_err() || hidden == *teams[opp.0 as usize] {
+                continue;
+            }
+            let mut alt = teams.clone();
+            alt[opp.0 as usize] = Arc::new(hidden);
+            if let Some((b, events_b, _)) = play(alt, seed, viewer, u32::MAX, &mut rng, Some(&played))
+                && events_a == events_b
+                && needs(&b, viewer)
+            {
+                found = Some((b, events_b));
+                break;
+            }
         }
-        teams[opp.0 as usize] = Arc::new(hidden);
-        let Some((b, events_b, _)) = play(teams, seed, viewer, u32::MAX, &mut rng, Some(&played)) else {
+        let Some((b, events_b)) = found else {
             discarded += 1;
             continue;
         };
-        if events_a != events_b || !needs(&b, viewer) {
-            discarded += 1;
-            continue;
-        }
         if a.teams().sides[opp.0 as usize] != b.teams().sides[opp.0 as usize] {
             differed += 1;
         }

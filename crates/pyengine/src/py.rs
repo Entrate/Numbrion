@@ -29,7 +29,7 @@ pyo3::create_exception!(
      present, is the re-sent request JSON (hidden information revealed by the rejection)."
 );
 
-fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
+pub(crate) fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(|e| e.into_inner())
 }
 
@@ -96,8 +96,8 @@ fn code(a: i64) -> PyResult<usize> {
 
 /// A single battle for debugging, scripted play and search.
 #[pyclass(frozen, module = "numbrion")]
-struct Battle {
-    g: Mutex<Game>,
+pub(crate) struct Battle {
+    pub(crate) g: Mutex<Game>,
 }
 
 #[pymethods]
@@ -390,6 +390,13 @@ impl Battle {
     fn teams(&self) -> (String, String) {
         let g = lock(&self.g);
         (g.packed_teams()[0].to_string(), g.packed_teams()[1].to_string())
+    }
+
+    /// True for battles built by a fair-information `WorldBuilder` (and copies of them): search roots that
+    /// carry no hidden information of the real battle. A live battle or its `clone()` is not a world.
+    #[getter]
+    fn is_world(&self) -> bool {
+        lock(&self.g).is_world()
     }
 }
 
@@ -763,6 +770,9 @@ fn _numbrion(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Battle>()?;
     m.add_class::<BatchEnv>()?;
     m.add_class::<GridExecutor>()?;
+    #[cfg(feature = "search")]
+    crate::py_search::register(m)?;
+    m.add("SEARCH", cfg!(feature = "search"))?;
     m.add("ChoiceError", m.py().get_type::<ChoiceError>())?;
     m.add_function(wrap_pyfunction!(describe_action, m)?)?;
     m.add_function(wrap_pyfunction!(decode_action, m)?)?;

@@ -100,7 +100,7 @@ def main() -> None:
             ex = executors[int(mode.split("/")[1])]
             n = 0
             for root, actions, seeds, _ in roots:
-                n += len(ex.run(root, actions, seeds=seeds)["turn"])
+                n += len(ex.run(root, actions, seeds=seeds, allow_live=True)["turn"])
             return n
         return python_cells(roots, worker if mode == "py-restore" else None, args.log)
 

@@ -154,6 +154,8 @@ struct Particle {
     rng: SplitMix64,
     /// Log likelihood weight (sum of `-ln attempts` over reproduced segments).
     log_w: f64,
+    /// Why the world was dropped (diagnostics).
+    why: String,
 }
 
 /// What the protocol says one opponent slot chose at a boundary.
@@ -161,8 +163,9 @@ struct Particle {
 enum SlotSpec {
     Pass,
     Move { id: EffectId, loc: Option<i8>, tera: bool },
-    /// The slot acted invisibly (flinch, sleep, fainted first) or not at all: any legal move.
-    AnyMove,
+    /// The slot acted invisibly (flinch, sleep, fainted first) or not at all: any legal move,
+    /// terastallizing when the protocol showed its Tera.
+    AnyMove { tera: bool },
     Switch(String),
     Revive(String),
 }
@@ -208,6 +211,8 @@ pub struct WorldBuilder {
     /// Viewer request JSON by the index of the choice that answered it (`None`: not pushed).
     requests: Vec<Option<String>>,
     particles: Vec<Particle>,
+    /// Why the most recently dropped world was dropped.
+    last_failure: String,
     /// `particles` are at the end of the observed stream.
     synced: bool,
     pub stats: WorldStats,
@@ -239,6 +244,7 @@ impl WorldBuilder {
             choices: Vec::new(),
             requests: Vec::new(),
             particles: Vec::new(),
+            last_failure: String::new(),
             synced: false,
             stats: WorldStats::default(),
         })
@@ -246,6 +252,12 @@ impl WorldBuilder {
 
     pub fn viewer(&self) -> SideId {
         self.viewer
+    }
+
+    /// Why the most recently dropped world was dropped (empty if none was): the reason, the
+    /// observed line index and, for an exhausted budget, the expected and the replayed line.
+    pub fn last_failure(&self) -> &str {
+        &self.last_failure
     }
 
     pub fn tracker(&self) -> &RevealTracker {
@@ -314,7 +326,10 @@ impl WorldBuilder {
         for mut p in std::mem::take(&mut self.particles) {
             match advance(&cx, &mut p, &mut self.stats) {
                 Ok(()) => alive.push(p),
-                Err(_) => self.stats.deaths += 1,
+                Err(d) => {
+                    self.stats.deaths += 1;
+                    self.last_failure = format!("{d:?}: {}", p.why);
+                }
             }
         }
         let mut builds = 0;
@@ -324,7 +339,10 @@ impl WorldBuilder {
             match build(&cx, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) {
                 Ok(mut p) => match advance(&cx, &mut p, &mut self.stats) {
                     Ok(()) => alive.push(p),
-                    Err(_) => self.stats.deaths += 1,
+                    Err(d) => {
+                    self.stats.deaths += 1;
+                    self.last_failure = format!("{d:?}: {}", p.why);
+                }
                 },
                 Err(e @ (WorldError::UnknownSpecies(_) | WorldError::Team(_))) => {
                     error = Some(e);
@@ -346,8 +364,9 @@ impl WorldBuilder {
                 let Ok(mut p) = build(&cx, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) else {
                     break;
                 };
-                if advance(&cx, &mut p, &mut self.stats).is_err() {
+                if let Err(d) = advance(&cx, &mut p, &mut self.stats) {
                     self.stats.deaths += 1;
+                    self.last_failure = format!("{d:?}: {}", p.why);
                     continue;
                 }
                 if alive.len() >= self.config.particles {
@@ -479,7 +498,7 @@ fn build(
     let battle = Battle::from_team_defs(prng.seed(), p1, p2, names.clone(), DrawLog::default())
         .map_err(|e| WorldError::Team(e.0))?;
     stats.builds += 1;
-    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w: 0.0 })
+    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w: 0.0, why: String::new() })
 }
 
 /// Constraints for an opponent Pokemon from what the tracker saw.
@@ -575,12 +594,20 @@ fn advance(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<(),
     let mut idle = 0;
     loop {
         let before = p.cursor;
-        if !step(cx, p, stats)? {
-            return Ok(());
+        match step(cx, p, stats) {
+            Ok(true) => {}
+            Ok(false) => return Ok(()),
+            Err(d) => {
+                if p.why.is_empty() {
+                    p.why = format!("at line {} (choice {})", p.cursor, p.choice);
+                }
+                return Err(d);
+            }
         }
         // A step that reproduces no line twice in a row cannot make progress.
         idle = if p.cursor == before { idle + 1 } else { 0 };
         if idle > 2 {
+            p.why = format!("no progress at line {}", p.cursor);
             return Err(Dead::Desync);
         }
     }
@@ -651,8 +678,9 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
             }
         } else {
             if let Some(text) = viewer_text
-                && p.battle.choose(viewer.0 as usize, text).is_err()
+                && let Err(e) = p.battle.choose(viewer.0 as usize, text)
             {
+                p.why = format!("viewer choice {text:?} rejected at line {}: {}", p.cursor, e.text);
                 return Err(Dead::Choice);
             }
             if let Some(choice) = &opp_choice
@@ -707,6 +735,11 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
         // same line keeps failing (its cause may be an earlier, invisible draw).
         fails = if l == last_l { fails + 1 } else { 1 };
         last_l = l;
+        // A line that resampling the whole segment cannot fix is a wrong hypothesis (a set, an
+        // exact HP), not bad luck: stop spending the budget on it.
+        if fails > STUCK {
+            break;
+        }
         let mut level = 0;
         let mut threshold = 6;
         while fails > threshold {
@@ -731,6 +764,14 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
         }
         points.push((at, attempt));
     }
+    let entries = &p.battle.log.text.entries;
+    p.why = format!(
+        "{} at line {}: expected {:?}, replayed {:?}",
+        if fails > STUCK { "stuck" } else { "budget" },
+        p.cursor + last_l,
+        region.get(last_l),
+        produced.get(last_l).map(|&(i, _)| &entries[i])
+    );
     Err(Dead::Budget)
 }
 
@@ -869,7 +910,7 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
                     instructed -= 1;
                     continue;
                 }
-                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else { return SlotSpec::AnyMove };
+                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else { return SlotSpec::AnyMove { tera } };
                 let loc = if l.has_tag("spread") || l.has_tag("notarget") || l.has_tag("still") {
                     None
                 } else {
@@ -885,16 +926,20 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
                 if mine {
                     return match dex::lookup(EffectKind::Move, l.arg(2)) {
                         Some(id) if !l.arg(2).is_empty() => SlotSpec::Move { id, loc: None, tera },
-                        _ => SlotSpec::AnyMove,
+                        _ => SlotSpec::AnyMove { tera },
                     };
                 }
             }
-            "faint" if mine => return SlotSpec::AnyMove,
+            "faint" if mine => return SlotSpec::AnyMove { tera },
             _ => {}
         }
     }
-    SlotSpec::AnyMove
+    SlotSpec::AnyMove { tera }
 }
+
+/// Consecutive failures at one line after which a world is dropped (the backoff has resampled the
+/// whole segment, and the opponent's open choices, many times by then).
+const STUCK: u32 = 400;
 
 /// One concrete legal choice consistent with `specs`, sampling what the protocol left open. With
 /// `explore`, a slot read as a specific move is instead any legal move with probability
@@ -913,7 +958,9 @@ fn sample_choice(
     for _ in 0..32 {
         let mut pick = |k: usize, rng: &mut SplitMix64| {
             let spec = match &specs[k] {
-                SlotSpec::Move { .. } if explore && rng.chance(EXPLORE) => &SlotSpec::AnyMove,
+                SlotSpec::Move { tera, .. } if explore && rng.chance(EXPLORE) => {
+                    if *tera { &SlotSpec::AnyMove { tera: true } } else { &SlotSpec::AnyMove { tera: false } }
+                }
                 s => s,
             };
             slot_choice(cx, b, &legal, k, spec, rng)
@@ -983,13 +1030,14 @@ fn slot_choice(
             let loc = pick_loc(m, *loc, rng);
             mv(m, loc, *tera)
         }
-        SlotSpec::AnyMove => {
-            if moves.is_empty() {
-                return if ls.can_pass || ls.automatic_pass { Some(SlotChoice::default()) } else { None };
+        SlotSpec::AnyMove { tera } => {
+            let options: Vec<_> = moves.iter().filter(|m| !*tera || m.can_terastallize).collect();
+            if options.is_empty() {
+                return if !*tera && (ls.can_pass || ls.automatic_pass) { Some(SlotChoice::default()) } else { None };
             }
-            let m = &moves[rng.below(moves.len())];
+            let m = options[rng.below(options.len())];
             let loc = pick_loc(m, None, rng);
-            mv(m, loc, false)
+            mv(m, loc, *tera)
         }
         SlotSpec::Switch(name) | SlotSpec::Revive(name) => {
             let mask = if matches!(spec, SlotSpec::Revive(_)) { ls.revival_mask } else { ls.switch_mask };

@@ -13,3 +13,6 @@ pub mod search;
 
 #[cfg(feature = "python")]
 mod py;
+
+#[cfg(all(feature = "python", feature = "search"))]
+mod py_search;
