@@ -285,7 +285,64 @@ impl TeamDef {
     }
 }
 
+impl TeamDef {
+    /// Showdown packed text that `unpack` parses back to this team (species, ability and item
+    /// written by id, tera type and level always explicit). A name equal to a forme's full
+    /// species name comes back as the base species name, as `Teams.unpack` does.
+    pub fn pack(&self) -> String {
+        let mut out = String::new();
+        for (i, set) in self.sets[..self.len as usize].iter().enumerate() {
+            if i > 0 {
+                out.push(']');
+            }
+            set.pack_into(&mut out);
+        }
+        out
+    }
+}
+
 impl SetDef {
+    fn pack_into(&self, out: &mut String) {
+        use core::fmt::Write;
+        let key = |id: EffectId| if id == EffectId::NONE { "" } else { dex::effect(id).key };
+        let stats = |values: &[u8; 6], default: u8| {
+            if values.iter().all(|&v| v == default) {
+                String::new()
+            } else {
+                values.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",")
+            }
+        };
+        let moves: Vec<&str> = self.moves[..self.move_count as usize].iter().map(|&m| key(m)).collect();
+        let nature = if self.nature >= 0 { dex::NATURES[self.nature as usize].key } else { "" };
+        let gender = match self.gender {
+            Gender::Male => "M",
+            Gender::Female => "F",
+            Gender::Genderless => "N",
+            Gender::Unspecified => "",
+        };
+        let _ = write!(
+            out,
+            "{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{},{},{},{},{},{}",
+            self.name,
+            key(self.species),
+            key(self.item),
+            key(self.ability),
+            moves.join(","),
+            nature,
+            stats(&self.evs, 0),
+            gender,
+            stats(&self.ivs, 31),
+            if self.shiny { "S" } else { "" },
+            self.level,
+            if self.happiness == 255 { String::new() } else { self.happiness.to_string() },
+            self.hp_type,
+            if self.pokeball == "pokeball" { "" } else { &self.pokeball },
+            if self.gigantamax { "G" } else { "" },
+            if self.dynamax_level == 10 { String::new() } else { self.dynamax_level.to_string() },
+            dex::TYPE_NAMES[self.tera_type.0 as usize - 1],
+        );
+    }
+
     pub(crate) fn validate(&self) -> Result<(), TeamError> {
         let in_table = |id: EffectId, kind| {
             let table = dex::table(kind);
@@ -325,6 +382,23 @@ mod tera_validation_tests {
         for (tera, ok) in [(0, false), (1, true), (dex::TYPE_STELLAR.0, true), (dex::TYPE_UNKNOWN.0, true), (21, false)] {
             let set = SetDef { tera_type: TypeId(tera), ..set.clone() };
             assert_eq!(set.validate().is_ok(), ok, "tera {tera}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod pack_tests {
+    use super::*;
+
+    #[test]
+    fn pack_round_trips_through_unpack() {
+        for packed in [
+            "Muk|MukAlola|SitrusBerry|PoisonTouch|poisonjab,helpinghand,knockoff,drainpunch||85,85,85,85,85,85|M|||82|,,,,,Flying]Mesprit||LifeOrb|Levitate|protect,psychic,nastyplot,dazzlinggleam||85,,85,85,85,85|N|,0,,,,||86|,,,,,Psychic",
+            "Pikachu||lightball|static|thunderbolt|Serious||M|||100|,,,,,Electric",
+            "Snorlax||leftovers|thickfat|bodyslam,curse|Adamant|252,4,,,,252||,,,,,0|S|50|128,,,,,???",
+        ] {
+            let team = TeamDef::unpack(packed).unwrap();
+            assert_eq!(TeamDef::unpack(&team.pack()).unwrap(), team, "{}", team.pack());
         }
     }
 }

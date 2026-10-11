@@ -12,3 +12,6 @@ event-probes = []
 event-trace = ["trace-hooks"]
 # Assert that every Pokemon named in the protocol is marked in `revealed_mons` (determinization).
 reveal-audit = []
+# Fair-information search support (`search` module, PRNG resample hook). Off by default: the
+# hook adds a counter and a compare to every PRNG draw and 152 bytes to `BattleState`.
+search = []

@@ -3,6 +3,7 @@
 
 pub mod math;
 pub mod prng;
+#[cfg(feature = "search")]
 pub mod search;
 
 pub mod actions;
