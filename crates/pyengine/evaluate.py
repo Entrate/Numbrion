@@ -142,15 +142,10 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
             for e in np.flatnonzero(obs["done"]):
                 results[e].append(int(obs["winner"][e]))
         logs = env.finished_logs() if log_games else []
-    games = wins = ties = 0
     outcome = {}
     for e in range(n):
         for k, winner in enumerate(results[e][:rounds]):
-            games += 1
-            score = 0.5 if winner < 0 else float(winner == a_side[e])
-            wins += score == 1.0
-            ties += score == 0.5
-            outcome[(e, k + 1)] = score
+            outcome[(e, k + 1)] = 0.5 if winner < 0 else float(winner == a_side[e])
     # Reset starts battle 1; VecEnv logs the finished battle's ID (post-reset ID minus one).
     logs = [item for item in logs if (item["env"], item["battle"]) in outcome]
     for item in logs:
@@ -158,20 +153,30 @@ def play(a, b, pool: Path, envs_per_copy: int, rounds: int, seed: int, workers: 
             item["choices"] = choices.get((item["env"], item["battle"]), {})
     keys = [(e, k + 1) for e in range(E) for k in range(min(rounds, len(results[e]), len(results[e + E])))]
     paired = [outcome[(e, k)] + outcome[(e + E, k)] for e, k in keys]  # duplicate pairs: same teams and seed
+    # Only complete pairs count, so a run that stops at the step cap with some battles unfinished still reports a
+    # paired score (and says it is short) instead of mixing in unpaired games.
+    scores = [outcome[key] for e, k in keys for key in ((e, k), (e + E, k))]
+    games, wins, ties = len(scores), sum(x == 1.0 for x in scores), sum(x == 0.5 for x in scores)
     score = (wins + 0.5 * ties) / max(games, 1)
+    if games < 2 * E * rounds:
+        print(f"warning: {a.name} vs {b.name}: {games} of {2 * E * rounds} games after {steps} steps", flush=True)
     values = [(v, outcome[(e, battle)]) for e, battle, v in calibration if (e, battle) in outcome]
     result = dict(a=a.name, b=b.name, games=games, score=score, wins=wins, ties=ties,
                   pair_sweeps=sum(p == 2 for p in paired), pair_splits=sum(p == 1 for p in paired),
-                  pair_losses=sum(p == 0 for p in paired), steps=steps)
+                  pair_losses=sum(p == 0 for p in paired), steps=steps, short=games < 2 * E * rounds,
+                  pair_se=float(np.std(np.asarray(paired) / 2, ddof=1) / math.sqrt(len(paired))) if len(paired) > 1
+                  else None)
     if pairs:
         result["pairs"] = dict(env=[e for e, _ in keys], battle=[k for _, k in keys],
                                first=[outcome[key] for key in keys], mirrored=[outcome[(e + E, k)] for e, k in keys])
     return result, values, logs, a_side
 
 
-def elo(score: float, games: int) -> tuple[float, float]:
+def elo(score: float, games: int, pair_se: float | None = None) -> tuple[float, float]:
+    """Elo difference and its ~2-sigma error; ``pair_se`` (play's standard error of the mirrored-pair mean) replaces
+    the independent-games error when given."""
     p = min(max(score, 0.5 / games), 1 - 0.5 / games)
-    error = math.sqrt(p * (1 - p) / games)
+    error = math.sqrt(p * (1 - p) / games) if pair_se is None else max(pair_se, 1e-9)
     to_elo = lambda x: 400 * math.log10(x / (1 - x))
     return to_elo(p), (to_elo(min(p + 2 * error, 0.999)) - to_elo(max(p - 2 * error, 0.001))) / 2
 
@@ -375,7 +380,7 @@ def main():
     device, _ = training_device(args.device)
     dex = load_dex()
     rng = np.random.default_rng(args.seed)
-    snapshots = sorted((args.run / "snapshots").glob("m*.pt"))
+    snapshots = sorted(s for s in (args.run / "snapshots").glob("m*.pt") if s.stem[1:].isdigit())
     final = snapshots[-1]
     chosen = [s for s in snapshots if int(s.stem[1:]) % args.every == 0 and s != final] + [final]
     out = dict(run=str(args.run), pool=str(args.pool), temperature=args.temperature, guards=asdict(guards), matchups=[],
@@ -383,7 +388,8 @@ def main():
     output = args.run / "evaluation.json"
 
     def record(result):
-        result["elo"], result["elo_error"] = (round(x) for x in elo(result["score"], result["games"]))
+        result["elo"], result["elo_error"] = (round(x) for x in elo(result["score"], result["games"],
+                                                                     result.get("pair_se")))
         out["matchups"].append(result)
         print(json.dumps(result), flush=True)
         output.write_text(json.dumps(out, indent=1))
@@ -392,10 +398,24 @@ def main():
     smart_seed = args.seed + 500  # the smart matchups have their own seeds, so the older ones keep theirs
     random_agent, heuristic = RandomAgent(rng), HeuristicAgent(rng)
     smart = SmartHeuristicAgent(rng, dex)
+
+    def reseed(battle_seed, *policies):
+        """Every agent of the next matchup draws from a fresh RNG keyed by ``--seed`` and that matchup's battle seed,
+        so a matchup's result does not depend on the ones played before it. The Rust smart player keeps its own
+        stream, so it is rebuilt from the fresh RNG."""
+        nonlocal smart
+        fresh = np.random.default_rng((args.seed, battle_seed))
+        random_agent.rng = heuristic.rng = fresh
+        smart = SmartHeuristicAgent(fresh, dex)
+        for policy in policies:
+            policy.rng = fresh
+
+    reseed(seed)
     result, *_ = play(heuristic, random_agent, args.pool, args.envs, args.rounds, seed, args.workers)
     record(result)
     for opponent in (heuristic, random_agent):  # sanity rows for the smart baseline
         smart_seed += 1
+        reseed(smart_seed)
         result, _, logs, a_side = play(smart, opponent, args.pool, args.envs, args.rounds, smart_seed, args.workers,
                                        log_games=opponent is heuristic)
         record(result)
@@ -404,11 +424,13 @@ def main():
     for snapshot in chosen:
         policy = load_policy(snapshot, dex, device, rng, temperature=args.temperature, guards=guards)
         rounds = args.final_rounds if snapshot == final else args.rounds
-        for opponent in (random_agent, heuristic, smart):
-            if opponent is smart:
+        for kind in ("random", "heuristic", "smart"):
+            if kind == "smart":
                 smart_seed += 1
             else:
                 seed += 1
+            reseed(smart_seed if kind == "smart" else seed, policy)
+            opponent = dict(random=random_agent, heuristic=heuristic, smart=smart)[kind]
             is_final = snapshot == final and opponent is not random_agent
             policy.record_values = snapshot == final and opponent is heuristic
             result, values, logs, a_side = play(policy, opponent, args.pool, args.envs, rounds,
@@ -433,6 +455,7 @@ def main():
     for snapshot in chosen[:-1]:
         seed += 1
         older = load_policy(snapshot, dex, device, rng, temperature=args.temperature, guards=guards)
+        reseed(seed, final_policy, older)
         result, *_ = play(final_policy, older, args.pool, args.envs, args.rounds, seed, args.workers)
         result["minutes"] = int(snapshot.stem[1:])
         record(result)
