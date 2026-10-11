@@ -29,6 +29,11 @@ rustup component add llvm-tools --toolchain stable-x86_64-pc-windows-msvc
 powershell -File tools/pgo.ps1 -Corpus scratch/corpus/pgo-train.jsonl.gz [-Maturin <maturin.exe>] [-Python <python.exe>] [-Pool <pool.txt.gz>] [-Search]
 ```
 
+The PowerShell script supports output paths with spaces. It uses `-Python` for both wheel builds and
+the instrumented wheel workload, and `-Jobs` limits both cargo and maturin builds. `-Pool` is only
+needed with `-Maturin`. The working directory and build environment are restored even if a stage fails.
+An inherited `LLVM_PROFILE_FILE` is temporarily overridden so every profile lands under `<out>/profraw`.
+
 ## macOS and Linux
 
 ```sh
@@ -94,6 +99,21 @@ The `bench.py` and `search_bench.py` runs use the bundled pool, which the pyengi
 that ran the `pgo_workload` example from an instrumented `cargo build`. Re-measure on an idle machine before
 quoting absolute numbers.
 
+### 2026-10-11, Windows (MSVC rustc 1.99.0, `main` at `4dd4517`)
+
+A correctness run, not a speed measurement. `pgo.ps1` ran end to end twice, default and `-Search`, with the
+wheel (`-Maturin`, `-Python`, the bundled pool) and `-TrainSeconds 1`. Both output paths had spaces
+(`scratch/windows pgo default`, `scratch/windows pgo search`). The caller had set `CARGO_ENCODED_RUSTFLAGS`,
+`RUSTUP_TOOLCHAIN` (GNU) and `LLVM_PROFILE_FILE` beforehand. In both runs the script restored them and the
+working directory, and no profile was written to the inherited `LLVM_PROFILE_FILE` path.
+
+- Both PGO `difftest.exe` builds replay `sample-50`, `slice2-200` and `directed-smoke` (634 battles, not in the
+  training corpus) with every battle passing, and they pass the 124 harness selftests.
+- In a throwaway venv, `pytest crates/pyengine/pytests` passes with both PGO wheels: default 27 passed and 4
+  skipped (the search tests), search 31 passed. Each wheel reports the expected `numbrion.SEARCH`.
+- `tools/check.ps1` passes: engine unit tests with `search` but without `reveal-audit`, engine integration
+  tests with all features, pyengine with and without `search`, difftest, the fixture replays and the selftests.
+
 ### 2026-10-10, Windows (branch `perf3`)
 
 - Correctness at `a5fee3d`: the PGO `difftest.exe` (profile retrained on that head) replays all 13,034 gate
@@ -104,4 +124,5 @@ quoting absolute numbers.
   battles/s** (+34% over the same code built with MSVC without PGO). An earlier busy-CPU run at `158b4f2`
   measured 743 / 757 / 910. Re-measure on an idle machine before quoting.
 - That wheel was built from the difftest-only profile and, per the analysis above, most likely got no PGO
-  benefit. The changed `pgo.ps1` (wheel-profiled) has not been run on Windows yet.
+  benefit. The wheel-profiled `pgo.ps1` now runs on Windows (2026-10-11 above). Its wheel speedup has not
+  been measured there yet.

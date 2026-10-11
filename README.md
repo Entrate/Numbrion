@@ -41,9 +41,9 @@ npm ci
 npm run build
 ```
 
-From the Numbrion root, Windows users can build both release artifacts, run both
-test suites, replay the committed fixtures with the real engine, and run the
-harness fault-injection checks in one command:
+From the Numbrion root, Windows users can build both release artifacts, run the
+engine, pyengine (with and without search), and harness tests, replay the
+committed fixtures, and run the harness fault-injection checks in one command:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
@@ -54,11 +54,17 @@ set `NUMBRION_SHOWDOWN` to use another pinned, built checkout. It also discovers
 Rust under `%USERPROFILE%\.cargo\bin` and the local Node 24 installation under
 `%LOCALAPPDATA%\Programs\numbrion-tools` when the shell's PATH is outdated.
 
+The `reveal-audit` diagnostic runs on battle integration tests and fixture
+replays because synthetic unit fixtures bypass reveal bookkeeping.
+
 On other platforms, set `NUMBRION_SHOWDOWN` to the checkout's absolute path and
 run:
 
 ```sh
-cargo test -p engine --all-features --locked
+cargo test -p engine --features trace-hooks,event-probes,event-trace,search --locked
+cargo test -p engine --all-features --locked --test '*'
+cargo test -p pyengine --release --locked
+cargo test -p pyengine --release --locked --features search
 cargo test --manifest-path crates/difftest/Cargo.toml --all-features --locked
 crates/difftest/target/release/difftest replay data/fixtures/sample-50.jsonl.gz --sim engine
 crates/difftest/target/release/difftest replay data/fixtures/directed-smoke.jsonl.gz --sim engine
