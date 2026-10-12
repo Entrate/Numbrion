@@ -25,7 +25,8 @@ $Flags = @(
     '--teacher-coef', '0.2', '--teacher-end-minutes', '36.5', '--ko-bonus-end', '0.15',
     '--pool-minutes', '3', '--seed', '42', '--pool', 'data/teams/train-s42-2000.txt',
     '--distill-stream', $Labels, '--distill-coef', '0.5', '--distill-end-minutes', 'inf',
-    '--distill-batch', '128', '--distill-max-batches', '4', '--output', $Output
+    '--distill-batch', '128', '--distill-max-uses', '4', '--distill-reuse-gap', '50',
+    '--distill-max-age-minutes', '60', '--distill-max-batches', '6', '--output', $Output
 )
 $SupervisorPid = Join-Path $Output 'supervisor.pid'
 $TrainerPid = Join-Path $Output 'trainer.pid'

@@ -33,8 +33,8 @@ Run from the repository root:
   search (search_labels.py), whose strategy over its candidate pairs the policy imitates (training.distill). Every
   minibatch adds ``--distill-batch`` labelled positions with weight ``--distill-coef``, falling linearly to zero at
   ``--distill-end-minutes``; held-out shards report ``distill_val_loss`` and ``distill_val_agree``.
-* Continuous distillation (``--distill-stream DIR``): consume each training row once, validate on the newest
-  holdout rows, and archive fully used shards after latest.pt saves. New shards are scanned once per update.
+* Continuous distillation (``--distill-stream DIR``): reuse training rows with update gaps, retire stale rows,
+  validate on the newest holdout rows, and archive complete shards after latest.pt saves. Scan once per update.
 * Schedule: learning rate, entropy and KO bonus anneal over ``--schedule-minutes`` (default: ``--minutes``).
   ``--minutes inf`` runs until <output>/STOP or ``--stop-minutes``. Snapshots every ``--snapshot-minutes`` feed
   evaluate.py. ``latest.pt`` (with optimizer, opponent-pool, entropy-controller and stream state) supports ``--resume``.
@@ -183,7 +183,7 @@ def schedule_progress(args, elapsed: float) -> float:
 
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device,
                teacher_coef: float = 0.0, distill: DistillData | None = None,
-               distill_coef: float = 0.0, elapsed: float = 0.0) -> tuple[dict, int]:
+               distill_coef: float = 0.0, elapsed: float = 0.0, update: int | None = None) -> tuple[dict, int]:
     """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays.
 
     With ``--teacher-coef`` set, the buffer carries teacher labels and the loss imitates them with weight
@@ -192,7 +192,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
 
     With ``distill`` and ``distill_coef`` > 0, every minibatch also imitates ``--distill-batch`` search-labelled
     positions (training.distill), uncompiled, with weight ``distill_coef``. A stream instead spreads at most
-    ``--distill-max-batches`` use-once batches over the update, and starvation leaves plain PPO unchanged."""
+    ``--distill-max-batches`` batches of eligible rows over the update, and starvation leaves plain PPO unchanged."""
     steps, R = data["a0"].shape
     partner = np.arange(R) ^ 1
     advantages, returns = gae(data["reward"], data["value"], data["done"], data["bootstrap"], args.gamma, args.lam)
@@ -223,7 +223,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
         n_minibatches = args.epochs * sum(1 for _ in minibatches(np.arange(len(selected)), args.minibatch))
         stream_batches = distill.begin_update(rng, args.distill_batch,
                                               getattr(args, "distill_max_batches", 4) if distilling else 0,
-                                              n_minibatches, elapsed / 60)
+                                              n_minibatches, elapsed / 60, update=update)
     stats = {k: [] for k in (*terms_keys, "grad_norm", *(("distill_loss", "distill_agree") if distilling else ()))}
     # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
     # memory for every op given a new Python scalar (see training.ppo.Adam).
@@ -361,14 +361,18 @@ def parse_args(argv=None):
     labels = parser.add_mutually_exclusive_group()
     labels.add_argument("--distill", type=Path, nargs="+",
                         help="search_labels.py output directories (or label files) for search distillation")
-    labels.add_argument("--distill-stream", type=Path, help="directory of incoming use-once label shards")
+    labels.add_argument("--distill-stream", type=Path, help="directory of incoming label shards with bounded reuse")
     parser.add_argument("--distill-coef", type=float, default=0.0,
                         help="search-distillation loss weight (0: off); falls linearly to 0 at --distill-end-minutes")
     parser.add_argument("--distill-end-minutes", type=float, default=60.0)
     parser.add_argument("--distill-batch", type=int, default=128, help="labelled positions per minibatch")
     parser.add_argument("--distill-max-batches", type=int, default=4, help="maximum stream batches per PPO update")
+    parser.add_argument("--distill-max-uses", type=int, default=4, help="maximum batches per stream row over its life")
+    parser.add_argument("--distill-reuse-gap", type=int, default=50, help="minimum PPO updates between stream row uses")
+    parser.add_argument("--distill-max-age-minutes", type=float, default=60.0,
+                        help="retire stream rows older than this trainer-minute lag (inf: no retirement)")
     parser.add_argument("--distill-max-resident-rows", type=int, default=60000,
-                        help="maximum unused stream training rows cached in memory; remaining rows wait on disk")
+                        help="maximum unfinished stream training rows cached in memory; remaining rows wait on disk")
     parser.add_argument("--distill-holdout-rows", type=int, default=4000, help="newest stream rows kept for validation")
     parser.add_argument("--distill-pairs", type=int, default=4,
                         help="most weighted search candidates per position that the loss imitates")
@@ -416,6 +420,10 @@ def parse_args(argv=None):
         parser.error("--distill-batch, --distill-pairs and --distill-validate-every must be positive")
     if args.distill_max_batches < 0 or args.distill_holdout_rows < 0:
         parser.error("--distill-max-batches and --distill-holdout-rows must be nonnegative")
+    if args.distill_max_uses <= 0 or args.distill_reuse_gap < 0:
+        parser.error("--distill-max-uses must be positive and --distill-reuse-gap must be nonnegative")
+    if math.isnan(args.distill_max_age_minutes) or args.distill_max_age_minutes < 0:
+        parser.error("--distill-max-age-minutes must be nonnegative (inf is allowed)")
     if args.distill_max_resident_rows <= 0 or (args.distill_stream and args.distill_max_resident_rows < args.distill_batch):
         parser.error("--distill-max-resident-rows must be positive and fit --distill-batch for a stream")
     return args
@@ -462,7 +470,9 @@ def main():
     if args.distill_stream:
         distill = DistillStream(args.distill_stream, device, pairs=args.distill_pairs,
                                 holdout_rows=args.distill_holdout_rows, state=state.get("distill_stream"),
-                                max_resident_rows=args.distill_max_resident_rows)
+                                max_resident_rows=args.distill_max_resident_rows, max_uses=args.distill_max_uses,
+                                reuse_gap=args.distill_reuse_gap, max_age_minutes=args.distill_max_age_minutes,
+                                update=update, elapsed_minutes=elapsed_before / 60)
         print(json.dumps({"distill": distill.describe()}), flush=True)
     elif args.distill and args.distill_coef > 0:
         distill = DistillData(args.distill, device, pairs=args.distill_pairs)
@@ -546,7 +556,7 @@ def main():
             t1 = time.perf_counter()
             model.train()
             stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device,
-                                        teacher_coef, distill, distill_coef, elapsed)
+                                        teacher_coef, distill, distill_coef, elapsed, update=update + 1)
             train_seconds = time.perf_counter() - t1
             if controller is not None:
                 controller.update(stats["entropy"], progress)

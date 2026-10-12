@@ -98,23 +98,30 @@ class DistillData:
 
 
 class DistillStream(DistillData):
-    """Bounded, use-once labels, admitted newest first. Only MPS caches rows on device; other devices receive
-    sampled batches. Checkpoint masks refer to original shard rows, including rows waiting on disk. Completed
-    names survive archival so resends cannot train twice. Save model and ``state_dict`` before ``archive_used``."""
+    """Bounded label reuse, admitted newest first, with update gaps and age retirement. Only MPS caches rows on
+    device; other devices receive sampled batches. Checkpoint row state refers to original shard rows, including
+    rows waiting on disk. Completed names survive archival so resends cannot train. Save model and ``state_dict``
+    before ``archive_used``."""
 
     def __init__(self, directory: Path, device, pairs: int = 4, holdout_rows: int = 4000, state: dict | None = None,
-                 max_resident_rows: int = 60000):
+                 max_resident_rows: int = 60000, max_uses: int = 4, reuse_gap: int = 50,
+                 max_age_minutes: float = 60.0, update: int = 0, elapsed_minutes: float = 0.0):
         if max_resident_rows <= 0:
             raise ValueError("max_resident_rows must be positive")
+        if max_uses <= 0 or reuse_gap < 0 or math.isnan(max_age_minutes) or max_age_minutes < 0:
+            raise ValueError("max_uses must be positive; reuse_gap and max_age_minutes must be nonnegative")
         self.directory, self.device, self.pairs = Path(directory), device, pairs
         self.holdout_rows, self.max_resident_rows = holdout_rows, max_resident_rows
+        self.max_uses, self.reuse_gap, self.max_age_minutes = max_uses, reuse_gap, max_age_minutes
+        self.update, self.elapsed_minutes = update, elapsed_minutes
         self.shards = {}
-        self.used_rows = {}
+        self.row_state = {}
         self._catalog, self._reject_failed = {}, set()
         self.backlog_rows = 0
         self.completed = set()
         self.pending_moves = set()
         self.used_total = 0
+        self.rows_spent_total = self.rows_retired_total = self.retired_unused_total = self.completed_uses_total = 0
         self.held = None
         self.held_size = 0
         self._held_shards, self._held_seen = {}, set()
@@ -349,29 +356,45 @@ class DistillStream(DistillData):
                     os.replace(path, destination / name)
                     self._catalog.pop(name)
                     continue
-                used = self.used_rows.get(name)
-                if used is not None and used.shape != (info["size"],):
+                state = self.row_state.get(name)
+                if state is not None and any(state[k].shape != (info["size"],) for k in ("uses", "last_used", "done")):
                     raise ValueError("shard changed row count since checkpoint")
-                free = self.max_resident_rows - self.size
-                if free <= 0:
-                    continue
-                if used is None:
-                    used = np.zeros(info["size"], dtype=bool)
-                available = ~used
-                if name in self.shards:
-                    available[self.shards[name]["rows"]] = False
-                rows = np.flatnonzero(available)[:free]
-                if not len(rows):
-                    if used.all():
-                        self.completed.add(name)
-                        self.pending_moves.add(name)
-                        self.used_rows.pop(name, None)
-                    continue
+                if state is not None:
+                    self._retire(name, info)
+            except Exception as error:
+                self._reject(path, error)
+                continue
+        # Retire admitted shards before filling freed slots, even if a newer file appeared while the cache was full.
+        for path in files:
+            name = path.name
+            if name not in self._catalog or name in self.completed or name in self._reject_failed:
+                continue
+            info = self._catalog[name]
+            free = self.max_resident_rows - self.size
+            if free <= 0:
+                continue
+            state = self.row_state.get(name)
+            available = np.ones(info["size"], dtype=bool) if state is None else ~state["done"]
+            if name in self.shards:
+                available[self.shards[name]["rows"]] = False
+            rows = np.flatnonzero(available)[:free]
+            if not len(rows):
+                if not info["size"]:
+                    self.completed.add(name)
+                    self.pending_moves.add(name)
+                continue
+            try:
                 raw = self._read(path, rows, info)
             except Exception as error:
                 self._reject(path, error)
                 continue
-            self.used_rows[name] = used
+            if state is None:
+                self.row_state[name] = dict(uses=np.zeros(info["size"], dtype=np.int64),
+                                            last_used=np.full(info["size"], -1, dtype=np.int64),
+                                            done=np.zeros(info["size"], dtype=bool), admitted_minutes=self.elapsed_minutes)
+            self._retire(name, info)
+            if name in self.completed:
+                continue
             data = self._resident(raw)
             del raw
             if name in self.shards:
@@ -380,9 +403,36 @@ class DistillStream(DistillData):
                 rows = np.r_[shard["rows"], rows]
             self.shards[name] = dict(data=data, rows=rows,
                                      teacher_minutes=float(info["metadata"].get("teacher_minutes", np.nan)))
-        self.backlog_rows = sum(info["size"] - int(self.used_rows[name].sum() if name in self.used_rows else 0)
+        self.backlog_rows = sum(info["size"] - int(self.row_state[name]["done"].sum() if name in self.row_state else 0)
                                 - (len(self.shards[name]["rows"]) if name in self.shards else 0)
                                 for name, info in self._catalog.items() if name not in self.completed)
+
+    def _prune(self, name: str) -> None:
+        state = self.row_state[name]
+        if name in self.shards:
+            shard = self.shards[name]
+            keep = np.flatnonzero(~state["done"][shard["rows"]])
+            if not len(keep):
+                del self.shards[name]
+            elif len(keep) < len(shard["rows"]):
+                shard["data"] = self._select(shard["data"], keep)
+                shard["rows"] = shard["rows"][keep]
+        if state["done"].all():
+            self.completed.add(name)
+            self.pending_moves.add(name)
+            del self.row_state[name]
+
+    def _retire(self, name: str, info: dict) -> None:
+        state = self.row_state[name]
+        teacher = float(info["metadata"].get("teacher_minutes", np.nan))
+        origin = teacher if np.isfinite(teacher) else state["admitted_minutes"]
+        if self.elapsed_minutes - origin > self.max_age_minutes:
+            retiring = ~state["done"]
+            self.rows_retired_total += int(retiring.sum())
+            self.retired_unused_total += int((retiring & (state["uses"] == 0)).sum())
+            self.completed_uses_total += int(state["uses"][retiring].sum())
+            state["done"][retiring] = True
+        self._prune(name)
 
     @property
     def size(self) -> int:
@@ -390,17 +440,34 @@ class DistillStream(DistillData):
 
     def describe(self) -> dict:
         return dict(train=self.size, held=self.held_size, pairs=self.pairs, stream=str(self.directory),
-                    max_resident_rows=self.max_resident_rows, distill_backlog_rows=self.backlog_rows)
+                    max_resident_rows=self.max_resident_rows, max_uses=self.max_uses, reuse_gap=self.reuse_gap,
+                    max_age_minutes=self.max_age_minutes, distill_backlog_rows=self.backlog_rows)
 
     def begin_update(self, rng, batch: int, max_batches: int, minibatches: int,
-                     elapsed_minutes: float = 0.0) -> dict[int, dict]:
-        """Admit newest rows up to the cap, sample the cache without replacement, and spread full PPO batches."""
+                     elapsed_minutes: float = 0.0, update: int | None = None) -> dict[int, dict]:
+        """Retire stale rows, admit up to the cap, and sample full batches without replacement, least-used first.
+        Explicit update numbers follow the trainer; standalone callers advance the checkpointed counter."""
+        self.update = self.update + 1 if update is None else update
+        self.elapsed_minutes = elapsed_minutes
         self.scan()
-        fresh = self.size
-        count = min(fresh // batch, max_batches, minibatches)
-        chosen = rng.choice(fresh, size=count * batch, replace=False).reshape(count, batch) if count else []
         names = list(self.shards)
         offsets = np.cumsum([0, *(len(self.shards[n]["rows"]) for n in names)])
+        uses = np.concatenate([self.row_state[n]["uses"][self.shards[n]["rows"]] for n in names]) if names else np.array([])
+        last = np.concatenate([self.row_state[n]["last_used"][self.shards[n]["rows"]] for n in names]) if names else np.array([])
+        eligible = (uses == 0) | ((last < self.update) & (self.update - last >= self.reuse_gap))
+        available = int(eligible.sum())
+        count = min(available // batch, max_batches, minibatches)
+        chosen, remaining = [], count * batch
+        if remaining:
+            for tier in np.unique(uses[eligible]):
+                rows = np.flatnonzero(eligible & (uses == tier))
+                n = min(len(rows), remaining)
+                chosen.extend(rng.choice(rows, size=n, replace=False))
+                remaining -= n
+                if not remaining:
+                    break
+        chosen = np.asarray(chosen, dtype=np.int64).reshape(count, batch)
+        fresh_used = int((uses[chosen.ravel()] == 0).sum())
         taken = {name: [] for name in names}
         batches, teachers = {}, []
         positions = np.linspace(0, minibatches - 1, count, dtype=int) if count else []
@@ -419,35 +486,53 @@ class DistillStream(DistillData):
             if not pick:
                 continue
             shard = self.shards[name]
-            self.used_rows[name][shard["rows"][pick]] = True
-            keep = np.ones(len(shard["rows"]), dtype=bool)
-            keep[pick] = False
-            if keep.any():
-                shard["data"] = self._select(shard["data"], np.flatnonzero(keep))
-                shard["rows"] = shard["rows"][keep]
-            else:
-                del self.shards[name]
-            if self.used_rows[name].all():
-                self.completed.add(name)
-                self.pending_moves.add(name)
-                del self.used_rows[name]
+            state, rows = self.row_state[name], shard["rows"][pick]
+            state["uses"][rows] += 1
+            state["last_used"][rows] = self.update
+            spent = rows[state["uses"][rows] >= self.max_uses]
+            self.rows_spent_total += len(spent)
+            self.completed_uses_total += int(state["uses"][spent].sum())
+            state["done"][spent] = True
+            self._prune(name)
         used = count * batch
         self.used_total += used
         lag = elapsed_minutes - float(np.mean(teachers)) if teachers and np.isfinite(teachers).all() else None
-        self.metrics = dict(distill_fresh=fresh, distill_used=used, distill_used_total=self.used_total,
+        completed = self.rows_spent_total + self.rows_retired_total
+        self.metrics = dict(distill_eligible=available, distill_used=used, distill_used_fresh=fresh_used,
+                            distill_used_total=self.used_total, distill_rows_spent_total=self.rows_spent_total,
+                            distill_rows_retired_total=self.rows_retired_total,
+                            distill_retired_unused_total=self.retired_unused_total,
+                            distill_mean_uses_completed=self.completed_uses_total / completed if completed else None,
                             distill_backlog_rows=self.backlog_rows,
                             distill_batches=count, distill_shards_pending=len(self.shards),
                             distill_teacher_lag_min=None if lag is None else round(lag, 3))
         return batches
 
     def state_dict(self) -> dict:
-        return dict(used_rows={k: v.copy() for k, v in self.used_rows.items()}, completed=sorted(self.completed),
-                    used_total=self.used_total)
+        return dict(row_state={name: {k: v.copy() if isinstance(v, np.ndarray) else v for k, v in state.items()}
+                               for name, state in self.row_state.items()}, completed=sorted(self.completed),
+                    used_total=self.used_total, rows_spent_total=self.rows_spent_total,
+                    rows_retired_total=self.rows_retired_total, retired_unused_total=self.retired_unused_total,
+                    completed_uses_total=self.completed_uses_total, update=self.update, elapsed_minutes=self.elapsed_minutes)
 
     def load_state_dict(self, state: dict) -> None:
-        self.used_rows = {k: np.asarray(v, dtype=bool).copy() for k, v in state.get("used_rows", {}).items()}
+        self.update = int(state.get("update", self.update))
+        self.elapsed_minutes = float(state.get("elapsed_minutes", self.elapsed_minutes))
+        self.row_state = {name: dict(uses=np.asarray(s["uses"], dtype=np.int64).copy(),
+                                    last_used=np.asarray(s["last_used"], dtype=np.int64).copy(),
+                                    done=np.asarray(s["done"], dtype=bool).copy(), admitted_minutes=float(s["admitted_minutes"]))
+                          for name, s in state.get("row_state", {}).items()}
+        # A legacy use-once checkpoint's consumed rows stay complete, even when the new run allows reuse.
+        for name, used in state.get("used_rows", {}).items():
+            done = np.asarray(used, dtype=bool).copy()
+            self.row_state[name] = dict(uses=done.astype(np.int64), last_used=np.full(len(done), -1, dtype=np.int64),
+                                        done=done, admitted_minutes=self.elapsed_minutes)
         self.completed = set(state.get("completed", []))
         self.used_total = int(state.get("used_total", 0))
+        self.rows_spent_total = int(state.get("rows_spent_total", self.used_total if "used_rows" in state else 0))
+        self.rows_retired_total = int(state.get("rows_retired_total", 0))
+        self.retired_unused_total = int(state.get("retired_unused_total", 0))
+        self.completed_uses_total = int(state.get("completed_uses_total", self.rows_spent_total))
         self.shards.clear()
         self._catalog.clear()
         self.backlog_rows = 0

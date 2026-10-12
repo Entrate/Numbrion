@@ -1,4 +1,4 @@
-"""Use-once stream consumption, checkpoint/archive ordering, live delivery, validation and infinite schedules."""
+"""Bounded stream reuse, use-once compatibility, checkpoint/archive ordering, live delivery, validation and infinite schedules."""
 import json
 import math
 import shutil
@@ -46,9 +46,198 @@ def row_ids(batches):
     return [int(row) for batch in batches.values() for row in batch["field"][:, 0].tolist()]
 
 
+@pytest.mark.parametrize("max_uses", [1, 2, 4])
+@pytest.mark.parametrize("archive_before_resume", [False, True])
+def test_reuse_limits_and_gap_survive_every_update_resume(tmp_path, labels, max_uses, archive_before_resume):
+    paths = [write_shard(tmp_path, labels, seq, rows=rows) for seq, rows in enumerate((6, 9))]
+    stream = DistillStream(tmp_path, DEVICE, max_resident_rows=8, max_uses=max_uses, reuse_gap=3)
+    rng, uses, last = np.random.default_rng(7), {}, {}
+    for update in range(1, 101):
+        ids = row_ids(stream.begin_update(rng, 1, 2, 5, elapsed_minutes=30))
+        assert len(ids) == len(set(ids)) and len(ids) <= 2
+        fresh = sum(row not in uses for row in ids)
+        for row in ids:
+            assert row not in last or update - last[row] >= 3
+            uses[row], last[row] = uses.get(row, 0) + 1, update
+            assert uses[row] <= max_uses
+        assert stream.metrics["distill_used_fresh"] == fresh
+        assert stream.metrics["distill_used_total"] == sum(uses.values())
+        assert stream.size <= 8
+        assert stream.rows_spent_total + stream.size + stream.backlog_rows == 15
+        trainer.save(tmp_path / "latest.pt", {"distill_stream": stream.state_dict(), "numpy_rng": rng.bit_generator.state})
+        if archive_before_resume:
+            stream.archive_used()
+        saved = torch.load(tmp_path / "latest.pt", weights_only=False)
+        stream = DistillStream(tmp_path, DEVICE, max_resident_rows=8, max_uses=max_uses, reuse_gap=3,
+                                state=saved["distill_stream"])
+        rng.bit_generator.state = saved["numpy_rng"]
+    assert len(uses) == 15 and set(uses.values()) == {max_uses}
+    assert stream.rows_spent_total == 15 and stream.rows_retired_total == stream.retired_unused_total == 0
+    assert stream.metrics == {} and not stream.row_state and not stream.shards
+    assert not stream.begin_update(rng, 1, 2, 5, elapsed_minutes=30)
+    assert stream.metrics["distill_mean_uses_completed"] == max_uses
+    stream.archive_used()
+    shutil.copyfile(tmp_path / "used" / paths[0].name, paths[0])
+    assert not stream.begin_update(rng, 1, 2, 5, elapsed_minutes=30)
+    assert stream.used_total == 15 * max_uses
+    trainer.save(tmp_path / "latest.pt", {"distill_stream": stream.state_dict()})
+    stream.archive_used()
+    assert not paths[0].exists()
+
+
+@pytest.mark.parametrize("gap", [0, 1, 3, 50])
+def test_exact_gap_boundary_and_never_twice_in_one_update(tmp_path, labels, gap):
+    path = write_shard(tmp_path, labels, 0, rows=8)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=2, reuse_gap=gap)
+    rng = np.random.default_rng(8)
+    assert set(row_ids(stream.begin_update(rng, 4, 8, 10, update=100))) == set(range(8))
+    state = stream.state_dict()["row_state"][path.name]
+    assert (state["uses"] == 1).all() and (state["last_used"] == 100).all()
+    assert not stream.begin_update(rng, 4, 8, 10, update=100)
+    for update in range(101, 100 + max(gap, 1)):
+        assert not stream.begin_update(rng, 4, 8, 10, update=update)
+        assert stream.metrics["distill_eligible"] == 0
+    ids = row_ids(stream.begin_update(rng, 4, 8, 10, update=100 + max(gap, 1)))
+    assert len(ids) == len(set(ids)) == 8
+    assert stream.metrics["distill_used_fresh"] == 0 and stream.rows_spent_total == 8
+    assert not stream.begin_update(rng, 4, 8, 10, update=100 + max(gap, 1))
+
+
+def test_least_used_first_across_shards_and_use_count_tiers(tmp_path, labels):
+    paths = [write_shard(tmp_path, labels, seq, rows=8) for seq in range(2)]
+    stream, rng = DistillStream(tmp_path, DEVICE, max_uses=4, reuse_gap=0), np.random.default_rng(3)
+    first = row_ids(stream.begin_update(rng, 4, 1, 5))
+    second = row_ids(stream.begin_update(rng, 4, 1, 5))
+    assert set(first).isdisjoint(second)
+    batches = stream.begin_update(rng, 4, 4, 5)
+    ids = row_ids(batches)
+    fresh = set(range(8)) | set(range(1000, 1008))
+    fresh -= set(first + second)
+    assert set(ids[:8]) == fresh and len(ids) == len(set(ids)) == 16
+    assert stream.metrics["distill_used_fresh"] == 8
+    assert stream.metrics["distill_eligible"] == 16
+    previous = {seq * 1000 + row: int(stream.row_state[p.name]["uses"][row])
+                for seq, p in enumerate(paths) for row in range(8)}
+    batches = stream.begin_update(rng, 4, 3, 5)
+    ids = row_ids(batches)
+    assert [previous[row] for row in ids[:8]] == [1] * 8
+    assert [previous[row] for row in ids[8:]] == [2] * 4
+    assert stream.metrics["distill_used_fresh"] == 0
+
+
+def test_use_once_selection_matches_original_rng_choice(tmp_path, labels):
+    write_shard(tmp_path, labels, 0, rows=31)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1)
+    actual, expected, remaining = np.random.default_rng(6), np.random.default_rng(6), np.arange(31)
+    for _ in range(7):
+        count = min(len(remaining) // 4, 2, 3)
+        picked = expected.choice(len(remaining), size=count * 4, replace=False)
+        assert row_ids(stream.begin_update(actual, 4, 2, 3)) == remaining[picked].tolist()
+        remaining = np.delete(remaining, picked)
+        assert actual.bit_generator.state == expected.bit_generator.state
+
+
+@pytest.mark.parametrize("teacher_minutes", [20.0, np.nan])
+def test_age_retirement_boundary_nan_admission_and_persisted_metrics(tmp_path, labels, teacher_minutes):
+    path = write_shard(tmp_path, labels, 0, rows=10, teacher_minutes=teacher_minutes)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=4, reuse_gap=0, max_age_minutes=5)
+    rng = np.random.default_rng(4)
+    assert len(row_ids(stream.begin_update(rng, 2, 1, 3, elapsed_minutes=20))) == 2
+    state = stream.state_dict()
+    assert state["row_state"][path.name]["admitted_minutes"] == 20
+    # Saved state must not share mutable use counters with later, discarded updates.
+    assert len(row_ids(stream.begin_update(rng, 2, 1, 3, elapsed_minutes=21))) == 2
+    assert state["row_state"][path.name]["uses"].sum() == 2
+    trainer.save(tmp_path / "latest.pt", {"distill_stream": state})
+    loaded = torch.load(tmp_path / "latest.pt", weights_only=False)["distill_stream"]
+    stream = DistillStream(tmp_path, DEVICE, state=loaded, max_uses=4, reuse_gap=0, max_age_minutes=5)
+    assert not stream.begin_update(rng, 2, 0, 3, elapsed_minutes=25)
+    assert stream.metrics["distill_eligible"] == 10 and stream.rows_retired_total == 0
+    assert not stream.begin_update(rng, 2, 4, 5, elapsed_minutes=25.001)
+    assert stream.metrics["distill_eligible"] == stream.metrics["distill_used"] == 0
+    assert stream.metrics["distill_used_total"] == 2
+    assert stream.metrics["distill_rows_spent_total"] == 0
+    assert stream.metrics["distill_rows_retired_total"] == 10
+    assert stream.metrics["distill_retired_unused_total"] == 8
+    assert stream.metrics["distill_mean_uses_completed"] == 0.2
+    assert stream.size == stream.backlog_rows == 0 and not stream.row_state
+    assert path.name in stream.completed and path.exists() and not (tmp_path / "used").exists()
+    state = stream.state_dict()
+    trainer.save(tmp_path / "latest.pt", {"distill_stream": state})
+    stream.archive_used()
+    shutil.copyfile(tmp_path / "used" / path.name, path)
+    resumed = DistillStream(tmp_path, DEVICE, state=state, max_age_minutes=5)
+    assert not resumed.begin_update(rng, 2, 4, 5, elapsed_minutes=30)
+    assert resumed.metrics["distill_mean_uses_completed"] == 0.2 and resumed.rows_retired_total == 10
+
+
+def test_spent_and_retired_rows_both_contribute_to_completed_mean(tmp_path, labels):
+    path = write_shard(tmp_path, labels, 0, rows=8, teacher_minutes=0)
+    stream, rng = DistillStream(tmp_path, DEVICE, max_uses=2, reuse_gap=0, max_age_minutes=5), np.random.default_rng(4)
+    for _ in range(3):
+        stream.begin_update(rng, 4, 1, 3, elapsed_minutes=0)
+    assert stream.rows_spent_total == 4 and stream.metrics["distill_mean_uses_completed"] == 2
+    assert not stream.begin_update(rng, 4, 1, 3, elapsed_minutes=6)
+    assert stream.rows_retired_total == 4 and stream.retired_unused_total == 0
+    assert stream.metrics["distill_mean_uses_completed"] == 1.5
+    assert stream.used_total == 12 and path.name in stream.completed
+
+
+def test_stale_backlog_retires_on_admission_and_frees_full_cache(tmp_path, labels, monkeypatch):
+    old = [write_shard(tmp_path, labels, seq, rows=20, teacher_minutes=0) for seq in range(3)]
+    stream = DistillStream(tmp_path, DEVICE, max_resident_rows=4, reuse_gap=50, max_age_minutes=5)
+    rng = np.random.default_rng(4)
+    stream.begin_update(rng, 2, 1, 5, elapsed_minutes=0)
+    assert stream.size == 4 and stream.backlog_rows == 56
+    fresh = write_shard(tmp_path, labels, 3, rows=8, teacher_minutes=6)
+    reads, original = [], stream._read
+
+    def read(path, rows, info):
+        assert len(rows) + stream.size <= 4
+        reads.append(path.name)
+        return original(path, rows, info)
+
+    monkeypatch.setattr(stream, "_read", read)
+    stream.begin_update(rng, 2, 1, 5, elapsed_minutes=6)
+    assert reads == [fresh.name] and stream.completed == {old[-1].name}
+    assert stream.rows_retired_total == 20 and stream.retired_unused_total == 18
+    assert stream.size == 4 and stream.backlog_rows == 44
+    # Once the fresh shard itself expires, all stale disk shards retire in the same scan despite the tiny cap.
+    assert not stream.begin_update(rng, 2, 1, 5, elapsed_minutes=12)
+    assert stream.completed == {p.name for p in [*old, fresh]}
+    assert stream.rows_retired_total == 68 and stream.retired_unused_total == 64
+    assert stream.backlog_rows == stream.size == 0
+
+
+def test_nan_backlog_age_starts_at_each_shards_first_admission(tmp_path, labels):
+    old = write_shard(tmp_path, labels, 0, rows=10, teacher_minutes=np.nan)
+    new = write_shard(tmp_path, labels, 1, rows=10, teacher_minutes=np.nan)
+    stream, rng = DistillStream(tmp_path, DEVICE, max_resident_rows=4, max_age_minutes=5), np.random.default_rng(2)
+    stream.begin_update(rng, 2, 0, 5, elapsed_minutes=100)
+    assert stream.row_state[new.name]["admitted_minutes"] == 100 and old.name not in stream.row_state
+    stream.begin_update(rng, 2, 0, 5, elapsed_minutes=106)
+    assert stream.completed == {new.name} and stream.rows_retired_total == 10
+    assert stream.row_state[old.name]["admitted_minutes"] == 106
+    assert stream.size == 4 and stream.backlog_rows == 6
+    stream.begin_update(rng, 2, 0, 5, elapsed_minutes=112)
+    assert stream.rows_retired_total == stream.retired_unused_total == 20
+
+
+def test_legacy_checkpoint_keeps_consumed_rows_done_with_reuse(tmp_path, labels):
+    path = write_shard(tmp_path, labels, 0, rows=8, teacher_minutes=np.nan)
+    state = dict(used_rows={path.name: np.array([True] * 4 + [False] * 4)}, completed=[], used_total=4)
+    stream = DistillStream(tmp_path, DEVICE, state=state, reuse_gap=0, update=100, elapsed_minutes=30)
+    rng = np.random.default_rng(7)
+    for _ in range(8):
+        ids = row_ids(stream.begin_update(rng, 4, 1, 3, elapsed_minutes=30))
+        assert set(ids) <= set(range(4, 8))
+    assert stream.used_total == 20 and stream.rows_spent_total == 8
+    assert stream.metrics["distill_mean_uses_completed"] == 2.5
+
+
 def test_use_once_many_updates_and_live_delivery(tmp_path, labels):
     paths = [write_shard(tmp_path, labels, seq, rows=37) for seq in range(3)]
-    stream, rng, seen = DistillStream(tmp_path, DEVICE), np.random.default_rng(7), set()
+    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_uses=1), np.random.default_rng(7), set()
     for update in range(40):
         if update == 10:
             paths.append(write_shard(tmp_path, labels, 3, rows=25))
@@ -59,7 +248,7 @@ def test_use_once_many_updates_and_live_delivery(tmp_path, labels):
         assert stream.metrics["distill_used"] == len(ids)
         assert stream.metrics["distill_used_total"] == len(seen)
         assert stream.metrics["distill_teacher_lag_min"] == (10.0 if ids else None)
-        assert stream.size == stream.metrics["distill_fresh"] - len(ids)
+        assert stream.size == stream.metrics["distill_eligible"] - len(ids)
         for shard in stream.shards.values():
             assert len(shard["rows"]) == len(shard["data"]["weight"])
             assert all(v.device == DEVICE for k, v in shard["data"].items() if k != "_reference")
@@ -76,17 +265,17 @@ def test_use_once_many_updates_and_live_delivery(tmp_path, labels):
 @pytest.mark.parametrize("archive_before_resume", [False, True])
 def test_use_once_checkpoint_resume_partial_and_complete_shards(tmp_path, labels, archive_before_resume):
     first = write_shard(tmp_path, labels, 0, rows=8)
-    stream, rng = DistillStream(tmp_path, DEVICE), np.random.default_rng(9)
+    stream, rng = DistillStream(tmp_path, DEVICE, max_uses=1), np.random.default_rng(9)
     seen = set(row_ids(stream.begin_update(rng, 4, 2, 2)))
     partial = write_shard(tmp_path, labels, 1, rows=31)
     seen.update(row_ids(stream.begin_update(rng, 4, 2, 3)))
     state = stream.state_dict()
-    assert first.name in state["completed"] and state["used_rows"][partial.name].sum() == 8
+    assert first.name in state["completed"] and state["row_state"][partial.name]["uses"].sum() == 8
     trainer.save(tmp_path / "latest.pt", {"distill_stream": state, "numpy_rng": rng.bit_generator.state})
     if archive_before_resume:
         stream.archive_used()
     loaded = torch.load(tmp_path / "latest.pt", weights_only=False)
-    resumed = DistillStream(tmp_path, DEVICE, state=loaded["distill_stream"])
+    resumed = DistillStream(tmp_path, DEVICE, max_uses=1, state=loaded["distill_stream"])
     rng.bit_generator.state = loaded["numpy_rng"]
     for _ in range(20):
         ids = row_ids(resumed.begin_update(rng, 1, 4, 5))
@@ -105,12 +294,12 @@ def test_use_once_checkpoint_resume_partial_and_complete_shards(tmp_path, labels
 
 def test_unsaved_updates_can_be_replayed_without_losing_rows(tmp_path, labels):
     write_shard(tmp_path, labels, 0, rows=32)
-    stream, rng = DistillStream(tmp_path, DEVICE), np.random.default_rng(2)
+    stream, rng = DistillStream(tmp_path, DEVICE, max_uses=1), np.random.default_rng(2)
     committed = set(row_ids(stream.begin_update(rng, 4, 1, 3)))
     state = stream.state_dict()
     row_ids(stream.begin_update(rng, 4, 1, 3))
-    assert sum(mask.sum() for mask in state["used_rows"].values()) == 4
-    restored = DistillStream(tmp_path, DEVICE, state=state)
+    assert sum(s["uses"].sum() for s in state["row_state"].values()) == 4
+    restored = DistillStream(tmp_path, DEVICE, max_uses=1, state=state)
     ids = row_ids(restored.begin_update(rng, 4, 4, 5))
     assert committed.isdisjoint(ids) and restored.size == 12
 
@@ -119,7 +308,7 @@ def test_newest_holdout_rows_never_trained_and_reload_newest_first(tmp_path, lab
     write_shard(tmp_path, labels, 0, rows=16)
     old = write_shard(tmp_path, labels, 19, rows=12, holdout=True)
     new = write_shard(tmp_path, labels, 39, rows=12, holdout=True)
-    stream = DistillStream(tmp_path, DEVICE, holdout_rows=18)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1, holdout_rows=18)
     batches = stream.begin_update(np.random.default_rng(3), 4, 4, 5)
     assert set(row_ids(batches)) == set(range(16))
     expected = set(range(39000, 39012)) | set(range(19006, 19012))
@@ -134,7 +323,7 @@ def test_newest_holdout_rows_never_trained_and_reload_newest_first(tmp_path, lab
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(DistillStream, "_read",
                       staticmethod(lambda p, *args: (reads.append(p.name), original(p, *args))[1]))
-        resumed = DistillStream(tmp_path, DEVICE, holdout_rows=18, state=stream.state_dict())
+        resumed = DistillStream(tmp_path, DEVICE, max_uses=1, holdout_rows=18, state=stream.state_dict())
     assert reads == [new.name, old.name]
     assert set(resumed.held["field"][:, 0].tolist()) == expected
     newest = write_shard(tmp_path, labels, 59, rows=25, holdout=True)
@@ -145,7 +334,7 @@ def test_newest_holdout_rows_never_trained_and_reload_newest_first(tmp_path, lab
 
 def test_ignores_temporary_and_partial_shards_and_quarantines_invalid_final_name(tmp_path, labels):
     directory = tmp_path / "arriving"
-    stream = DistillStream(directory, DEVICE)
+    stream = DistillStream(directory, DEVICE, max_uses=1)
     assert not stream.begin_update(np.random.default_rng(0), 4, 4, 5)
     final = write_shard(directory, labels, 0, rows=8)
     contents = final.read_bytes()
@@ -183,12 +372,12 @@ def test_corrupt_zlib_shard_is_quarantined_and_does_not_crash_or_retry(tmp_path,
     with pytest.raises(zlib.error):
         with np.load(bad, allow_pickle=False) as data:
             data["ids"]
-    stream = DistillStream(tmp_path, DEVICE)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1)
     assert set(row_ids(stream.begin_update(np.random.default_rng(4), 1, 8, 8))) == set(range(8))
     assert good.exists() and not bad.exists() and (tmp_path / "rejected" / bad.name).exists()
     lines = capsys.readouterr().out.splitlines()
     assert len(lines) == 1 and bad.name in lines[0] and "decompress" in lines[0]
-    resumed = DistillStream(tmp_path, DEVICE, state=stream.state_dict())
+    resumed = DistillStream(tmp_path, DEVICE, max_uses=1, state=stream.state_dict())
     assert not resumed.begin_update(np.random.default_rng(4), 1, 8, 8)
     assert capsys.readouterr().out == ""
 
@@ -222,7 +411,7 @@ def test_invalid_shards_are_rejected_before_training(tmp_path, labels, capsys, k
     bad = write_shard(tmp_path, labels, 1, rows=8)
     rewrite_shard(bad, key, change)
     write_shard(tmp_path, labels, 0, rows=8)
-    stream = DistillStream(tmp_path, DEVICE)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1)
     assert set(row_ids(stream.begin_update(np.random.default_rng(3), 1, 8, 8))) == set(range(8))
     assert not bad.exists() and (tmp_path / "rejected" / bad.name).exists()
     lines = capsys.readouterr().out.splitlines()
@@ -233,7 +422,7 @@ def test_invalid_shards_are_rejected_before_training(tmp_path, labels, capsys, k
 
 def test_resident_cap_admits_newest_first_and_leaves_backlog_on_disk(tmp_path, labels, monkeypatch):
     paths = [write_shard(tmp_path, labels, seq, rows=8) for seq in range(6)]
-    stream = DistillStream(tmp_path, DEVICE, max_resident_rows=10)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=10)
     reads = []
     original = DistillStream._read
 
@@ -262,14 +451,15 @@ def test_resident_cap_admits_newest_first_and_leaves_backlog_on_disk(tmp_path, l
     assert stream.backlog_rows == stream.size == 0
 
 
-def test_non_mps_cache_stays_on_cpu_and_only_sampled_rows_move_to_device(tmp_path, labels):
+@pytest.mark.parametrize("max_uses", [1, 4])
+def test_non_mps_cache_stays_on_cpu_and_only_sampled_rows_move_to_device(tmp_path, labels, max_uses):
     write_shard(tmp_path, labels, 0, rows=12)
-    stream = DistillStream(tmp_path, torch.device("meta"), max_resident_rows=10)
+    stream = DistillStream(tmp_path, torch.device("meta"), max_uses=max_uses, max_resident_rows=10)
     stream.scan()
     assert stream.size == 10 and stream.backlog_rows == 2
     batches = stream.begin_update(np.random.default_rng(6), 2, 1, 3)
     assert all(v.device.type == "meta" and len(v) == 2 for batch in batches.values() for v in batch.values())
-    assert stream.size == 8
+    assert stream.size == (8 if max_uses == 1 else 10)
     assert all(v.device.type == "cpu" for shard in stream.shards.values()
                for k, v in shard["data"].items() if k != "_reference")
 
@@ -277,7 +467,7 @@ def test_non_mps_cache_stays_on_cpu_and_only_sampled_rows_move_to_device(tmp_pat
 @pytest.mark.parametrize("archive_before_resume", [False, True])
 def test_use_once_resume_with_backlog_and_shards_larger_than_cap(tmp_path, labels, archive_before_resume):
     paths = [write_shard(tmp_path, labels, seq, rows=rows) for seq, rows in enumerate((13, 9, 10))]
-    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_resident_rows=7), np.random.default_rng(9), set()
+    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=7), np.random.default_rng(9), set()
     seen.update(row_ids(stream.begin_update(rng, 1, 3, 5)))
     assert stream.size == 4 and stream.backlog_rows == 25
     assert all(path.exists() for path in paths)
@@ -287,7 +477,7 @@ def test_use_once_resume_with_backlog_and_shards_larger_than_cap(tmp_path, label
             stream.archive_used()
         state = torch.load(tmp_path / "latest.pt", weights_only=False)["distill_stream"]
         # A new cap must preserve the original row masks, including the unadmitted portion of a shard.
-        stream = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=state)
+        stream = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=5, state=state)
         ids = row_ids(stream.begin_update(rng, 1, 3, 5))
         assert seen.isdisjoint(ids) and len(ids) == len(set(ids))
         seen.update(ids)
@@ -299,7 +489,7 @@ def test_use_once_resume_with_backlog_and_shards_larger_than_cap(tmp_path, label
     stream.archive_used()
     assert all((tmp_path / "used" / path.name).exists() and not path.exists() for path in paths)
     shutil.copyfile(tmp_path / "used" / paths[2].name, paths[2])
-    resumed = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=stream.state_dict())
+    resumed = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=5, state=stream.state_dict())
     assert not resumed.begin_update(rng, 1, 3, 5) and resumed.used_total == 32
 
 
@@ -307,12 +497,12 @@ def test_partial_reads_support_fortran_order_and_noncontiguous_unused_rows(tmp_p
     path = write_shard(tmp_path, labels, 0, rows=12)
     for key in OBS_KEYS:
         rewrite_shard(path, key, np.asfortranarray)
-    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_resident_rows=5), np.random.default_rng(2), set()
+    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=5), np.random.default_rng(2), set()
     for _ in range(6):
         ids = row_ids(stream.begin_update(rng, 1, 2, 3))
         assert seen.isdisjoint(ids)
         seen.update(ids)
-        stream = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=stream.state_dict())
+        stream = DistillStream(tmp_path, DEVICE, max_uses=1, max_resident_rows=5, state=stream.state_dict())
     assert seen == set(range(12))
 
 
@@ -328,7 +518,7 @@ def test_round_one_and_metadata_shards_still_load_offline(tmp_path, labels):
 
 def test_batches_limited_by_ppo_minibatches_and_unknown_teacher_lag(tmp_path, labels):
     write_shard(tmp_path, labels, 0, rows=100, teacher_minutes=np.nan)
-    stream = DistillStream(tmp_path, DEVICE)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1)
     batches = stream.begin_update(np.random.default_rng(2), 8, 4, 2, elapsed_minutes=30)
     assert len(batches) == 2 and stream.metrics["distill_used"] == 16
     assert stream.metrics["distill_teacher_lag_min"] is None
@@ -354,11 +544,42 @@ def update_args():
                            distill_batch=4, distill_max_batches=2)
 
 
+def test_ppo_stream_reuse_tracks_trainer_updates_across_resume(tmp_path, labels):
+    steps, rows = 2, 8
+    arrays = {k: v[:steps * rows].reshape(steps, rows, *v.shape[1:]).copy() for k, v in labels.items() if k in OBS_KEYS}
+    arrays.update(a0=labels["pairs"][:steps * rows, 0, 0].reshape(steps, rows).astype(np.int64),
+                  a1=labels["pairs"][:steps * rows, 0, 1].reshape(steps, rows).astype(np.int64),
+                  mask0=labels["mask0"][:steps * rows].reshape(steps, rows, -1).copy(),
+                  mask1=labels["mask1"][:steps * rows, 0].reshape(steps, rows, -1).copy(),
+                  foe_match=np.full((steps, rows, 6), -1, np.int64),
+                  reward=np.random.default_rng(0).normal(size=(steps, rows)).astype(np.float32),
+                  value=np.zeros((steps, rows), np.float32), logp=np.zeros((steps, rows), np.float32),
+                  done=np.ones((steps, rows), bool), train=np.ones((steps, rows), bool), bootstrap=np.zeros(rows, np.float32))
+    write_shard(tmp_path, labels, 0, rows=8)
+    model, args, rng = model_for_test(), update_args(), np.random.default_rng(5)
+    args.minibatch = 8
+    optimizer = Adam(model.parameters(), 3e-4)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=2, reuse_gap=3)
+    stats, samples = trainer.ppo_update(model, optimizer, arrays, args, rng, 0.01, DEVICE,
+                                       distill=stream, distill_coef=0.5, elapsed=30 * 60, update=100)
+    assert samples == 16 and stats["distill_used"] == stats["distill_used_fresh"] == 8
+    assert stats["distill_batches"] == 2 and np.isfinite(stats["distill_loss"])
+    trainer.save(tmp_path / "latest.pt", {"distill_stream": stream.state_dict()})
+    loaded = torch.load(tmp_path / "latest.pt", weights_only=False)["distill_stream"]
+    stream = DistillStream(tmp_path, DEVICE, state=loaded, max_uses=2, reuse_gap=3)
+    for update, expected in ((101, 0), (102, 0), (103, 8), (103, 0), (200, 0)):
+        stats, _ = trainer.ppo_update(model, optimizer, arrays, args, rng, 0.01, DEVICE,
+                                     distill=stream, distill_coef=0.5, elapsed=30 * 60, update=update)
+        assert stats["distill_used"] == expected and stats["distill_used_fresh"] == 0
+        assert (stats["distill_loss"] is None) == (expected == 0)
+    assert stream.used_total == 16 and stream.rows_spent_total == 8 and stream.size == 0
+
+
 def test_starvation_is_exactly_plain_ppo_then_live_shard_is_consumed_once(tmp_path, labels, rollout, monkeypatch):
     arrays, _ = rollout
     plain, streamed = model_for_test(), model_for_test()
     args = update_args()
-    stream = DistillStream(tmp_path, DEVICE)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=1)
     scan_calls = []
     original_scan = stream.scan
     monkeypatch.setattr(stream, "scan", lambda: (scan_calls.append(1), original_scan())[1])
@@ -425,6 +646,9 @@ def test_schedule_clamps_and_inf_budget(minutes, schedule):
 @pytest.mark.parametrize("argv", [["--minutes", "nan"], ["--minutes", "0"], ["--schedule-minutes", "0"],
                                   ["--schedule-minutes", "nan"], ["--stop-minutes", "-1"],
                                   ["--distill", "a", "--distill-stream", "b"], ["--distill-batch", "0"],
+                                  ["--distill-max-uses", "0"], ["--distill-max-uses", "-1"],
+                                  ["--distill-reuse-gap", "-1"], ["--distill-max-age-minutes", "-1"],
+                                  ["--distill-max-age-minutes", "nan"],
                                   ["--distill-max-resident-rows", "0"], ["--distill-max-resident-rows", "-1"],
                                   ["--distill-stream", "a", "--distill-max-resident-rows", "127"]])
 def test_invalid_schedule_and_stream_arguments(argv):
@@ -432,10 +656,14 @@ def test_invalid_schedule_and_stream_arguments(argv):
         trainer.parse_args(argv)
 
 
-def test_resident_cap_flag_default_and_override():
-    assert trainer.parse_args([]).distill_max_resident_rows == 60000
-    args = trainer.parse_args(["--distill-stream", "a", "--distill-max-resident-rows", "256"])
+def test_stream_flag_defaults_and_overrides():
+    defaults = trainer.parse_args([])
+    assert defaults.distill_max_resident_rows == 60000 and defaults.distill_max_batches == 4
+    assert defaults.distill_max_uses == 4 and defaults.distill_reuse_gap == 50 and defaults.distill_max_age_minutes == 60
+    args = trainer.parse_args(["--distill-stream", "a", "--distill-max-resident-rows", "256", "--distill-max-uses", "1",
+                               "--distill-reuse-gap", "0", "--distill-max-age-minutes", "inf"])
     assert args.distill_max_resident_rows == 256
+    assert args.distill_max_uses == 1 and args.distill_reuse_gap == 0 and args.distill_max_age_minutes == math.inf
 
 
 def test_main_stop_checkpoint_archive_and_resume_new_output(tmp_path, labels, rollout, monkeypatch):
@@ -491,7 +719,8 @@ def test_main_stop_checkpoint_archive_and_resume_new_output(tmp_path, labels, ro
     argv = ["--minutes", "inf", "--schedule-minutes", "120", "--width", "32", "--layers", "1", "--envs", "4",
             "--workers", "1", "--steps", "16", "--epochs", "1", "--minibatch", "32", "--device", "cpu",
             "--distill-stream", str(directory), "--distill-coef", "0.5", "--distill-end-minutes", "inf",
-            "--distill-batch", "4", "--distill-max-batches", "1", "--distill-validate-every", "1"]
+            "--distill-batch", "4", "--distill-max-batches", "1", "--distill-validate-every", "1",
+            "--distill-max-uses", "1", "--distill-max-age-minutes", "inf"]
     monkeypatch.setattr("sys.argv", ["train_selfplay.py", *argv, "--output", str(first)])
     trainer.main()
     checkpoint = torch.load(first / "latest.pt", weights_only=False)

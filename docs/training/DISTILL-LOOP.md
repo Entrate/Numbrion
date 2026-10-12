@@ -46,7 +46,7 @@ run `-Action start` again after logging in. A file lock and task state prevent d
 The supervisor runs `.venv\Scripts\python.exe`, resumes `latest.pt` when available, and restarts after 30 seconds
 unless `train\STOP` exists. Stop creates that file. The trainer saves `latest.pt` at the next update boundary, exits,
 and the supervisor ends. Status prints supervisor/trainer pids, scheduled task state, the latest metrics line with
-`update`, `minutes`, `distill_fresh`, `distill_used`, `distill_teacher_lag`, and active/used/heldout shard counts.
+`update`, `minutes` and distillation counters, and active/used/heldout shard counts.
 Stdout appends to `train\trainer.log`; stderr appends to `train\trainer.log.err`.
 
 On the Mac:
@@ -89,7 +89,7 @@ Mac wrapper state and log paths. Windows accepts `DISTILL_WINDOWS_REPO`, `DISTIL
 `DISTILL_WINDOWS_LABELS`; start passes these resolved paths to the scheduled supervisor. Trainer flags are in one
 block at the top of `windows-train.ps1`.
 
-## Shards, use-once semantics and crashes
+## Shards, reuse and crashes
 
 A process writes `labels-<RUN>-<six-digit sequence>.npz`. RUN begins with the UTC start time as
 `YYYYMMDDTHHMMSSZ`, followed by six-digit microseconds and a random UUID suffix. Names sort by start time and remain
@@ -106,26 +106,85 @@ runs about every five minutes, fetches only a newer numbered snapshot into `.pt.
 keeps the newest three teachers. A sync lock prevents two copies from sharing the ledger. Mac labels remain on disk
 after delivery; disk usage grows until you archive or remove sent shards.
 
-Windows only opens finished `labels-*.npz` files. Training rows are sampled uniformly without replacement from all
-fresh rows. Each update gets at most four batches of exactly 128 rows, further limited by fresh rows and PPO
-minibatches. Remainders wait. No labels means an ordinary PPO update. Holdouts go to `labels\heldout\`; fully used
-training shards move to `labels\used\` only after `latest.pt` saves their consumption state. The checkpoint tracks
-partly consumed row masks and consumed shards awaiting moves. The existing static `--distill` loader still accepts
-round-1 `labels-NNNN.npz` files without metadata.
+Windows only opens finished `labels-*.npz` files. Each training row can appear in at most `--distill-max-uses` batches
+over its life, default 4. A row used at update u waits until update u + `--distill-reuse-gap`, default 50, before
+becoming eligible again. A row never appears twice in one update, even with a gap of 0. Selection takes eligible
+0-use rows before any 1-use row, then 1-use rows before 2-use rows, and so on, uniformly at random within each tier.
+`--distill-max-uses 1` restores use-once selection and consumption.
 
-After a trainer crash, resume never reuses a row consumed by an update recorded in `latest.pt`. Rows consumed after
-the last checkpoint can be used again because those model updates were lost too. If sync crashes after Windows
-renamed a shard but before the Mac saved its ledger, a retry skips any matching active, used, or heldout Windows
+An update gets k = min(floor(eligible rows / `--distill-batch`), `--distill-max-batches`, PPO minibatches) batches,
+each containing exactly `--distill-batch` distinct rows. Sampling uses no replacement within the update, and the
+batches attach to PPO minibatches spread evenly across it. Remainders wait. No full eligible batch means an ordinary
+PPO update. The trainer admits newest shards first into free slots, up to `--distill-max-resident-rows`, default
+60000 unfinished rows, including rows waiting for their reuse gap. Other rows stay compressed on disk. MPS keeps
+resident tensors on device; other devices, including Windows DirectML, cache them on CPU and move only sampled batches.
+
+A row retires when current trainer elapsed minutes minus its shard's `teacher_minutes` exceeds
+`--distill-max-age-minutes`, default 60. For NaN teacher minutes, age starts at the trainer minute when the shard was
+first admitted, saved in the checkpoint. Retirement completes rows even if they have uses left. Once admitted, this
+age rule covers every unfinished row in the shard, including its rows still on disk. Shards waiting entirely on disk
+face the rule when admitted, so stale backlog after a long outage retires immediately and frees room for later shards.
+
+These flags affect only `--distill-stream`; static `--distill` sampling is unchanged:
+
+| Flag | Trainer default | Windows wrapper |
+|---|---|---|
+| `--distill-max-uses` | 4 | 4 |
+| `--distill-reuse-gap` | 50 updates | 50 updates |
+| `--distill-max-age-minutes` | 60 minutes | 60 minutes |
+| `--distill-max-batches` | 4 | 6 |
+| `--distill-batch` | 128 rows | 128 rows |
+| `--distill-max-resident-rows` | 60000 rows | 60000 rows |
+
+Max uses must be positive. Reuse gap and max age may be 0; `--distill-max-age-minutes inf` disables retirement.
+Holdouts remain validation only and go to `labels\heldout\`. A training shard completes when every row is spent at
+its use limit or retired, and moves to `labels\used\` only after `latest.pt` saves that state. The checkpoint tracks
+per-row use counts, last-used updates, completion masks, each admitted shard's admission minute, cumulative counters,
+and completed shard names. Completed names survive archival, so a resent shard never trains again. The existing
+static `--distill` loader still accepts round-1 `labels-NNNN.npz` files without metadata.
+
+After a trainer crash, resume preserves saved row-use counts, last-used updates and retirement counts. Uses after the last
+checkpoint can be replayed because those model updates were lost too. Legacy use-once checkpoints still load; their
+already-consumed rows stay complete. If sync crashes after Windows renamed a shard but before the Mac saved its ledger,
+a retry skips any matching active, used, or heldout Windows
 file rather than publishing it again. Keep those directories with the training checkpoint. A label-maker crash
 can lose rows still in memory or inside unfinished games; `.tmp` shards remain invisible. Finished shards survive.
-A corrupt finished shard needs manual repair; partial transfer names are safe to retry. An unreadable teacher is
-skipped until a later check succeeds or a newer teacher arrives.
+A corrupt finished shard moves to `labels\rejected\` with a logged reason; partial transfer names are safe to retry.
+An unreadable teacher is skipped until a later check succeeds or a newer teacher arrives.
+
+The trainer reports these stream metrics each update:
+
+| Metric | Meaning |
+|---|---|
+| `distill_eligible` | Resident rows eligible before this update's sampling, after retirement and admission |
+| `distill_used` | Row-uses in this update |
+| `distill_used_fresh` | Rows receiving their first use in this update |
+| `distill_used_total` | Cumulative row-uses |
+| `distill_rows_spent_total` | Cumulative rows completed at their use limit |
+| `distill_rows_retired_total` | Cumulative rows completed by age retirement |
+| `distill_retired_unused_total` | Cumulative rows retired with zero uses, wasted labels |
+| `distill_mean_uses_completed` | Mean uses of all spent and retired rows, null until a row completes |
+| `distill_batches` | Full distillation batches in this update |
+| `distill_backlog_rows` | Unfinished training rows waiting on disk outside the resident cap |
+| `distill_shards_pending` | Shards with unfinished resident rows after sampling |
+| `distill_teacher_lag_min` | Trainer minutes minus mean sampled teacher minutes, null with no samples or any NaN teacher |
+
+`distill_eligible` replaces the use-once `distill_fresh` counter. Validation still reports `distill_val_loss` and
+`distill_val_agree`; training batches still report `distill_loss` and `distill_agree`.
 
 ## Rates and local checks
 
 The expected Mac rate is about 25 labels/s at concurrency 5 with MPS. Windows takes about 4.1 seconds per PPO update
-without distillation. That produces about 103 labels per update before holdouts, roughly one 128-row distill batch
-per update on average. Actual extra GPU time may change that balance; watch fresh-row backlog and teacher lag.
+without distillation. Reusing labels four times gives roughly three 128-row batches per Windows update on average,
+once the reuse gaps have filled:
+
+| Quantity | Approximate rate |
+|---|---|
+| Fresh Mac labels per Windows update | 100, before holdouts |
+| Training row-uses per update at 4 uses | 400, before holdouts and retirement |
+| 128-row distillation batches per update | 3 |
+
+Actual extra GPU time may change that balance; watch eligible rows, backlog, wasted labels and teacher lag.
 CPU label making is slower. The validated concurrency-2 CPU run made about 13.5 labels/s.
 
 The local mode maps the laptop and Windows to directories and never invokes SSH/scp. Windows simulation uses
@@ -134,11 +193,12 @@ failure after copying `.part` files and before publication; removing it allows r
 
 ```bash
 PY=/Users/aminaliu/.t3/worktrees/numbrion-mac/t3code-c1f8987c/.venv/bin/python
-"$PY" -m pytest crates/pyengine/training_tests/test_search_labels.py tools/distill/tests -q
+"$PY" -m pytest crates/pyengine/training_tests tools/distill -q
 "$PY" tools/distill/mac_sync.py --local --once \
   --labels /tmp/loop/mac/labels --teacher /tmp/loop/mac/teacher --state /tmp/loop/mac/sync \
   --local-laptop /tmp/loop/laptop --local-windows /tmp/loop/windows
 ```
 
-Remote transport and PowerShell execution must be checked on their target machines. The local tests cover
-publication boundaries, ledger persistence, retries, already-consumed shards, numeric teacher selection and pruning.
+Remote transport and PowerShell execution must be checked on their target machines. The local tests cover reuse
+limits and gaps across resume, least-used selection, age retirement, resident caps, use-once compatibility, publication
+boundaries, ledger persistence, retries, completed-shard resends, numeric teacher selection and pruning.
