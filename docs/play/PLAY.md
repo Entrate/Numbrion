@@ -5,6 +5,8 @@ bot accounts on a Showdown server on your machine. You need Node 22 or later, th
 `numbrion` wheel, and internet access. The client page and the name check come from play.pokemonshowdown.com.
 The battles run locally.
 
+For the bot on the public ladder, see [LADDER.md](LADDER.md).
+
 ## Once: set up the Showdown server
 
 ```sh
