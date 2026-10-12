@@ -370,10 +370,16 @@ class DistillStream(DistillData):
             if name not in self._catalog or name in self.completed or name in self._reject_failed:
                 continue
             info = self._catalog[name]
+            state = self.row_state.get(name)
+            teacher = float(info["metadata"].get("teacher_minutes", np.nan))
+            if state is None and self.elapsed_minutes - teacher > self.max_age_minutes:
+                # Stale before admission (e.g. a backlog after an outage): retire it unread, outside the cap.
+                self.row_state[name] = self._fresh_state(info["size"])
+                self._retire(name, info)
+                continue
             free = self.max_resident_rows - self.size
             if free <= 0:
                 continue
-            state = self.row_state.get(name)
             available = np.ones(info["size"], dtype=bool) if state is None else ~state["done"]
             if name in self.shards:
                 available[self.shards[name]["rows"]] = False
@@ -389,9 +395,7 @@ class DistillStream(DistillData):
                 self._reject(path, error)
                 continue
             if state is None:
-                self.row_state[name] = dict(uses=np.zeros(info["size"], dtype=np.int64),
-                                            last_used=np.full(info["size"], -1, dtype=np.int64),
-                                            done=np.zeros(info["size"], dtype=bool), admitted_minutes=self.elapsed_minutes)
+                self.row_state[name] = self._fresh_state(info["size"])
             self._retire(name, info)
             if name in self.completed:
                 continue
@@ -406,6 +410,10 @@ class DistillStream(DistillData):
         self.backlog_rows = sum(info["size"] - int(self.row_state[name]["done"].sum() if name in self.row_state else 0)
                                 - (len(self.shards[name]["rows"]) if name in self.shards else 0)
                                 for name, info in self._catalog.items() if name not in self.completed)
+
+    def _fresh_state(self, size: int) -> dict:
+        return dict(uses=np.zeros(size, dtype=np.int64), last_used=np.full(size, -1, dtype=np.int64),
+                    done=np.zeros(size, dtype=bool), admitted_minutes=self.elapsed_minutes)
 
     def _prune(self, name: str) -> None:
         state = self.row_state[name]
@@ -454,7 +462,8 @@ class DistillStream(DistillData):
         offsets = np.cumsum([0, *(len(self.shards[n]["rows"]) for n in names)])
         uses = np.concatenate([self.row_state[n]["uses"][self.shards[n]["rows"]] for n in names]) if names else np.array([])
         last = np.concatenate([self.row_state[n]["last_used"][self.shards[n]["rows"]] for n in names]) if names else np.array([])
-        eligible = (uses == 0) | ((last < self.update) & (self.update - last >= self.reuse_gap))
+        # uses < max_uses also covers a resume with a lower --distill-max-uses than the checkpoint's.
+        eligible = (uses < self.max_uses) & ((uses == 0) | ((last < self.update) & (self.update - last >= self.reuse_gap)))
         available = int(eligible.sum())
         count = min(available // batch, max_batches, minibatches)
         chosen, remaining = [], count * batch

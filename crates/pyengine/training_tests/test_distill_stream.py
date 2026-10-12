@@ -199,10 +199,10 @@ def test_stale_backlog_retires_on_admission_and_frees_full_cache(tmp_path, label
 
     monkeypatch.setattr(stream, "_read", read)
     stream.begin_update(rng, 2, 1, 5, elapsed_minutes=6)
-    assert reads == [fresh.name] and stream.completed == {old[-1].name}
-    assert stream.rows_retired_total == 20 and stream.retired_unused_total == 18
-    assert stream.size == 4 and stream.backlog_rows == 44
-    # Once the fresh shard itself expires, all stale disk shards retire in the same scan despite the tiny cap.
+    # Stale disk shards retire unread in the same scan, despite the full cache.
+    assert reads == [fresh.name] and stream.completed == {p.name for p in old}
+    assert stream.rows_retired_total == 60 and stream.retired_unused_total == 58
+    assert stream.size == 4 and stream.backlog_rows == 4
     assert not stream.begin_update(rng, 2, 1, 5, elapsed_minutes=12)
     assert stream.completed == {p.name for p in [*old, fresh]}
     assert stream.rows_retired_total == 68 and stream.retired_unused_total == 64
@@ -771,3 +771,13 @@ def test_normal_end_saves_latest_with_inf_snapshot_and_pool(tmp_path, rollout, m
                                      "--layers", "1", "--device", "cpu", "--output", str(tmp_path)])
     trainer.main()
     assert torch.load(tmp_path / "latest.pt", weights_only=False)["update"] == 0
+
+
+def test_lower_max_uses_on_resume_never_exceeds_the_new_limit(tmp_path, labels):
+    write_shard(tmp_path, labels, 0, rows=8, teacher_minutes=0)
+    stream = DistillStream(tmp_path, DEVICE, max_uses=4, reuse_gap=1, max_age_minutes=1e9)
+    rng = np.random.default_rng(0)
+    for update in range(2):
+        stream.begin_update(rng, 8, 1, 1, update=update)
+    resumed = DistillStream(tmp_path, DEVICE, max_uses=2, reuse_gap=1, max_age_minutes=1e9, state=stream.state_dict())
+    assert not resumed.begin_update(rng, 8, 1, 1, update=5)
