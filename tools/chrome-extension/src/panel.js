@@ -1,6 +1,7 @@
 /*
- * The advisor panel sits inside the active battle's controls, below the client's move and switch buttons.
- * A shadow root keeps its styles isolated; the enclosing controls scroll together with the advisor.
+ * The advisor panel sits at the top of Showdown's room-list sidebar beside the active battle.
+ * When that sidebar is hidden, it sits below the battle's move and switch buttons instead.
+ * A shadow root keeps its styles isolated.
  * render(view) redraws it from a plain view model built by content.js; user actions go to the callbacks.
  */
 (function (root) {
@@ -20,6 +21,10 @@
   --button-top: #426e34; --button-bottom: #305525; --track: #424a50; --link: #a0c7ef;
 }
 :host([data-layout="standalone"]) { max-width: 640px; margin: 12px auto; }
+:host([data-layout="sidebar"]) {
+  position: sticky; top: 0; z-index: 2; padding: 8px; background: var(--surface);
+  max-height: var(--numbrion-sidebar-height); overflow-y: auto; scrollbar-width: thin; overscroll-behavior: contain;
+}
 * { box-sizing: border-box; }
 .panel {
   width: 100%; font: 12px/1.4 Verdana, Arial, Helvetica, sans-serif; color: var(--text);
@@ -194,7 +199,7 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       shadow.append(this.root);
       this.layoutStyle = el('style', { id: HOST_ID + '-layout', text: '.battle-controls[data-numbrion-controls] { max-height: var(--numbrion-controls-height); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }' });
       document.head.append(this.layoutStyle);
-      // Showdown replaces the controls on choices, turns and animation updates. Reattach the same host so
+      // Showdown replaces the room list and controls as they update. Reattach the same host so
       // open disclosures and event handlers survive. Ignore our own rendering to avoid observer loops.
       this.observer = new MutationObserver((records) => {
         if (records.every((record) => this.host.contains(record.target))) return;
@@ -231,8 +236,16 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       if (!this.host || !this.view || !this.view.visible) return;
       const room = document.getElementById('room-' + this.view.roomid) || document.getElementById(this.view.roomid);
       const controls = room && room.querySelector('.battle-controls');
-      if (this.controls !== controls) this.releaseControls();
-      if (controls) {
+      const sidebar = this.findSidebar(room);
+      if (sidebar) {
+        this.releaseControls();
+        this.host.dataset.layout = 'sidebar';
+        if (this.host.parentElement !== sidebar || sidebar.firstElementChild !== this.host) sidebar.prepend(this.host);
+        const rect = sidebar.getBoundingClientRect();
+        const height = Math.max(120, Math.floor(Math.min(window.innerHeight, rect.bottom) - Math.max(0, rect.top))) + 'px';
+        if (this.host.style.getPropertyValue('--numbrion-sidebar-height') !== height) this.host.style.setProperty('--numbrion-sidebar-height', height);
+      } else if (controls) {
+        if (this.controls !== controls) this.releaseControls();
         this.controls = controls;
         this.host.dataset.layout = 'battle';
         if (this.host.parentElement !== controls) controls.append(this.host);
@@ -241,15 +254,26 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
         const height = Math.max(120, Math.floor(bottom - controls.getBoundingClientRect().top - 4)) + 'px';
         if (controls.style.getPropertyValue('--numbrion-controls-height') !== height) controls.style.setProperty('--numbrion-controls-height', height);
       } else if (!document.querySelector('.ps-room')) {
+        this.releaseControls();
         // A standalone transport page has no Showdown UI to integrate with. Keep the advisor in page flow.
         this.host.dataset.layout = 'standalone';
-        if (!this.host.isConnected) document.body.append(this.host);
+        if (this.host.parentElement !== document.body) document.body.append(this.host);
       } else {
+        this.releaseControls();
         this.host.style.display = 'none';
         return; // The client's battle controls have not been created yet.
       }
       this.host.style.display = '';
       this.host.dataset.theme = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    findSidebar(room) {
+      const sidebar = document.getElementById('room-rooms');
+      if (!room || !sidebar || !room.getClientRects().length || !sidebar.getClientRects().length) return null;
+      const battle = room.getBoundingClientRect();
+      const side = sidebar.getBoundingClientRect();
+      return battle.width > 0 && side.width >= 260 && side.height >= 120 && side.left >= battle.right - 2 && side.left < window.innerWidth
+        ? sidebar : null;
     }
 
     setCollapsed(collapsed, silent) {

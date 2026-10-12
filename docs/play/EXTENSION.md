@@ -29,9 +29,11 @@ reload the battle tab if the panel does not come back; the server then resends t
 
 ## Use
 
-The advisor appears below the move and switch buttons in the active battle, using the client's light or dark
-theme. The battle controls scroll when there is not enough space. The lobby stays clear. Collapse the advisor
-with its header button; it remembers that setting.
+The advisor appears at the top of the room-list sidebar to the right of the active battle, using the client's
+light or dark theme. It stays visible while you scroll the room list underneath. If the sidebar is hidden,
+showing a chat room, or there is not enough width, the advisor appears below the battle's move and switch buttons
+instead. Long analysis scrolls inside the sidebar advisor; in the battle controls, both scroll together. The
+advisor hides when you leave the battle. Collapse it with its header button; it remembers that setting.
 
 The green **Recommended play** card highlights both Pokémon's actions, their targets, the estimated chance of
 winning as a **62% win** badge and the **Play recommended** button. The badge stays visible on narrow screens;
@@ -39,6 +41,8 @@ an unavailable estimate appears as **— win**. Compact **Opponent likely** rows
 likely opponent turns, their estimated probabilities and the probability of other replies. Each row includes
 both Pokémon's actions and their targets, wrapping when needed. It uses search weights when available, otherwise
 policy probabilities. The win estimate also appears in the collapsed header.
+Full search supplies the win estimate. Policy/default recommendations, including forced choices and search
+fallbacks, can omit it; **Search details** shows the advice source and the reason for a fallback.
 Expand **Other options**, **Opponent moves**, **Search details** or
 **Bot log** to inspect the rest of the analysis:
 
@@ -116,7 +120,7 @@ node e2e.js --full-battle --opponent NumbrionSearch --human-turns 2,5 --screensh
 
 The first run plays four turns, one of them with the client's own buttons and the rest with "Play this". It
 checks the advise bodies against the client's state, including `history` and the choices sent, then the bot
-log, integration with the battle controls, a page reload, a dead API URL and a bare page that speaks SockJS. The second starts the
+log, integration with the room-list sidebar, a page reload, a dead API URL and a bare page that speaks SockJS. The second starts the
 battle before the extension exists and installs it into the running browser, so the panel must show the
 "search needs the battle from its start" note. The script loads a temporary copy of the extension whose default
 API URL is `--api`, so a fresh install never calls a play server on the default port. The third uses the real play

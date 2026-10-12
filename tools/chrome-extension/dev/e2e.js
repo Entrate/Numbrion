@@ -108,7 +108,8 @@ async function panelState(page) {
       choice: (root.querySelector('.choice code') || {}).textContent || null,
       playEnabled: !!play && !play.disabled,
       playBox: play ? center(play) : null,
-      integrated: !!host.closest('.battle-controls'),
+      integrated: !!host.closest('.battle-controls') || host.dataset.layout === 'sidebar' && host.parentElement.id === 'room-rooms',
+      sidebar: host.dataset.layout === 'sidebar' && host.parentElement.id === 'room-rooms',
       recommended: !!root.querySelector('.recommended .play'),
       rect: { left: rect.left, top: rect.top, width: rect.width },
       logEntries: root.querySelectorAll('.log').length,
@@ -465,9 +466,9 @@ async function normalRun(browser) {
   await page.screenshot({ path: SCREENSHOT });
   check(true, 'screenshot saved', SCREENSHOT);
 
-  // The advisor belongs to the battle controls. It must reattach after the client rebuilds them on reload.
+  // On this desktop viewport the advisor belongs to the room-list sidebar, including after a reload.
   const p0 = await panelState(page);
-  check(p0.integrated && p0.recommended, 'advisor is built into battle controls with a highlighted recommendation', p0.rect);
+  check(p0.sidebar && p0.recommended, 'advisor is built into the room-list sidebar with a highlighted recommendation', p0.rect);
   const reloadUrl = new URL(CLIENT);
   reloadUrl.pathname = '/' + roomid;
   await page.goto(reloadUrl.href, { waitUntil: 'domcontentloaded' });
@@ -477,7 +478,7 @@ async function normalRun(browser) {
   const rejoined = await clientRoom(page, roomid);
   const readvised = await waitForAdvice(page, rejoined.rqid).then(() => true, () => false);
   const p2 = await panelState(page);
-  check(p2 && p2.integrated, 'advisor reattached to battle controls after reload', p2 && p2.rect);
+  check(p2 && p2.sidebar, 'advisor reattached to the room-list sidebar after reload', p2 && p2.rect);
   check(readvised, 'rejoined battle (the server resends the whole log) is advised again', { rqid: rejoined.rqid, status: p2 && p2.status });
 
   // A dead API URL: "Advise now" reports the API as offline; then back.
@@ -633,15 +634,16 @@ async function fullBattleRun(browser) {
       await page.screenshot({ path: SCREENSHOT });
       screenshotTaken = true;
       log('  screenshot saved', SCREENSHOT);
-      // And one scrolled down to the bot log.
+      // And one scrolled down to the bot log (the sidebar advisor scrolls independently).
       await page.evaluate(() => {
         const host = document.getElementById('numbrion-advisor-host');
         host.shadowRoot.querySelector('.bot-log').open = true;
-        host.parentElement.scrollTop = host.parentElement.scrollHeight;
+        const scroller = host.dataset.layout === 'sidebar' ? host : host.parentElement;
+        scroller.scrollTop = scroller.scrollHeight;
       });
       const botLogShot = SCREENSHOT.replace(/\.png$/, '-botlog.png');
       await page.screenshot({ path: botLogShot });
-      await page.evaluate(() => { const host = document.getElementById('numbrion-advisor-host'); host.shadowRoot.querySelector('.bot-log').open = false; host.parentElement.scrollTop = 0; });
+      await page.evaluate(() => { const host = document.getElementById('numbrion-advisor-host'); host.shadowRoot.querySelector('.bot-log').open = false; const scroller = host.dataset.layout === 'sidebar' ? host : host.parentElement; scroller.scrollTop = 0; });
       log('  screenshot saved', botLogShot);
     }
 
