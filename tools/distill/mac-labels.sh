@@ -50,6 +50,8 @@ PY
         echo $! > "$BASE/labels.pid"
         nohup "$PY" -u tools/distill/mac_sync.py >> "$BASE/sync.log" 2>&1 < /dev/null &
         echo $! > "$BASE/sync.pid"
+        # No idle sleep while the label maker runs (a closed lid still sleeps the Mac).
+        nohup caffeinate -i -w "$(cat "$BASE/labels.pid")" > /dev/null 2>&1 < /dev/null &
         sleep 1
         if ! alive "$BASE/labels.pid" || ! alive "$BASE/sync.pid"; then
             touch "$LABELS/STOP"
@@ -77,7 +79,7 @@ PY
             else echo "$name stopped"; fi
         done
         if [ -f "$BASE/labels.log" ]; then
-            rg '^(Status:|Teacher switch:|Teacher:)' "$BASE/labels.log" | tail -2 || true
+            grep -E '^(Status:|Teacher switch:|Teacher:)' "$BASE/labels.log" | tail -2 || true
         fi
         "$PY" - "$LABELS" "$TEACHER" "$STATE" <<'PY'
 import json, pathlib, re, sys
