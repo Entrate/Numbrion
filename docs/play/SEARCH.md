@@ -43,6 +43,7 @@ sampled world, or when there is only one legal choice. The analysis names the re
 | `play` | `argmax` | `sample` draws from our strategy instead |
 | `particles` | 8 | world-builder particles |
 | `threads` | 4 | grid threads |
+| `max_worlds` | 32 | most worlds a time budget can buy |
 
 `"search": false` gives the plain policy. Other `SearchBot` arguments: `checkpoint`, `device` (`auto` uses the
 Apple GPU for leaf values), `policy_temperature` (0.5, for policy decisions), `pools` (the team pool the world
@@ -53,6 +54,28 @@ The world builder needs that pool. Generate it once from the pinned Showdown che
 ```sh
 node tools/oracle/gen-teams.mjs <showdown> --count 200000 --seed 1 --out data/teams/pool-s1-200k.txt && gzip -k data/teams/pool-s1-200k.txt
 ```
+
+## Time budgets and deadlines
+
+A driver can hand the player two things before `decide` (play/driver.py does on the ladder, see
+[LADDER.md](LADDER.md)):
+
+* `budget_ms`, the search allowance. `SearchBot.config_for` turns it into a number of worlds (2 to `max_worlds`) from
+  running estimates of the cost per cell and per decision, which every search decision updates.
+* `deadline`, a `time.monotonic()` by which the choice must be sent, and `decision_token`. Right after the root
+  policy the player posts the policy's most likely pair as `fallback = (token, Decision)`. If the decision is still
+  running at the deadline the driver sends that choice and later tells the player with `record_choice`, so the
+  world builder replays what was really played. After building the worlds the player keeps only as many as fit the
+  time left, and plays the policy (note "out of time after building the worlds") when none fits.
+
+A search decision's analysis also has `policy` (the policy's most likely pair, to find where search disagreed;
+`agrees_with_policy`), `worlds_requested`, `budget_ms`, `observed` (what the protocol revealed about each opponent
+Pokemon) and `inferred` (per seen species, the share of sampled worlds with each item, ability, Tera type and move,
+plus the unseen species the worlds put on the bench).
+
+`play/preflight.py` plays one short in-process battle with these time rules before a ladder run: on the Windows PC
+(Ryzen 5 3600, CPU only, with a training run going) the 128x3 teacher m240 with `ours` 8 / `theirs` 6 and a 3 s
+allowance searched all 15 decisions, 32 worlds each, median 1.1 s and at most 1.7 s per decision.
 
 ## Does it help?
 

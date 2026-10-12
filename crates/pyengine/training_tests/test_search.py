@@ -150,3 +150,44 @@ def test_recorded_defaults_and_resent_requests_keep_the_worlds(bot):
 
     sources = _drive(bot, (7, 7, 7, 7), teams, hook)
     assert sources and sources.count("search") >= len(sources) - 1, sources
+
+
+def test_deadlines_post_the_policy_fallback_and_cut_the_search(bot):
+    import time
+
+    teams = [line.strip() for line in gzip.open(POOL, "rt") if line.strip()][30:32]
+    state = {"n": 0, "checked": 0, "out_of_time": 0, "fallbacks_sent": 0}
+
+    def hook(battle, player):
+        state["n"] += 1
+        player.decision_token = state["n"]
+        late = state["n"] % 4 == 3
+        # Every 4th decision the deadline has already passed after world building; every 4th + 1 the driver sent
+        # the posted policy fallback instead of the search's choice and tells the player (record_choice).
+        player.deadline = time.monotonic() - 1.0 if late else time.monotonic() + 30.0
+        decision = player.decide()
+        if decision.analysis.get("note") == "only one legal choice":
+            return decision.choice, None
+        token, fallback = player.fallback
+        assert token == state["n"]
+        analysis = decision.analysis
+        if analysis["source"] == "search":
+            assert analysis["policy"]["choice"] == fallback.choice
+            assert analysis["agrees_with_policy"] == (decision.choice == fallback.choice)
+            assert isinstance(analysis["observed"], list) and analysis["inferred"]["worlds"] == analysis["worlds"]
+            for mon in analysis["inferred"]["mons"].values():
+                assert abs(sum(mon["item"].values()) - 1.0) < 0.05 or len(mon["item"]) == 3
+            json.dumps(analysis)
+            state["checked"] += 1
+        if late and analysis.get("note") == "out of time after building the worlds":
+            state["out_of_time"] += 1
+        if state["n"] % 4 == 0:
+            player.record_choice(fallback.choice)
+            state["fallbacks_sent"] += 1
+            return fallback.choice, None
+        return decision.choice, analysis["source"]
+
+    sources = _drive(bot, (9, 9, 9, 9), teams, hook)
+    assert state["checked"] >= 3 and state["out_of_time"] >= 1 and state["fallbacks_sent"] >= 1
+    # Sending the fallback instead of the search's choice keeps the worlds alive.
+    assert sources.count("search") >= len(sources) - state["out_of_time"] - 1, sources

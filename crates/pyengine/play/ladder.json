@@ -1,0 +1,23 @@
+{
+  "account": "Numbrion",
+  "server": "wss://sim3.psim.us/showdown/websocket",
+  "format": "gen9randomdoublesbattle",
+  "credentials": null,
+  "numbrion_path": "scratch/ladder/bundle",
+  "bot": {
+    "factory": "training.search:SearchBot",
+    "checkpoint": "scratch/training/teacher-s43-4h/snapshots/m240.pt",
+    "search": {"ours": 12, "theirs": 8, "seeds": 2, "max_worlds": 32, "particles": 8, "threads": 4,
+               "seed": 20261012},
+    "device": "cpu",
+    "torch_threads": 4,
+    "policy_temperature": 0.5,
+    "pools": ["data/teams/pool-s1-200k.txt.gz", "data/teams/pool-s2-200k.txt.gz", "data/teams/pool-s3-200k.txt.gz"]
+  },
+  "timing": {"search_s": 3.0, "deadline_s": 6.0, "min_response_s": 2.0, "reserve_s": 0.5, "clock_margin_s": 10,
+             "hang_s": 30},
+  "rating_wait_s": 30,
+  "stop": {"minutes": 60, "games": null},
+  "save_replays": false,
+  "users_json": "https://pokemonshowdown.com/users/{userid}.json"
+}

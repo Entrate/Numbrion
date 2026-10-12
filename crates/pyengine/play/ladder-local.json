@@ -1,0 +1,13 @@
+{
+  "account": "NumbrionLadder",
+  "server": "ws://localhost:8000/showdown/websocket",
+  "format": "gen9randomdoublesbattle",
+  "credentials": null,
+  "bot": {"factory": "training.player:DefaultBot"},
+  "timing": {"search_s": 3.0, "deadline_s": 6.0, "min_response_s": 2.0},
+  "rating_wait_s": 10,
+  "stop": {"minutes": 60, "games": null},
+  "save_replays": false,
+  "users_json": null,
+  "local": true
+}

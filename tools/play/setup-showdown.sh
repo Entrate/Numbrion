@@ -3,6 +3,7 @@
 #
 #     tools/play/setup-showdown.sh            # creates scratch/showdown-play, installs, builds, writes the config
 #     tools/play/setup-showdown.sh --config   # only rewrites scratch/showdown-play/config/config.js
+#     tools/play/setup-showdown.sh --config --ladder   # ... with ladder search on (local ladder tests, LADDER.md)
 #
 # The checkout is pinned to the Showdown commit the engine is tested against. It is cloned from a local checkout
 # when one has the commit (SHOWDOWN_SRC, or scratch/pokemon-showdown in this or another worktree of the repo),
@@ -15,6 +16,10 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEST="$REPO/scratch/showdown-play"
 PORT="${SHOWDOWN_PORT:-8000}"
 BIND="${SHOWDOWN_BIND:-127.0.0.1}"
+NOBATTLESEARCH=true
+for arg in "$@"; do
+    [[ "$arg" == "--ladder" ]] && NOBATTLESEARCH=false
+done
 
 write_config() {
     mkdir -p "$DEST/config"
@@ -44,7 +49,8 @@ exports.reportbattlejoins = false;
 exports.forcetimer = false;
 exports.backdoor = false;
 exports.repl = false;
-exports.nobattlesearch = true;
+// Ladder search (/search) is off unless the config was written with --ladder; local ratings then go to config/ladders.
+exports.nobattlesearch = ${NOBATTLESEARCH};
 exports.autolockdown = false;
 exports.crashguardemail = null;
 exports.logchallenges = false;
@@ -96,8 +102,15 @@ git -C "$DEST" -c advice.detachedHead=false checkout --quiet --force "$COMMIT"
 echo "checked out $(git -C "$DEST" log --oneline -1)"
 
 cd "$DEST"
-# Optional dependencies (sqlite, pg, mail, ...) are only for features a local play server does not use.
-npm ci --omit=optional --no-audit --no-fund --prefer-offline
+# Optional dependencies (sqlite, pg, mail, ...) are only for features a local play server does not use, but esbuild's
+# platform binary is optional too and the build needs it: omit them only where the build still works without.
+if [[ "$(uname -s)" == MINGW* || "$(uname -s)" == MSYS* || "$(uname -s)" == CYGWIN* ]]; then
+    npm ci --no-audit --no-fund --prefer-offline
+    # cloud-env (optional) would make the server listen on 0.0.0.0 instead of BIND (server/sockets.ts).
+    rm -rf node_modules/cloud-env
+else
+    npm ci --omit=optional --no-audit --no-fund --prefer-offline
+fi
 write_config
 node build
 echo
