@@ -16,6 +16,7 @@ The older `train.py` MLP baseline is unchanged.
 | PPO helpers | `training/ppo.py` |
 | trainer | `train_selfplay.py` |
 | duplicate evaluation | `evaluate.py` |
+| keep/drop comparison of two checkpoints (fixed seeds, panel, per-pair results) | `compare.py` |
 | scripted "smart" baseline | `training/smart.py` |
 | tests | `training_tests/test_selfplay.py`, `training_tests/test_smart.py` |
 
@@ -719,6 +720,38 @@ training time; it was still improving at the end (m120 vs m110: 54%).
 
 Outputs (git-ignored): `scratch/training/fourth-run/` (hour 1) and `scratch/training/fourth-run-2h/`
 (hour 2, with `evaluation.json`, `cross.log`, `metrics.jsonl` and `switches-m120.json`).
+
+## Overnight A/B tests (2026-10-11/12, Mac)
+
+Eight 1-hour 128x3 runs on the M1 Pro, each changing one thing. Every run used the first hour of the 192x4
+run's 2-hour schedule (`--lr-final 0.65 --entropy-target 2.5 --entropy-target-final 2.0 --ko-bonus-end 0.5`,
+otherwise its first-stage settings, `--compile`). `compare.py` scored each final checkpoint at temperature 0.5
+against the current best (4,000 mirrored games on eval-s43-200) and against smart, the heuristic and the
+3-hour 192x4 m180 (2,000 each). A change was kept at 53% or more head to head with no panel drop above 3
+points. Two controls with seeds 42 and 43 scored exactly 50.0% against each other.
+
+| Change | vs best | Decision |
+|---|---:|---|
+| smart as a fading teacher (`--teacher-coef 0.2 --teacher-end-minutes 30`) | 55.7% | kept |
+| + partner-aware slot-b features (`--joint-features`) | 50.1% | dropped |
+| + smart in 20% of battles instead of 10% (`--scripted-share 0.66`) | 50.0% | dropped |
+| + entropy target ending at 1.8 instead of 2.0 | 50.4% | dropped |
+| teacher fading out at minute 60 instead of 30 | 50.0% (46.3% at T=1) | dropped |
+| teacher, seed 43, against the seed-43 control | 56.0% | confirmed |
+| teacher on the untouched eval-s44-200 pool | 55.0% | confirmed |
+
+**Teacher.** The smart player labels the learner's own decisions in the actors (slot b's label answers the
+learner's sampled slot a, `SmartAgent.second_given`), and the loss adds the weighted cross-entropy of the
+labels, falling linearly to zero at `--teacher-end-minutes`; then labelling stops. It costs no measurable
+throughput. A 1-hour 128x3 with it scores about 50% against the 3-hour 192x4 m180 at temperature 0.5 (the
+control 43%). The dropped changes gained 3-4 points against smart or the heuristic but nothing against learned
+opponents. Temperature 0.5 beats 1 by 1-3 points for every checkpoint tested.
+
+Also from that night: the spread-move damage/KO feature fix (action columns 27 -> 35, token 16 -> 21; old
+checkpoints keep their columns), `evaluate.py` fixes (paired counts at the step cap, a fresh RNG per matchup,
+pair-based Elo error), and two engine panics fixed. An aborted battle no longer ends a run: `BatchEnv` catches
+a panic per battle, reports it in `crashes()` and the trainer's `crashes.jsonl`, and starts a fresh battle (see
+the training API).
 
 ## Not implemented yet
 
