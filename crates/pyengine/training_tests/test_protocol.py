@@ -610,3 +610,20 @@ def test_recorded_server_streams():
             replay_recording(record, set_pool, check_every=1 if os.environ.get("NUMBRION_TEST_BATTLES") else 0,
                              stats=stats)
     print(f"\nrecorded streams: {len(files)} files, {dict(stats)}")
+
+
+def test_revival_blessing_slot_never_offers_pass():
+    """A forced pass on a Revival Blessing slot is the Showdown bug behind "Choices are done immediately after a
+    request"; the engine's masks leave it out (mask.rs passes_on_revival), and so must the request mask."""
+    def mon(name, condition, active=False, reviving=False):
+        entry = {"ident": f"p1: {name}", "details": f"{name}, L80", "condition": condition, "active": active,
+                 "stats": {}, "moves": [], "baseAbility": "", "item": "", "pokeball": "pokeball", "ability": ""}
+        if reviving:
+            entry["reviving"] = True
+        return entry
+    request = {"forceSwitch": [True, False], "side": {"name": "Alice", "id": "p1", "pokemon": [
+        mon("Pawmot", "100/100", active=True, reviving=True), mon("Muk", "120/200", active=True),
+        mon("Abra", "0 fnt"), mon("Mew", "0 fnt"), mon("Ditto", "0 fnt"), mon("Eevee", "0 fnt")]}, "rqid": 3}
+    mask0, joint = P.request_mask(request)
+    assert not mask0[P.PASS]
+    assert mask0[P.SWITCH_BASE + 2] and joint[P.SWITCH_BASE + 2, P.PASS]

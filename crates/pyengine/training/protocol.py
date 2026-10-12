@@ -155,7 +155,9 @@ class Options:
             if not flagged[k]:
                 slots.append(SlotOptions([PASS], auto=True))
             elif k < len(self.party) and self.party[k].get("reviving"):
-                slots.append(SlotOptions([SWITCH_BASE + i for i in dead] + pass_ok, revival=True))
+                # Never `pass` here, as in the engine's masks (mask.rs `passes_on_revival`): Showdown accepts it with
+                # no living Pokemon in reserve, then throws "Choices are done immediately after a request".
+                slots.append(SlotOptions([SWITCH_BASE + i for i in dead], revival=True))
             else:
                 slots.append(SlotOptions([SWITCH_BASE + i for i in self.bench] + pass_ok))
         return slots
