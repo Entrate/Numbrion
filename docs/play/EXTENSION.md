@@ -34,9 +34,11 @@ theme. The battle controls scroll when there is not enough space. The lobby stay
 with its header button; it remembers that setting.
 
 The green **Recommended play** card highlights both Pokémon's actions, their targets, the estimated chance of
-winning and the **Play recommended** button. A compact **Opponent likely** column beside it shows the three
-most likely opponent turns, their estimated probabilities and the probability of other replies. It uses search
-weights when available, otherwise policy probabilities. On narrow screens it moves below the recommendation.
+winning as a **62% win** badge and the **Play recommended** button. The badge stays visible on narrow screens;
+an unavailable estimate appears as **— win**. Compact **Opponent likely** rows below it show the three most
+likely opponent turns, their estimated probabilities and the probability of other replies. Each row includes
+both Pokémon's actions and their targets, wrapping when needed. It uses search weights when available, otherwise
+policy probabilities. The win estimate also appears in the collapsed header.
 Expand **Other options**, **Opponent moves**, **Search details** or
 **Bot log** to inspect the rest of the analysis:
 

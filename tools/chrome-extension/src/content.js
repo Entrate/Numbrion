@@ -401,7 +401,7 @@
       prior: num(reply.prior),
       weight: num(reply.weight),
     }));
-    const summary = slots.map((slot) => slot.text).join(' / ') + (win !== null ? ' · ' + Math.round(win * 100) + '%' : '');
+    const summary = slots.map((slot) => slot.text).join(' / ');
     return {
       choice: decision.choice,
       slots,

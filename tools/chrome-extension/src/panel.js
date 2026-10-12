@@ -36,7 +36,7 @@
   color: var(--muted); border: 1px solid transparent; background: transparent; font: inherit;
 }
 .iconbtn:hover { border-color: var(--border); }
-.body { padding: 8px 9px; container-type: inline-size; }
+.body { padding: 8px 9px; }
 .collapsed .body, .collapsed .foot { display: none; }
 .status { display: flex; align-items: center; gap: 6px; color: var(--muted); margin-bottom: 6px; font-size: 11px; }
 .status:last-child { margin-bottom: 0; }
@@ -46,29 +46,28 @@
 @keyframes pulse { 50% { opacity: 0.35; } }
 .status .txt { flex: 1; }
 .muted { color: var(--muted); }
-.decision { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 8px; align-items: start; }
-.recommended { padding: 9px 10px; border: 1px solid var(--best-border); border-left-width: 4px; border-radius: 4px; background: var(--best); }
-.recommendation-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.decision { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.recommended { padding: 7px 9px; border: 1px solid var(--best-border); border-left-width: 4px; border-radius: 4px; background: var(--best); }
+.recommendation-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--best-text); }
 .win { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; color: var(--best-text); }
-.win .pct { font-size: 16px; font-weight: 700; }
+.win .pct { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .win .label { font-size: 10px; }
+.head .win .pct { font-size: 12px; }
 .slot { display: grid; grid-template-columns: minmax(90px, 130px) 1fr; gap: 8px; padding: 3px 0; }
 .slot:first-child { border-top: 0; }
 .slot .mon { font-weight: 700; color: var(--best-text); overflow-wrap: anywhere; }
 .slot .act { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
 .decision .slot { grid-template-columns: minmax(75px, 100px) minmax(0, 1fr); gap: 6px; }
 .decision .slot .act { font-size: 12px; }
-.forecast { min-width: 0; padding: 8px 9px; border: 1px solid var(--line); border-radius: 4px; }
-.forecast h4 { margin: 0 0 6px; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
-.forecast-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 7px; padding: 5px 0; border-top: 1px solid var(--line); }
-.forecast-row:first-of-type { padding-top: 0; border-top: 0; }
-.forecast-actions { min-width: 0; font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
+.forecast { min-width: 0; padding-top: 6px; border-top: 1px solid var(--line); }
+.forecast h4 { margin: 0 0 3px; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.forecast-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 7px; padding: 3px 0; }
+.forecast-actions { display: flex; flex-wrap: wrap; gap: 1px 12px; min-width: 0; font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
+.forecast-actions > span { min-width: 0; }
 .forecast-actions strong { font-weight: 700; }
-.forecast-pct { color: var(--link); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.forecast-pct { color: var(--link); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .forecast-row:first-of-type .forecast-actions { color: var(--text); font-weight: 600; }
-.forecast-bar { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; }
-.forecast-bar > i { display: block; height: 100%; background: #4b9ba1; }
 .forecast-other, .forecast-empty { color: var(--muted); font-size: 10px; margin: 3px 0 0; }
 .forecast-other { display: flex; justify-content: space-between; gap: 7px; }
 .choice { margin-top: 7px; display: flex; justify-content: flex-end; }
@@ -116,13 +115,8 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
 @media (max-width: 480px) {
   .slot { grid-template-columns: 100px 1fr; }
   .slot .act { font-size: 12px; }
-  .win .label { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .dot.busy { animation: none; } }
-@container (max-width: 500px) {
-  .decision { grid-template-columns: minmax(0, 1fr); }
-  .forecast { padding: 7px 9px; }
-}
 `;
 
   function el(tag, attrs, ...children) {
@@ -147,6 +141,12 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
   const clamp01 = (x) => Math.max(0, Math.min(1, Number(x) || 0));
   const pct = (x) => Math.round(clamp01(x) * 100) + '%';
   const signed = (x) => (x >= 0 ? '+' : '') + Number(x).toFixed(2);
+
+  function winBadge(probability) {
+    const win = Number.isFinite(probability) ? pct(probability) : null;
+    return el('div', { class: 'win', title: win === null ? 'Win probability unavailable for this turn' : 'Estimated chance of winning the battle with the recommended play', 'aria-label': win === null ? 'Win probability unavailable' : 'Estimated win probability: ' + win },
+      el('span', { class: 'pct', text: win === null ? '—' : win }), el('span', { class: 'label', text: 'win' }));
+  }
 
   function meter(kind, label, value, shown) {
     const bar = el('div', { class: 'bar ' + kind });
@@ -185,8 +185,9 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       shadow.append(el('style', { text: CSS }));
       this.root = el('section', { class: 'panel', 'aria-label': 'Numbrion advisor' });
       this.roomEl = el('span', { class: 'room' });
+      this.headerWin = el('span', { style: 'display: none' });
       this.collapseBtn = el('button', { class: 'iconbtn', title: 'Collapse', onclick: () => this.setCollapsed(!this.collapsed) });
-      this.head = el('div', { class: 'head' }, el('span', { class: 'brand', text: 'Numbrion advisor' }), this.roomEl, this.collapseBtn);
+      this.head = el('div', { class: 'head' }, el('span', { class: 'brand', text: 'Numbrion advisor' }), this.roomEl, this.headerWin, this.collapseBtn);
       this.body = el('div', { class: 'body' });
       this.foot = el('div', { class: 'foot' });
       this.root.append(this.head, this.body, this.foot);
@@ -284,6 +285,8 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       if (this.collapsed && view.advice && view.advice.summary) text = view.advice.summary;
       this.roomEl.textContent = text;
       this.roomEl.title = view.header || view.roomid || '';
+      this.headerWin.style.display = this.collapsed && view.advice ? '' : 'none';
+      this.headerWin.replaceChildren(...(this.collapsed && view.advice ? [winBadge(view.advice.winProbability)] : []));
     }
 
     disclosure(key, label, children) {
@@ -315,12 +318,10 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
         for (const part of String(reply.text || '').split(';')) {
           const action = part.trim().replace(/\s*->\s*/g, ' → ');
           const colon = action.indexOf(':');
-          actions.append(colon > 0 ? el('div', null, el('strong', { text: action.slice(0, colon) }), action.slice(colon)) : el('div', { text: action }));
+          actions.append(colon > 0 ? el('span', null, el('strong', { text: action.slice(0, colon) }), action.slice(colon)) : el('span', { text: action }));
         }
-        const fill = el('i');
-        fill.style.width = chance * 100 + '%';
         forecast.append(el('div', { class: 'forecast-row', title: reply.text || '' }, actions,
-          el('span', { class: 'forecast-pct', text: pct(chance) }), el('div', { class: 'forecast-bar' }, fill)));
+          el('span', { class: 'forecast-pct', text: pct(chance), 'aria-label': pct(chance) + ' estimated chance of this opponent turn' })));
       }
       const other = Math.max(0, 1 - shown);
       if (other >= 0.005) forecast.append(el('div', { class: 'forecast-other' }, el('span', { text: 'Other replies' }), el('span', { text: pct(other) })));
@@ -339,7 +340,7 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       if (advice) {
         const best = el('section', { class: 'recommended', 'aria-label': 'Recommended play' });
         best.append(el('div', { class: 'recommendation-head' }, el('span', { class: 'badge', text: 'Recommended play' }),
-          advice.winProbability !== null && advice.winProbability !== undefined ? el('div', { class: 'win', title: 'Estimated chance of winning the battle' }, el('span', { class: 'pct', text: pct(advice.winProbability) }), el('span', { class: 'label', text: 'win estimate' })) : null));
+          winBadge(advice.winProbability)));
         for (const slot of advice.slots || []) {
           best.append(el('div', { class: 'slot' }, el('span', { class: 'mon', text: slot.pokemon || '' }), el('span', { class: 'act', text: (slot.text || '').replace(/\s*->\s*/g, ' → ') })));
         }
