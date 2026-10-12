@@ -1,6 +1,6 @@
 //! NumPy observation encoding and scripted play. Array borrows stay alive while Rust runs without the GIL.
 
-use crate::py::{BatchEnv, lock};
+use crate::{py::{BatchEnv, lock}, py_search_grid::TrackerState};
 use encoder::{Dex, encode::{Encoder, Observation, Outputs}, layout::*, smart::{ObsRows, SmartConfig}};
 use numpy::{Element, PyArray1, PyArrayDyn, PyArrayMethods, PyReadonlyArrayDyn, PyReadwriteArrayDyn,
             PyUntypedArrayMethods};
@@ -105,6 +105,20 @@ impl ObsEncoder {
     #[getter]
     fn rows(&self) -> usize { self.rows }
 
+    /// A `TrackerState` copy of `row`'s tracker (everything `encode_row` reads besides the new lines and the
+    /// request), for `SearchGrid`. The encoder is unchanged.
+    fn snapshot(&self, py: Python<'_>, row: isize) -> PyResult<TrackerState> {
+        let row = self.row(row)?;
+        Ok(TrackerState::of(py.detach(|| lock(&self.encoder).tracker(row).clone())))
+    }
+
+    /// Replace `row`'s tracker with a copy of `state` (a snapshot of a row of the same side, `row % 2`).
+    fn restore(&self, py: Python<'_>, row: isize, state: &Bound<'_, TrackerState>) -> PyResult<()> {
+        let row = self.row(row)?;
+        let tracker = state.get().tracker.clone();
+        py.detach(|| lock(&self.encoder).restore_tracker(row, &tracker)).map_err(PyValueError::new_err)
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn encode_batch(&self, py: Python<'_>, observations: Vec<Bound<'_, PyAny>>,
         ids: &Bound<'_, PyAny>, floats: &Bound<'_, PyAny>, field: &Bound<'_, PyAny>,
@@ -129,11 +143,40 @@ impl ObsEncoder {
         foe_match: &Bound<'_, PyAny>, fainted: &Bound<'_, PyAny>, guard: &Bound<'_, PyAny>,
         action_features: &Bound<'_, PyAny>, token_features: &Bound<'_, PyAny>) -> PyResult<()>
     {
-        let row = usize::try_from(row).ok().filter(|&r| r < self.rows)
-            .ok_or_else(|| PyValueError::new_err(format!("row must be in 0..{}, got {row}", self.rows)))?;
+        let row = self.row(row)?;
         let owned = OwnedObservation::extract(observation)?;
         with_outputs(self.rows, ids, floats, field, foe_match, fainted, guard, action_features, token_features, |out| {
             py.detach(|| lock(&self.encoder).encode_row(row, &owned.view(), out)).map_err(PyValueError::new_err)
+        })
+    }
+
+    /// `encode_row` for each of `rows` (with `observations[i]` for `rows[i]`), then damage features for those rows
+    /// only (`damage=False` skips them). No partner matching. Other rows of the arrays are left as they were.
+    #[pyo3(signature = (rows, observations, ids, floats, field, foe_match, fainted, guard, action_features, token_features, damage=true))]
+    #[allow(clippy::too_many_arguments)]
+    fn encode_rows(&self, py: Python<'_>, rows: Vec<usize>, observations: Vec<Bound<'_, PyAny>>,
+        ids: &Bound<'_, PyAny>, floats: &Bound<'_, PyAny>, field: &Bound<'_, PyAny>,
+        foe_match: &Bound<'_, PyAny>, fainted: &Bound<'_, PyAny>, guard: &Bound<'_, PyAny>,
+        action_features: &Bound<'_, PyAny>, token_features: &Bound<'_, PyAny>, damage: bool) -> PyResult<()>
+    {
+        if observations.len() != rows.len() {
+            return Err(PyValueError::new_err("rows and observations must have the same length"));
+        }
+        if let Some(&r) = rows.iter().find(|&&r| r >= self.rows) {
+            return Err(PyValueError::new_err(format!("row {r} outside 0..{}", self.rows)));
+        }
+        let owned: Vec<_> = observations.iter().map(OwnedObservation::extract).collect::<PyResult<_>>()?;
+        with_outputs(self.rows, ids, floats, field, foe_match, fainted, guard, action_features, token_features, |out| {
+            py.detach(|| {
+                let mut encoder = lock(&self.encoder);
+                for (&row, obs) in rows.iter().zip(&owned) {
+                    encoder.encode_row(row, &obs.view(), out)?;
+                }
+                if damage {
+                    encoder.damage_features_rows(&rows, out);
+                }
+                Ok::<_, String>(())
+            }).map_err(PyValueError::new_err)
         })
     }
 
@@ -194,6 +237,13 @@ impl ObsEncoder {
             d.set_item(key, columns)?;
         }
         Ok(d)
+    }
+}
+
+impl ObsEncoder {
+    fn row(&self, row: isize) -> PyResult<usize> {
+        usize::try_from(row).ok().filter(|&r| r < self.rows)
+            .ok_or_else(|| PyValueError::new_err(format!("row must be in 0..{}, got {row}", self.rows)))
     }
 }
 
@@ -303,6 +353,7 @@ impl SmartAgent {
 pub(crate) fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ObsEncoder>()?;
     m.add_class::<SmartAgent>()?;
+    crate::py_search_grid::register(m)?;
     m.add("ENCODER", true)?;
     Ok(())
 }

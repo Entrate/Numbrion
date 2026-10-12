@@ -6,6 +6,7 @@
 //! keeps what it already changed, like the Python `try: handler(...) except (IndexError, ValueError): pass`.
 
 use crate::dex::to_id;
+use std::borrow::Cow;
 
 /// A tracked Pokemon key: side ("p1" / "p2") and name.
 pub type Key = (String, String);
@@ -54,14 +55,17 @@ fn partition(s: &str) -> (&str, &str) {
 }
 
 /// Digit-separating underscores removed ("1_000" -> "1000"); None when an underscore is not between two ASCII digits.
-fn without_underscores(s: &str) -> Option<String> {
+fn without_underscores(s: &str) -> Option<Cow<'_, str>> {
+    if !s.contains('_') {
+        return Some(Cow::Borrowed(s));
+    }
     let b = s.as_bytes();
     for (i, &c) in b.iter().enumerate() {
         if c == b'_' && !(i > 0 && b[i - 1].is_ascii_digit() && b.get(i + 1).is_some_and(u8::is_ascii_digit)) {
             return None;
         }
     }
-    Some(s.replace('_', ""))
+    Some(Cow::Owned(s.replace('_', "")))
 }
 
 /// Largest magnitude [`py_int`] returns: Python ints are unbounded, the clamp keeps all later arithmetic in range.
@@ -88,8 +92,7 @@ pub fn py_int(s: &str) -> Result<i64, Abort> {
 
 /// Python `float(s)` (ASCII digits; "inf", "infinity" and "nan" in any case).
 pub fn py_float(s: &str) -> Result<f64, Abort> {
-    let s = py_strip(s);
-    let clean = if s.contains('_') { without_underscores(s).ok_or(Abort)? } else { s.to_string() };
+    let clean = without_underscores(py_strip(s)).ok_or(Abort)?;
     clean.parse::<f64>().map_err(|_| Abort)
 }
 
@@ -129,7 +132,7 @@ pub fn details(text: &str) -> (&str, i64, &str) {
 }
 
 /// What is known about a Pokemon (`KNOWLEDGE`), saved at each switch-in for the Illusion bookkeeping.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Knowledge {
     pub hp: f64,
     pub status: String,
@@ -140,6 +143,55 @@ pub struct Knowledge {
     pub terastallized: bool,
 }
 
+// `clone_from` reuses the string allocations: search copies a root tracker into a scratch one for every cell.
+impl Clone for Knowledge {
+    fn clone(&self) -> Self {
+        Knowledge {
+            hp: self.hp,
+            status: self.status.clone(),
+            item: self.item.clone(),
+            item_lost: self.item_lost,
+            ability: self.ability.clone(),
+            tera: self.tera.clone(),
+            terastallized: self.terastallized,
+        }
+    }
+
+    fn clone_from(&mut self, s: &Self) {
+        // Exhaustive, so a new field cannot be forgotten here.
+        let Knowledge { hp, status, item, item_lost, ability, tera, terastallized } = s;
+        self.hp = *hp;
+        self.status.clone_from(status);
+        self.item.clone_from(item);
+        self.item_lost = *item_lost;
+        self.ability.clone_from(ability);
+        self.tera.clone_from(tera);
+        self.terastallized = *terastallized;
+    }
+}
+
+/// `dst.clone_from(src)` with `assign` for the common prefix (reusing allocations) and `Clone` for the rest.
+fn clone_vec_from<T: Clone>(dst: &mut Vec<T>, src: &[T], assign: impl Fn(&mut T, &T)) {
+    dst.truncate(src.len());
+    for (d, s) in dst.iter_mut().zip(src) {
+        assign(d, s);
+    }
+    let done = dst.len();
+    dst.extend_from_slice(&src[done..]);
+}
+
+/// `clone_from` of a (String, value) pair.
+fn assign_named<V: Clone>(d: &mut (String, V), s: &(String, V)) {
+    d.0.clone_from(&s.0);
+    d.1.clone_from(&s.1);
+}
+
+/// `clone_from` of a [`Key`].
+fn assign_key(d: &mut Key, s: &Key) {
+    d.0.clone_from(&s.0);
+    d.1.clone_from(&s.1);
+}
+
 impl Default for Knowledge {
     fn default() -> Self {
         let m = Mon::default();
@@ -147,7 +199,7 @@ impl Default for Knowledge {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Mon {
     pub species: String,
     pub level: i64,
@@ -207,6 +259,42 @@ impl Default for Mon {
     }
 }
 
+impl Clone for Mon {
+    fn clone(&self) -> Self {
+        let mut m = Mon::default();
+        m.clone_from(self);
+        m
+    }
+
+    fn clone_from(&mut self, s: &Self) {
+        // Exhaustive, so a new field cannot be forgotten here.
+        let Mon {
+            species, level, hp, status, boosts, volatiles, switch_turn, moves_since_switch, protect_turn, stall_pending,
+            moves, item, item_lost, ability, tera, terastallized, appearances, before_stint, stint_moves, stint_added,
+        } = s;
+        self.species.clone_from(species);
+        self.level = *level;
+        self.hp = *hp;
+        self.status.clone_from(status);
+        clone_vec_from(&mut self.boosts, boosts, assign_named);
+        clone_vec_from(&mut self.volatiles, volatiles, assign_named);
+        self.switch_turn = *switch_turn;
+        self.moves_since_switch = *moves_since_switch;
+        self.protect_turn = *protect_turn;
+        self.stall_pending = *stall_pending;
+        self.moves.clone_from(moves);
+        self.item.clone_from(item);
+        self.item_lost = *item_lost;
+        self.ability.clone_from(ability);
+        self.tera.clone_from(tera);
+        self.terastallized = *terastallized;
+        self.appearances = *appearances;
+        self.before_stint.clone_from(before_stint);
+        self.stint_moves.clone_from(stint_moves);
+        self.stint_added.clone_from(stint_added);
+    }
+}
+
 impl Mon {
     fn knowledge(&self) -> Knowledge {
         Knowledge {
@@ -239,6 +327,19 @@ impl Mon {
     }
 }
 
+/// `hay.contains(pat)` for a non-empty `pat`, scanning for its first byte: protocol lines are short, and a
+/// `str::contains` with a string pattern sets up a Two-Way searcher on every call.
+fn has(hay: &str, pat: &str) -> bool {
+    let (h, p) = (hay.as_bytes(), pat.as_bytes());
+    (0..h.len()).any(|i| h[i] == p[0] && h[i..].starts_with(p))
+}
+
+/// `*s = value.to_string()`, reusing the allocation.
+fn set_str(s: &mut String, value: &str) {
+    s.clear();
+    s.push_str(value);
+}
+
 /// Python `d[key] = value` on an insertion-ordered list of pairs.
 fn dict_set(d: &mut Vec<(String, i64)>, key: &str, value: i64) {
     match d.iter_mut().find(|(k, _)| k == key) {
@@ -262,7 +363,7 @@ fn side_index(side: &str) -> Option<usize> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Tracker {
     /// 0 for p1, 1 for p2.
     pub side: usize,
@@ -286,6 +387,44 @@ pub struct Tracker {
     /// Per side (p1, p2): condition id -> (start turn, layers), in insertion order.
     pub sides: [Vec<(String, (i64, i64))>; 2],
     pub tera_used: [bool; 2],
+}
+
+impl Clone for Tracker {
+    fn clone(&self) -> Self {
+        let mut t = Tracker::new(self.side);
+        t.clone_from(self);
+        t
+    }
+
+    /// Reuses this tracker's allocations (strings, vectors, Pokemon records) where it can.
+    fn clone_from(&mut self, s: &Self) {
+        // Exhaustive, so a new field cannot be forgotten here.
+        let Tracker { side, own, battle_id, turn, mons, active, foe_order, weather, terrain, trickroom, gravity, sides, tera_used } = s;
+        self.side = *side;
+        self.own = own;
+        self.battle_id = *battle_id;
+        self.turn = *turn;
+        clone_vec_from(&mut self.mons, mons, |d, s| {
+            assign_key(&mut d.0, &s.0);
+            d.1.clone_from(&s.1);
+        });
+        clone_vec_from(&mut self.active, active, |d, s| {
+            d.0.clone_from(&s.0);
+            match (&mut d.1, &s.1) {
+                (Some(d), Some(s)) => assign_key(d, s),
+                (d, s) => *d = s.clone(),
+            }
+        });
+        clone_vec_from(&mut self.foe_order, foe_order, assign_key);
+        assign_named(&mut self.weather, weather);
+        assign_named(&mut self.terrain, terrain);
+        self.trickroom = *trickroom;
+        self.gravity = *gravity;
+        for (d, s) in self.sides.iter_mut().zip(sides) {
+            clone_vec_from(d, s, assign_named);
+        }
+        self.tera_used = *tera_used;
+    }
 }
 
 impl Tracker {
@@ -348,10 +487,30 @@ impl Tracker {
         self.active.iter().find(|(p, _)| p == position).and_then(|(_, k)| k.as_ref())
     }
 
+    /// `active.get(side + slot)` ("p2" + "a") without building the position string.
+    pub fn active_in(&self, side: &str, slot: &str) -> Option<&Key> {
+        self.active
+            .iter()
+            .find(|(p, _)| p.len() == side.len() + slot.len() && p.starts_with(side) && p.ends_with(slot))
+            .and_then(|(_, k)| k.as_ref())
+    }
+
     fn set_active(&mut self, position: &str, key: Option<Key>) {
         match self.active.iter_mut().find(|(p, _)| p == position) {
             Some(slot) => slot.1 = key,
             None => self.active.push((position.to_string(), key)),
+        }
+    }
+
+    /// `set_active(position, Some((side, name)))`, reusing the slot's strings.
+    fn set_active_key(&mut self, position: &str, side: &str, name: &str) {
+        match self.active.iter_mut().find(|(p, _)| p == position) {
+            Some((_, Some(key))) => {
+                set_str(&mut key.0, side);
+                set_str(&mut key.1, name);
+            }
+            Some((_, slot)) => *slot = Some((side.to_string(), name.to_string())),
+            None => self.active.push((position.to_string(), Some((side.to_string(), name.to_string())))),
         }
     }
 
@@ -395,7 +554,7 @@ impl Tracker {
             parts.extend(line.split('|'));
             // An Err is the Python handler's swallowed IndexError / ValueError: its earlier effects stay.
             let _ = self.handle(&parts);
-            if line.contains("[from] ability:") || line.contains("[from] item:") {
+            if has(line, "[from] ability:") || has(line, "[from] item:") {
                 self.attribute(&parts);
             }
         }
@@ -493,16 +652,16 @@ impl Tracker {
             mon.stint_added.clear();
         }
         let (species, level, tera) = details(part(parts, 3)?);
-        mon.species = species.to_string();
+        set_str(&mut mon.species, species);
         mon.level = level;
         if !tera.is_empty() {
-            mon.tera = tera.to_string();
+            set_str(&mut mon.tera, tera);
             mon.terastallized = true;
         }
         if parts.len() > 4 {
             let (hp, max_hp, status) = condition(parts[4])?;
             mon.hp = hp / max_hp;
-            mon.status = status.to_string();
+            set_str(&mut mon.status, status);
         }
         if !replace {
             mon.boosts.clear();
@@ -513,8 +672,7 @@ impl Tracker {
             mon.stall_pending = false;
         }
         let name = ident.split_once(": ").ok_or(Abort)?.1;
-        let key = (head(position, 2).to_string(), name.to_string());
-        self.set_active(head(position, 3), Some(key));
+        self.set_active_key(head(position, 3), head(position, 2), name);
         Ok(())
     }
 
@@ -595,9 +753,9 @@ impl Tracker {
         if let Some(i) = self.mon(part(parts, 2)?) {
             let (species, _, tera) = details(part(parts, 3)?);
             let mon = &mut self.mons[i].1;
-            mon.species = species.to_string();
+            set_str(&mut mon.species, species);
             if !tera.is_empty() {
-                mon.tera = tera.to_string();
+                set_str(&mut mon.tera, tera);
                 mon.terastallized = true;
             }
         }
@@ -611,7 +769,7 @@ impl Tracker {
             let (hp, max_hp, status) = condition(parts[3])?;
             let mon = &mut self.mons[i].1;
             mon.hp = hp / max_hp;
-            mon.status = status.to_string();
+            set_str(&mut mon.status, status);
         }
         Ok(())
     }
@@ -620,14 +778,15 @@ impl Tracker {
         if let Some(i) = self.mon(part(parts, 2)?) {
             let mon = &mut self.mons[i].1;
             mon.hp = 0.0;
-            mon.status = "fnt".to_string();
+            set_str(&mut mon.status, "fnt");
         }
         Ok(())
     }
 
     fn status(&mut self, parts: &[&str]) -> Result<(), Abort> {
         if let Some(i) = self.mon(part(parts, 2)?) {
-            self.mons[i].1.status = part(parts, 3)?.to_string();
+            let status = part(parts, 3)?;
+            set_str(&mut self.mons[i].1.status, status);
         }
         Ok(())
     }
@@ -698,10 +857,15 @@ impl Tracker {
     fn r#move(&mut self, parts: &[&str]) -> Result<(), Abort> {
         let Some(i) = self.mon(part(parts, 2)?) else { return Ok(()) };
         let mv = to_id(part(parts, 3)?);
-        let rest = parts[4.min(parts.len())..].concat();
+        // "".join(parts[4:]); a single part is used as it is.
+        let rest: Cow<'_, str> = match &parts[4.min(parts.len())..] {
+            [] => Cow::Borrowed(""),
+            [one] => Cow::Borrowed(one),
+            many => Cow::Owned(many.concat()),
+        };
         let turn = self.turn;
         let mon = &mut self.mons[i].1;
-        if !rest.contains("Magic Bounce") {
+        if !has(&rest, "Magic Bounce") {
             // A bounced move is not a move action (Dancer's copy is).
             mon.moves_since_switch += 1;
         }
@@ -709,7 +873,7 @@ impl Tracker {
             mon.protect_turn = turn;
             mon.stall_pending = true;
         }
-        if mv == "struggle" || rest.contains("[from]") {
+        if mv == "struggle" || has(&rest, "[from]") {
             return Ok(());
         }
         if !mon.stint_moves.contains(&mv) {
@@ -976,6 +1140,39 @@ mod tests {
         assert!((z.hp - 0.30).abs() < 1e-12);
         assert_eq!(z.moves, ["nightdaze", "thunderbolt"]);
         assert_eq!(t.active_at("p2b"), Some(&("p2".to_string(), "Zoroark".to_string())));
+    }
+
+    #[test]
+    fn clone_from_reuses_but_equals_a_fresh_clone() {
+        // Every field away from its default: Illusion bookkeeping, boosts, volatiles, items, field and side state.
+        let mut rich = Tracker::new(1);
+        rich.battle_id = 7;
+        feed(&mut rich, &["|switch|p2a: Inteleon|Inteleon, L78|100/100", "|switch|p2b: Raichu|Raichu, L85|100/100",
+                          "|switch|p1a: Zoroark|Zoroark, L80|100/100", "|turn|1", "|move|p1a: Zoroark|Night Daze|p2a: Inteleon",
+                          "|-boost|p1a: Zoroark|spa|2", "|-start|p1a: Zoroark|confusion", "|-item|p1a: Zoroark|Life Orb",
+                          "|-ability|p2a: Inteleon|Sniper", "|-terastallize|p2b: Raichu|Electric", "|-enditem|p2b: Raichu|Focus Sash",
+                          "|switch|p1a: Gengar|Gengar, L80|90/100 par", "|turn|2", "|switch|p1a: Zoroark|Zoroark, L80|80/100",
+                          "|-start|p1a: Zoroark|Substitute", "|-boost|p1a: Zoroark|spe|1", "|-weather|RainDance", "|-fieldstart|move: Psychic Terrain", "|-fieldstart|move: Trick Room",
+                          "|-fieldstart|move: Gravity", "|-sidestart|p1: A|Spikes", "|-sidestart|p2: B|move: Reflect",
+                          "|swap|p2a: Inteleon|1", "|turn|3"]);
+        assert!(rich.mons.iter().any(|(_, m)| m.before_stint.is_some() && !m.volatiles.is_empty()));
+        let mut dirty = Tracker::new(0);
+        feed(&mut dirty, &["|switch|p1a: A|A, L80|100/100", "|switch|p1b: B|B, L80|100/100", "|switch|p2a: C|C, L80|1/100",
+                           "|switch|p2b: D|D, L80|100/100", "|switch|p2a: E|E, L80|100/100", "|switch|p2a: F|F, L80|100/100",
+                           "|switch|p2a: G|G, L80|100/100", "|-boost|p2a: G|atk|1", "|-boost|p2a: G|def|1",
+                           "|-boost|p2a: G|spe|1", "|-sidestart|p1: A|Stealth Rock", "|-sidestart|p1: A|Spikes",
+                           "|-sidestart|p1: A|Toxic Spikes"]);
+        let want = format!("{rich:?}");
+        assert_eq!(format!("{:?}", rich.clone()), want);
+        let mut small = dirty.clone();
+        small.clone_from(&rich);
+        assert_eq!(format!("{small:?}"), want);
+        // A larger source into a smaller destination, and back.
+        let mut empty = Tracker::new(0);
+        empty.clone_from(&rich);
+        assert_eq!(format!("{empty:?}"), want);
+        empty.clone_from(&dirty);
+        assert_eq!(format!("{empty:?}"), format!("{dirty:?}"));
     }
 
     #[test]

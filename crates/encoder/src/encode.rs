@@ -13,7 +13,12 @@ use crate::{
     layout::*,
     tracker::{self, Key, Mon, Tracker},
 };
-use std::{borrow::Cow, collections::HashMap, sync::Arc};
+use std::{
+    borrow::{Borrow, Cow},
+    collections::HashMap,
+    hash::{BuildHasherDefault, Hash, Hasher},
+    sync::Arc,
+};
 
 /// Per-row sizes of the output arrays (`Buffers` in encoder.py).
 pub const IDS_PER_ROW: usize = N_TOKENS * N_IDS;
@@ -48,6 +53,17 @@ pub struct Outputs<'a> {
 }
 
 impl Outputs<'_> {
+    /// The slices of `row` that `encode_row` writes.
+    pub fn row(&mut self, row: usize) -> RowOutputs<'_> {
+        RowOutputs {
+            ids: &mut self.ids[row * IDS_PER_ROW..(row + 1) * IDS_PER_ROW],
+            floats: &mut self.floats[row * FLOATS_PER_ROW..(row + 1) * FLOATS_PER_ROW],
+            field: Some(&mut self.field[row * FIELD_PER_ROW..(row + 1) * FIELD_PER_ROW]),
+            fainted: Some(&mut self.fainted[row * FAINTED_PER_ROW..(row + 1) * FAINTED_PER_ROW]),
+            guard: Some(&mut self.guard[row * GUARD_PER_ROW..(row + 1) * GUARD_PER_ROW]),
+        }
+    }
+
     /// The number of rows the slices hold, or an error naming the first slice whose length is inconsistent.
     pub fn rows(&self) -> Result<usize, String> {
         let rows = self.field.len() / FIELD_PER_ROW;
@@ -64,6 +80,25 @@ impl Outputs<'_> {
         check("token_features", self.token_features.len(), TOKEN_FEATURES_PER_ROW)?;
         Ok(rows)
     }
+}
+
+/// One row of the observation arrays, for [`encode_tracker`]: `ids` `[N_TOKENS * N_IDS]` and `floats`
+/// `[N_TOKENS * N_POKEMON_FLOATS]` (or only the own tokens 0-5, `[6 * N_IDS]` / `[6 * N_POKEMON_FLOATS]`, for
+/// [`encode_own_tokens`]), `field` `[N_FIELD_FLOATS]`, `fainted` `[2]`, `guard` `[GUARD_PER_ROW]`. Parts left `None`
+/// are not written.
+pub struct RowOutputs<'a> {
+    pub ids: &'a mut [i64],
+    pub floats: &'a mut [f32],
+    pub field: Option<&'a mut [f32]>,
+    pub fainted: Option<&'a mut [f32]>,
+    pub guard: Option<&'a mut [bool]>,
+}
+
+/// Where an encode records the names `match_partners` needs: our request's Pokemon (`own_names`) and the foes on
+/// tokens 6-11 (`foe_names`).
+pub struct RowNames<'a> {
+    pub own: &'a mut Vec<String>,
+    pub foe: &'a mut [Option<String>; 6],
 }
 
 /// What one side of one env observes (`BatchEnv.observe`): its request JSON (None or "" for no request) and the
@@ -110,7 +145,7 @@ impl Static {
 }
 
 /// `_foe_static`'s cache key.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug)]
 struct FoeKey {
     species: String,
     level: i64,
@@ -120,6 +155,147 @@ struct FoeKey {
     item: Option<String>,
     item_lost: bool,
 }
+
+/// A [`FoeKey`] borrowed from a tracked Pokemon, so a cache hit copies no strings.
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct FoeRef<'a> {
+    species: &'a str,
+    level: i64,
+    moves: &'a [String],
+    ability: Option<&'a str>,
+    tera: &'a str,
+    item: Option<&'a str>,
+    item_lost: bool,
+}
+
+impl<'a> FoeRef<'a> {
+    fn of(mon: &'a Mon) -> Self {
+        FoeRef {
+            species: &mon.species,
+            level: mon.level,
+            moves: &mon.moves,
+            ability: mon.ability.as_deref(),
+            tera: if mon.terastallized { &mon.tera } else { "" },
+            item: mon.item.as_deref(),
+            item_lost: mon.item_lost,
+        }
+    }
+
+    fn owned(&self) -> FoeKey {
+        FoeKey {
+            species: self.species.to_string(),
+            level: self.level,
+            moves: self.moves.to_vec(),
+            ability: self.ability.map(str::to_string),
+            tera: self.tera.to_string(),
+            item: self.item.map(str::to_string),
+            item_lost: self.item_lost,
+        }
+    }
+}
+
+/// Looks up `FoeKey`s by `FoeRef` (the borrowed-key pattern: both hash and compare through `view`).
+trait FoeView {
+    fn view(&self) -> FoeRef<'_>;
+}
+
+impl FoeView for FoeKey {
+    fn view(&self) -> FoeRef<'_> {
+        FoeRef {
+            species: &self.species,
+            level: self.level,
+            moves: &self.moves,
+            ability: self.ability.as_deref(),
+            tera: &self.tera,
+            item: self.item.as_deref(),
+            item_lost: self.item_lost,
+        }
+    }
+}
+
+impl FoeView for FoeRef<'_> {
+    fn view(&self) -> FoeRef<'_> {
+        *self
+    }
+}
+
+impl Hash for dyn FoeView + '_ {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.view().hash(state);
+    }
+}
+
+impl PartialEq for dyn FoeView + '_ {
+    fn eq(&self, other: &Self) -> bool {
+        self.view() == other.view()
+    }
+}
+
+impl Eq for dyn FoeView + '_ {}
+
+impl Hash for FoeKey {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.view().hash(state);
+    }
+}
+
+impl PartialEq for FoeKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.view() == other.view()
+    }
+}
+
+impl Eq for FoeKey {}
+
+impl<'a> Borrow<dyn FoeView + 'a> for FoeKey {
+    fn borrow(&self) -> &(dyn FoeView + 'a) {
+        self
+    }
+}
+
+/// FxHash (rustc's hasher): the cache keys are trusted, short and hashed once per token.
+#[derive(Default, Clone, Copy)]
+pub struct FxHasher(u64);
+
+impl FxHasher {
+    #[inline]
+    fn add(&mut self, word: u64) {
+        self.0 = (self.0.rotate_left(5) ^ word).wrapping_mul(0x51_7c_c1_b7_27_22_0a_95);
+    }
+}
+
+impl Hasher for FxHasher {
+    fn write(&mut self, bytes: &[u8]) {
+        let mut chunks = bytes.chunks_exact(8);
+        for c in &mut chunks {
+            self.add(u64::from_le_bytes(c.try_into().unwrap()));
+        }
+        let rest = chunks.remainder();
+        if !rest.is_empty() {
+            let mut word = [0u8; 8];
+            word[..rest.len()].copy_from_slice(rest);
+            self.add(u64::from_le_bytes(word));
+        }
+    }
+
+    fn write_u8(&mut self, i: u8) {
+        self.add(u64::from(i));
+    }
+
+    fn write_u64(&mut self, i: u64) {
+        self.add(i);
+    }
+
+    fn write_usize(&mut self, i: usize) {
+        self.add(i as u64);
+    }
+
+    fn finish(&self) -> u64 {
+        self.0
+    }
+}
+
+type FxBuild = BuildHasherDefault<FxHasher>;
 
 /// Appends a serialization of `v` that is equal for values Python's `==` treats as equal (True == 1 == 1.0,
 /// 0.0 == -0.0), for the own-static cache key.
@@ -173,11 +349,12 @@ fn max1(x: f64) -> f64 {
     if 1.0 > x { 1.0 } else { x }
 }
 
-/// The static-feature caches of `Encoder` (`_own_cache`, `_foe_cache`), shared by all rows.
+/// The static-feature caches of `Encoder` (`_own_cache`, `_foe_cache`), shared by all rows. A cached entry equals a
+/// freshly computed one, so any number of caches (one per thread for [`encode_tracker`]) give identical outputs.
 #[derive(Default)]
-struct Statics {
-    own: HashMap<Vec<u8>, Static>,
-    foe: HashMap<FoeKey, Static>,
+pub struct Statics {
+    own: HashMap<Vec<u8>, Static, FxBuild>,
+    foe: HashMap<FoeKey, Static, FxBuild>,
     key: Vec<u8>,
 }
 
@@ -241,18 +418,11 @@ impl Statics {
 
     /// `_foe_static(mon)`: ids, static floats and estimated max HP of a revealed foe, beliefs included.
     fn foe(&mut self, dex: &Dex, mon: &Mon) -> Static {
-        let key = FoeKey {
-            species: mon.species.clone(),
-            level: mon.level,
-            moves: mon.moves.clone(),
-            ability: mon.ability.clone(),
-            tera: if mon.terastallized { mon.tera.clone() } else { String::new() },
-            item: mon.item.clone(),
-            item_lost: mon.item_lost,
-        };
-        if let Some(cached) = self.foe.get(&key) {
+        let probe = FoeRef::of(mon);
+        if let Some(cached) = self.foe.get(&probe as &dyn FoeView) {
             return cached.clone();
         }
+        let key = probe.owned();
         let sid = dex.species_id(&mon.species);
         let sp = dex.species_index(&sid);
         let mut s = Static::new();
@@ -376,13 +546,13 @@ fn dynamic(d: &mut [f64; N_DYNAMIC], hp: f64, status: &str, mon: Option<&Mon>, t
     }
 }
 
-/// Writes one token: the dynamic block (f64 rounded to f32), the static block and the ids.
-fn put_token(out: &mut Outputs<'_>, row: usize, token: usize, d: &[f64; N_DYNAMIC], s: Option<&Static>) {
-    let f = &mut out.floats[row * FLOATS_PER_ROW + token * N_POKEMON_FLOATS..][..N_POKEMON_FLOATS];
+/// Writes one token of a row: the dynamic block (f64 rounded to f32), the static block and the ids.
+fn put_token(out: &mut RowOutputs<'_>, token: usize, d: &[f64; N_DYNAMIC], s: Option<&Static>) {
+    let f = &mut out.floats[token * N_POKEMON_FLOATS..][..N_POKEMON_FLOATS];
     for (o, x) in f[..N_DYNAMIC].iter_mut().zip(d) {
         *o = *x as f32;
     }
-    let ids = &mut out.ids[row * IDS_PER_ROW + token * N_IDS..][..N_IDS];
+    let ids = &mut out.ids[token * N_IDS..][..N_IDS];
     match s {
         Some(s) => {
             f[N_DYNAMIC..].copy_from_slice(&s.row);
@@ -452,163 +622,20 @@ impl Encoder {
             tracker.reset(obs.battle_id);
         }
         tracker.feed(obs.log);
-        let request = match obs.request {
-            Some(text) if !text.is_empty() => Json::parse(text)?,
-            _ => Json::Obj(Vec::new()),
-        };
-        let tracker = &self.trackers[row];
-        let dex = &*self.dex;
-        out.guard[row * GUARD_PER_ROW..(row + 1) * GUARD_PER_ROW].fill(false);
-        let turn = tracker.turn;
-        let (own_side, foe_side) = (tracker.own, tracker.foe());
-        let active_json = request.at("active");
-        let actives: &[Json] = if active_json.truthy() { active_json.items() } else { &[] };
-        let move_request = !request.at("wait").truthy() && !request.at("forceSwitch").truthy();
-        let own_names = &mut self.own_names[row];
-        own_names.clear();
-        let mut own_fainted = 0usize;
-        let team = request.at("side").at("pokemon").items();
-        let team = &team[..team.len().min(6)];
-        for (index, pokemon) in team.iter().enumerate() {
-            let ident = pokemon.at("ident").as_str().ok_or("a request Pokemon has no ident")?;
-            let name = ident.split_once(": ").ok_or_else(|| format!("request ident {ident:?} has no \": \""))?.1;
-            own_names.push(name.to_string());
-            let s = self.statics.own(dex, pokemon);
-            let text = pokemon.get("condition").map_or("0 fnt", Json::str_or_empty);
-            let (hp, mut max_hp, status) = tracker::condition(text).map_err(|_| format!("bad condition {text:?}"))?;
-            if status == "fnt" {
-                own_fainted += 1;
-                max_hp = s.max_hp;
-            }
-            let mut d = [0.0f64; N_DYNAMIC];
-            d[pf::PRESENT] = 1.0;
-            d[pf::OWN] = 1.0;
-            let is_active = index < 2 && pokemon.at("active").truthy();
-            let mon = tracker.get(own_side, name);
-            dynamic(&mut d, hp / max_hp, status, mon, turn, is_active, index);
-            d[pf::STAT_HP] = max_hp / f64::from(STAT_SCALE);
-            d[pf::TERASTALLIZED] = f64::from(u8::from(pokemon.at("terastallized").truthy()));
-            let moves = pokemon.at("moves").items();
-            let moves = &moves[..moves.len().min(4)];
-            for m in 0..moves.len() {
-                d[pf::PP0 + m] = 1.0;
-            }
-            if is_active && index < actives.len() && actives[index].truthy() {
-                let active = &actives[index];
-                let active_moves = active.at("moves").items();
-                // Guards only for a Pokemon the tracker places in this slot: our disguised Zoroark is on record under
-                // the disguise, so its own record (if any) holds a past stint's timing.
-                if let Some(mon) = mon
-                    && move_request
-                    && status != "fnt"
-                    && tracker.active_at(&format!("{own_side}{}", ["a", "b"][index])).is_some_and(|k| k.0 == own_side && k.1 == name)
-                {
-                    for (m, info) in active_moves.iter().take(4).enumerate() {
-                        let mv = info.get("id").unwrap_or(&EMPTY_STR).as_str().unwrap_or("");
-                        let g = row * GUARD_PER_ROW + (index * 4 + m) * 2;
-                        out.guard[g + STALE] = FIRST_TURN_ONLY.contains(&mv) && mon.moves_since_switch > 0;
-                        out.guard[g + REPEAT_PROTECT] =
-                            dex.move_stalling[dex.move_index(mv) as usize] && mon.protect_turn >= turn - 1;
-                    }
-                }
-                d[pf::TERA_AVAILABLE] = f64::from(u8::from(active.at("canTerastallize").truthy()));
-                d[pf::TRAPPED] = f64::from(u8::from(active.at("trapped").truthy() || active.at("maybeTrapped").truthy()));
-                for (m, mv) in moves.iter().enumerate() {
-                    // by_id = {m.get("id"): m for m in moves}: the last request move with that id.
-                    if let Some(info) = active_moves.iter().rev().find(|info| py_eq(info.at("id"), mv)) {
-                        let pp = info.get("pp").map_or(0.0, |v| v.as_f64().unwrap_or(0.0));
-                        let maxpp = info.get("maxpp").map_or(1.0, |v| v.as_f64().unwrap_or(1.0));
-                        d[pf::PP0 + m] = pp / max1(maxpp);
-                        d[pf::DISABLED0 + m] = f64::from(u8::from(info.at("disabled").truthy()));
-                    }
-                }
-            }
-            put_token(out, row, OWN + index, &d, Some(&s));
-        }
-        let zero = [0.0f64; N_DYNAMIC];
-        for index in team.len()..6 {
-            put_token(out, row, OWN + index, &zero, None);
-        }
+        let request = parse_request(obs.request)?;
+        let names = RowNames { own: &mut self.own_names[row], foe: &mut self.foe_names[row] };
+        encode_tracker(&self.dex, &mut self.statics, &self.trackers[row], &request, out.row(row), Some(names))
+    }
 
-        // Foe tokens: active a, active b, then the rest in reveal order.
-        let foe_a = tracker.active_at(&format!("{foe_side}a"));
-        let foe_b = tracker.active_at(&format!("{foe_side}b"));
-        let mut foe_keys: Vec<Option<&Key>> = vec![foe_a, foe_b];
-        foe_keys.extend(tracker.foe_order.iter().filter(|k| foe_a != Some(*k) && foe_b != Some(*k)).take(4).map(Some));
-        let foe_names = &mut self.foe_names[row];
-        *foe_names = Default::default();
-        let (mut foe_fainted, mut revealed) = (0usize, 0usize);
-        let foe_tera_available = f64::from(u8::from(!tracker.tera_used[usize::from(foe_side == "p2")]));
-        for k in 0..6 {
-            let key = foe_keys.get(k).copied().flatten();
-            let mon = key.and_then(|key| tracker.get(&key.0, &key.1));
-            let (Some(key), Some(mon)) = (key, mon.filter(|m| !m.species.is_empty())) else {
-                put_token(out, row, FOE_A + k, &zero, None);
-                continue;
-            };
-            revealed += 1;
-            foe_names[k] = Some(key.1.clone());
-            if mon.status == "fnt" {
-                foe_fainted += 1;
-            }
-            let s = self.statics.foe(dex, mon);
-            let mut d = [0.0f64; N_DYNAMIC];
-            d[pf::PRESENT] = 1.0;
-            dynamic(&mut d, mon.hp, &mon.status, Some(mon), turn, k < 2, k);
-            d[pf::STAT_HP] = s.max_hp / f64::from(STAT_SCALE);
-            d[pf::TERASTALLIZED] = f64::from(u8::from(mon.terastallized));
-            d[pf::TERA_AVAILABLE] = foe_tera_available;
-            put_token(out, row, FOE_A + k, &d, Some(&s));
+    /// Replaces `row`'s tracker (a snapshot taken with [`Encoder::tracker`]); its side must be the row's (`row % 2`).
+    pub fn restore_tracker(&mut self, row: usize, tracker: &Tracker) -> Result<(), String> {
+        if row >= self.rows() {
+            return Err(format!("row {row} out of range 0..{}", self.rows()));
         }
-
-        let mut f = [0.0f64; N_FIELD_FLOATS];
-        let (weather, since) = (&tracker.weather.0, tracker.weather.1);
-        if let Some(col) = weather_column(weather) {
-            f[col] = 1.0;
-            if EXTREME_WEATHER.contains(&weather.as_str()) {
-                f[ff::EXTREME_WEATHER] = 1.0;
-            }
-            f[ff::WEATHER_TURNS] = (turn - since).min(8) as f64 / 8.0;
+        if tracker.side != row % 2 {
+            return Err(format!("row {row} tracks side {}, the state is a side-{} tracker", row % 2, tracker.side));
         }
-        let (terrain, since) = (&tracker.terrain.0, tracker.terrain.1);
-        if let Some(i) = TERRAINS.iter().position(|t| t == terrain) {
-            f[ff::ELECTRICTERRAIN + i] = 1.0;
-            f[ff::TERRAIN_TURNS] = (turn - since).min(8) as f64 / 8.0;
-        }
-        if tracker.trickroom >= 0 {
-            f[ff::TRICKROOM] = 1.0;
-            f[ff::TRICKROOM_TURNS] = (turn - tracker.trickroom).min(5) as f64 / 5.0;
-        }
-        f[ff::GRAVITY] = f64::from(u8::from(tracker.gravity));
-        let own_index = usize::from(own_side == "p2");
-        for (conditions, turns, side) in [(ff::OWN_TAILWIND, ff::OWN_TAILWIND_TURNS, own_index), (ff::FOE_TAILWIND, ff::FOE_TAILWIND_TURNS, 1 - own_index)] {
-            for (name, (start, layers)) in &tracker.sides[side] {
-                let Some(i) = SIDE_CONDITIONS.iter().position(|c| c == name) else { continue };
-                f[conditions + i] = match name.as_str() {
-                    "spikes" => *layers as f64 / 3.0,
-                    "toxicspikes" => *layers as f64 / 2.0,
-                    _ => 1.0,
-                };
-                if let Some(t) = TIMED_SIDE.iter().position(|c| c == name) {
-                    f[turns + t] = (turn - start).min(8) as f64 / 8.0;
-                }
-            }
-        }
-        f[ff::TURN] = turn.min(60) as f64 / 30.0;
-        f[ff::OWN_TERA_USED] = f64::from(u8::from(tracker.tera_used[own_index]));
-        f[ff::FOE_TERA_USED] = f64::from(u8::from(tracker.tera_used[1 - own_index]));
-        f[ff::REQUEST_WAIT] = f64::from(u8::from(request.at("wait").truthy()));
-        f[ff::REQUEST_SWITCH] = f64::from(u8::from(request.at("forceSwitch").truthy()));
-        f[ff::REQUEST_MOVE] = f64::from(u8::from(active_json.truthy()));
-        f[ff::OWN_ALIVE] = (6.0 - own_fainted as f64) / 6.0;
-        f[ff::FOE_FAINTED] = foe_fainted as f64 / 6.0;
-        f[ff::FOE_REVEALED] = revealed as f64 / 6.0;
-        f[ff::FOE_UNREVEALED] = (6.0 - revealed as f64) / 6.0;
-        for (o, x) in out.field[row * FIELD_PER_ROW..(row + 1) * FIELD_PER_ROW].iter_mut().zip(&f) {
-            *o = *x as f32;
-        }
-        out.fainted[row * FAINTED_PER_ROW] = own_fainted as f32;
-        out.fainted[row * FAINTED_PER_ROW + 1] = foe_fainted as f32;
+        self.trackers[row].clone_from(tracker);
         Ok(())
     }
 
@@ -626,6 +653,19 @@ impl Encoder {
                     }
                 }
             }
+        }
+    }
+
+    /// `damage_features` for the given rows only.
+    pub fn damage_features_rows(&self, rows: &[usize], out: &mut Outputs<'_>) {
+        for &row in rows {
+            self.damage.row(
+                &out.ids[row * IDS_PER_ROW..(row + 1) * IDS_PER_ROW],
+                &out.floats[row * FLOATS_PER_ROW..(row + 1) * FLOATS_PER_ROW],
+                &out.field[row * FIELD_PER_ROW..(row + 1) * FIELD_PER_ROW],
+                &mut out.action_features[row * ACTION_PER_ROW..(row + 1) * ACTION_PER_ROW],
+                &mut out.token_features[row * TOKEN_FEATURES_PER_ROW..(row + 1) * TOKEN_FEATURES_PER_ROW],
+            );
         }
     }
 
@@ -656,6 +696,214 @@ impl Encoder {
         self.damage_features(out);
         Ok(())
     }
+}
+
+/// The request of an observation: None or "" is an empty object (no request), as in `Encoder.encode`.
+pub fn parse_request(request: Option<&str>) -> Result<Json<'_>, String> {
+    match request {
+        Some(text) if !text.is_empty() => Json::parse(text),
+        _ => Ok(Json::Obj(Vec::new())),
+    }
+}
+
+/// `Encoder.encode` of one row from a given tracker (already fed with the row's lines) and request: what
+/// [`Encoder::encode_row`] writes after its tracker update, bit for bit. `cache` may be any [`Statics`] (one per
+/// thread). `names` receives what `match_partners` needs. Err like `encode_row` (an own Pokemon's ident without ": "
+/// or an unreadable condition), with the parts written so far left in place.
+pub fn encode_tracker(dex: &Dex, cache: &mut Statics, tracker: &Tracker, request: &Json, out: RowOutputs<'_>,
+    names: Option<RowNames<'_>>) -> Result<(), String>
+{
+    encode_impl(dex, cache, tracker, request, out, names, false)
+}
+
+/// The own tokens 0-5 of [`encode_tracker`] only (`out.ids` `[6 * N_IDS]`, `out.floats` `[6 * N_POKEMON_FLOATS]`,
+/// `guard` when given; `field` and `fainted` are ignored), identical to tokens 0-5 of the full row: what the value
+/// head reads from the partner row.
+pub fn encode_own_tokens(dex: &Dex, cache: &mut Statics, tracker: &Tracker, request: &Json, out: RowOutputs<'_>)
+    -> Result<(), String>
+{
+    encode_impl(dex, cache, tracker, request, out, None, true)
+}
+
+fn encode_impl(dex: &Dex, statics: &mut Statics, tracker: &Tracker, request: &Json, mut out: RowOutputs<'_>,
+    names: Option<RowNames<'_>>, own_only: bool) -> Result<(), String>
+{
+    let tokens = if own_only { 6 } else { N_TOKENS };
+    if out.ids.len() != tokens * N_IDS || out.floats.len() != tokens * N_POKEMON_FLOATS {
+        return Err(format!("row outputs must hold {tokens} tokens, got {} ids and {} floats", out.ids.len(), out.floats.len()));
+    }
+    if let Some(guard) = out.guard.as_deref_mut() {
+        guard.fill(false);
+    }
+    let turn = tracker.turn;
+    let (own_side, foe_side) = (tracker.own, tracker.foe());
+    let active_json = request.at("active");
+    let actives: &[Json] = if active_json.truthy() { active_json.items() } else { &[] };
+    let move_request = !request.at("wait").truthy() && !request.at("forceSwitch").truthy();
+    let (mut own_names, mut foe_names) = match names {
+        Some(RowNames { own, foe }) => (Some(own), Some(foe)),
+        None => (None, None),
+    };
+    if let Some(own_names) = own_names.as_deref_mut() {
+        own_names.clear();
+    }
+    let mut own_fainted = 0usize;
+    let team = request.at("side").at("pokemon").items();
+    let team = &team[..team.len().min(6)];
+    for (index, pokemon) in team.iter().enumerate() {
+        let ident = pokemon.at("ident").as_str().ok_or("a request Pokemon has no ident")?;
+        let name = ident.split_once(": ").ok_or_else(|| format!("request ident {ident:?} has no \": \""))?.1;
+        if let Some(own_names) = own_names.as_deref_mut() {
+            own_names.push(name.to_string());
+        }
+        let s = statics.own(dex, pokemon);
+        let text = pokemon.get("condition").map_or("0 fnt", Json::str_or_empty);
+        let (hp, mut max_hp, status) = tracker::condition(text).map_err(|_| format!("bad condition {text:?}"))?;
+        if status == "fnt" {
+            own_fainted += 1;
+            max_hp = s.max_hp;
+        }
+        let mut d = [0.0f64; N_DYNAMIC];
+        d[pf::PRESENT] = 1.0;
+        d[pf::OWN] = 1.0;
+        let is_active = index < 2 && pokemon.at("active").truthy();
+        let mon = tracker.get(own_side, name);
+        dynamic(&mut d, hp / max_hp, status, mon, turn, is_active, index);
+        d[pf::STAT_HP] = max_hp / f64::from(STAT_SCALE);
+        d[pf::TERASTALLIZED] = f64::from(u8::from(pokemon.at("terastallized").truthy()));
+        let moves = pokemon.at("moves").items();
+        let moves = &moves[..moves.len().min(4)];
+        for m in 0..moves.len() {
+            d[pf::PP0 + m] = 1.0;
+        }
+        if is_active && index < actives.len() && actives[index].truthy() {
+            let active = &actives[index];
+            let active_moves = active.at("moves").items();
+            // Guards only for a Pokemon the tracker places in this slot: our disguised Zoroark is on record under
+            // the disguise, so its own record (if any) holds a past stint's timing.
+            if let Some(guard) = out.guard.as_deref_mut()
+                && let Some(mon) = mon
+                && move_request
+                && status != "fnt"
+                && tracker.active_in(own_side, ["a", "b"][index]).is_some_and(|k| k.0 == own_side && k.1 == name)
+            {
+                for (m, info) in active_moves.iter().take(4).enumerate() {
+                    let mv = info.get("id").unwrap_or(&EMPTY_STR).as_str().unwrap_or("");
+                    let g = (index * 4 + m) * 2;
+                    guard[g + STALE] = FIRST_TURN_ONLY.contains(&mv) && mon.moves_since_switch > 0;
+                    guard[g + REPEAT_PROTECT] = dex.move_stalling[dex.move_index(mv) as usize] && mon.protect_turn >= turn - 1;
+                }
+            }
+            d[pf::TERA_AVAILABLE] = f64::from(u8::from(active.at("canTerastallize").truthy()));
+            d[pf::TRAPPED] = f64::from(u8::from(active.at("trapped").truthy() || active.at("maybeTrapped").truthy()));
+            for (m, mv) in moves.iter().enumerate() {
+                // by_id = {m.get("id"): m for m in moves}: the last request move with that id.
+                if let Some(info) = active_moves.iter().rev().find(|info| py_eq(info.at("id"), mv)) {
+                    let pp = info.get("pp").map_or(0.0, |v| v.as_f64().unwrap_or(0.0));
+                    let maxpp = info.get("maxpp").map_or(1.0, |v| v.as_f64().unwrap_or(1.0));
+                    d[pf::PP0 + m] = pp / max1(maxpp);
+                    d[pf::DISABLED0 + m] = f64::from(u8::from(info.at("disabled").truthy()));
+                }
+            }
+        }
+        put_token(&mut out, OWN + index, &d, Some(&s));
+    }
+    let zero = [0.0f64; N_DYNAMIC];
+    for index in team.len()..6 {
+        put_token(&mut out, OWN + index, &zero, None);
+    }
+    if own_only {
+        return Ok(());
+    }
+
+    // Foe tokens: active a, active b, then the rest in reveal order.
+    let foe_a = tracker.active_in(foe_side, "a");
+    let foe_b = tracker.active_in(foe_side, "b");
+    let mut foe_keys: [Option<&Key>; 6] = [foe_a, foe_b, None, None, None, None];
+    for (k, key) in tracker.foe_order.iter().filter(|k| foe_a != Some(*k) && foe_b != Some(*k)).take(4).enumerate() {
+        foe_keys[2 + k] = Some(key);
+    }
+    if let Some(foe_names) = foe_names.as_deref_mut() {
+        *foe_names = Default::default();
+    }
+    let (mut foe_fainted, mut revealed) = (0usize, 0usize);
+    let foe_tera_available = f64::from(u8::from(!tracker.tera_used[usize::from(foe_side == "p2")]));
+    for (k, key) in foe_keys.into_iter().enumerate() {
+        let mon = key.and_then(|key| tracker.get(&key.0, &key.1));
+        let (Some(key), Some(mon)) = (key, mon.filter(|m| !m.species.is_empty())) else {
+            put_token(&mut out, FOE_A + k, &zero, None);
+            continue;
+        };
+        revealed += 1;
+        if let Some(foe_names) = foe_names.as_deref_mut() {
+            foe_names[k] = Some(key.1.clone());
+        }
+        if mon.status == "fnt" {
+            foe_fainted += 1;
+        }
+        let s = statics.foe(dex, mon);
+        let mut d = [0.0f64; N_DYNAMIC];
+        d[pf::PRESENT] = 1.0;
+        dynamic(&mut d, mon.hp, &mon.status, Some(mon), turn, k < 2, k);
+        d[pf::STAT_HP] = s.max_hp / f64::from(STAT_SCALE);
+        d[pf::TERASTALLIZED] = f64::from(u8::from(mon.terastallized));
+        d[pf::TERA_AVAILABLE] = foe_tera_available;
+        put_token(&mut out, FOE_A + k, &d, Some(&s));
+    }
+
+    let mut f = [0.0f64; N_FIELD_FLOATS];
+    let (weather, since) = (&tracker.weather.0, tracker.weather.1);
+    if let Some(col) = weather_column(weather) {
+        f[col] = 1.0;
+        if EXTREME_WEATHER.contains(&weather.as_str()) {
+            f[ff::EXTREME_WEATHER] = 1.0;
+        }
+        f[ff::WEATHER_TURNS] = (turn - since).min(8) as f64 / 8.0;
+    }
+    let (terrain, since) = (&tracker.terrain.0, tracker.terrain.1);
+    if let Some(i) = TERRAINS.iter().position(|t| t == terrain) {
+        f[ff::ELECTRICTERRAIN + i] = 1.0;
+        f[ff::TERRAIN_TURNS] = (turn - since).min(8) as f64 / 8.0;
+    }
+    if tracker.trickroom >= 0 {
+        f[ff::TRICKROOM] = 1.0;
+        f[ff::TRICKROOM_TURNS] = (turn - tracker.trickroom).min(5) as f64 / 5.0;
+    }
+    f[ff::GRAVITY] = f64::from(u8::from(tracker.gravity));
+    let own_index = usize::from(own_side == "p2");
+    for (conditions, turns, side) in [(ff::OWN_TAILWIND, ff::OWN_TAILWIND_TURNS, own_index), (ff::FOE_TAILWIND, ff::FOE_TAILWIND_TURNS, 1 - own_index)] {
+        for (name, (start, layers)) in &tracker.sides[side] {
+            let Some(i) = SIDE_CONDITIONS.iter().position(|c| c == name) else { continue };
+            f[conditions + i] = match name.as_str() {
+                "spikes" => *layers as f64 / 3.0,
+                "toxicspikes" => *layers as f64 / 2.0,
+                _ => 1.0,
+            };
+            if let Some(t) = TIMED_SIDE.iter().position(|c| c == name) {
+                f[turns + t] = (turn - start).min(8) as f64 / 8.0;
+            }
+        }
+    }
+    f[ff::TURN] = turn.min(60) as f64 / 30.0;
+    f[ff::OWN_TERA_USED] = f64::from(u8::from(tracker.tera_used[own_index]));
+    f[ff::FOE_TERA_USED] = f64::from(u8::from(tracker.tera_used[1 - own_index]));
+    f[ff::REQUEST_WAIT] = f64::from(u8::from(request.at("wait").truthy()));
+    f[ff::REQUEST_SWITCH] = f64::from(u8::from(request.at("forceSwitch").truthy()));
+    f[ff::REQUEST_MOVE] = f64::from(u8::from(active_json.truthy()));
+    f[ff::OWN_ALIVE] = (6.0 - own_fainted as f64) / 6.0;
+    f[ff::FOE_FAINTED] = foe_fainted as f64 / 6.0;
+    f[ff::FOE_REVEALED] = revealed as f64 / 6.0;
+    f[ff::FOE_UNREVEALED] = (6.0 - revealed as f64) / 6.0;
+    if let Some(field) = out.field {
+        for (o, x) in field.iter_mut().zip(&f) {
+            *o = *x as f32;
+        }
+    }
+    if let Some(fainted) = out.fainted {
+        fainted[0] = own_fainted as f32;
+        fainted[1] = foe_fainted as f32;
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -827,6 +1075,56 @@ mod tests {
         encode(&mut encoder, &mut b, 2, &[], &request(moves, ""));
         assert!(!b.5.iter().any(|g| *g));
         assert_eq!(b.float(FOE_A, pf::PRESENT), 0.0);
+    }
+
+    #[test]
+    fn external_trackers_and_own_tokens_match_encode_row() {
+        let dex = dex();
+        let moves = ["fakeout", "closecombat", "protect", "flareblitz"];
+        let mut lines: Vec<&str> = SWITCH_IN.to_vec();
+        lines.extend(["|turn|1", "|move|p1a: Infernape|Protect|p1a: Infernape", "|-singleturn|p1a: Infernape|Protect",
+                      "|-boost|p2b: Gengar|spa|1", "|-sidestart|p2: Bob|move: Reflect", "|turn|2"]);
+        let text = request(moves, "");
+        let mut encoder = Encoder::new(dex.clone(), 2);
+        let mut b = Buffers::new(2);
+        encode(&mut encoder, &mut b, 1, &lines[..5], &text);
+        let snapshot = encoder.tracker(0).clone();
+        encode(&mut encoder, &mut b, 1, &lines[5..], &text);
+        encoder.damage_features(&mut b.out());
+
+        // The same history in an external tracker, encoded with a separate cache.
+        let mut tracker = snapshot.clone();
+        tracker.feed(&lines[5..]);
+        let request = parse_request(Some(&text)).unwrap();
+        let mut c = Buffers::new(1);
+        let mut cache = Statics::default();
+        let Buffers(ids, floats, field, _, fainted, guard, action, token) = &mut c;
+        let row = RowOutputs { ids, floats, field: Some(field), fainted: Some(fainted), guard: Some(guard) };
+        encode_tracker(&dex, &mut cache, &tracker, &request, row, None).unwrap();
+        encoder.damage.row(ids, floats, field, action, token);
+        let mut token_only = vec![0.0; TOKEN_FEATURES_PER_ROW];
+        encoder.damage.token_row(ids, floats, field, &mut token_only);
+        let bits = |v: &[f32]| v.iter().map(|x| x.to_bits()).collect::<Vec<_>>();
+        assert_eq!(c.0[..], b.0[..IDS_PER_ROW]);
+        assert_eq!(bits(&c.1), bits(&b.1[..FLOATS_PER_ROW]));
+        assert_eq!(bits(&c.2), bits(&b.2[..FIELD_PER_ROW]));
+        assert_eq!(c.4[..], b.4[..FAINTED_PER_ROW]);
+        assert_eq!(c.5[..], b.5[..GUARD_PER_ROW]);
+        assert_eq!(bits(&c.6), bits(&b.6[..ACTION_PER_ROW]));
+        assert_eq!(bits(&c.7), bits(&b.7[..TOKEN_FEATURES_PER_ROW]));
+        assert_eq!(bits(&token_only), bits(&c.7));
+        assert!(c.5.iter().any(|g| *g), "the scenario sets a guard");
+
+        let (mut ids, mut floats) = (vec![0; 6 * N_IDS], vec![0.0; 6 * N_POKEMON_FLOATS]);
+        let row = RowOutputs { ids: &mut ids, floats: &mut floats, field: None, fainted: None, guard: None };
+        encode_own_tokens(&dex, &mut cache, &tracker, &request, row).unwrap();
+        assert_eq!(ids[..], c.0[..6 * N_IDS]);
+        assert_eq!(bits(&floats), bits(&c.1[..6 * N_POKEMON_FLOATS]));
+
+        // restore_tracker puts a snapshot back (same side only).
+        encoder.restore_tracker(0, &snapshot).unwrap();
+        assert_eq!(encoder.tracker(0).turn, 1);
+        assert!(encoder.restore_tracker(1, &snapshot).is_err());
     }
 
     #[test]

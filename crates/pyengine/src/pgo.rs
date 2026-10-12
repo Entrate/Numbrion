@@ -13,8 +13,10 @@
 //! - `selfplay-nolog` (15%): a NoLog `BatchEnv`: `run_random`, a `step` loop and `clone_game`.
 //! - `selfplay-smart` (15%): encode every row at every boundary, including partner matching and damage
 //!   features, then play both slots with `SmartAgent` and the engine's conditional legal masks.
-//! - `grid` (30%): `GridExecutor` over mid-battle roots (NoLog and TextLog): both stop modes, every cell
+//! - `grid` (20%): `GridExecutor` over mid-battle roots (NoLog and TextLog): both stop modes, every cell
 //!   reseeded, requests on (masks and logs on alternate calls), plus multi-world calls on determinized worlds.
+//! - `search-grid` (10%): `SearchGrid` over the TextLog roots (leaves encoded on the workers, with and without
+//!   action features, both eval sides and stop modes) and `encode_states` of both sides' root requests.
 //! - `primitives` (15%): per cell `Game::fork` (clone), `restore_from`, or `restore_from` +
 //!   `replace_hidden_set` of every hidden opponent set, each followed by the cell's turn and both requests.
 
@@ -24,9 +26,11 @@ use crate::{
     mask::Req,
     pool::{SplitMix, TeamPool},
     search::{GridExecutor, Options, Seeds, Stop},
+    search_grid::{LeafOptions, SearchGrid, StateInput},
 };
 use encoder::{
     Dex,
+    tracker::Tracker,
     encode::{Encoder, Observation, Outputs, IDS_PER_ROW, FLOATS_PER_ROW, FIELD_PER_ROW, FOE_MATCH_PER_ROW,
         FAINTED_PER_ROW, GUARD_PER_ROW, ACTION_PER_ROW, TOKEN_FEATURES_PER_ROW},
     smart::{ObsRows, SmartAgent, SmartConfig},
@@ -272,6 +276,30 @@ fn grid(roots: &[Root], ex: &mut GridExecutor, budget: Duration) -> Result<Tally
     Ok(t)
 }
 
+fn search_grid(roots: &[Root], sg: &mut SearchGrid, budget: Duration) -> Result<Tally, String> {
+    // Trackers that saw only the leaf lines: the encoding paths are the same as with a history.
+    let fresh = [Tracker::new(0), Tracker::new(1)];
+    let mut t = Tally::default();
+    let start = Instant::now();
+    while start.elapsed() < budget {
+        for (k, r) in roots.iter().enumerate().filter(|(_, r)| r.game.is_text()) {
+            let stop = if (t.calls / 2) % 2 == 0 { Stop::Boundary } else { Stop::Turn };
+            let opts = LeafOptions { stop, masks: false, action_features: k % 2 == 0, guard: k % 2 == 0 };
+            let pair = [&fresh[0], &fresh[1]];
+            let out = sg.run(&[&r.game], &[], &r.actions, &Seeds::Fixed(r.seeds.clone()), &[pair], t.calls as usize % 2, &opts)
+                .map_err(|e| format!("SearchGrid failed on root {k}: {e}"))?;
+            t.sink += out.eval_side.iter().map(|&e| e as usize).sum::<usize>() + out.ids.len();
+            let requests = [r.game.request_json(0), r.game.request_json(1)];
+            let states: Vec<StateInput<'_, String>> =
+                (0..2).map(|s| StateInput { tracker: &fresh[s], request: requests[s].as_deref(), lines: &[] }).collect();
+            t.sink += sg.encode_states(&states, true, true)?.ids.len();
+            t.items += out.eval_side.len() as u64;
+            t.calls += 1;
+        }
+    }
+    Ok(t)
+}
+
 fn primitives(roots: &[Root], budget: Duration) -> Result<Tally, String> {
     // One reusable worker per log mode (`restore_from` requires matching modes).
     let mut workers: Vec<Game> = Vec::new();
@@ -341,7 +369,11 @@ pub fn run(pool_paths: &[String], seconds: f64, threads: usize) -> Result<String
     all.extend(roots(&pool, 12, true, 2028)?);
     let mut ex = GridExecutor::new(threads)?;
     let start = Instant::now();
-    line("grid", "cells", &grid(&all, &mut ex, share(0.30))?, start);
+    line("grid", "cells", &grid(&all, &mut ex, share(0.20))?, start);
+    let dex = Dex::shared(Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../../data/training/dex.json")))?;
+    let mut sg = SearchGrid::new(dex, threads)?;
+    let start = Instant::now();
+    line("search-grid", "cells", &search_grid(&all, &mut sg, share(0.10))?, start);
     let start = Instant::now();
     line("primitives", "cells", &primitives(&all, share(0.15))?, start);
     let _ = writeln!(report, "pgo workload: done in {:.1} s", total.elapsed().as_secs_f64());

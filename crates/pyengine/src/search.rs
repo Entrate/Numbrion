@@ -200,14 +200,47 @@ impl GridExecutor {
         seeds: &Seeds,
         opts: &Options,
     ) -> Result<Vec<Leaf>, GridError> {
+        let items = vec![(); actions.len() / 4];
+        self.run_staged_with(n_worlds, world, actions, seeds, opts, items, |_, _, _, leaf, ()| Ok(leaf))
+    }
+
+    /// The executor's thread pool (for work that should use the same threads, e.g. `SearchGrid`).
+    pub fn pool(&self) -> &rayon::ThreadPool {
+        &self.pool
+    }
+
+    /// `run_staged`, then `visit(thread, cell, leaf game, leaf, item)` on the worker thread that ran the cell,
+    /// with that cell's entry of `items` (one per cell; e.g. its slices of the output arrays). `thread` is
+    /// the pool thread index (`0..threads`): state indexed by it is never used by two cells at once. The
+    /// game is the worker battle at the leaf (its unread player views hold the lines since the root unless
+    /// `opts.logs` moved them into the leaf); it is restored for the next cell, so `visit` may consume it.
+    #[allow(clippy::too_many_arguments)]
+    pub fn run_staged_with<I, R, F>(
+        &mut self,
+        n_worlds: usize,
+        world: &[u32],
+        actions: &[i32],
+        seeds: &Seeds,
+        opts: &Options,
+        items: Vec<I>,
+        visit: F,
+    ) -> Result<Vec<R>, GridError>
+    where
+        I: Send,
+        R: Send,
+        F: Fn(usize, usize, &mut Game, Leaf, I) -> Result<R, GridError> + Sync,
+    {
         let bad = |e: String| Err(GridError::Input(e));
         if n_worlds == 0 || n_worlds > self.worlds.len() {
             return bad(format!("{n_worlds} worlds requested, {} staged", self.worlds.len()));
         }
-        if actions.len() % 4 != 0 {
+        if !actions.len().is_multiple_of(4) {
             return bad(format!("actions must be [n, 2, 2], got {} entries", actions.len()));
         }
         let n = actions.len() / 4;
+        if items.len() != n {
+            return bad(format!("{} cell items for {n} cells", items.len()));
+        }
         if !world.is_empty() && world.len() != n {
             return bad(format!("world must have one entry per cell ({n}), got {}", world.len()));
         }
@@ -243,11 +276,13 @@ impl GridExecutor {
             }
         }
         let workers = &self.workers;
-        let cells: Vec<Result<Leaf, GridError>> = self.pool.install(|| {
-            (0..n)
+        let visit = &visit;
+        let cells: Vec<Result<R, GridError>> = self.pool.install(|| {
+            items
                 .into_par_iter()
+                .enumerate()
                 .with_max_len(1)
-                .map(|i| {
+                .map(|(i, item)| {
                     let w = &worlds[world.get(i).map_or(0, |&w| w as usize)];
                     let seed = match seeds {
                         Seeds::Root => None,
@@ -255,7 +290,9 @@ impl GridExecutor {
                     };
                     // Pool threads are 0..threads; each locks only its own worker (never contended).
                     let t = rayon::current_thread_index().unwrap_or(0) % workers.len();
-                    run_cell(&mut lock_worker(&workers[t]), w, i, &actions[4 * i..4 * i + 4], seed, opts)
+                    let mut slot = lock_worker(&workers[t]);
+                    let leaf = run_cell(&mut slot, w, i, &actions[4 * i..4 * i + 4], seed, opts)?;
+                    visit(t, i, slot.as_mut().expect("run_cell leaves a worker"), leaf, item)
                 })
                 .collect()
         });

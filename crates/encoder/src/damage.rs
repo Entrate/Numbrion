@@ -784,7 +784,20 @@ impl DamageFeatures {
     /// flinchable, fake_out_threat, protect_ready; all times `present`. Rust-only columns append own-side offense
     /// (including switching vision for the bench), entry damage, and the foe actives' Protect choice prior.
     pub fn row(&self, ids: &[i64], floats: &[f32], field: &[f32], action: &mut [f32], token: &mut [f32]) {
-        assert_eq!(action.len(), 2 * N_CODES * N_ACTION_FEATURES, "action buffer");
+        self.row_impl(ids, floats, field, Some(action), token);
+    }
+
+    /// The `token` output of [`DamageFeatures::row`] alone, bit for bit, skipping what only the action features
+    /// need (the Tera attackers and defenders, damage through Protect, the per-code columns).
+    pub fn token_row(&self, ids: &[i64], floats: &[f32], field: &[f32], token: &mut [f32]) {
+        self.row_impl(ids, floats, field, None, token);
+    }
+
+    fn row_impl(&self, ids: &[i64], floats: &[f32], field: &[f32], mut action: Option<&mut [f32]>, token: &mut [f32]) {
+        if let Some(action) = action.as_deref() {
+            assert_eq!(action.len(), 2 * N_CODES * N_ACTION_FEATURES, "action buffer");
+        }
+        let actions = action.is_some();
         assert_eq!(token.len(), N_TOKENS * N_TOKEN_FEATURES, "token buffer");
         let fl = |i: usize, c: usize| floats[i * N_POKEMON_FLOATS + c];
         let (sun, rain) = (field[ff::SUN], field[ff::RAIN]);
@@ -804,6 +817,9 @@ impl DamageFeatures {
         let mut all_ko = [[[0.0f32; 12]; 4]; 4];
         let mut own_eff = [[[0.0f32; 12]; 4]; 2];
         for (a, att) in attackers.iter().enumerate() {
+            if a >= 2 && !actions {
+                break;
+            }
             let s = a % 2;
             for k in 0..4 {
                 let m = moves[s][k];
@@ -857,8 +873,9 @@ impl DamageFeatures {
         let mut targets = [Tok::default(); N_TARGETS];
         targets[..N_TOKENS].copy_from_slice(&t);
         targets[N_TOKENS..].copy_from_slice(&tera_t);
-        let foe_need: [bool; N_TARGETS] =
-            std::array::from_fn(|d| d < 2 || d >= N_TOKENS || (is_own[d] && present[d] != 0.0));
+        let foe_need: [bool; N_TARGETS] = std::array::from_fn(|d| {
+            d < 2 || (d >= N_TOKENS && actions) || (d < N_TOKENS && is_own[d] && present[d] != 0.0)
+        });
         let mut foe_dealt = [0.0f32; 2 * M_FOE * N_TARGETS];
         let mut foe_ko = [0.0f32; 2 * M_FOE * N_TARGETS];
         let mut foe_probs = [[0.0f32; M_FOE]; 2];
@@ -948,9 +965,12 @@ impl DamageFeatures {
         };
         let protect_now = prior(&offense, &offense_ko);
         let protect_now_fixed = prior(&offense_fixed, &offense_ko_fixed);
+        // The action columns (skipped without an action buffer).
+        let action: &mut [f32] = action.as_mut().map_or(&mut [], |a| &mut **a);
+        let slots = if actions { 2 } else { 0 };
         let mut through = [[0.0f32; 2]; 2]; // [user slot][foe]
         let mut through_ko = [[0.0f32; 2]; 2];
-        for (f, &foe) in FOE_TOKENS.iter().enumerate() {
+        for (f, &foe) in FOE_TOKENS.iter().enumerate().take(slots) {
             let unseen = p.unseen_fist[foe];
             let mut bypass = [0.0f32; M_FOE]; // generic attacks: blocked
             for m in 0..M_IDS {
@@ -976,7 +996,7 @@ impl DamageFeatures {
         let dark: [f32; 2] = std::array::from_fn(|f| f32::from(t[FOE_TOKENS[f]].def_types.contains(&self.dark)));
         let grassy = field[ff::GRASSYTERRAIN] > 0.5;
 
-        for s in 0..2 {
+        for s in 0..slots {
             let ability = ids[s * N_IDS + I_ABILITY];
             let sheer = f32::from(ability == self.sheer_force);
             let serene = f32::from(ability == self.serene_grace);

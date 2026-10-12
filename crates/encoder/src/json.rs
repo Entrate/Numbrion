@@ -20,7 +20,7 @@ static NULL: Json<'static> = Json::Null;
 impl<'a> Json<'a> {
     /// Borrow unescaped strings and object keys; only escape decoding allocates string storage.
     pub fn parse(text: &'a str) -> Result<Json<'a>, String> {
-        let mut p = Parser { text, s: text.as_bytes(), i: 0 };
+        let mut p = Parser { text, s: text.as_bytes(), i: 0, members: Vec::with_capacity(64), items: Vec::with_capacity(32) };
         p.ws();
         let v = p.value(0)?;
         p.ws();
@@ -122,6 +122,10 @@ struct Parser<'a> {
     text: &'a str,
     s: &'a [u8],
     i: usize,
+    /// Stacks of the members / items of the containers being parsed: a finished container moves its own entries
+    /// into one exactly sized vector (one allocation per container, however many entries it has).
+    members: Vec<(Cow<'a, str>, Json<'a>)>,
+    items: Vec<Json<'a>>,
 }
 
 impl<'a> Parser<'a> {
@@ -130,13 +134,8 @@ impl<'a> Parser<'a> {
     }
 
     fn ws(&mut self) {
-        while let Some(&c) = self.s.get(self.i) {
-            if matches!(c, b' ' | b'\t' | b'\n' | b'\r') {
-                self.i += 1;
-            } else {
-                break;
-            }
-        }
+        let rest = &self.s[self.i.min(self.s.len())..];
+        self.i += rest.iter().position(|c| !matches!(c, b' ' | b'\t' | b'\n' | b'\r')).unwrap_or(rest.len());
     }
 
     fn eat(&mut self, lit: &[u8]) -> bool {
@@ -156,11 +155,11 @@ impl<'a> Parser<'a> {
             None => Err(self.err("unexpected end")),
             Some(b'{') => {
                 self.i += 1;
-                let mut members = Vec::new();
                 self.ws();
                 if self.eat(b"}") {
-                    return Ok(Json::Obj(members));
+                    return Ok(Json::Obj(Vec::new()));
                 }
+                let start = self.members.len();
                 loop {
                     self.ws();
                     if self.s.get(self.i) != Some(&b'"') {
@@ -173,33 +172,34 @@ impl<'a> Parser<'a> {
                     }
                     self.ws();
                     let v = self.value(depth + 1)?;
-                    members.push((key, v));
+                    self.members.push((key, v));
                     self.ws();
                     if self.eat(b",") {
                         continue;
                     }
                     if self.eat(b"}") {
-                        return Ok(Json::Obj(members));
+                        return Ok(Json::Obj(self.members.drain(start..).collect()));
                     }
                     return Err(self.err("expected ',' or '}'"));
                 }
             }
             Some(b'[') => {
                 self.i += 1;
-                let mut items = Vec::new();
                 self.ws();
                 if self.eat(b"]") {
-                    return Ok(Json::Arr(items));
+                    return Ok(Json::Arr(Vec::new()));
                 }
+                let start = self.items.len();
                 loop {
                     self.ws();
-                    items.push(self.value(depth + 1)?);
+                    let v = self.value(depth + 1)?;
+                    self.items.push(v);
                     self.ws();
                     if self.eat(b",") {
                         continue;
                     }
                     if self.eat(b"]") {
-                        return Ok(Json::Arr(items));
+                        return Ok(Json::Arr(self.items.drain(start..).collect()));
                     }
                     return Err(self.err("expected ',' or ']'"));
                 }
@@ -229,7 +229,17 @@ impl<'a> Parser<'a> {
                 break;
             }
         }
-        let text = std::str::from_utf8(&self.s[start..self.i]).map_err(|_| self.err("bad number"))?;
+        let bytes = &self.s[start..self.i];
+        // Plain integers below 10^15 are exact in f64: the same value `parse` gives (including -0.0).
+        let (negative, digits) = match bytes.split_first() {
+            Some((b'-', rest)) => (true, rest),
+            _ => (false, bytes),
+        };
+        if !digits.is_empty() && digits.len() <= 15 && digits.iter().all(u8::is_ascii_digit) {
+            let v = digits.iter().fold(0u64, |v, &d| v * 10 + u64::from(d - b'0')) as f64;
+            return Ok(Json::Num(if negative { -v } else { v }));
+        }
+        let text = std::str::from_utf8(bytes).map_err(|_| self.err("bad number"))?;
         text.parse::<f64>().map(Json::Num).map_err(|_| self.err("bad number"))
     }
 
@@ -250,12 +260,8 @@ impl<'a> Parser<'a> {
             // ASCII quotes/backslashes cannot occur inside a UTF-8 code point. Both ends of each
             // run are therefore character boundaries in the original &str, even for non-ASCII names.
             let start = self.i;
-            while let Some(&c) = self.s.get(self.i) {
-                if c == b'"' || c == b'\\' {
-                    break;
-                }
-                self.i += 1;
-            }
+            let rest = &self.s[start.min(self.s.len())..];
+            self.i += rest.iter().position(|&c| c == b'"' || c == b'\\').unwrap_or(rest.len());
             if let Some(out) = &mut decoded {
                 out.push_str(&self.text[start..self.i]);
             }

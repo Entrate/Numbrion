@@ -594,11 +594,88 @@ impl BatchEnv {
     }
 }
 
-fn grid_err(e: GridError) -> PyErr {
+pub(crate) fn grid_err(e: GridError) -> PyErr {
     match e {
         GridError::Input(e) => PyValueError::new_err(e),
         GridError::Engine(e) => PyRuntimeError::new_err(e),
     }
+}
+
+/// The cells of a grid call (`GridExecutor.run`, `SearchGrid.run`), checked for shape and range.
+pub(crate) struct GridArgs<'py> {
+    pub roots: Vec<Bound<'py, Battle>>,
+    pub n: usize,
+    /// `[n, 2, 2]` action codes, flattened.
+    pub actions: Vec<i32>,
+    pub world: Vec<u32>,
+    pub seeds: Seeds,
+    pub stop: Stop,
+}
+
+pub(crate) fn grid_args<'py>(
+    roots: &Bound<'py, PyAny>,
+    actions: PyArrayLikeDyn<'py, i32, AllowTypeChange>,
+    world: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+    seeds: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+    stop: &str,
+) -> PyResult<GridArgs<'py>> {
+    let roots: Vec<Bound<'py, Battle>> = match roots.cast::<Battle>() {
+        Ok(b) => vec![b.clone()],
+        Err(_) => roots.extract().map_err(|_| PyValueError::new_err("roots must be a Battle or a list of Battles"))?,
+    };
+    if roots.is_empty() {
+        return Err(PyValueError::new_err("roots is empty"));
+    }
+    let shape = actions.shape().to_vec();
+    if shape.len() != 3 || shape[1..] != [2, 2] {
+        return Err(PyValueError::new_err(format!("actions must have shape (n, 2, 2), got {shape:?}")));
+    }
+    let n = shape[0];
+    let flat: Vec<i32> = actions.as_array().iter().copied().collect();
+    let world: Vec<u32> = match world {
+        None => Vec::new(),
+        Some(w) => {
+            if w.shape() != [n] {
+                return Err(PyValueError::new_err(format!("world must have shape ({n},), got {:?}", w.shape())));
+            }
+            let w: Vec<i64> = w.as_array().iter().copied().collect();
+            w.iter().map(|&x| u32::try_from(x).map_err(|_| PyValueError::new_err(format!("world index {x} out of range")))).collect::<PyResult<_>>()?
+        }
+    };
+    let seeds = match seeds {
+        None => Seeds::Root,
+        Some(s) => {
+            let shape = s.shape().to_vec();
+            if shape != [4] && shape != [n, 4] {
+                return Err(PyValueError::new_err(format!("seeds must have shape (4,) or ({n}, 4), got {shape:?}")));
+            }
+            let words: Vec<u16> = s.as_array().iter().map(|&x| u16::try_from(x).map_err(|_| PyValueError::new_err(format!("seed word {x} out of range 0..65536")))).collect::<PyResult<_>>()?;
+            Seeds::Fixed(words.chunks(4).map(|c| [c[0], c[1], c[2], c[3]]).collect())
+        }
+    };
+    let stop = match stop {
+        "boundary" => Stop::Boundary,
+        "turn" => Stop::Turn,
+        other => return Err(PyValueError::new_err(format!("stop must be 'boundary' or 'turn', got {other:?}"))),
+    };
+    Ok(GridArgs { roots, n, actions: flat, world, seeds, stop })
+}
+
+/// The `GridArrays` entries of a result dict (`n` cells).
+pub(crate) fn put_grid_arrays(d: &Bound<'_, PyDict>, a: GridArrays) -> PyResult<()> {
+    let py = d.py();
+    let n = a.n;
+    d.set_item("ended", bools(py, &a.ended))?;
+    d.set_item("winner", a.winner.into_pyarray(py))?;
+    d.set_item("turn", a.turn.into_pyarray(py))?;
+    d.set_item("steps", a.steps.into_pyarray(py))?;
+    d.set_item("needs_action", bools(py, &a.needs_action).reshape([n, 2])?)?;
+    d.set_item("request_kind", a.request_kind.into_pyarray(py).reshape([n, 2])?)?;
+    if let (Some(m0), Some(m1)) = (&a.mask0, &a.mask1_any) {
+        d.set_item("mask0", bools(py, m0).reshape([n, 2, N_ACTIONS])?)?;
+        d.set_item("mask1_any", bools(py, m1).reshape([n, 2, N_ACTIONS])?)?;
+    }
+    Ok(())
 }
 
 /// Batched one-decision search: many cells, each = restore a root, submit both sides' action codes, run to
@@ -663,44 +740,8 @@ impl GridExecutor {
         logs: Option<bool>,
         keep_leaves: bool,
     ) -> PyResult<Bound<'py, PyDict>> {
-        let roots: Vec<Bound<'py, Battle>> = match roots.cast::<Battle>() {
-            Ok(b) => vec![b.clone()],
-            Err(_) => roots.extract().map_err(|_| PyValueError::new_err("roots must be a Battle or a list of Battles"))?,
-        };
-        let Some(first) = roots.first() else { return Err(PyValueError::new_err("roots is empty")) };
-        let shape = actions.shape().to_vec();
-        if shape.len() != 3 || shape[1..] != [2, 2] {
-            return Err(PyValueError::new_err(format!("actions must have shape (n, 2, 2), got {shape:?}")));
-        }
-        let n = shape[0];
-        let flat: Vec<i32> = actions.as_array().iter().copied().collect();
-        let world: Vec<u32> = match world {
-            None => Vec::new(),
-            Some(w) => {
-                if w.shape() != [n] {
-                    return Err(PyValueError::new_err(format!("world must have shape ({n},), got {:?}", w.shape())));
-                }
-                let w: Vec<i64> = w.as_array().iter().copied().collect();
-                w.iter().map(|&x| u32::try_from(x).map_err(|_| PyValueError::new_err(format!("world index {x} out of range")))).collect::<PyResult<_>>()?
-            }
-        };
-        let seeds = match seeds {
-            None => Seeds::Root,
-            Some(s) => {
-                let shape = s.shape().to_vec();
-                if shape != [4] && shape != [n, 4] {
-                    return Err(PyValueError::new_err(format!("seeds must have shape (4,) or ({n}, 4), got {shape:?}")));
-                }
-                let words: Vec<u16> = s.as_array().iter().map(|&x| u16::try_from(x).map_err(|_| PyValueError::new_err(format!("seed word {x} out of range 0..65536")))).collect::<PyResult<_>>()?;
-                Seeds::Fixed(words.chunks(4).map(|c| [c[0], c[1], c[2], c[3]]).collect())
-            }
-        };
-        let stop = match stop {
-            "boundary" => Stop::Boundary,
-            "turn" => Stop::Turn,
-            other => return Err(PyValueError::new_err(format!("stop must be 'boundary' or 'turn', got {other:?}"))),
-        };
-        let logs = logs.unwrap_or_else(|| first.get().g.lock().map_or(false, |g| g.is_text()));
+        let GridArgs { roots, actions: flat, world, seeds, stop, .. } = grid_args(roots, actions, world, seeds, stop)?;
+        let logs = logs.unwrap_or_else(|| roots[0].get().g.lock().is_ok_and(|g| g.is_text()));
         let opts = Options { stop, requests, masks, logs, keep_leaves };
         let refs: Vec<&Battle> = roots.iter().map(|b| b.get()).collect();
         let leaves = py
@@ -712,18 +753,8 @@ impl GridExecutor {
                 ex.run_staged(refs.len(), &world, &flat, &seeds, &opts)
             })
             .map_err(grid_err)?;
-        let a = GridArrays::from_leaves(&leaves, masks);
         let d = PyDict::new(py);
-        d.set_item("ended", bools(py, &a.ended))?;
-        d.set_item("winner", a.winner.into_pyarray(py))?;
-        d.set_item("turn", a.turn.into_pyarray(py))?;
-        d.set_item("steps", a.steps.into_pyarray(py))?;
-        d.set_item("needs_action", bools(py, &a.needs_action).reshape([n, 2])?)?;
-        d.set_item("request_kind", a.request_kind.into_pyarray(py).reshape([n, 2])?)?;
-        if let (Some(m0), Some(m1)) = (&a.mask0, &a.mask1_any) {
-            d.set_item("mask0", bools(py, m0).reshape([n, 2, N_ACTIONS])?)?;
-            d.set_item("mask1_any", bools(py, m1).reshape([n, 2, N_ACTIONS])?)?;
-        }
+        put_grid_arrays(&d, GridArrays::from_leaves(&leaves, masks))?;
         let mut leaves = leaves;
         if requests {
             d.set_item("requests", PyList::new(py, leaves.iter_mut().map(|l| std::mem::take(&mut l.requests)).map(|[a, b]| (a, b)))?)?;

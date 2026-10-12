@@ -224,6 +224,16 @@ impl Game {
         with!(self, b => b.request_json(side))
     }
 
+    /// `request_json` appended to `out` (reusing its allocation); false (nothing written) after the end.
+    pub fn write_request_json(&self, side: usize, out: &mut String) -> bool {
+        with!(self, b => b.write_request_json(SideId(side as u8), out))
+    }
+
+    /// `request_json` as the tree `encoder::json::Json::parse` gives, built without text (`request_tree.rs`).
+    pub fn request_tree(&self, side: usize) -> Option<encoder::json::Json<'_>> {
+        with!(self, b => crate::request_tree::request_tree(b, side))
+    }
+
     /// Showdown's normalized text of the choice stored for `side` (`Side.getChoice`).
     pub fn choice_text(&self, side: usize) -> String {
         with!(self, b => b.choice_text(SideId(side as u8)))

@@ -12,10 +12,11 @@ public API of `crates/engine`; observation encoding and scripted play use `crate
 | `numbrion.BatchEnv` | N battles, `step(actions)` with auto-reset, masks, rewards |
 | `numbrion.ObsEncoder`, `numbrion.SmartAgent` | in-place NumPy observation encoding and two-slot scripted play; `ENCODER=True` ([training integration](../training/SELFPLAY.md#rust-observation-encoding-and-scripted-play)) |
 | `numbrion.GridExecutor` | one-decision search grids (restore root, both choices, next boundary) on Rust threads |
+| `numbrion.SearchGrid`, `numbrion.TrackerState` | the same grids with each leaf encoded for the value network on the worker threads ("Fused leaf encoding") |
 | action codes, masks | `src/action.rs`, `src/mask.rs` |
-| search executor | `src/search.rs` (see "Search" below) |
+| search executor | `src/search.rs` (see "Search" below), fused leaf encoding `src/search_grid.rs`, `src/request_tree.rs` |
 | tests | `tests/*.rs` (Rust, exhaustive mask checks) and `pytests/` (Python) |
-| benchmarks | `crates/pyengine/bench.py`, `search_bench.py`, `examples/grid_bench.rs` |
+| benchmarks | `crates/pyengine/bench.py`, `search_bench.py`, `search_grid_bench.py`, `examples/grid_bench.rs`, `examples/search_grid_bench.rs` |
 
 ## Build and install
 
@@ -453,6 +454,94 @@ cost equals a hand-written restore loop and its value is running the cells in pa
 `cargo run --release -p pyengine --example grid_bench` measures the same without Python (NoLog: executor/1
 70 us, executor/3 35 us, sequential restore 70 us, clone per cell 75 us).
 
+### Fused leaf encoding (`numbrion.SearchGrid`)
+
+`GridExecutor` returns each leaf as strings (player-view lines, request JSON) that Python must feed to the
+observation encoder. `SearchGrid` runs the same cells and encodes each leaf for the value network on the worker
+thread that ran it, straight into fresh NumPy arrays. It needs no `search` feature (it uses only the encoder and
+the executor; the engine is unchanged), but its roots should still be `WorldBuilder` worlds: like
+`GridExecutor` it reminds of SEARCH-PREREQUISITES.md and, in search wheels, warns on roots that are not worlds
+(`allow_live=True` silences that).
+
+```python
+enc = numbrion.ObsEncoder(dex_path, 2)                 # the bot's trackers: row s is side s, fed as usual
+pair = (enc.snapshot(0), enc.snapshot(1))              # TrackerState copies at this decision
+worlds = wb.worlds(4, seed=s, log=True)                # roots need log=True
+grid = numbrion.SearchGrid(dex_path, threads=4)        # persistent pool: worker battle, tracker, cache per thread
+opp = grid.encode_states([pair[1 - me]] * 4, [w.request_json(1 - me) for w in worlds])   # the opponent's view
+out = grid.run(worlds, actions, pair, me, world=world, seeds=seeds)                      # one call per decision
+state = model.trunk(out["ids"], out["floats"], out["field"], action_features, out["token_features"])
+value = model.value(state, out["partner_ids"], out["partner_floats"])   # from out["eval_side"]'s point of view
+```
+
+* **`TrackerState`**: an immutable copy of one observation tracker, i.e. everything `encode_row` reads for a row
+  besides the new lines and the request. `ObsEncoder.snapshot(row)` takes one (the encoder is unchanged),
+  `ObsEncoder.restore(row, state)` puts one back (same side only: row `% 2`), `TrackerState(side)` is an empty
+  tracker and `state.feed(lines)` a fed copy; `side`, `turn`, `battle_id` describe it.
+* **`run(roots, actions, trackers, eval_side, world=None, seeds=None, stop="boundary", masks=False,
+  action_features=False, guard=False, allow_live=False)`**: the cells, inputs and validation of
+  `GridExecutor.run`, plus `trackers`, the side-0 and side-1 `TrackerState`s at the root (one pair for every
+  root, or a list with one pair per root), and `eval_side`, the searching player's side. Per cell, on the worker:
+  * the **eval side** is `eval_side` if that side must act at the leaf, else the other side if it must, else -1
+    (the battle ended; all of the cell's encoded rows are zero). The value head was only trained on rows whose
+    side must act, so the caller negates values evaluated from the other side and scores ended cells from
+    `winner`;
+  * the eval side's **observation**: its root tracker, copied and fed its own player-view lines from the root to
+    the leaf, encoded with its own leaf request (ids, floats, field, token features; action features and guard
+    when asked; the value head does not read them);
+  * the **partner** (what `Model.value` reads from the other side's row): the other side's tracker, lines and
+    leaf request the same way, own tokens 0-5 only (ids and floats, no damage features).
+* **`encode_states(states, requests, lines=None, action_features=True, guard=True)`**: hypothetical
+  observations without touching an encoder, e.g. the opponent's at each world's root (its tracker state, the
+  world's `request_json(opp)`, no lines). Row `i` is a copy of `states[i]` fed `lines[i]` (None: none), encoded
+  with `requests[i]` (None or "" for none), plus damage features. Keys `ids`, `floats`, `field`,
+  `token_features`, `action_features`, `guard`. Runs on the grid's threads with the GIL released.
+* **Exactness.** Every array equals, bit for bit, what `ObsEncoder.encode_batch` writes for the same row when a
+  tracker with the same history is fed the same leaf lines and request (both tested on random cells, including
+  ended leaves, one-sided replacement leaves and `stop="turn"`). Leaf requests are not formatted as JSON and parsed
+  back: `request_tree.rs` builds the parsed tree from the engine's request data, and a test compares it with
+  `Json::parse(request_json)` at every boundary of many battles (51,770 requests with `NUMBRION_TEST_BATTLES=400`,
+  including requests updated by rejected choices). A change to the engine's request JSON must be repeated there.
+* **Determinism and threads.** A cell depends only on its root, codes, seed, trackers, `eval_side` and the
+  options, never on `threads` or the scheduling (each pool thread has its own worker battle, scratch tracker and
+  static-feature cache; a cached feature equals a computed one). Calls on one grid serialize; `TrackerState`s
+  are immutable and may be shared between grids and threads.
+* **The opponent's row is an approximation.** The bot's encoder feeds the opponent row the bot's own lines (the
+  real opponent view is not observable), so that tracker has the bot's own Pokemon at exact HP instead of the
+  percentages the opponent sees, and nothing the opponent alone was shown. The opponent's own tokens come from
+  its request (in a world: the sampled team), and its leaf lines are its real player view of the world.
+
+Result keys of `run` (`n` cells; `ended`, `winner`, `turn`, `steps`, `needs_action`, `request_kind` and with
+`masks=True` `mask0` / `mask1_any` exactly as `GridExecutor.run`):
+
+| Key | dtype / shape | Meaning |
+|---|---|---|
+| `eval_side` | int8 `[n]` | the side whose observation was encoded, -1 when the battle ended |
+| `ids` | int64 `[n, 12, N_IDS]` | eval side's observation, the `ObsEncoder` layout |
+| `floats` | float32 `[n, 12, N_POKEMON_FLOATS]` | |
+| `field` | float32 `[n, N_FIELD_FLOATS]` | |
+| `token_features` | float32 `[n, 12, N_TOKEN_FEATURES]` | damage-calc token features (what the trunk reads) |
+| `partner_ids`, `partner_floats` | int64 / float32 `[n, 6, ...]` | the other side's own tokens 0-5 at the leaf |
+| `action_features` | float32 `[n, 2, 40, N_ACTION_FEATURES]` | with `action_features=True` |
+| `guard` | bool `[n, 2, 4, 2]` | with `guard=True` |
+
+**Cost** (`search_grid_bench.py`: 8 decisions at turns 3-10, each 4 worlds x 8 x 8 pairs = 256 cells with one
+seed per cell; Apple M1 Pro shared with other jobs, load 7-8, 4 alternating rounds of 1 s). `slow` is
+`GridExecutor` plus `ObsEncoder.encode_batch` of the leaves from Python, with every row restored from the root
+snapshots (two rows per cell); `grid` is `GridExecutor` alone with logs and requests:
+
+| Threads | grid us/cell | slow us/cell | fused us/cell | fused cells/s |
+|---:|---:|---:|---:|---:|
+| 1 | 34.7 | 85.6 | 53.7 | 18,600 |
+| 2 | 21.6 | 73.4 | 30.4 | 32,900 |
+| 4 | 16.5 | 70.1 | 20.9 | 47,900 |
+| 6 | 14.5 | 68.1 | 17.0 | 58,800 |
+
+The slow path stops scaling because its encoding runs on one thread; the fused path adds ~19 us of encoding to a
+cell on one thread and scales with the engine. Per leaf side (one thread, `examples/search_grid_bench.rs`):
+tracker copy 0.7 us, feeding ~17 lines 2.6 us, request tree 3.3 us (JSON writing plus parsing was 8.9 us),
+row 3.4 us, token features 2.9 us (4.4 with action features), own tokens only 2.6 us.
+
 ## Performance
 
 Ryzen 5 3600 (6 cores / 12 threads), engine at `df62d35` (perf round 1 merged), portable release build, team pool = first 20,000 teams of `pool-s1-200k`, random legal self-play
@@ -498,6 +587,11 @@ text is ~46-49 us and from pre-parsed teams ~17 us; auto-reset reuses the battle
   kept leaves, and the leaves played on); with `NUMBRION_TEST_BATTLES=400`: 4,418 boundary-mode cells (1,014
   replacement leaves: 61 pivots, 941 faints, 12 Revival Blessing) and 4,271 turn-mode cells, all identical on
   1 and 3 threads.
+* `tests/search_grid.rs` and `pytests/test_search_grid.py`: `SearchGrid` leaves against `GridExecutor` logs and
+  requests encoded by an `ObsEncoder` (restored from the snapshots, and in Python also a fresh encoder replaying
+  the whole history), 1 and 3 threads, eval-side rules, `encode_states`, input errors, `WorldBuilder` worlds as
+  roots with the bot's tracker pair; the request tree against the parsed request JSON. With
+  `NUMBRION_TEST_BATTLES=400`: 4,770 cells (752 ended, 553 with one side acting) and 51,770 requests, all identical.
 * `NUMBRION_TEST_BATTLES=N` scales the number of battles of every test; the figures below were produced with it.
 
 Large runs on this PC (engine perf round 1), all green:

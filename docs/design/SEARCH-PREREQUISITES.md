@@ -107,7 +107,7 @@ over the same code without PGO (noisy; see [PGO.md](PGO.md)).
 **Steps.**
 
 1. Profile the pyengine paths. The workload (`crates/pyengine/src/pgo.rs`: `BatchEnv` self-play with and
-   without TextLog, `GridExecutor`, clone/restore/`replace_hidden_set`) runs inside an instrumented wheel
+   without TextLog, `GridExecutor`, `SearchGrid`, clone/restore/`replace_hidden_set`) runs inside an instrumented wheel
    in the training step of `tools/pgo.ps1` and `tools/pgo.sh`. Running it from a separate cargo binary
    would not help, because that profile does not match the wheel's symbols (see [PGO.md](PGO.md)). Not yet
    run on Windows.
