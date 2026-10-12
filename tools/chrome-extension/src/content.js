@@ -35,7 +35,6 @@
     onAdviseNow: () => adviseActive(true),
     onToggle: (key, value) => saveSettings({ [key]: value }),
     onCollapse: (collapsed) => storageSet({ panelCollapsed: collapsed }),
-    onMoved: (position) => storageSet({ panelPosition: position }),
   });
 
   // ------------------------------------------------------------- extension plumbing
@@ -397,7 +396,7 @@
       weight: num(cand.weight),
       best: cand.choice ? cand.choice === decision.choice : index === 0,
     }));
-    const opponent = (Array.isArray(analysis.opponent) ? analysis.opponent : []).slice(0, 5).map((reply) => ({
+    const opponent = (Array.isArray(analysis.opponent) ? analysis.opponent : []).map((reply) => ({
       text: reply.text,
       prior: num(reply.prior),
       weight: num(reply.weight),
@@ -443,6 +442,7 @@
     const view = {
       visible: true,
       roomid,
+      turn: room.turn,
       settings,
       header: '',
       status: { kind: 'idle', text: '' },
@@ -500,7 +500,7 @@
       const sent = room.sentChoice && room.sentChoice.rqid === entry.rqid;
       view.play = {
         enabled: !room.ended && !(samePlay && (play.status === 'pending' || play.status === 'sent')) && !sent,
-        label: samePlay && play.status === 'sent' ? 'Sent' : 'Play this',
+        label: samePlay && play.status === 'sent' ? 'Sent' : samePlay && play.status === 'pending' ? 'Sending…' : 'Play recommended',
         message: samePlay ? play.message : '',
         messageKind: samePlay ? (play.status === 'sent' ? 'ok' : play.status === 'pending' ? 'info' : 'error') : 'info',
       };
@@ -522,9 +522,8 @@
 
   async function start() {
     try {
-      const stored = await chrome.storage.local.get([Settings.KEY, 'panelPosition', 'panelCollapsed']);
+      const stored = await chrome.storage.local.get([Settings.KEY, 'panelCollapsed']);
       settings = Settings.normalize(stored[Settings.KEY]);
-      panel.setPosition(stored.panelPosition || null);
       panel.collapsed = !!stored.panelCollapsed;
     } catch (e) { /* defaults */ }
     chrome.storage.onChanged.addListener((changes, area) => {

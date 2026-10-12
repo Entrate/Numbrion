@@ -15,7 +15,7 @@
  * room's lines (from |init|battle on, no |request| lines, every line the client queued) and the client's current
  * request (--mock reads it back from mock_api.py's /api/_last); "Play this" submits a choice the server accepts
  * (the client shows its "waiting" controls, the next request arrives without an |error|) for --turns turns; the
- * bot log fills; the panel can be dragged and keeps its place across a page reload, after which the rejoined
+ * bot log fills; the advisor stays inside the battle controls across a page reload, after which the rejoined
  * battle is advised again; a dead API URL shows "API offline"; the end of the battle is shown. With --sockjs, a
  * bare page also opens a SockJS connection itself (the transport the client uses for non-localhost servers): the
  * hook must decode its frames, and "play" must answer through it.
@@ -95,19 +95,21 @@ async function panelState(page) {
     if (!root || host.style.display === 'none') return null;
     const panel = root.querySelector('.panel');
     const play = root.querySelector('.play');
+    if (play) play.scrollIntoView({ block: 'nearest' });
     const rect = panel.getBoundingClientRect();
     const center = (el) => {
       const r = el.getBoundingClientRect();
       return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
     };
     return {
-      text: panel.innerText,
+      text: panel.textContent,
       status: (root.querySelector('.status .txt') || {}).textContent || '',
-      right: (root.querySelector('.status .muted') || {}).textContent || '',
+      right: panel.dataset.request || '',
       choice: (root.querySelector('.choice code') || {}).textContent || null,
       playEnabled: !!play && !play.disabled,
       playBox: play ? center(play) : null,
-      head: (() => { const r = root.querySelector('.head').getBoundingClientRect(); return { x: r.x + 60, y: r.y + r.height / 2 }; })(),
+      integrated: !!host.closest('.battle-controls'),
+      recommended: !!root.querySelector('.recommended .play'),
       rect: { left: rect.left, top: rect.top, width: rect.width },
       logEntries: root.querySelectorAll('.log').length,
     };
@@ -215,8 +217,8 @@ async function waitForAdvice(page, rqid, timeout) {
   return page.waitForFunction((rqid) => {
     const root = document.getElementById('numbrion-advisor-host')?.shadowRoot;
     const play = root && root.querySelector('.play');
-    const right = root && root.querySelector('.status .muted');
-    return play && !play.disabled && right && right.textContent === 'rqid ' + rqid;
+    const request = root && root.querySelector('.panel').dataset.request;
+    return play && !play.disabled && request === 'rqid ' + rqid;
   }, { timeout: timeout || 30000, polling: 200 }, rqid);
 }
 
@@ -463,14 +465,9 @@ async function normalRun(browser) {
   await page.screenshot({ path: SCREENSHOT });
   check(true, 'screenshot saved', SCREENSHOT);
 
-  // Drag the panel, then reload: the position is kept and the rejoined battle is advised again.
+  // The advisor belongs to the battle controls. It must reattach after the client rebuilds them on reload.
   const p0 = await panelState(page);
-  await page.mouse.move(p0.head.x, p0.head.y);
-  await page.mouse.down();
-  await page.mouse.move(p0.head.x - 300, p0.head.y + 60, { steps: 8 });
-  await page.mouse.up();
-  const p1 = await panelState(page);
-  check(Math.abs(p1.rect.left - (p0.rect.left - 300)) < 3 && Math.abs(p1.rect.top - (p0.rect.top + 60)) < 3, 'panel can be dragged', { from: p0.rect, to: p1.rect });
+  check(p0.integrated && p0.recommended, 'advisor is built into battle controls with a highlighted recommendation', p0.rect);
   const reloadUrl = new URL(CLIENT);
   reloadUrl.pathname = '/' + roomid;
   await page.goto(reloadUrl.href, { waitUntil: 'domcontentloaded' });
@@ -480,7 +477,7 @@ async function normalRun(browser) {
   const rejoined = await clientRoom(page, roomid);
   const readvised = await waitForAdvice(page, rejoined.rqid).then(() => true, () => false);
   const p2 = await panelState(page);
-  check(p2 && Math.abs(p2.rect.left - p1.rect.left) < 3 && Math.abs(p2.rect.top - p1.rect.top) < 3, 'panel position restored after reload', p2 && p2.rect);
+  check(p2 && p2.integrated, 'advisor reattached to battle controls after reload', p2 && p2.rect);
   check(readvised, 'rejoined battle (the server resends the whole log) is advised again', { rqid: rejoined.rqid, status: p2 && p2.status });
 
   // A dead API URL: "Advise now" reports the API as offline; then back.
@@ -552,8 +549,7 @@ async function waitForPanelAnswer(page, rqid, timeout) {
   return page.waitForFunction((rqid) => {
     const root = document.getElementById('numbrion-advisor-host')?.shadowRoot;
     if (!root) return false;
-    const right = root.querySelector('.status .muted');
-    if (!right || right.textContent !== 'rqid ' + rqid) return false;
+    if (root.querySelector('.panel').dataset.request !== 'rqid ' + rqid) return false;
     const play = root.querySelector('.play');
     if (play && !play.disabled) return 'advice';
     const text = root.querySelector('.status .txt').textContent;
@@ -568,7 +564,7 @@ async function panelAdvice(page) {
   return page.evaluate(() => {
     const root = document.getElementById('numbrion-advisor-host').shadowRoot;
     const meta = (root.querySelector('.win .meta') || root.querySelector('.body > .muted') || {}).textContent || '';
-    const status = root.querySelector('.status .txt').textContent;
+    const status = root.querySelector('.status').title;
     const note = root.querySelector('.note:not(.history)');
     const round = /round trip ([\d.]+) s/.exec(status);
     const time = /^\w+ \u00B7 ([\d.]+) s/.exec(meta);
@@ -639,12 +635,13 @@ async function fullBattleRun(browser) {
       log('  screenshot saved', SCREENSHOT);
       // And one scrolled down to the bot log.
       await page.evaluate(() => {
-        const body = document.getElementById('numbrion-advisor-host').shadowRoot.querySelector('.body');
-        body.scrollTop = body.scrollHeight;
+        const host = document.getElementById('numbrion-advisor-host');
+        host.shadowRoot.querySelector('.bot-log').open = true;
+        host.parentElement.scrollTop = host.parentElement.scrollHeight;
       });
       const botLogShot = SCREENSHOT.replace(/\.png$/, '-botlog.png');
       await page.screenshot({ path: botLogShot });
-      await page.evaluate(() => { document.getElementById('numbrion-advisor-host').shadowRoot.querySelector('.body').scrollTop = 0; });
+      await page.evaluate(() => { const host = document.getElementById('numbrion-advisor-host'); host.shadowRoot.querySelector('.bot-log').open = false; host.parentElement.scrollTop = 0; });
       log('  screenshot saved', botLogShot);
     }
 

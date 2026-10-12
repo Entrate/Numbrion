@@ -1,7 +1,7 @@
 # Chrome extension
 
 `tools/chrome-extension` is a Manifest V3 extension for the Showdown web client. While you play a battle it shows
-what the advisor bot would choose in your position, and a "Play this" button submits that choice. In battles
+what the advisor bot would choose in your position, and a "Play recommended" button submits that choice. In battles
 against the play server's bots it also lists what those bots chose on earlier turns. It talks to the play
 server's HTTP API, described in [ADVISOR-API.md](ADVISOR-API.md).
 
@@ -29,15 +29,23 @@ reload the battle tab if the panel does not come back; the server then resends t
 
 ## Use
 
-The panel appears in the battle tab you are looking at and hides elsewhere. Drag it by its title bar. It keeps
-its place and its collapsed state. For each request it shows:
+The advisor appears below the move and switch buttons in the active battle, using the client's light or dark
+theme. The battle controls scroll when there is not enough space. The lobby stays clear. Collapse the advisor
+with its header button; it remembers that setting.
+
+The green **Recommended play** card highlights both Pokémon's actions, their targets, the estimated chance of
+winning and the **Play recommended** button. A compact **Opponent likely** column beside it shows the three
+most likely opponent turns, their estimated probabilities and the probability of other replies. It uses search
+weights when available, otherwise policy probabilities. On narrow screens it moves below the recommendation.
+Expand **Other options**, **Opponent moves**, **Search details** or
+**Bot log** to inspect the rest of the analysis:
 
 * the advised action per active pokemon, the raw choice text and the win probability,
 * where the advice came from, search or policy, with its time, worlds and cells,
 * the alternatives with their prior, searched value and final weight, and the opponent's likely replies,
 * a status line: thinking, API offline, advisor errors, waiting for the opponent, battle over.
 
-**Play this** submits the advised choice. The classic client then shows its usual "waiting for opponent" box
+**Play recommended** submits the advised choice. The classic client then shows its usual "waiting for opponent" box
 with its own summary of the choice, and its Cancel button still works. A choice the server rejects shows the
 server's error in the panel.
 
@@ -106,7 +114,7 @@ node e2e.js --full-battle --opponent NumbrionSearch --human-turns 2,5 --screensh
 
 The first run plays four turns, one of them with the client's own buttons and the rest with "Play this". It
 checks the advise bodies against the client's state, including `history` and the choices sent, then the bot
-log, dragging, a page reload, a dead API URL and a bare page that speaks SockJS. The second starts the
+log, integration with the battle controls, a page reload, a dead API URL and a bare page that speaks SockJS. The second starts the
 battle before the extension exists and installs it into the running browser, so the panel must show the
 "search needs the battle from its start" note. The script loads a temporary copy of the extension whose default
 API URL is `--api`, so a fresh install never calls a play server on the default port. The third uses the real play
