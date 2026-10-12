@@ -560,7 +560,7 @@ def test_supervisor_restart_resume_backoff_and_terminal_codes(tmp_path, monkeypa
     assert len(commands) == expected_starts
     assert commands[0][-2:] == ["--run-id", "supervised"]
     if len(commands) > 1:
-        assert commands[1][-2:] == ["--resume", "supervised"] and ticks[0] >= 10
+        assert commands[1][-2:] == ["--resume", "supervised"] and ticks[0] >= 3
     events = [json.loads(line) for line in (tmp_path / "runs" / "supervised" / "events.jsonl").read_text().splitlines()]
     assert sum(e["kind"] == "supervisor_start" for e in events) == expected_starts
     assert sum(e["kind"] == "supervisor_exit" for e in events) == expected_starts

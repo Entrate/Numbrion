@@ -747,7 +747,12 @@ async def main(args: argparse.Namespace) -> int:
         await worker.load()
         manifest["bot"]["description"] = worker.describe()
         preflight = {"ok": True, "summary": "Skipped by --no-preflight", "skipped": True}
-        if not args.no_preflight and not worker.failed:
+        reuse = previous is not None and not differences and (previous.get("preflight") or {}).get("ok")
+        if reuse:
+            # The same frozen bot passed it at the run's start (hashes checked above); a battle in progress may be
+            # waiting for us to reconnect (Showdown forfeits a player away for about a minute with the timer on).
+            preflight = {**previous["preflight"], "reused": True}
+        elif not args.no_preflight and not worker.failed:
             try:
                 from play.preflight import run_preflight
                 log.info("preflight: one short in-process battle with the run's time rules")

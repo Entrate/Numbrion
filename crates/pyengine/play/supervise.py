@@ -108,7 +108,8 @@ def run(argv=None) -> int:
                     print("Supervisor restart limit reached", file=sys.stderr)
                     return code or 1
                 restarts.append(now)
-                delay = (10, 30, 60, 120)[min(attempt, 3)]
+                # Quick first restart: a battle in progress forfeits if we stay away ~60 s with the timer on.
+                delay = (3, 10, 30, 60, 120)[min(len(restarts) - 1, 4)]
                 record(event_path, "supervisor_backoff", seconds=delay)
                 until = now + delay
                 while not stopped and time.monotonic() < until:

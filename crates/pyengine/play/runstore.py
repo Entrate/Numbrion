@@ -315,8 +315,12 @@ class RunStore:
         players = meta.get("players") or e.get("players") or {}
         if side and players:
             ours, opp = players.get(side, {}), players.get("p2" if side == "p1" else "p1", {})
-            values.update(opponent=opp.get("name"), our_rating_before=ours.get("rating"),
-                          opp_rating_before=opp.get("rating"))
+            # A rejoined segment's |player| lines may lack the ratings: keep the first ones seen.
+            values.update(opponent=opp.get("name") or row["opponent"],
+                          our_rating_before=row["our_rating_before"] if row["our_rating_before"] is not None
+                          else ours.get("rating"),
+                          opp_rating_before=row["opp_rating_before"] if row["opp_rating_before"] is not None
+                          else opp.get("rating"))
         if kind == "battle_open":
             values.update(segments=row["segments"] + 1, rejoins=row["rejoins"] + int(e.get("rejoined", False)))
             if e.get("queue_wait_s") is not None:
