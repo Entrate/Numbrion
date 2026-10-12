@@ -804,3 +804,36 @@ def test_snapshots_count_from_a_new_account_and_absorb_late_updates(tmp_path, mo
         events = [json.loads(line) for line in (store.run_dir / "events.jsonl").read_text().splitlines()]
         assert not any(e["kind"] == "ratings_pending" for e in events)
     asyncio.run(scenario())
+
+
+def test_a_stale_not_searching_update_does_not_start_a_second_search(tmp_path):
+    """Live run 2026-10-12 20:39: an |updatesearch| saying "not searching", sent just before the server took our
+    /search, made the runner search again, and the server started two battles."""
+    async def scenario():
+        cfg = config()
+        store = make_store(tmp_path, cfg)
+        worker = BotWorker(cfg["bot"], DefaultBot(cfg["account"]))
+        client = LadderClient(worker, cfg, store)
+        sent = []
+
+        async def send(text):
+            sent.append(text)
+        client.send = send
+        client.logged_in.set()
+        client.reconcile_at = 0.0
+        try:
+            await client.maybe_search()
+            client._on_updatesearch('|updatesearch|{"searching":[],"games":null}')  # stale
+            await client.maybe_search()
+            assert sent.count("|/search gen9randomdoublesbattle") == 1
+            # The match arrives while the server still lists a search: cancel it, one battle at a time.
+            client._on_updatesearch('|updatesearch|{"searching":["gen9randomdoublesbattle"],'
+                                    '"games":{"battle-gen9randomdoublesbattle-7":"[Gen 9] Random Doubles Battle*"}}')
+            await asyncio.sleep(0)
+            assert sent[-1] == "|/cancelsearch"
+            await client.maybe_search()
+            assert sent.count("|/search gen9randomdoublesbattle") == 1
+        finally:
+            worker.shutdown()
+            store.close()
+    asyncio.run(scenario())

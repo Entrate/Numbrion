@@ -51,6 +51,9 @@ DEFAULTS = {"account": "numbrion", "server": "wss://sim3.psim.us/showdown/websoc
             "users_json": "https://pokemonshowdown.com/users/{userid}.json"}
 
 
+SEARCH_CONFIRM_S = 15.0  # how long a /search may go unconfirmed before the runner searches again
+
+
 class ConfigError(ValueError):
     pass
 
@@ -272,6 +275,7 @@ class LadderClient(ShowdownClient):
                                                        for d in history)}
         self.after_tasks: set[asyncio.Task] = set()
         self.snapshot_tasks: set[asyncio.Task] = set()
+        self.search_unconfirmed_until = 0.0  # monotonic; see maybe_search
         self.base_count: int | None = None  # official games in the format at the run's (re)start
         self.counted_battles = 0  # rated battles finished since then
         self._snapshot_lock = asyncio.Lock()
@@ -399,6 +403,12 @@ class LadderClient(ShowdownClient):
             self.searching = set(info.get("searching") or [])
         except (ValueError, AttributeError, TypeError):
             return
+        if self.searching:
+            self.search_unconfirmed_until = 0.0  # the server has our search
+            if info.get("games") or self.rooms:
+                # One battle at a time: a search still queued next to a running battle would start a second one.
+                self.task(self.send("|/cancelsearch"))
+                self.searching.clear()
         super()._on_updatesearch(line)
         self.store.emit("updatesearch", info)
 
@@ -427,6 +437,7 @@ class LadderClient(ShowdownClient):
         now = time.time()
         wait = now - self.search_started if self.search_started is not None and not rejoined else None
         self.search_started = None
+        self.search_unconfirmed_until = 0.0
         self.searching.clear()
         self.battle_baselines.setdefault(roomid, self.last_snapshot)
         self.summaries.setdefault(roomid, {"sources": Counter(), "notes": Counter(), "times": [], "end": None,
@@ -609,9 +620,13 @@ class LadderClient(ShowdownClient):
         async with self._search_lock:
             self.check_limits()
             if (self.stop_requested or self.store.failed.is_set() or not self.connected or self.games or self.rooms
-                    or self.after_tasks or self.searching or time.monotonic() < self.reconcile_at):
+                    or self.after_tasks or self.searching or time.monotonic() < self.reconcile_at
+                    or time.monotonic() < self.search_unconfirmed_until):
                 return
             self.searching.add(self.config["format"])
+            # Until the server lists the search (or a battle starts), a "not searching" update may predate our
+            # /search: searching again then queues a second search, and the server starts two battles.
+            self.search_unconfirmed_until = time.monotonic() + SEARCH_CONFIRM_S
             self.search_started = time.time()
             self.store.emit("search", {"time": self.search_started, "format": self.config["format"]})
             await self.send("|/utm null")
