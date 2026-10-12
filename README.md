@@ -9,6 +9,10 @@ See [engine validation](docs/STATUS.md) and [the training API](docs/design/TRAIN
 For AMD GPU training on Windows, follow [the setup and training guide](docs/training/WINDOWS-GPU.md).
 For Apple silicon Macs, see [GPU training on Apple silicon](docs/training/MAC.md).
 
+To play against the bots in the Showdown client, see [Play against the bots](docs/play/PLAY.md); the bots search
+one turn ahead ([search](docs/play/SEARCH.md)), and a [Chrome extension](docs/play/EXTENSION.md) shows what a bot
+would choose in your battles.
+
 ## Build
 
 Install current stable Rust using rustup. Windows requires a matching linker:

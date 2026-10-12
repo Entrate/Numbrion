@@ -1,0 +1,13 @@
+{
+  "name": "numbrion-advisor-extension-dev",
+  "private": true,
+  "description": "End-to-end test tools for the Numbrion advisor Chrome extension (not part of the extension).",
+  "scripts": {
+    "install-chrome": "npx @puppeteer/browsers install chrome@stable --path ./.browsers",
+    "e2e": "node e2e.js"
+  },
+  "devDependencies": {
+    "@puppeteer/browsers": "^2.10.0",
+    "puppeteer-core": "^24.0.0"
+  }
+}
