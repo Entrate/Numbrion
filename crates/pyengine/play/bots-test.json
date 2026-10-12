@@ -1,0 +1,7 @@
+{
+  "advisor": "NumbrionDefault",
+  "bots": [
+    {"name": "NumbrionDefault", "factory": "training.player:DefaultBot"},
+    {"name": "NumbrionDefault2", "factory": "training.player:DefaultBot"}
+  ]
+}

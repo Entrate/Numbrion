@@ -1,0 +1,14 @@
+{
+  "advisor": "NumbrionAdvisor",
+  "bots": [
+    {"name": "NumbrionSearch", "factory": "training.search:SearchBot",
+     "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/.claude/worktrees/mac-training/scratch/training/overnight/03-teacher/snapshots/m060.pt",
+     "search": {}, "device": "auto", "torch_threads": 4},
+    {"name": "NumbrionPolicy", "factory": "training.search:SearchBot",
+     "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/.claude/worktrees/mac-training/scratch/training/overnight/03-teacher/snapshots/m060.pt",
+     "search": false, "device": "cpu"},
+    {"name": "NumbrionAdvisor", "factory": "training.search:SearchBot", "showdown": false,
+     "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/.claude/worktrees/mac-training/scratch/training/overnight/03-teacher/snapshots/m060.pt",
+     "search": {}, "device": "auto", "torch_threads": 4}
+  ]
+}
