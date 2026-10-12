@@ -33,8 +33,11 @@ Run from the repository root:
   search (search_labels.py), whose strategy over its candidate pairs the policy imitates (training.distill). Every
   minibatch adds ``--distill-batch`` labelled positions with weight ``--distill-coef``, falling linearly to zero at
   ``--distill-end-minutes``; held-out shards report ``distill_val_loss`` and ``distill_val_agree``.
-* Schedule: the learning rate anneals over the time budget; snapshots every ``--snapshot-minutes`` feed
-  evaluate.py. ``latest.pt`` (with optimizer, opponent-pool and entropy-controller state) supports ``--resume``.
+* Continuous distillation (``--distill-stream DIR``): consume each training row once, validate on the newest
+  holdout rows, and archive fully used shards after latest.pt saves. New shards are scanned once per update.
+* Schedule: learning rate, entropy and KO bonus anneal over ``--schedule-minutes`` (default: ``--minutes``).
+  ``--minutes inf`` runs until <output>/STOP or ``--stop-minutes``. Snapshots every ``--snapshot-minutes`` feed
+  evaluate.py. ``latest.pt`` (with optimizer, opponent-pool, entropy-controller and stream state) supports ``--resume``.
 * Metrics: besides the losses, win rates against snapshots and against the heuristic, the PFSP table, and the
   learner's action usage (Tera, switches, Protect, status moves, Fake Out; training.diagnostics).
 """
@@ -42,6 +45,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import time
 from functools import lru_cache
@@ -53,7 +57,7 @@ import torch
 from training.actors import Actors, memory_mb
 from training.device import BACKENDS, training_device
 from training.diagnostics import ActionUsage
-from training.distill import DistillData, distill_loss, validate
+from training.distill import DistillData, DistillStream, distill_loss, validate
 from training.dex import load_dex
 from training.guards import MoveGuards
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
@@ -171,9 +175,15 @@ def distill_coefficient(args, elapsed: float) -> float:
     return args.distill_coef * max(0.0, 1 - elapsed / end)
 
 
+def schedule_progress(args, elapsed: float) -> float:
+    minutes = getattr(args, "schedule_minutes", None)
+    minutes = args.minutes if minutes is None else minutes
+    return min(max(elapsed / (minutes * 60), 0.0), 1.0)
+
+
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device,
                teacher_coef: float = 0.0, distill: DistillData | None = None,
-               distill_coef: float = 0.0) -> tuple[dict, int]:
+               distill_coef: float = 0.0, elapsed: float = 0.0) -> tuple[dict, int]:
     """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays.
 
     With ``--teacher-coef`` set, the buffer carries teacher labels and the loss imitates them with weight
@@ -181,7 +191,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     the fade, so a compiled loss keeps one graph.
 
     With ``distill`` and ``distill_coef`` > 0, every minibatch also imitates ``--distill-batch`` search-labelled
-    positions (training.distill), uncompiled, with weight ``distill_coef``."""
+    positions (training.distill), uncompiled, with weight ``distill_coef``. A stream instead spreads at most
+    ``--distill-max-batches`` use-once batches over the update, and starvation leaves plain PPO unchanged."""
     steps, R = data["a0"].shape
     partner = np.arange(R) ^ 1
     advantages, returns = gae(data["reward"], data["value"], data["done"], data["bootstrap"], args.gamma, args.lam)
@@ -207,6 +218,12 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     terms_keys = ("policy_loss", "value_loss", "entropy", "tera_entropy", "aux_loss", "kl", "clipfrac",
                   *(("teacher_loss",) if teach else ()))
     distilling = distill is not None and distill_coef > 0
+    stream_batches = None
+    if isinstance(distill, DistillStream):
+        n_minibatches = args.epochs * sum(1 for _ in minibatches(np.arange(len(selected)), args.minibatch))
+        stream_batches = distill.begin_update(rng, args.distill_batch,
+                                              getattr(args, "distill_max_batches", 4) if distilling else 0,
+                                              n_minibatches, elapsed / 60)
     stats = {k: [] for k in (*terms_keys, "grad_norm", *(("distill_loss", "distill_agree") if distilling else ()))}
     # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
     # memory for every op given a new Python scalar (see training.ppo.Adam).
@@ -230,6 +247,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     def rows(key, index, extra=()):
         return columns[key][(index, *extra)] if resident else up(columns[key][(index, *extra)])
 
+    minibatch_index = 0
     for _ in range(args.epochs):
         for pick in minibatches(rng.permutation(len(selected)), args.minibatch):
             index, partner_rows = selected[pick], partner_index[selected[pick]]
@@ -244,11 +262,14 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                                   rows("logp", index), weights[pick] if resident else up(weights[pick]),
                                   rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip,
                                   tera_entropy_weight, **teacher)
-            if distilling:
-                imitation, agree = distill_loss(model, distill.sample(rng, args.distill_batch))
+            if distilling and (stream_batches is None or minibatch_index in stream_batches):
+                labels_batch = (distill.sample(rng, args.distill_batch) if stream_batches is None
+                                else stream_batches.pop(minibatch_index))
+                imitation, agree = distill_loss(model, labels_batch)
                 loss = loss + distill_weight * imitation
                 stats["distill_loss"].append(imitation.detach())
                 stats["distill_agree"].append(agree)
+            minibatch_index += 1
             optimizer.zero_grad()
             loss.backward()
             norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
@@ -269,6 +290,10 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
         summary["distill_coef"] = round(float(distill_coef), 5)
         summary.setdefault("distill_loss", None)
         summary.setdefault("distill_agree", None)
+        if stream_batches is not None:
+            summary.update(distill.metrics)
+            if not distill.metrics["distill_batches"]:
+                summary["distill_loss"] = summary["distill_agree"] = None
     if teach:
         # Agreement of the learner's sampled codes with the labels, over slot decisions with a choice (forced ones
         # agree trivially); slot b's label answers the learner's own slot a.
@@ -282,11 +307,13 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     return summary, len(selected)
 
 
-def main():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--minutes", type=float, default=60.0, help="training wall-clock budget")
+    parser.add_argument("--minutes", type=float, default=60.0, help="training wall-clock budget (inf: until STOP)")
+    parser.add_argument("--schedule-minutes", type=float,
+                        help="duration of progress-based schedules (default: --minutes; progress clamps at 1)")
     parser.add_argument("--stop-minutes", type=float,
-                        help="stop after this many minutes while the schedules still span --minutes (to reproduce "
+                        help="stop after this many minutes while the schedules still span --schedule-minutes (to reproduce "
                              "the start of a longer run)")
     parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--adapter", type=int, default=0)
@@ -331,12 +358,16 @@ def main():
                         help="elapsed training minutes at which the imitation weight reaches 0 and labelling stops")
     parser.add_argument("--teacher-temperature", type=float, default=0.0,
                         help="Gumbel noise on the teacher's pair values (0: its best pair)")
-    parser.add_argument("--distill", type=Path, nargs="+",
+    labels = parser.add_mutually_exclusive_group()
+    labels.add_argument("--distill", type=Path, nargs="+",
                         help="search_labels.py output directories (or label files) for search distillation")
+    labels.add_argument("--distill-stream", type=Path, help="directory of incoming use-once label shards")
     parser.add_argument("--distill-coef", type=float, default=0.0,
                         help="search-distillation loss weight (0: off); falls linearly to 0 at --distill-end-minutes")
     parser.add_argument("--distill-end-minutes", type=float, default=60.0)
     parser.add_argument("--distill-batch", type=int, default=128, help="labelled positions per minibatch")
+    parser.add_argument("--distill-max-batches", type=int, default=4, help="maximum stream batches per PPO update")
+    parser.add_argument("--distill-holdout-rows", type=int, default=4000, help="newest stream rows kept for validation")
     parser.add_argument("--distill-pairs", type=int, default=4,
                         help="most weighted search candidates per position that the loss imitates")
     parser.add_argument("--distill-validate-every", type=int, default=25,
@@ -366,11 +397,28 @@ def main():
     parser.add_argument("--resume", type=Path)
     parser.add_argument("--compile", action="store_true",
                         help="torch.compile the minibatch loss (~12 s of compiling per minibatch size at the start)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.schedule_minutes is None:
+        args.schedule_minutes = args.minutes
+    for name in ("minutes", "schedule_minutes", "snapshot_minutes", "pool_minutes"):
+        value = getattr(args, name)
+        if math.isnan(value) or value <= 0:
+            parser.error(f"--{name.replace('_', '-')} must be positive (inf is allowed)")
+    if args.stop_minutes is not None and (math.isnan(args.stop_minutes) or args.stop_minutes < 0):
+        parser.error("--stop-minutes must be nonnegative (inf is allowed)")
     if args.teacher_coef < 0 or args.teacher_temperature < 0:
         parser.error("--teacher-coef and --teacher-temperature must be nonnegative")
-    if args.distill_coef < 0 or (args.distill_coef > 0 and not args.distill):
-        parser.error("--distill-coef must be nonnegative and needs --distill")
+    if args.distill_coef < 0 or (args.distill_coef > 0 and not (args.distill or args.distill_stream)):
+        parser.error("--distill-coef must be nonnegative and needs --distill or --distill-stream")
+    if args.distill_batch <= 0 or args.distill_pairs <= 0 or args.distill_validate_every <= 0:
+        parser.error("--distill-batch, --distill-pairs and --distill-validate-every must be positive")
+    if args.distill_max_batches < 0 or args.distill_holdout_rows < 0:
+        parser.error("--distill-max-batches and --distill-holdout-rows must be nonnegative")
+    return args
+
+
+def main():
+    args = parse_args()
 
     torch.manual_seed(args.seed)
     torch.set_num_threads(1)
@@ -385,6 +433,7 @@ def main():
     usage = ActionUsage(dex)
     elapsed_before = 0.0
     update = battles = samples_total = 0
+    state = {}
     if args.resume:
         state = torch.load(args.resume, map_location="cpu", weights_only=False)
         saved = state["model"]["act_damage.weight"].shape[1], state["model"]["float_proj.weight"].shape[1]
@@ -406,15 +455,21 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
     print(json.dumps({"adapter": adapter, "device": str(device), "parameters": n_params}), flush=True)
     distill = None
-    if args.distill and args.distill_coef > 0:
+    if args.distill_stream:
+        distill = DistillStream(args.distill_stream, device, pairs=args.distill_pairs,
+                                holdout_rows=args.distill_holdout_rows, state=state.get("distill_stream"))
+        print(json.dumps({"distill": distill.describe()}), flush=True)
+    elif args.distill and args.distill_coef > 0:
         distill = DistillData(args.distill, device, pairs=args.distill_pairs)
         print(json.dumps({"distill": distill.describe()}), flush=True)
 
     kinds = opponent_kinds(args.envs, args.pool_fraction, args.scripted_share)  # fixed per env for the whole run
     budget = args.minutes * 60
-    stop = min(budget, args.stop_minutes * 60) if args.stop_minutes else budget
+    stop = min(budget, args.stop_minutes * 60) if args.stop_minutes is not None else budget
     next_pool = elapsed_before + args.pool_minutes * 60 if len(pool) else 0.0
-    next_snapshot = (int(elapsed_before // (args.snapshot_minutes * 60)) + (1 if elapsed_before else 0)) * args.snapshot_minutes * 60
+    snapshot_seconds = args.snapshot_minutes * 60
+    next_snapshot = ((int(elapsed_before // snapshot_seconds) + (1 if elapsed_before else 0)) * snapshot_seconds
+                     if math.isfinite(snapshot_seconds) else math.inf)
     loaded = {"snapshot": None}  # id of the snapshot in the actors' opponent weights
 
     def checkpoint(elapsed):
@@ -422,7 +477,10 @@ def main():
             "model": cpu_state(model), "optimizer": optimizer.state_dict(), "pool": pool.state_dict(),
             "entropy_controller": controller.state_dict() if controller is not None else None, "elapsed": elapsed,
             "update": update, "battles": battles, "samples": samples_total, "numpy_rng": rng.bit_generator.state,
-            "width": args.width, "layers": args.layers})
+            "width": args.width, "layers": args.layers,
+            **({"distill_stream": distill.state_dict()} if isinstance(distill, DistillStream) else {})})
+        if isinstance(distill, DistillStream):
+            distill.archive_used()
 
     def launch(actors, buffer: int, elapsed: float) -> dict:
         """Hand the idle actors the current weights and opponents, and start filling ``buffer``."""
@@ -430,7 +488,7 @@ def main():
         if elapsed >= next_pool:
             pool.add(cpu_state(model), elapsed / 60)
             next_pool = elapsed + args.pool_minutes * 60
-        progress = min(elapsed / budget, 1.0)
+        progress = schedule_progress(args, elapsed)
         actors.set_weights("learner", cpu_state(model))
         snapshot = pool.sample(rng)  # PFSP; None until there are two snapshots
         if snapshot is not None and snapshot["id"] != loaded["snapshot"]:
@@ -453,13 +511,13 @@ def main():
         rollout = actors.wait()
         while True:
             elapsed = time.perf_counter() - start
+            if (args.output / "STOP").exists() or elapsed >= stop:
+                break
             if elapsed >= next_snapshot:
                 save(args.output / "snapshots" / f"m{int(round(next_snapshot / 60)):03d}.pt",
                      {"model": cpu_state(model), "width": args.width, "layers": args.layers, "minutes": elapsed / 60,
                       "battles": battles, "update": update})
                 next_snapshot += args.snapshot_minutes * 60
-            if elapsed >= stop:
-                break
             # The actors fill the other buffer with the current weights while the GPU trains on this one.
             collected, collected_info = rollout, info
             if collected["crashes"]:  # battles an engine panic aborted (as ties); the run goes on, the reports stay
@@ -472,7 +530,7 @@ def main():
             pool.record(collected_info["snapshot"], float(collected["clean_games"][snapshot_envs].sum()),
                         float(collected["clean_score"][snapshot_envs].sum()))
             info = launch(actors, 1 - current, elapsed)
-            progress = min(elapsed / budget, 1.0)
+            progress = schedule_progress(args, elapsed)
             optimizer.lr = args.lr * (1 - (1 - args.lr_final) * progress)
             if controller is not None:
                 entropy_coef = controller.coef
@@ -483,7 +541,7 @@ def main():
             t1 = time.perf_counter()
             model.train()
             stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device,
-                                        teacher_coef, distill, distill_coef)
+                                        teacher_coef, distill, distill_coef, elapsed)
             train_seconds = time.perf_counter() - t1
             if controller is not None:
                 controller.update(stats["entropy"], progress)
@@ -503,7 +561,7 @@ def main():
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
                 "guarded_slots": collected["guarded"], "aborted_battles": len(collected["crashes"]),
                 **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
-                "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5),
+                "lr": optimizer.lr, "progress": progress, "entropy_coef": round(entropy_coef, 5),
                 "entropy_target": round(controller.target(progress), 3) if controller is not None else None,
                 "ko_bonus": round(collected_info["ko_bonus"], 4), "pool_size": len(pool), **stats, **behaviour,
                 "pfsp": pool.summary(), **memory_mb(),
