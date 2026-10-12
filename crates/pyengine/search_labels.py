@@ -17,14 +17,18 @@ reloads newer teachers between games; ``--minutes inf`` runs until ``<out>/STOP`
 from __future__ import annotations
 
 import argparse
+import fcntl
 import gzip
 import json
 import os
+import pickle
 import re
 import sys
 import threading
 import time
+import uuid
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,7 +56,17 @@ def teacher_key(path: Path) -> tuple:
 
 def newest_teacher(directory: Path) -> Path | None:
     """Numbered snapshots take precedence; other finished checkpoints fall back to modification time."""
-    return max((p for p in directory.glob("*.pt") if p.is_file()), key=teacher_key, default=None)
+    newest, version = None, ()
+    for path in directory.glob("*.pt"):
+        try:
+            if not path.is_file():
+                continue
+            key = teacher_key(path)
+        except FileNotFoundError:
+            continue
+        if key > version:
+            newest, version = path, key
+    return newest
 
 
 @dataclass(frozen=True)
@@ -67,12 +81,38 @@ class Teacher:
         return cls(path, float(state.get("minutes", float("nan"))), teacher_key(path))
 
 
+def follow_teacher(directory: Path, current: Teacher | None = None) -> Teacher | None:
+    """Keep the current teacher when pruning or an incomplete checkpoint interrupts a reload."""
+    path = newest_teacher(directory)
+    if path is None:
+        return current
+    try:
+        if current is not None and teacher_key(path) <= current.version:
+            return current
+        return Teacher.load(path)
+    except (OSError, EOFError, RuntimeError, ValueError, pickle.UnpicklingError) as error:
+        print(f"Teacher skipped: {path.name}: {error}", flush=True)
+        return current
+
+
+@contextmanager
+def output_lock(out: Path):
+    """Hold a persistent lock inode until generation, including all worker games, has finished."""
+    out.mkdir(parents=True, exist_ok=True)
+    with (out / ".labels.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise RuntimeError(f"another label maker holds {out / '.labels.lock'}") from error
+        yield
+
+
 class ShardWriter:
     """Keep one teacher per shard, including late results from games that began before a reload."""
 
     def __init__(self, out: Path, size: int, run: str | None = None):
         self.out, self.size = out, size
-        self.run = run or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        self.run = run or (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-%f") + "-" + uuid.uuid4().hex)
         if any(out.glob(f"labels-{self.run}-*.npz*")):
             raise FileExistsError(f"label run {self.run} already exists in {out}")
         self.pending, self.teacher, self.sequence = [], None, 0
@@ -213,18 +253,20 @@ def main() -> None:
 
 
 def generate(args) -> dict:
-    run = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    with output_lock(args.out):
+        return _generate(args)
+
+
+def _generate(args) -> dict:
     torch.set_num_threads(args.torch_threads)
     search = json.loads(args.search)
     teams = read_teams(Path(args.pool))
-    args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "config.json").write_text(json.dumps(vars(args), default=str, indent=1))
-    path = newest_teacher(args.follow) if args.follow else args.checkpoint
-    if path is None:
+    teacher = follow_teacher(args.follow) if args.follow else Teacher.load(args.checkpoint)
+    if teacher is None:
         raise FileNotFoundError(f"no finished teacher in {args.follow}")
-    teacher = Teacher.load(path)
     local, lock = threading.local(), threading.Lock()
-    writer = ShardWriter(args.out, args.shard, run)
+    writer = ShardWriter(args.out, args.shard)
     totals = dict(games=0, labels=0, shards=0)
     started = time.monotonic()
     deadline = started + args.minutes * 60
@@ -269,9 +311,8 @@ def generate(args) -> dict:
             now = time.monotonic()
             if args.follow and now >= next_reload and not stopping():
                 next_reload = now + args.reload_minutes * 60
-                path = newest_teacher(args.follow)
-                if path is not None and teacher_key(path) > teacher.version:
-                    replacement = Teacher.load(path)
+                replacement = follow_teacher(args.follow, teacher)
+                if replacement is not teacher:
                     with lock:
                         writer.flush(final=True)
                         print(f"Teacher switch: {teacher.path.name} -> {replacement.path.name}, "

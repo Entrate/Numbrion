@@ -11,15 +11,23 @@ and how often the policy's most likely candidate is the search's most weighted o
 """
 from __future__ import annotations
 
+import math
 import os
 from pathlib import Path
-from zipfile import BadZipFile
+from zipfile import ZipFile
 
 import numpy as np
 import torch
 
+from .dex import load_dex
+from .encoder import (I_CAND_ABILITIES, I_CAND_ITEMS, N_ACTION_FEATURES, N_FIELD_FLOATS, N_IDS,
+                      N_POKEMON_FLOATS, N_TOKEN_FEATURES, N_TOKENS)
+from .model import N_ACTIONS
+
 OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 STATE_SHARED = ("tables",)
+ROW_KEYS = (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior", "q", "value")
+META_KEYS = ("teacher", "teacher_minutes", "created", "holdout")
 
 
 def _take(state: dict, index: torch.Tensor) -> dict:
@@ -44,7 +52,7 @@ class DistillData:
         self.held_size = 0 if self.held is None else len(self.held["weight"])
 
     def _prepare(self, shards: list[dict]) -> dict:
-        data = {k: np.concatenate([s[k] for s in shards])
+        data = {k: shards[0][k] if len(shards) == 1 else np.concatenate([s[k] for s in shards])
                 for k in (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior")}
         x = data["x"].astype(np.float32)
         top = np.argsort(-x, axis=1, kind="stable")[:, :self.pairs]  # most weighted candidates first
@@ -56,7 +64,7 @@ class DistillData:
         pairs[missing] = np.broadcast_to(pairs[:, :1], pairs.shape)[missing]
         mask1[missing] = np.broadcast_to(mask1[:, :1], mask1.shape)[missing]
         weight = np.where(missing, 0.0, weight)
-        weight = weight / weight.sum(1, keepdims=True)
+        weight = weight / weight.sum(1, keepdims=True, dtype=np.float64)
         prior = np.where(missing, 0.0, data["prior"][rows, top])
         out = {k: data[k] for k in OBS_KEYS}
         out.update(mask0=data["mask0"], mask1=mask1, a0=pairs[..., 0], a1=pairs[..., 1], weight=weight.astype(np.float32))
@@ -90,15 +98,20 @@ class DistillData:
 
 
 class DistillStream(DistillData):
-    """Device-resident, use-once labels. Checkpoint masks refer to original shard rows; device tensors retain only
-    unused rows. Completed names stay in the checkpoint even after archival, so a resent shard cannot be trained
-    twice. Call ``archive_used`` only after saving the model and ``state_dict`` together in latest.pt."""
+    """Bounded, use-once labels, admitted newest first. Only MPS caches rows on device; other devices receive
+    sampled batches. Checkpoint masks refer to original shard rows, including rows waiting on disk. Completed
+    names survive archival so resends cannot train twice. Save model and ``state_dict`` before ``archive_used``."""
 
-    def __init__(self, directory: Path, device, pairs: int = 4, holdout_rows: int = 4000, state: dict | None = None):
+    def __init__(self, directory: Path, device, pairs: int = 4, holdout_rows: int = 4000, state: dict | None = None,
+                 max_resident_rows: int = 60000):
+        if max_resident_rows <= 0:
+            raise ValueError("max_resident_rows must be positive")
         self.directory, self.device, self.pairs = Path(directory), device, pairs
-        self.holdout_rows = holdout_rows
+        self.holdout_rows, self.max_resident_rows = holdout_rows, max_resident_rows
         self.shards = {}
         self.used_rows = {}
+        self._catalog, self._reject_failed = {}, set()
+        self.backlog_rows = 0
         self.completed = set()
         self.pending_moves = set()
         self.used_total = 0
@@ -112,9 +125,13 @@ class DistillStream(DistillData):
         for path in sorted(self._files(self.directory / "heldout"), reverse=True):
             if self.held_size >= holdout_rows:
                 break
-            raw = self._read(path)
-            if raw is not None:
-                self._hold(path.name, raw)
+            try:
+                info = self._inspect(path)
+                raw = self._read(path, np.arange(max(0, info["size"] - holdout_rows), info["size"]), info)
+            except Exception as error:
+                self._reject(path, error)
+                continue
+            self._hold(path.name, raw)
 
     @staticmethod
     def _files(directory: Path) -> list[Path]:
@@ -126,21 +143,161 @@ class DistillStream(DistillData):
             return []
 
     @staticmethod
-    def _read(path: Path) -> dict | None:
+    def _header(stream) -> tuple:
+        version = np.lib.format.read_magic(stream)
+        readers = {(1, 0): np.lib.format.read_array_header_1_0, (2, 0): np.lib.format.read_array_header_2_0}
+        if version not in readers:
+            raise ValueError(f"unsupported NPY version {version}")
+        shape, fortran, dtype = readers[version](stream)
+        return shape, fortran, dtype, stream.tell()
+
+    @staticmethod
+    def _inspect(path: Path) -> dict:
+        """Read only NPY headers and scalar metadata, leaving backlog row arrays compressed on disk."""
+        headers, metadata = {}, {}
+        with ZipFile(path) as archive:
+            members = archive.namelist()
+            if len(members) != len(set(members)) or any(k not in {f"{key}.npy" for key in (*ROW_KEYS, *META_KEYS)}
+                                                       for k in members):
+                raise ValueError("unexpected or duplicate shard members")
+            for key in ROW_KEYS:
+                member = archive.getinfo(f"{key}.npy")
+                with archive.open(member) as stream:
+                    headers[key] = DistillStream._header(stream)
+                shape, _, dtype, offset = headers[key]
+                if dtype.hasobject or not dtype.isnative or member.file_size != offset + math.prod(shape) * dtype.itemsize:
+                    raise ValueError(f"invalid {key} payload or dtype")
+            shape = headers["x"][0]
+            if len(shape) != 2 or not 0 < shape[1] <= N_ACTIONS ** 2:
+                raise ValueError("x must have shape (rows, candidates)")
+            n, candidates = shape
+            shapes = dict(ids=(n, N_TOKENS, N_IDS), floats=(n, N_TOKENS, N_POKEMON_FLOATS),
+                          field=(n, N_FIELD_FLOATS), action_features=(n, 2, 40, N_ACTION_FEATURES),
+                          token_features=(n, N_TOKENS, N_TOKEN_FEATURES), x=shape, pairs=(n, candidates, 2),
+                          mask0=(n, N_ACTIONS), mask1=(n, candidates, N_ACTIONS), prior=shape, q=shape, value=(n,))
+            for key, expected in shapes.items():
+                actual, _, dtype, _ = headers[key]
+                valid_dtype = (dtype == np.dtype("int64") if key == "ids" else
+                               dtype.kind == "i" and dtype.itemsize in (2, 4, 8) if key == "pairs" else
+                               dtype == np.dtype("bool") if key in ("mask0", "mask1") else dtype == np.dtype("float32"))
+                if actual != expected or not valid_dtype:
+                    raise ValueError(f"invalid {key} shape or dtype: {actual}, {dtype}")
+            present = {key for key in META_KEYS if f"{key}.npy" in members}
+            if present and present != set(META_KEYS):
+                raise ValueError("incomplete shard metadata")
+            for key in present:
+                with archive.open(f"{key}.npy") as stream:
+                    shape, _, dtype, _ = DistillStream._header(stream)
+                    valid_dtype = (dtype.kind == "U" and dtype.itemsize <= 4096 if key == "teacher" else
+                                   dtype == np.dtype("bool") if key == "holdout" else dtype == np.dtype("float64"))
+                    if shape != () or not valid_dtype:
+                        raise ValueError(f"{key} must be scalar with the expected dtype")
+                with archive.open(f"{key}.npy") as stream:
+                    metadata[key] = np.lib.format.read_array(stream, allow_pickle=False)
+            created, teacher = float(metadata.get("created", 0)), float(metadata.get("teacher_minutes", np.nan))
+            if not np.isfinite(created) or created < 0 or np.isinf(teacher):
+                raise ValueError("invalid shard timestamps")
+        return dict(headers=headers, metadata=metadata, size=n)
+
+    @staticmethod
+    def _discard(stream, length: int) -> None:
+        while length:
+            block = stream.read(min(length, 65536))
+            if not block:
+                raise EOFError("truncated row data")
+            length -= len(block)
+
+    @staticmethod
+    def _copy(stream, target: memoryview) -> None:
+        cursor = 0
+        while cursor < len(target):
+            block = stream.read(min(len(target) - cursor, 65536))
+            if not block:
+                raise EOFError("truncated row data")
+            target[cursor:cursor + len(block)] = block
+            cursor += len(block)
+
+    @staticmethod
+    def _read(path: Path, rows: np.ndarray | None = None, info: dict | None = None) -> dict:
+        """Decode just admitted rows, draining the remaining bytes in small blocks to check CRC/decompression.
+        This also handles a shard larger than the entire cache without materializing its unused rows."""
+        info = DistillStream._inspect(path) if info is None else info
+        rows = np.arange(info["size"]) if rows is None else rows
+        raw = dict(info["metadata"])
+        with ZipFile(path) as archive:
+            for key, header in info["headers"].items():
+                shape, fortran, dtype, offset = header
+                out = np.empty((len(rows), *shape[1:]), dtype=dtype, order="F" if fortran else "C")
+                with archive.open(f"{key}.npy") as stream:
+                    if DistillStream._header(stream) != header:
+                        raise ValueError(f"{key} changed during admission")
+                    width = math.prod(shape[1:])
+                    # In Fortran order each feature column stores all rows consecutively.
+                    columns = width if fortran else 1
+                    row_bytes = dtype.itemsize if fortran else width * dtype.itemsize
+                    target = memoryview(out.ravel(order="K")).cast("B")
+                    cursor = 0
+                    starts = np.r_[0, np.flatnonzero(np.diff(rows) != 1) + 1]
+                    ends = np.r_[starts[1:], len(rows)]
+                    for column in range(columns):
+                        for begin, end in zip(starts, ends):
+                            if begin == end:
+                                continue
+                            position = offset + (column * shape[0] + int(rows[begin])) * row_bytes
+                            DistillStream._discard(stream, position - offset - cursor)
+                            length = (end - begin) * row_bytes
+                            start = (column * len(rows) + begin) * row_bytes
+                            DistillStream._copy(stream, target[start:start + length])
+                            cursor = position - offset + length
+                    DistillStream._discard(stream, math.prod(shape) * dtype.itemsize - cursor)
+                raw[key] = out
+        DistillStream._validate_rows(raw)
+        return raw
+
+    @staticmethod
+    def _validate_rows(raw: dict) -> None:
+        for key in (*OBS_KEYS[1:], "x", "q", "prior", "value"):
+            if not np.isfinite(raw[key]).all():
+                raise ValueError(f"nonfinite {key}")
+        x, pairs = raw["x"], raw["pairs"]
+        valid = ((pairs >= 0) & (pairs < N_ACTIONS)).all(2)
+        missing = (pairs == -1).all(2)
+        if not (valid | missing).all() or (x < 0).any() or (x[missing] != 0).any() or (x.sum(1, dtype=np.float64) <= 0).any():
+            raise ValueError("invalid candidate pairs or target weights; each x row needs a positive sum")
+        row, candidate = np.nonzero(valid)
+        if not (raw["mask0"][row, pairs[row, candidate, 0]] &
+                raw["mask1"][row, candidate, pairs[row, candidate, 1]]).all():
+            raise ValueError("candidate pair is masked out")
+        dex = load_dex()
+        limits = np.array([dex.n_species, dex.n_items, dex.n_abilities, *([dex.n_types] * 3),
+                           *([dex.n_moves] * (I_CAND_ABILITIES - 6)),
+                           *([dex.n_abilities] * (I_CAND_ITEMS - I_CAND_ABILITIES)),
+                           *([dex.n_items] * (N_IDS - I_CAND_ITEMS))])
+        if (raw["ids"] < 0).any() or (raw["ids"] >= limits).any():
+            raise ValueError("observation ids outside embedding tables")
+
+    def _reject(self, path: Path, error: Exception) -> None:
+        self.shards.pop(path.name, None)
+        self._catalog.pop(path.name, None)
+        reason = " ".join(str(error).splitlines())
         try:
-            with np.load(path, allow_pickle=False) as data:
-                raw = {k: data[k] for k in data.files}
-            for key in (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior"):
-                if len(raw[key]) != len(raw["x"]):
-                    return None
-            return raw
-        except (OSError, ValueError, EOFError, KeyError, BadZipFile):
-            # An interrupted transfer may have exposed a final name; retry it at the next update.
-            return None
+            destination = self.directory / "rejected"
+            destination.mkdir(parents=True, exist_ok=True)
+            os.replace(path, destination / path.name)
+        except FileNotFoundError:
+            return
+        except OSError as move_error:
+            self._reject_failed.add(path.name)
+            reason += f"; quarantine failed: {move_error}"
+        print(f"distill rejected {path.name}: {type(error).__name__}: {reason}", flush=True)
+
+    @staticmethod
+    def _select(data: dict, rows: np.ndarray) -> dict:
+        index = torch.from_numpy(np.asarray(rows, dtype=np.int64)).to(data["weight"].device)
+        return {k: v if k == "_reference" else v.index_select(0, index) for k, v in data.items()}
 
     def _resident(self, raw: dict) -> dict:
-        data = self._prepare([raw])
-        return {k: v if k == "_reference" else v.to(self.device) for k, v in data.items()}
+        return self._prepare([raw])
 
     def _hold(self, name: str, raw: dict) -> None:
         self._held_seen.add(name)
@@ -156,7 +313,7 @@ class DistillStream(DistillData):
             if not n:
                 break
             if n < len(data["weight"]):
-                data = self._batch(data, np.arange(len(data["weight"]) - n, len(data["weight"])))
+                data = self._select(data, np.arange(len(data["weight"]) - n, len(data["weight"])))
             keep[key] = (created, data)
             remaining -= n
         self._held_shards = keep
@@ -165,52 +322,79 @@ class DistillStream(DistillData):
         self.held_size = self.holdout_rows - remaining
 
     def scan(self) -> None:
-        for path in sorted(self._files(self.directory)):
+        files = sorted(self._files(self.directory), reverse=True)
+        present = {p.name for p in files}
+        self._catalog = {name: info for name, info in self._catalog.items() if name in present}
+        for path in files:
             name = path.name
             if name in self.completed:
                 self.pending_moves.add(name)
                 continue
-            if name in self.shards:
+            if name in self._reject_failed:
                 continue
             if name in self._held_seen:
-                raw = None
-                holdout = True
-            else:
-                raw = self._read(path)
-                if raw is None:
-                    continue
-                holdout = bool(raw.get("holdout", False))
-            if holdout:
-                if raw is not None:
-                    self._hold(name, raw)
                 destination = self.directory / "heldout"
                 destination.mkdir(parents=True, exist_ok=True)
                 os.replace(path, destination / name)
                 continue
-            used = self.used_rows.get(name, np.zeros(len(raw["x"]), dtype=bool))
-            if len(used) != len(raw["x"]):
-                raise ValueError(f"Distill shard changed row count since checkpoint: {path}")
-            self.used_rows[name] = used
-            rows = np.flatnonzero(~used)
-            if not len(rows):
-                self.completed.add(name)
-                self.pending_moves.add(name)
-                self.used_rows.pop(name)
+            try:
+                info = self._catalog.get(name)
+                if info is None:
+                    info = self._catalog[name] = self._inspect(path)
+                if bool(info["metadata"].get("holdout", False)):
+                    rows = np.arange(max(0, info["size"] - self.holdout_rows), info["size"])
+                    self._hold(name, self._read(path, rows, info))
+                    destination = self.directory / "heldout"
+                    destination.mkdir(parents=True, exist_ok=True)
+                    os.replace(path, destination / name)
+                    self._catalog.pop(name)
+                    continue
+                used = self.used_rows.get(name)
+                if used is not None and used.shape != (info["size"],):
+                    raise ValueError("shard changed row count since checkpoint")
+                free = self.max_resident_rows - self.size
+                if free <= 0:
+                    continue
+                if used is None:
+                    used = np.zeros(info["size"], dtype=bool)
+                available = ~used
+                if name in self.shards:
+                    available[self.shards[name]["rows"]] = False
+                rows = np.flatnonzero(available)[:free]
+                if not len(rows):
+                    if used.all():
+                        self.completed.add(name)
+                        self.pending_moves.add(name)
+                        self.used_rows.pop(name, None)
+                    continue
+                raw = self._read(path, rows, info)
+            except Exception as error:
+                self._reject(path, error)
                 continue
-            sliced = {k: v[rows] for k, v in raw.items() if v.ndim > 0}
-            self.shards[name] = dict(data=self._resident(sliced), rows=rows,
-                                     teacher_minutes=float(raw.get("teacher_minutes", np.nan)))
+            self.used_rows[name] = used
+            data = self._resident(raw)
+            del raw
+            if name in self.shards:
+                shard = self.shards[name]
+                data = {k: v if k == "_reference" else torch.cat((shard["data"][k], v)) for k, v in data.items()}
+                rows = np.r_[shard["rows"], rows]
+            self.shards[name] = dict(data=data, rows=rows,
+                                     teacher_minutes=float(info["metadata"].get("teacher_minutes", np.nan)))
+        self.backlog_rows = sum(info["size"] - int(self.used_rows[name].sum() if name in self.used_rows else 0)
+                                - (len(self.shards[name]["rows"]) if name in self.shards else 0)
+                                for name, info in self._catalog.items() if name not in self.completed)
 
     @property
     def size(self) -> int:
         return sum(len(s["rows"]) for s in self.shards.values())
 
     def describe(self) -> dict:
-        return dict(train=self.size, held=self.held_size, pairs=self.pairs, stream=str(self.directory))
+        return dict(train=self.size, held=self.held_size, pairs=self.pairs, stream=str(self.directory),
+                    max_resident_rows=self.max_resident_rows, distill_backlog_rows=self.backlog_rows)
 
     def begin_update(self, rng, batch: int, max_batches: int, minibatches: int,
                      elapsed_minutes: float = 0.0) -> dict[int, dict]:
-        """Scan once, then draw uniformly without replacement and spread full batches over the PPO minibatches."""
+        """Admit newest rows up to the cap, sample the cache without replacement, and spread full PPO batches."""
         self.scan()
         fresh = self.size
         count = min(fresh // batch, max_batches, minibatches)
@@ -239,16 +423,19 @@ class DistillStream(DistillData):
             keep = np.ones(len(shard["rows"]), dtype=bool)
             keep[pick] = False
             if keep.any():
-                shard["data"] = self._batch(shard["data"], np.flatnonzero(keep))
+                shard["data"] = self._select(shard["data"], np.flatnonzero(keep))
                 shard["rows"] = shard["rows"][keep]
             else:
+                del self.shards[name]
+            if self.used_rows[name].all():
                 self.completed.add(name)
                 self.pending_moves.add(name)
-                del self.shards[name], self.used_rows[name]
+                del self.used_rows[name]
         used = count * batch
         self.used_total += used
         lag = elapsed_minutes - float(np.mean(teachers)) if teachers and np.isfinite(teachers).all() else None
         self.metrics = dict(distill_fresh=fresh, distill_used=used, distill_used_total=self.used_total,
+                            distill_backlog_rows=self.backlog_rows,
                             distill_batches=count, distill_shards_pending=len(self.shards),
                             distill_teacher_lag_min=None if lag is None else round(lag, 3))
         return batches
@@ -262,6 +449,8 @@ class DistillStream(DistillData):
         self.completed = set(state.get("completed", []))
         self.used_total = int(state.get("used_total", 0))
         self.shards.clear()
+        self._catalog.clear()
+        self.backlog_rows = 0
         self.pending_moves = set(self.completed)
 
     def archive_used(self) -> None:

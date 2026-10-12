@@ -367,6 +367,8 @@ def parse_args(argv=None):
     parser.add_argument("--distill-end-minutes", type=float, default=60.0)
     parser.add_argument("--distill-batch", type=int, default=128, help="labelled positions per minibatch")
     parser.add_argument("--distill-max-batches", type=int, default=4, help="maximum stream batches per PPO update")
+    parser.add_argument("--distill-max-resident-rows", type=int, default=60000,
+                        help="maximum unused stream training rows cached in memory; remaining rows wait on disk")
     parser.add_argument("--distill-holdout-rows", type=int, default=4000, help="newest stream rows kept for validation")
     parser.add_argument("--distill-pairs", type=int, default=4,
                         help="most weighted search candidates per position that the loss imitates")
@@ -414,6 +416,8 @@ def parse_args(argv=None):
         parser.error("--distill-batch, --distill-pairs and --distill-validate-every must be positive")
     if args.distill_max_batches < 0 or args.distill_holdout_rows < 0:
         parser.error("--distill-max-batches and --distill-holdout-rows must be nonnegative")
+    if args.distill_max_resident_rows <= 0 or (args.distill_stream and args.distill_max_resident_rows < args.distill_batch):
+        parser.error("--distill-max-resident-rows must be positive and fit --distill-batch for a stream")
     return args
 
 
@@ -457,7 +461,8 @@ def main():
     distill = None
     if args.distill_stream:
         distill = DistillStream(args.distill_stream, device, pairs=args.distill_pairs,
-                                holdout_rows=args.distill_holdout_rows, state=state.get("distill_stream"))
+                                holdout_rows=args.distill_holdout_rows, state=state.get("distill_stream"),
+                                max_resident_rows=args.distill_max_resident_rows)
         print(json.dumps({"distill": distill.describe()}), flush=True)
     elif args.distill and args.distill_coef > 0:
         distill = DistillData(args.distill, device, pairs=args.distill_pairs)

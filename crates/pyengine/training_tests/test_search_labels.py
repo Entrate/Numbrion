@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
+import subprocess
 import sys
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -34,6 +37,107 @@ def test_teacher_selection_is_numeric_then_mtime(tmp_path):
     (tmp_path / 'm1000.pt').touch()
     (tmp_path / 'm999.pt').touch()
     assert labels.newest_teacher(tmp_path).name == 'm1000.pt'
+
+
+def test_teacher_selection_skips_file_pruned_after_listing(tmp_path, monkeypatch):
+    old, new = tmp_path / 'm115.pt', tmp_path / 'm120.pt'
+    old.touch()
+    new.touch()
+    is_file = Path.is_file
+
+    def prune(path):
+        result = is_file(path)
+        if path == new and result:
+            path.unlink()
+        return result
+
+    monkeypatch.setattr(Path, 'is_file', prune)
+    assert labels.newest_teacher(tmp_path) == old
+
+
+@pytest.mark.parametrize('stat_call', [2, 3])
+def test_follow_keeps_teacher_when_candidate_vanishes_during_stat(tmp_path, monkeypatch, stat_call):
+    old = checkpoint(tmp_path / 'm115.pt', 115)
+    new = checkpoint(tmp_path / 'm120.pt', 120)
+    key, calls = labels.teacher_key, 0
+
+    def prune(path):
+        nonlocal calls
+        if path == new.path:
+            calls += 1
+            if calls == stat_call:
+                path.unlink()
+        return key(path)
+
+    monkeypatch.setattr(labels, 'teacher_key', prune)
+    assert labels.follow_teacher(tmp_path, old) is old
+    monkeypatch.setattr(labels, 'teacher_key', key)
+    checkpoint(new.path, 120)
+    assert labels.follow_teacher(tmp_path, old).path == new.path
+
+
+@pytest.mark.parametrize('damage', ['deleted', 'empty', 'truncated', 'unpicklable'])
+def test_follow_skips_failed_load_and_retries_next_check(tmp_path, monkeypatch, damage):
+    old = checkpoint(tmp_path / 'm115.pt', 115)
+    new = checkpoint(tmp_path / 'm120.pt', 120)
+    load = labels.torch.load
+
+    def interrupt(path, **kwargs):
+        if path == new.path:
+            if damage == 'deleted':
+                path.unlink()
+            else:
+                data = path.read_bytes()[:64] if damage == 'truncated' else (b'' if damage == 'empty' else b'broken')
+                path.write_bytes(data)
+        return load(path, **kwargs)
+
+    monkeypatch.setattr(labels.torch, 'load', interrupt)
+    assert labels.follow_teacher(tmp_path, old) is old
+    monkeypatch.setattr(labels.torch, 'load', load)
+    checkpoint(new.path, 120)
+    assert labels.follow_teacher(tmp_path, old).path == new.path
+
+
+def test_run_names_are_unique_in_one_instant_and_sort_by_time(tmp_path, monkeypatch):
+    class Clock:
+        instant = datetime(2026, 10, 12, tzinfo=timezone.utc)
+
+        @classmethod
+        def now(cls, tz):
+            return cls.instant
+
+    monkeypatch.setattr(labels, 'datetime', Clock)
+    first = labels.ShardWriter(tmp_path, 1)
+    second = labels.ShardWriter(tmp_path, 1)
+    Clock.instant = Clock.instant.replace(microsecond=1)
+    later = labels.ShardWriter(tmp_path, 1)
+    assert first.run != second.run
+    assert first.run < later.run and second.run < later.run
+    row = {'value': np.float32(1)}
+    teacher = checkpoint(tmp_path / 'm115.pt', 115)
+    for writer in (first, second, later):
+        writer.add([row], teacher)
+    names = [p.name for p in tmp_path.glob('labels-*.npz')]
+    assert len(names) == 3
+    assert all(re.fullmatch(r'labels-20261012T000000Z-\d{6}-[a-f0-9]{32}-000000\.npz', name) for name in names)
+
+
+def test_output_lock_refuses_another_process_and_releases_on_error(tmp_path):
+    script = """import fcntl, sys
+with open(sys.argv[1], 'a') as lock:
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+"""
+    lock_path = tmp_path / '.labels.lock'
+    with pytest.raises(ValueError, match='generation failed'):
+        with labels.output_lock(tmp_path):
+            child = subprocess.run([sys.executable, '-c', script, str(lock_path)], capture_output=True, text=True)
+            assert child.returncode != 0 and 'BlockingIOError' in child.stderr
+            with pytest.raises(RuntimeError, match='another label maker holds'):
+                labels.generate(args(tmp_path))
+            assert not (tmp_path / 'config.json').exists()
+            raise ValueError('generation failed')
+    assert lock_path.exists()
+    assert subprocess.run([sys.executable, '-c', script, str(lock_path)]).returncode == 0
 
 
 def test_atomic_shards_metadata_holdout_and_late_old_game(tmp_path, monkeypatch):
@@ -131,6 +235,8 @@ def test_follow_rebuilds_bots_keeps_inflight_teacher_and_drains_stop(tmp_path, m
         assert new_started.wait(5)
         count = len(starts)
         assert thread.is_alive()
+        with pytest.raises(RuntimeError, match='another label maker holds'):
+            labels.generate(settings)
         release_old.set()
         thread.join(5)
         assert not thread.is_alive() and not errors

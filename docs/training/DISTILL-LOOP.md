@@ -26,10 +26,12 @@ copying, then rename it to `m115.pt` or the snapshot's actual name. Never overwr
 The label maker chooses `m<number>.pt` by integer, so `m1000.pt` is newer than `m999.pt`. If there are no numbered
 snapshots, it chooses the newest finished `*.pt` by modification time. `.part` and `.tmp` files are ignored.
 
-On Windows, start from an existing checkpoint. Later starts prefer `train\latest.pt` automatically.
+On Windows, start from a full trainer checkpoint such as `latest.pt`, including optimizer, pool, elapsed time and
+RNG state. Start checks it with the repository's venv Python before registering the task. Teacher snapshots are
+only for label making. Later starts prefer `train\latest.pt` automatically; any supplied `-Resume` is also checked.
 
 ```powershell
-.\tools\distill\windows-train.ps1 -Action start -Resume C:\path\to\m115.pt
+.\tools\distill\windows-train.ps1 -Action start -Resume C:\path\to\latest.pt
 .\tools\distill\windows-train.ps1 -Action status
 .\tools\distill\windows-train.ps1 -Action stop
 ```
@@ -55,7 +57,8 @@ tools/distill/mac-labels.sh status
 tools/distill/mac-labels.sh stop
 ```
 
-Start refuses an empty teacher directory. It launches the label maker and sync with `nohup`, with pids and logs in
+Start refuses an empty teacher directory and holds an exclusive `start.lock` directory through startup. It launches
+the label maker and sync with `nohup`, with pids and logs in
 `scratch/distill-loop/`. The label maker uses the 200k set pool at
 `/Users/aminaliu/.t3/worktrees/numbrion-mac/t3code-c1f8987c/data/teams/pool-s1-200k.txt.gz`, the training team pool
 `data/teams/train-s42-2000.txt`, exploration 0.25, 256-row shards, and concurrency 5. Stop creates `labels/STOP`,
@@ -73,6 +76,10 @@ DISTILL_RELOAD_MINUTES=5 tools/distill/mac-labels.sh start
 
 For a direct label-maker run, use `--reload-minutes 5`. Existing games finish with their original bots; new games
 rebuild thread-local bots for the current teacher. Logs show teacher switches and `labels/s` every 30 seconds.
+If a candidate disappears during selection or cannot be read, the label maker keeps its current teacher and retries
+at the next check. Each label maker holds an exclusive `labels/.labels.lock` for its lifetime, including draining
+games and flushing rows. Another process using the same output directory refuses to start. The lock file stays on
+disk; the operating system releases the lock when the process exits.
 `--minutes inf` runs until `STOP`; `--checkpoint FILE --minutes 60` still makes a finite one-shot run.
 
 The config block at the top of `mac_sync.py` lists every host/path override, including `DISTILL_LAPTOP`,
@@ -84,7 +91,9 @@ block at the top of `windows-train.ps1`.
 
 ## Shards, use-once semantics and crashes
 
-A process writes `labels-<UTC start>-<six-digit sequence>.npz`. It saves into `.npz.tmp`, flushes and fsyncs the file,
+A process writes `labels-<RUN>-<six-digit sequence>.npz`. RUN begins with the UTC start time as
+`YYYYMMDDTHHMMSSZ`, followed by six-digit microseconds and a random UUID suffix. Names sort by start time and remain
+unique for starts within one second. It saves into `.npz.tmp`, flushes and fsyncs the file,
 then renames it atomically. Every shard includes scalar `teacher`, `teacher_minutes`, `created`, and `holdout`
 metadata alongside the existing observation/search arrays. Missing checkpoint minutes become NaN. Every twentieth
 shard, sequence 19, 39, and so on, is a validation holdout. A teacher switch flushes any pending rows. Late results
@@ -109,8 +118,8 @@ the last checkpoint can be used again because those model updates were lost too.
 renamed a shard but before the Mac saved its ledger, a retry skips any matching active, used, or heldout Windows
 file rather than publishing it again. Keep those directories with the training checkpoint. A label-maker crash
 can lose rows still in memory or inside unfinished games; `.tmp` shards remain invisible. Finished shards survive.
-Run names use seconds; a second process started in the same second in the same output directory refuses to overwrite
-an existing run. A corrupt finished teacher or shard needs manual repair; partial transfer names are safe to retry.
+A corrupt finished shard needs manual repair; partial transfer names are safe to retry. An unreadable teacher is
+skipped until a later check succeeds or a newer teacher arrives.
 
 ## Rates and local checks
 

@@ -26,6 +26,12 @@ wait_exit() {
 
 case ${1:-status} in
     start)
+        if ! mkdir "$BASE/start.lock" 2>/dev/null; then
+            echo "Another start command holds $BASE/start.lock" >&2
+            exit 1
+        fi
+        trap 'rmdir "$BASE/start.lock"' EXIT
+        trap 'exit 1' HUP INT TERM
         if alive "$BASE/labels.pid" || alive "$BASE/sync.pid"; then
             echo "Already running; use status or stop first" >&2
             exit 1

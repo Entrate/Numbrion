@@ -2,8 +2,10 @@
 import json
 import math
 import shutil
+import zlib
 from pathlib import Path
 from types import SimpleNamespace
+from zipfile import ZipFile
 
 import numpy as np
 import pytest
@@ -130,7 +132,8 @@ def test_newest_holdout_rows_never_trained_and_reload_newest_first(tmp_path, lab
     reads = []
     original = DistillStream._read
     with pytest.MonkeyPatch.context() as patch:
-        patch.setattr(DistillStream, "_read", staticmethod(lambda p: (reads.append(p.name), original(p))[1]))
+        patch.setattr(DistillStream, "_read",
+                      staticmethod(lambda p, *args: (reads.append(p.name), original(p, *args))[1]))
         resumed = DistillStream(tmp_path, DEVICE, holdout_rows=18, state=stream.state_dict())
     assert reads == [new.name, old.name]
     assert set(resumed.held["field"][:, 0].tolist()) == expected
@@ -140,7 +143,7 @@ def test_newest_holdout_rows_never_trained_and_reload_newest_first(tmp_path, lab
     assert (tmp_path / "heldout" / newest.name).exists()
 
 
-def test_ignores_temporary_and_partial_shards_and_retries_final_name(tmp_path, labels):
+def test_ignores_temporary_and_partial_shards_and_quarantines_invalid_final_name(tmp_path, labels):
     directory = tmp_path / "arriving"
     stream = DistillStream(directory, DEVICE)
     assert not stream.begin_update(np.random.default_rng(0), 4, 4, 5)
@@ -153,8 +156,164 @@ def test_ignores_temporary_and_partial_shards_and_retries_final_name(tmp_path, l
     final.write_bytes(contents[:100])
     rng = np.random.default_rng(1)
     assert not stream.begin_update(rng, 4, 4, 5) and stream.size == 0
+    assert not final.exists() and (directory / "rejected" / final.name).exists()
     final.write_bytes(contents)
     assert set(row_ids(stream.begin_update(rng, 4, 4, 5))) == set(range(8))
+
+
+def rewrite_shard(path, key, value):
+    with np.load(path, allow_pickle=False) as data:
+        raw = {k: data[k] for k in data.files}
+    raw[key] = value(raw[key]) if callable(value) else value
+    with path.open("wb") as output:
+        np.savez_compressed(output, **raw)
+
+
+def test_corrupt_zlib_shard_is_quarantined_and_does_not_crash_or_retry(tmp_path, labels, capsys):
+    bad = write_shard(tmp_path, labels, 1, rows=8)
+    good = write_shard(tmp_path, labels, 0, rows=8)
+    contents = bytearray(bad.read_bytes())
+    with ZipFile(bad) as archive:
+        member = archive.getinfo("ids.npy")
+    offset = member.header_offset
+    start = offset + 30 + int.from_bytes(contents[offset + 26:offset + 28], "little") \
+        + int.from_bytes(contents[offset + 28:offset + 30], "little")
+    contents[start] = (contents[start] & ~6) | 6  # reserved DEFLATE block type
+    bad.write_bytes(contents)
+    with pytest.raises(zlib.error):
+        with np.load(bad, allow_pickle=False) as data:
+            data["ids"]
+    stream = DistillStream(tmp_path, DEVICE)
+    assert set(row_ids(stream.begin_update(np.random.default_rng(4), 1, 8, 8))) == set(range(8))
+    assert good.exists() and not bad.exists() and (tmp_path / "rejected" / bad.name).exists()
+    lines = capsys.readouterr().out.splitlines()
+    assert len(lines) == 1 and bad.name in lines[0] and "decompress" in lines[0]
+    resumed = DistillStream(tmp_path, DEVICE, state=stream.state_dict())
+    assert not resumed.begin_update(np.random.default_rng(4), 1, 8, 8)
+    assert capsys.readouterr().out == ""
+
+
+@pytest.mark.parametrize("key,change", [
+    ("x", lambda x: np.array(1, dtype=np.float32)),
+    ("x", lambda x: x[:, 0]),
+    ("x", lambda x: x[:, :-1]),
+    ("ids", lambda x: x[:, :, :-1]),
+    ("field", lambda x: x[:-1]),
+    ("mask1", lambda x: x[:, :, :-1]),
+    ("pairs", lambda x: x[:, :, 0]),
+    ("x", lambda x: x.astype(np.int32)),
+    ("ids", lambda x: x.astype(np.float32)),
+    ("mask0", lambda x: x.astype(np.int8)),
+    ("prior", lambda x: x.astype(object)),
+    ("holdout", lambda x: np.array([False, True])),
+    ("created", lambda x: np.array([1.0])),
+    ("teacher_minutes", lambda x: np.array([20.0])),
+    ("teacher", lambda x: np.array(["m020.pt"])),
+    ("holdout", lambda x: np.array(0)),
+    ("teacher_minutes", lambda x: np.array(20.0, dtype=np.float32)),
+    ("x", lambda x: np.zeros_like(x)),
+    ("x", lambda x: np.where(x > 0, -x, x)),
+    ("x", lambda x: np.full_like(x, np.nan)),
+    ("x", lambda x: np.full_like(x, np.inf)),
+    ("ids", lambda x: np.full_like(x, 1000000)),
+    ("mask0", lambda x: np.zeros_like(x)),
+])
+def test_invalid_shards_are_rejected_before_training(tmp_path, labels, capsys, key, change):
+    bad = write_shard(tmp_path, labels, 1, rows=8)
+    rewrite_shard(bad, key, change)
+    write_shard(tmp_path, labels, 0, rows=8)
+    stream = DistillStream(tmp_path, DEVICE)
+    assert set(row_ids(stream.begin_update(np.random.default_rng(3), 1, 8, 8))) == set(range(8))
+    assert not bad.exists() and (tmp_path / "rejected" / bad.name).exists()
+    lines = capsys.readouterr().out.splitlines()
+    assert len(lines) == 1 and bad.name in lines[0]
+    assert not stream.begin_update(np.random.default_rng(3), 1, 8, 8)
+    assert capsys.readouterr().out == ""
+
+
+def test_resident_cap_admits_newest_first_and_leaves_backlog_on_disk(tmp_path, labels, monkeypatch):
+    paths = [write_shard(tmp_path, labels, seq, rows=8) for seq in range(6)]
+    stream = DistillStream(tmp_path, DEVICE, max_resident_rows=10)
+    reads = []
+    original = DistillStream._read
+
+    def read(path, rows, info):
+        assert len(rows) + stream.size <= stream.max_resident_rows
+        reads.append((path.name, len(rows)))
+        return original(path, rows, info)
+
+    monkeypatch.setattr(stream, "_read", read)
+    stream.begin_update(np.random.default_rng(4), 2, 0, 5)
+    assert stream.size == 10 and stream.metrics["distill_backlog_rows"] == 38
+    assert reads == [(paths[5].name, 8), (paths[4].name, 2)]
+    assert set(stream.shards) == {paths[5].name, paths[4].name}
+    assert all(path.exists() for path in paths) and not (tmp_path / "used").exists()
+    reads.clear()
+    stream.scan()
+    assert not reads and stream.size == 10 and stream.backlog_rows == 38
+    seen = set()
+    for _ in range(8):
+        ids = row_ids(stream.begin_update(np.random.default_rng(4), 1, 10, 10))
+        assert seen.isdisjoint(ids)
+        seen.update(ids)
+        assert stream.size <= 10
+        assert len(seen) + stream.size + stream.metrics["distill_backlog_rows"] == 48
+    assert seen == {seq * 1000 + row for seq in range(6) for row in range(8)}
+    assert stream.backlog_rows == stream.size == 0
+
+
+def test_non_mps_cache_stays_on_cpu_and_only_sampled_rows_move_to_device(tmp_path, labels):
+    write_shard(tmp_path, labels, 0, rows=12)
+    stream = DistillStream(tmp_path, torch.device("meta"), max_resident_rows=10)
+    stream.scan()
+    assert stream.size == 10 and stream.backlog_rows == 2
+    batches = stream.begin_update(np.random.default_rng(6), 2, 1, 3)
+    assert all(v.device.type == "meta" and len(v) == 2 for batch in batches.values() for v in batch.values())
+    assert stream.size == 8
+    assert all(v.device.type == "cpu" for shard in stream.shards.values()
+               for k, v in shard["data"].items() if k != "_reference")
+
+
+@pytest.mark.parametrize("archive_before_resume", [False, True])
+def test_use_once_resume_with_backlog_and_shards_larger_than_cap(tmp_path, labels, archive_before_resume):
+    paths = [write_shard(tmp_path, labels, seq, rows=rows) for seq, rows in enumerate((13, 9, 10))]
+    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_resident_rows=7), np.random.default_rng(9), set()
+    seen.update(row_ids(stream.begin_update(rng, 1, 3, 5)))
+    assert stream.size == 4 and stream.backlog_rows == 25
+    assert all(path.exists() for path in paths)
+    for update in range(15):
+        trainer.save(tmp_path / "latest.pt", {"distill_stream": stream.state_dict()})
+        if archive_before_resume:
+            stream.archive_used()
+        state = torch.load(tmp_path / "latest.pt", weights_only=False)["distill_stream"]
+        # A new cap must preserve the original row masks, including the unadmitted portion of a shard.
+        stream = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=state)
+        ids = row_ids(stream.begin_update(rng, 1, 3, 5))
+        assert seen.isdisjoint(ids) and len(ids) == len(set(ids))
+        seen.update(ids)
+        assert stream.size <= 5 and stream.used_total == len(seen)
+        assert len(seen) + stream.size + stream.backlog_rows == 32
+    assert seen == {seq * 1000 + row for seq, rows in enumerate((13, 9, 10)) for row in range(rows)}
+    assert stream.size == stream.backlog_rows == 0
+    trainer.save(tmp_path / "latest.pt", {"distill_stream": stream.state_dict()})
+    stream.archive_used()
+    assert all((tmp_path / "used" / path.name).exists() and not path.exists() for path in paths)
+    shutil.copyfile(tmp_path / "used" / paths[2].name, paths[2])
+    resumed = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=stream.state_dict())
+    assert not resumed.begin_update(rng, 1, 3, 5) and resumed.used_total == 32
+
+
+def test_partial_reads_support_fortran_order_and_noncontiguous_unused_rows(tmp_path, labels):
+    path = write_shard(tmp_path, labels, 0, rows=12)
+    for key in OBS_KEYS:
+        rewrite_shard(path, key, np.asfortranarray)
+    stream, rng, seen = DistillStream(tmp_path, DEVICE, max_resident_rows=5), np.random.default_rng(2), set()
+    for _ in range(6):
+        ids = row_ids(stream.begin_update(rng, 1, 2, 3))
+        assert seen.isdisjoint(ids)
+        seen.update(ids)
+        stream = DistillStream(tmp_path, DEVICE, max_resident_rows=5, state=stream.state_dict())
+    assert seen == set(range(12))
 
 
 def test_round_one_and_metadata_shards_still_load_offline(tmp_path, labels):
@@ -265,10 +424,18 @@ def test_schedule_clamps_and_inf_budget(minutes, schedule):
 
 @pytest.mark.parametrize("argv", [["--minutes", "nan"], ["--minutes", "0"], ["--schedule-minutes", "0"],
                                   ["--schedule-minutes", "nan"], ["--stop-minutes", "-1"],
-                                  ["--distill", "a", "--distill-stream", "b"], ["--distill-batch", "0"]])
+                                  ["--distill", "a", "--distill-stream", "b"], ["--distill-batch", "0"],
+                                  ["--distill-max-resident-rows", "0"], ["--distill-max-resident-rows", "-1"],
+                                  ["--distill-stream", "a", "--distill-max-resident-rows", "127"]])
 def test_invalid_schedule_and_stream_arguments(argv):
     with pytest.raises(SystemExit):
         trainer.parse_args(argv)
+
+
+def test_resident_cap_flag_default_and_override():
+    assert trainer.parse_args([]).distill_max_resident_rows == 60000
+    args = trainer.parse_args(["--distill-stream", "a", "--distill-max-resident-rows", "256"])
+    assert args.distill_max_resident_rows == 256
 
 
 def test_main_stop_checkpoint_archive_and_resume_new_output(tmp_path, labels, rollout, monkeypatch):

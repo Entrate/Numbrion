@@ -58,6 +58,14 @@ function Open-Lock([string]$Path) {
     return [IO.File]::Open($Path, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
 }
 
+function Confirm-ResumeCheckpoint([string]$Path) {
+    if (!(Test-Path -LiteralPath $Path -PathType Leaf)) { throw "Resume checkpoint missing: $Path" }
+    $Check = "import sys, torch; state = torch.load(sys.argv[1], map_location='cpu', weights_only=False); required = {'model', 'optimizer', 'pool', 'elapsed', 'update', 'battles', 'samples', 'numpy_rng'}; missing = sorted(required - state.keys()) if isinstance(state, dict) else sorted(required); sys.exit('Not a full trainer checkpoint; missing ' + ', '.join(missing) + '. Use latest.pt; teacher snapshots cannot be resumed.' if missing else 0)"
+    try { $Result = & $Python -c $Check $Path 2>&1 }
+    catch { throw "Cannot resume '$Path'. Use a full trainer checkpoint such as latest.pt. $($_.Exception.Message)" }
+    if ($LASTEXITCODE -ne 0) { throw "Cannot resume '$Path'. Use a full trainer checkpoint such as latest.pt. $($Result -join ' ')" }
+}
+
 if ($Action -eq 'start') {
     $LaunchLock = $null
     try { $LaunchLock = Open-Lock $LaunchLockPath }
@@ -75,9 +83,11 @@ if ($Action -eq 'start') {
         catch { throw 'Supervisor lock is held. Use -Action status.' }
         finally { if ($CheckLock) { $CheckLock.Dispose() } }
         if (!(Test-Path -LiteralPath $Latest) -and (!$Resume -or !(Test-Path -LiteralPath $Resume))) {
-            throw 'Supply -Resume with the first checkpoint, or provide output\latest.pt.'
+            throw 'Supply -Resume with a full trainer checkpoint, or provide output\latest.pt.'
         }
         if (!(Test-Path -LiteralPath $Python)) { throw "Python missing: $Python" }
+        if ($Resume) { Confirm-ResumeCheckpoint $Resume }
+        if ((Test-Path -LiteralPath $Latest) -and ($Latest -ne $Resume)) { Confirm-ResumeCheckpoint $Latest }
         Remove-Item -LiteralPath $StopFile -ErrorAction SilentlyContinue
         $Arguments = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ' + (Quote-Argument $PSCommandPath) + ' -Action supervise'
         $Arguments += ' -RepoPath ' + (Quote-Argument $Repo) + ' -TrainerDirectory ' + (Quote-Argument $Output) + ' -LabelDirectory ' + (Quote-Argument $Labels)
