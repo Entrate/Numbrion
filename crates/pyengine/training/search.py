@@ -44,6 +44,7 @@ PASS = 46
 OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 STATE_SHARED = ("tables",)
 REPO = Path(__file__).resolve().parents[3]
+DEADLINE_MARGIN_MS = 150.0  # with a deadline: time kept for solving, the analysis and sending after the cells
 
 warnings.filterwarnings("ignore", message=r"numbrion\.\w+: search prerequisites")
 
@@ -64,6 +65,7 @@ class SearchConfig:
     particles: int = 8              # WorldBuilder particles (16 doubled world-building time)
     threads: int = 4                # grid threads
     seed: int = 0
+    max_worlds: int = 32            # budgeted decisions: budget_ms scales the worlds between 2 and this
 
     @classmethod
     def from_dict(cls, values: dict | None) -> "SearchConfig":
@@ -343,13 +345,13 @@ class SearchBot(Bot):
         self.cell_ms, self.fixed_ms = 0.3, 60.0
 
     def config_for(self, budget_ms: float | None) -> "SearchConfig":
-        """The search config with as many worlds as fit ``budget_ms`` (at least 2, at most 32)."""
+        """The search config with as many worlds as fit ``budget_ms`` (at least 2, at most ``max_worlds``)."""
         cfg = self.search
         if not budget_ms:
             return cfg
         per_world = cfg.ours * cfg.theirs * cfg.seeds * self.cell_ms
         worlds = int((budget_ms - self.fixed_ms) // max(per_world, 1e-3))
-        return replace(cfg, worlds=max(2, min(32, worlds)))
+        return replace(cfg, worlds=max(2, min(cfg.max_worlds, worlds)))
 
     def observe_cost(self, timing: dict, cells: int, total_ms: float) -> None:
         cell_part = sum(timing.get(k, 0.0) for k in ("opponent_ms", "grid_ms", "value_ms"))
@@ -415,6 +417,12 @@ class SearchPlayer(Player):
         self.synced = False  # a request has been synced (later ones without new lines are re-sends)
         self.mask_hint = None
         self.budget_ms: float | None = None  # per-decision time budget (scales the number of worlds)
+        # Set by a driver with a deadline (play.driver): the time.monotonic() by which the choice must be sent, and a
+        # token for this decision. ``fallback`` = (token, Decision) is the policy's choice, posted as soon as it is
+        # known so the driver can send it if the search runs late.
+        self.deadline: float | None = None
+        self.decision_token = None
+        self.fallback: tuple | None = None
         self.decisions = 0
         self.stats = dict(search=0, policy=0, forced=0, no_worlds=0)
 
@@ -507,6 +515,7 @@ class SearchPlayer(Player):
         (pairs, prior, full), = self.bot.net.candidates(arrays, np.array([side]), [(mask0, joint)], k=max(k, 1),
                                                        first=first, temperature=self.bot.policy_temperature)
         self.stats["root_ms"] = self.stats.get("root_ms", 0.0) + (time.perf_counter() - t_root) * 1000
+        policy = self._post_fallback(request, full)
         if cfg is None or self.builder is None:
             return self._policy(request, full, started, note=self.builder_failed or "search off")
         t_worlds = time.perf_counter()
@@ -519,6 +528,16 @@ class SearchPlayer(Player):
             a0, a1 = map(int, pairs[0])
             return self._finish(request, a0, a1, dict(source="policy", note="one candidate"), started)
         worlds_ms = (time.perf_counter() - t_worlds) * 1000
+        requested = len(worlds)
+        if self.deadline is not None:
+            # Keep the worlds whose cells fit the time left (the bot's running cost per cell), or play the policy.
+            left_ms = (self.deadline - time.monotonic()) * 1000 - DEADLINE_MARGIN_MS
+            per_world = cfg.ours * cfg.theirs * cfg.seeds * self.bot.cell_ms
+            fit = int(left_ms // max(per_world, 1e-3))
+            if fit < 1:
+                self.stats["out_of_time"] = self.stats.get("out_of_time", 0) + 1
+                return self._policy(request, full, started, note="out of time after building the worlds")
+            worlds = worlds[:fit]
         result = run_search(self.bot, cfg, self.battle, side, worlds, pairs, full)
         if result is None:
             return self._policy(request, full, started, note="no candidate is legal in the sampled worlds")
@@ -535,16 +554,33 @@ class SearchPlayer(Player):
         a0, a1 = map(int, pairs[best])
         analysis = dict(source="search", value=round(float(q[best]), 4),
                         win_probability=round(float((q[best] + 1) / 2), 3), worlds=len(worlds),
-                        cells=result["cells"],
+                        worlds_requested=requested,
+                        budget_ms=None if self.budget_ms is None else round(self.budget_ms),
+                        cells=result["cells"], policy=policy,
+                        agrees_with_policy=policy["choice"] == self._text(request, a0, a1),
                         candidates=[dict(choice=self._text(request, int(p[0]), int(p[1])),
                                          text=self._readable(request, int(p[0]), int(p[1])),
                                          prior=round(float(np.exp(full.get((int(p[0]), int(p[1])), (-np.inf,))[0])), 4),
                                          value=round(float(qq), 4), weight=round(float(xx), 4))
                                     for p, qq, xx in sorted(zip(pairs, q, x), key=lambda t: -t[2])],
                         opponent=result["opponent"], timing=result["timing"])
+        try:  # what we saw of the opponent's Pokemon, and what the sampled worlds assumed about them
+            analysis["observed"], analysis["inferred"] = opponent_knowledge(self.builder.public_state(), worlds, side)
+        except Exception as error:  # noqa: BLE001 - analysis only
+            analysis["observed"] = {"error": repr(error)[:200]}
         decision = self._finish(request, a0, a1, analysis, started)
         self.bot.observe_cost(result["timing"], result["cells"], analysis["time_ms"])
         return decision
+
+    def _post_fallback(self, request, full) -> dict:
+        """The policy's most likely pair: posted as the driver's fallback for this decision (``fallback``), and kept
+        in a search decision's analysis (``policy``) to show where search disagrees with the plain policy."""
+        (a0, a1), (logp, _) = max(full.items(), key=lambda kv: kv[1][0])
+        info = dict(choice=self._text(request, a0, a1), text=self._readable(request, a0, a1),
+                    prior=round(float(np.exp(logp)), 4))
+        self.fallback = (self.decision_token, Decision(info["choice"], int(a0), int(a1), dict(
+            source="policy", note="the policy's choice, sent when search ran out of time", policy=info)))
+        return info
 
     def _policy(self, request, full, started, note=""):
         self.stats["policy"] += 1
@@ -585,6 +621,58 @@ class SearchPlayer(Player):
         self.pending_choice = choice
         self.pending_decided = True
         return Decision(choice, a0, a1, analysis)
+
+
+def _unpack_sets(packed: str) -> list[dict]:
+    """Species, item, ability, moves and Tera type of each Pokemon of a packed team (Showdown's Teams.pack)."""
+    sets = []
+    for mon in packed.split("]"):
+        fields = mon.split("|")
+        if len(fields) < 12:
+            continue
+        misc = fields[11].split(",")
+        sets.append(dict(species=fields[1] or fields[0], item=fields[2], ability=fields[3],
+                         moves=[m for m in fields[4].split(",") if m], tera=misc[5] if len(misc) > 5 else ""))
+    return sets
+
+
+def _shares(values: list, top: int) -> dict:
+    counts: dict = {}
+    for value in values:
+        counts[value] = counts.get(value, 0) + 1
+    n = max(len(values), 1)
+    return {k: round(c / n, 2) for k, c in sorted(counts.items(), key=lambda kv: -kv[1])[:top]}
+
+
+def _id(text: str) -> str:
+    return "".join(ch for ch in text.lower() if ch.isalnum())
+
+
+def opponent_knowledge(public: dict, worlds: list, side: int) -> tuple[list, dict]:
+    """(observed, inferred) about the opponent's team. ``observed``: per Pokemon seen, what the protocol revealed
+    (``WorldBuilder.public_state``). ``inferred``: per seen species, how often the sampled worlds gave each item,
+    ability, Tera type and move, plus the unseen species the worlds put on the bench."""
+    opp = 1 - side
+    observed = [dict(species=m["species"], moves=m["moves"], item=m["item"], ability=m["ability"],
+                     tera_type=m["tera_type"], terastallized=m["terastallized"], fainted=m["fainted"])
+                for m in public["sides"][opp]["mons"]]
+    seen = {_id(m["species"]) for m in observed}
+    by_species: dict = {}
+    unseen = []
+    for world in worlds:
+        for s in _unpack_sets(world.teams[opp]):
+            key = _id(s["species"])
+            if key in seen:
+                by_species.setdefault(key, []).append(s)
+            else:
+                unseen.append(s["species"])
+    inferred = {"worlds": len(worlds), "mons": {}, "unseen_species": _shares(unseen, 8)}
+    for sets in by_species.values():
+        inferred["mons"][sets[0]["species"]] = dict(
+            item=_shares([s["item"] for s in sets], 3), ability=_shares([s["ability"] for s in sets], 3),
+            tera=_shares([s["tera"] for s in sets], 3),
+            moves=_shares([m for s in sets for m in s["moves"]], 8))
+    return observed, inferred
 
 
 def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, worlds: list, ours: np.ndarray,
