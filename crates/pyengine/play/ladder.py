@@ -231,6 +231,11 @@ def percentile(values, q: float) -> float:
     return ordered[lo] + (ordered[hi] - ordered[lo]) * (index - lo)
 
 
+def games(rating: dict) -> int:
+    """Official games of a users-JSON rating entry (wins, losses and ties when listed)."""
+    return int(rating.get("w", 0) or 0) + int(rating.get("l", 0) or 0) + int(rating.get("t", 0) or 0)
+
+
 class LadderClient(ShowdownClient):
     """Reject challenges, reconcile running games, and keep all reconnect segments in the same record."""
 
@@ -267,6 +272,8 @@ class LadderClient(ShowdownClient):
                                                        for d in history)}
         self.after_tasks: set[asyncio.Task] = set()
         self.snapshot_tasks: set[asyncio.Task] = set()
+        self.base_count: int | None = None  # official games in the format at the run's (re)start
+        self.counted_battles = 0  # rated battles finished since then
         self._snapshot_lock = asyncio.Lock()
         self.background: set[asyncio.Task] = set()
         self.room_tasks: set[asyncio.Task] = set()
@@ -486,15 +493,20 @@ class LadderClient(ShowdownClient):
             self.pause("three consecutive battles with errors or more than two fallbacks", 3)
         self.print_status(room, summary)
         if self.stuck_since is None:
-            self.task(self.snapshot_after(room.room), self.snapshot_tasks)
+            expected = None
+            if room.rated and self.base_count is not None:
+                # The official totals must reach the run's starting count plus every rated battle finished since.
+                self.counted_battles += 1
+                expected = self.base_count + self.counted_battles
+            self.task(self.snapshot_after(room.room, expected), self.snapshot_tasks)
 
-    async def snapshot_after(self, roomid: str) -> None:
+    async def snapshot_after(self, roomid: str, expected: int | None = None) -> None:
         """The official snapshot after a battle, in the background (matchmaking does not wait for it). One at a
         time, in battle order, so each battle's baseline already counts the battles before it."""
         async with self._snapshot_lock:
             if roomid not in self.store.initial_baselines and self.last_snapshot is not None:
                 self.battle_baselines[roomid] = self.last_snapshot
-            await self.capture_snapshot("after_battle", roomid, retry=True)
+            await self.capture_snapshot("after_battle", roomid, retry=True, expected=expected)
 
     def print_status(self, room, summary) -> None:
         end, rating, sources = summary["end"], summary["rating"] or {}, summary["sources"]
@@ -531,14 +543,15 @@ class LadderClient(ShowdownClient):
             self.store.emit("replay", {"id": replay_id, "url": "https://replay.pokemonshowdown.com/" + replay_id},
                             roomid)
 
-    async def capture_snapshot(self, stage: str, roomid: str | None = None, retry: bool = False) -> None:
+    async def capture_snapshot(self, stage: str, roomid: str | None = None, retry: bool = False,
+                               expected: int | None = None) -> None:
         template = self.config.get("users_json")
         if not template or not self.session:
             return
         # A resumed battle can already be counted by the fresh run-start snapshot. Compare against its
         # pre-battle count, rather than demanding another game to appear in the official account totals.
         baseline = self.battle_baselines.get(roomid, self.last_snapshot) if retry else self.last_snapshot
-        count = baseline.get("w", 0) + baseline.get("l", 0) if baseline else None
+        count = games(baseline) if baseline else None
         started = time.monotonic()
         for offset in ((0, 5, 20, 60, 180) if retry else (0,)):
             if offset:
@@ -550,8 +563,15 @@ class LadderClient(ShowdownClient):
                     raw = await response.json(content_type=None)
                 rating = raw.get("ratings", {}).get(self.config["format"])
                 if not isinstance(rating, dict):
+                    if stage == "start" and isinstance(raw, dict) and raw.get("userid"):
+                        self.base_count = 0  # the account has not played this format yet
                     raise ValueError("No rating yet")
-                changed = count is not None and rating.get("w", 0) + rating.get("l", 0) != count
+                if stage == "start":
+                    self.base_count = games(rating)
+                if expected is not None:
+                    changed = games(rating) >= expected
+                else:
+                    changed = count is not None and games(rating) != count
                 self.store.emit("ratings_snapshot", {"stage": stage, "battle_room": roomid, "rating": rating,
                                                       "raw": raw, "pending": bool(retry and not changed)})
                 self.last_snapshot = rating

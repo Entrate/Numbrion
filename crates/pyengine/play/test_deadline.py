@@ -218,3 +218,13 @@ def test_a_room_opened_mid_battle_is_marked_rejoined():
     assert room.rejoined
     _, _, fresh = asyncio.run(play([*RATED_START, msg(f"|request|{request(1)}")], bot, wait=0.1))
     assert not fresh.rejoined
+
+
+def test_deciding_again_after_a_refusal_is_timed_from_the_request():
+    bot = SlowBot()
+    refused = msg("|error|[Invalid choice] Can't move: bad")
+    _, events, _ = asyncio.run(play([*RATED_START, msg(f"|request|{request(1)}"), refused], bot,
+                                    DecisionTiming(deadline_s=2.0), gaps=[0, 0, 0, 0, 0, 0.3], wait=0.2))
+    first, again = events.of("decision")[:2]
+    assert again["seq"] == first["seq"] + 1 and again["timing"]["received"] == first["timing"]["received"]
+    assert again["timing"]["total_ms"] >= 300 and again["fallback"] is None

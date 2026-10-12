@@ -573,11 +573,14 @@ class BattleRoom:
                 "deadline": wall_deadline, "budget_ms": budget_ms, "queue_ms": None, "compute_ms": None,
                 "paced_ms": 0.0, "fallback": None, **extra}
 
-    async def _decide(self, lines: list[str] | None, text: str | None, received: tuple[float, float]) -> None:
+    async def _decide(self, lines: list[str] | None, text: str | None, received: tuple[float, float],
+                      window_from: float | None = None) -> None:
         """Let the player decide on its worker thread under the room's time rules and send the result, or send a
-        fallback at the deadline (module docstring, "Deadlines")."""
+        fallback at the deadline (module docstring, "Deadlines"). ``received`` is the request's receipt, which the
+        timing reports count from; the deadline counts from ``window_from`` when given (deciding again after a
+        refusal gets a fresh window)."""
         timing = self.timing
-        deadline = self._deadline(received[1])
+        deadline = self._deadline(received[1] if window_from is None else window_from)
         allowance_ms = None if timing.search_s is None else timing.search_s * 1000.0
         token = (self.room, self.seq)
         meta = self._meta(received, deadline, allowance_ms)
@@ -673,7 +676,7 @@ class BattleRoom:
         self._emit("late_decision", data)
 
     def _check_hang(self, future: asyncio.Future) -> None:
-        if future.done() or self.finished is not None:
+        if future.done():
             return
         self.stats["unhealthy"] += 1
         reason = f"worker stuck: a decision is still running {self.timing.hang_s:.0f} s after its deadline"
@@ -793,7 +796,7 @@ class BattleRoom:
         if self.request is None:
             return
         self.seq += 1
-        received = (time.time(), time.monotonic())
+        received = self.request_at or (time.time(), time.monotonic())
         if self.refusals >= 3:
             log.error("%s %s: even the default choice was refused; waiting for the server", self.worker.name,
                       self.room)
@@ -801,7 +804,7 @@ class BattleRoom:
         if self.refusals >= 2:
             await self._submit_default("the bot's choice was refused twice", self._meta(received))
             return
-        await self._decide(None, None, received)
+        await self._decide(None, None, received, window_from=time.monotonic())
 
     # -- end -----------------------------------------------------------------------------------------------------
 

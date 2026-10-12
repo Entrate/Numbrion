@@ -759,3 +759,46 @@ def test_full_ladder_reconnect_pending_rejoin(tmp_path):
     with connect_db(tmp_path) as conn:
         b = conn.execute("SELECT * FROM battles").fetchone()
         assert b["result"] == "win" and b["segments"] == 2 and b["rejoins"] == 1
+
+
+def test_snapshots_count_from_a_new_account_and_absorb_late_updates(tmp_path, monkeypatch):
+    """A fresh account has no rating in the format at the start (0 games); a late snapshot that already counts two
+    battles confirms both instead of leaving the second pending."""
+    async def scenario():
+        replies = [{"userid": "numbrionladder", "ratings": {}},
+                   {"userid": "numbrionladder", "ratings": {"gen9randomdoublesbattle": {"elo": 1040, "w": 2, "l": 0}}}]
+        served = []
+
+        async def handle(request):
+            served.append(request.path)
+            return web.json_response(replies[min(len(served) - 1, len(replies) - 1)])
+        app = web.Application()
+        app.router.add_get("/users/{userid}.json", handle)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "127.0.0.1", 0)
+        await site.start()
+        port = site._server.sockets[0].getsockname()[1]
+        cfg = config(users_json=f"http://127.0.0.1:{port}/users/{{userid}}.json")
+        store = make_store(tmp_path, cfg)
+        worker = BotWorker(cfg["bot"], DefaultBot(cfg["account"]))
+
+        async def sleep(seconds):
+            pass
+        monkeypatch.setattr(ladder, "asyncio", SimpleNamespace(sleep=sleep, Lock=asyncio.Lock))
+        try:
+            async with aiohttp.ClientSession() as session:
+                client = LadderClient(worker, cfg, store, session=session)
+                await client.capture_snapshot("start")
+                assert client.base_count == 0
+                await client.capture_snapshot("after_battle", "battle-a", retry=True, expected=1)
+                await client.capture_snapshot("after_battle", "battle-b", retry=True, expected=2)
+                assert len(served) == 3  # one fetch each after the start: both already counted
+            await asyncio.wrap_future(store.flush())
+        finally:
+            worker.shutdown()
+            store.close()
+            await runner.cleanup()
+        events = [json.loads(line) for line in (store.run_dir / "events.jsonl").read_text().splitlines()]
+        assert not any(e["kind"] == "ratings_pending" for e in events)
+    asyncio.run(scenario())
