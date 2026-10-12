@@ -11,17 +11,22 @@ of each pair's slot a, the search's strategy ``x`` and pair values ``q``, and th
 
 ``--explore``: the share of decisions where the side plays a pair sampled from the policy at temperature 1 instead of
 the search's choice (the label is still the search's), so the labelled positions also cover worse play than the
-search's own. Labels are written as ``labels-NNNN.npz`` shards of ``--shard`` rows plus ``games.jsonl``.
+search's own. Atomic ``labels-<UTC run>-<sequence>.npz`` shards include teacher metadata. ``--follow DIR``
+reloads newer teachers between games; ``--minutes inf`` runs until ``<out>/STOP``, then drains games and rows.
 """
 from __future__ import annotations
 
 import argparse
 import gzip
 import json
+import os
+import re
 import sys
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +43,65 @@ from training.protocol import choice_text  # noqa: E402
 from training.search import N_ACTIONS, OBS_KEYS, SearchBot  # noqa: E402
 
 GUARDS = MoveGuards()
+
+
+def teacher_key(path: Path) -> tuple:
+    match = re.fullmatch(r"m(\d+)\.pt", path.name)
+    return (1, int(match[1]), path.stat().st_mtime_ns) if match else (0, path.stat().st_mtime_ns, path.name)
+
+
+def newest_teacher(directory: Path) -> Path | None:
+    """Numbered snapshots take precedence; other finished checkpoints fall back to modification time."""
+    return max((p for p in directory.glob("*.pt") if p.is_file()), key=teacher_key, default=None)
+
+
+@dataclass(frozen=True)
+class Teacher:
+    path: Path
+    minutes: float
+    version: tuple
+
+    @classmethod
+    def load(cls, path: Path):
+        state = torch.load(path, map_location="cpu", weights_only=False)
+        return cls(path, float(state.get("minutes", float("nan"))), teacher_key(path))
+
+
+class ShardWriter:
+    """Keep one teacher per shard, including late results from games that began before a reload."""
+
+    def __init__(self, out: Path, size: int, run: str | None = None):
+        self.out, self.size = out, size
+        self.run = run or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        if any(out.glob(f"labels-{self.run}-*.npz*")):
+            raise FileExistsError(f"label run {self.run} already exists in {out}")
+        self.pending, self.teacher, self.sequence = [], None, 0
+
+    def add(self, rows: list[dict], teacher: Teacher):
+        if not rows:
+            return
+        if self.teacher is not None and teacher.version != self.teacher.version:
+            self.flush(final=True)
+        self.teacher = teacher
+        self.pending.extend(rows)
+        self.flush()
+
+    def flush(self, final=False):
+        while len(self.pending) >= self.size or (final and self.pending):
+            rows = self.pending[:self.size]
+            arrays = {key: np.stack([row[key] for row in rows]) for key in rows[0]}
+            arrays.update(teacher=np.asarray(self.teacher.path.name),
+                          teacher_minutes=np.asarray(self.teacher.minutes, dtype=np.float64),
+                          created=np.asarray(time.time(), dtype=np.float64),
+                          holdout=np.asarray(self.sequence % 20 == 19, dtype=bool))
+            path = self.out / f"labels-{self.run}-{self.sequence:06d}.npz"
+            with path.with_suffix(".npz.tmp").open("wb") as stream:
+                np.savez_compressed(stream, **arrays)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(path.with_suffix(".npz.tmp"), path)
+            del self.pending[:len(rows)]
+            self.sequence += 1
 
 
 def read_teams(path: Path) -> list[str]:
@@ -124,7 +188,10 @@ def play_game(bots, team1: str, team2: str, seed: tuple, explore: float, rng, k:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--checkpoint", required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--checkpoint", type=Path)
+    source.add_argument("--follow", type=Path, help="directory of trainer checkpoints")
+    parser.add_argument("--reload-minutes", type=float, default=20.0)
     parser.add_argument("--search", default="{}", help="SearchConfig JSON")
     parser.add_argument("--pool", default=str(REPO / "data/teams/train-s42-2000.txt"), help="teams of the games")
     parser.add_argument("--set-pool", default=str(REPO / "data/teams/pool-s1-200k.txt.gz"), help="world builder pool")
@@ -140,71 +207,98 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
+    if args.concurrency < 1 or args.shard < 1 or not args.reload_minutes > 0 or not args.minutes > 0:
+        parser.error("concurrency, shard, reload-minutes and minutes must be positive")
+    generate(args)
+
+
+def generate(args) -> dict:
+    run = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     torch.set_num_threads(args.torch_threads)
     search = json.loads(args.search)
     teams = read_teams(Path(args.pool))
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "config.json").write_text(json.dumps(vars(args), default=str, indent=1))
-    local = threading.local()
-    lock = threading.Lock()
-    pending: list[dict] = []
+    path = newest_teacher(args.follow) if args.follow else args.checkpoint
+    if path is None:
+        raise FileNotFoundError(f"no finished teacher in {args.follow}")
+    teacher = Teacher.load(path)
+    local, lock = threading.local(), threading.Lock()
+    writer = ShardWriter(args.out, args.shard, run)
     totals = dict(games=0, labels=0, shards=0)
-    started = time.time()
+    started = time.monotonic()
     deadline = started + args.minutes * 60
+    next_reload, next_log = started + args.reload_minutes * 60, started + 30
+    print(f"Teacher: {teacher.path.name}, minutes={teacher.minutes:g}", flush=True)
 
-    def bots():
-        if not hasattr(local, "bots"):  # per thread: no policy-lock contention between games
-            local.bots = [SearchBot(name=f"label{s}", checkpoint=args.checkpoint, search=search, pools=[args.set_pool],
-                                    device=args.device, policy_temperature=args.policy_temperature) for s in (0, 1)]
-            for bot in local.bots:
-                bot.rng = np.random.default_rng([args.seed, threading.get_ident() % (1 << 31), len(local.bots)])
+    def stopping():
+        return time.monotonic() >= deadline or (args.out / "STOP").exists()
+
+    def bots(version):
+        if getattr(local, "version", None) != version.version:
+            local.bots = [SearchBot(name=f"label{s}", checkpoint=str(version.path), search=search,
+                                    pools=[args.set_pool], device=args.device,
+                                    policy_temperature=args.policy_temperature) for s in (0, 1)]
+            local.version = version.version
+            for side, bot in enumerate(local.bots):
+                bot.rng = np.random.default_rng([args.seed, threading.get_ident() % (1 << 31), side])
         return local.bots
 
-    def flush(final=False):
-        while len(pending) >= args.shard or (final and pending):
-            rows, pending[:] = pending[:args.shard], pending[args.shard:]
-            arrays = {key: np.stack([row[key] for row in rows]) for key in rows[0]}
-            np.savez_compressed(args.out / f"labels-{totals['shards']:04d}.npz", **arrays)
-            totals["shards"] += 1
-
-    def run(index: int):
-        if time.time() > deadline or (args.games and index >= args.games):
-            return
+    def run(index):
+        with lock:
+            if stopping():
+                return None
+            version = teacher
         game_rng = np.random.default_rng([args.seed, index])
         i, j = game_rng.choice(len(teams), size=2, replace=False)
         seed = tuple(int(x) for x in game_rng.integers(0, 1 << 16, size=4))
-        k = (search.get("ours") or 8)
-        labels, info = play_game(bots(), teams[i], teams[j], seed, args.explore, game_rng, k)
-        with lock:
-            pending.extend(labels)
-            totals["games"] += 1
-            totals["labels"] += len(labels)
-            with (args.out / "games.jsonl").open("a", encoding="utf-8") as stream:
-                stream.write(json.dumps(dict(game=index, **info)) + "\n")
-            flush()
-            if totals["games"] % 20 == 0:
-                elapsed = time.time() - started
-                print(f"{totals['games']} games, {totals['labels']} labels ({totals['labels'] / elapsed:.1f}/s, "
-                      f"{elapsed / 60:.1f} min)", flush=True)
+        labels, info = play_game(bots(version), teams[i], teams[j], seed, args.explore, game_rng,
+                                 search.get("ours") or 8)
+        return index, labels, info, version
 
-    limit = args.games or 10 ** 9
+    def status():
+        elapsed = max(time.monotonic() - started, 1e-6)
+        totals["shards"] = writer.sequence
+        print(f"Status: games={totals['games']} labels={totals['labels']} "
+              f"labels/s={totals['labels'] / elapsed:.1f} shards={writer.sequence} "
+              f"teacher={teacher.path.name} minutes={elapsed / 60:.1f}", flush=True)
+
+    limit, index, futures = args.games or 10 ** 18, 0, set()
     with ThreadPoolExecutor(args.concurrency) as pool:
-        futures = []
-        index = 0
-        while index < limit and time.time() <= deadline:
-            futures = [f for f in futures if not f.done()]
-            while len(futures) < 2 * args.concurrency and index < limit:
-                futures.append(pool.submit(run, index))
+        while futures or (index < limit and not stopping()):
+            now = time.monotonic()
+            if args.follow and now >= next_reload and not stopping():
+                next_reload = now + args.reload_minutes * 60
+                path = newest_teacher(args.follow)
+                if path is not None and teacher_key(path) > teacher.version:
+                    replacement = Teacher.load(path)
+                    with lock:
+                        writer.flush(final=True)
+                        print(f"Teacher switch: {teacher.path.name} -> {replacement.path.name}, "
+                              f"minutes={replacement.minutes:g}", flush=True)
+                        teacher = replacement
+            while len(futures) < args.concurrency and index < limit and not stopping():
+                futures.add(pool.submit(run, index))
                 index += 1
-            for future in [f for f in futures if f.done()]:
-                future.result()
-            time.sleep(0.2)
-        for future in futures:
-            future.result()
-    with lock:
-        flush(final=True)
-    print(f"Done: {totals['games']} games, {totals['labels']} labels in {totals['shards']} shards, "
-          f"{(time.time() - started) / 60:.1f} min", flush=True)
+            done, futures = wait(futures, timeout=0.2, return_when=FIRST_COMPLETED)
+            for future in done:
+                result = future.result()
+                if result is None:
+                    continue
+                game, labels, info, version = result
+                writer.add(labels, version)
+                totals["games"] += 1
+                totals["labels"] += len(labels)
+                with (args.out / "games.jsonl").open("a", encoding="utf-8") as stream:
+                    stream.write(json.dumps(dict(game=game, teacher=version.path.name,
+                                                 teacher_minutes=version.minutes, **info)) + "\n")
+            if now >= next_log:
+                status()
+                next_log = now + 30
+    writer.flush(final=True)
+    status()
+    print("Done: in-flight games finished and pending rows flushed", flush=True)
+    return totals
 
 
 if __name__ == "__main__":
