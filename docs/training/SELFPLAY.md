@@ -482,6 +482,244 @@ scores the same choices the actors sampled from. `--allow-repeat-protect` (both 
 off. Per update, `guarded_slots` counts the trained slot decisions the guards changed; `fake_out_stale` and
 `protect_repeat` should stay near zero.
 
+## Third run (2026-10-11)
+
+The first run with the action-effect columns above (Fake Out, Protect and Tera). It started fresh with
+`--minutes 60 --pool-fraction 0.45 --scripted-share 0.5`: 22% smart games, 23% snapshots and 55% self-play.
+The second hour resumed from its `latest.pt` with the [move guards](#move-guards), which mask stale Fake Out /
+First Impression and Protect right after a successful one. Resume settings:
+`--minutes 120 --lr 1.5e-4 --lr-final 0.4 --entropy-target 1.8 --entropy-target-final 1.2`.
+The schedules continue from the first hour's end.
+
+| Measure | Hour 1 | Hour 2 (with guards) |
+|---|---:|---:|
+| battles, cumulative | 269,156 | 526,279 |
+| battles/s | about 75 | 70-74 |
+| self-play turns, start -> end of hour 2 | | 11.0 -> 12.3 |
+| trainer memory, MB | | 710 -> 815 |
+| training-time score vs smart (temperature 0.05) | 7% -> 38% | 41% -> 47-49% |
+
+Battles got longer in the second hour. Evaluation at temperature 1 (1,000 duplicate games per baseline):
+
+| Snapshot | vs heuristic | vs smart |
+|---|---:|---:|
+| m060 | 71.7% | 36.7% |
+| m120 | 77.3% | 46.4% |
+
+Paired seed-5150 checks (1,000 duplicate games per matchup):
+
+| Matchup | temperature 1 | temperature 0 |
+|---|---:|---:|
+| m060 vs smart | 37.9% | 44.3% |
+| m060 vs first run's final model | 51.0% | 57.0% |
+| m060 vs second run's two-hour model | 42.8% | 44.9% |
+| m120 vs smart | 44.7% | 49.0% |
+| m120 vs second run's two-hour model | 50.7% | 53.4% |
+| m120 vs first run's final model | 62.4% | 62.0% |
+
+| Within-run matchup | Score |
+|---|---:|
+| m060 vs m040 | 57.0% |
+| m120 vs m060 | 61.3% (about +80 Elo) |
+| m120 vs m100 | 47.8% |
+| m120 vs m110 | 49.0% |
+
+The second hour improved on m060, but was flat after about minute 100.
+Behaviour against smart, from the logged evaluation games:
+
+| Measure | Second run, two hours | Third run, m060 | Third run, m120 |
+|---|---:|---:|---:|
+| Fake Out uses per battle | 0.02 | 0.20 | 0.28 |
+| Fake Outs failing | 77% | 3% | 0% |
+| Protect repeats / uses | 376 / 1,221 (31%) | 268 / 1,585 (17%) | 1 / 1,690 |
+| Tera uses per battle | | 0.97 | 0.96 (smart: 0.72) |
+| attacks at foes that could Protect, blocked | | 40% | 46% |
+| overkill | | | 4.1% (smart: 1.4%) |
+
+`scratch/training/switch_analysis.py` recorded every switch of both sides in m120 vs smart, using the
+switching side's own features. The sample was 1,368 duplicate battles.
+
+| Voluntary switches | m120 | smart |
+|---|---:|---:|
+| switches per battle | 0.87 | 0.15 |
+| KO chance of Pokemon leaving / coming in | 0.64 / 0.08 | |
+| safest bench option picked | 47% | 89% |
+| extra expected damage above safest option, fraction of max HP | +16% | +1% |
+| switch-ins fainting that turn | 4.9% | 0.5% |
+
+Voluntary switches were out of real danger, but the switch-in choice was weak. Forced switches (faint
+replacements and pivots) were about random in defensive terms:
+
+| Forced switches | m120 | smart |
+|---|---:|---:|
+| expected damage on chosen / average option, fraction of max HP | 0.78 / 0.79 | 0.75 / 0.87 |
+
+Smart also weighs offence, which these features did not have for bench Pokemon.
+Outputs (git-ignored): `scratch/training/third-run/` and `scratch/training/third-run-2h/`, with
+`evaluation.json`, `cross.log` and `metrics.jsonl`; the switch analysis is `third-run-2h/switches-m120.json`.
+
+The guards and effect columns fixed Fake Out and repeated Protects. Tera and attacking into Protect did
+not change, and switch-in choice was weak, which motivated the next section.
+
+## Encoder fixes, Protect and switching inputs, Tera as its own choice
+
+Commit `b996acb` fixes four errors in the Rust damage features and the Python reference:
+
+| Fix | Symptom before the fix |
+|---|---|
+| spread move's main target prefers a foe on ties | Earthquake next to a Flying partner read as immune: the main-target columns described the ally |
+| keep Stellar STAB after terastallizing | a Stellar-terastallized Pokemon lost its Stellar STAB; Flare Blitz damage in the reproduction rose from 0.569 to 0.759 of max HP after the fix |
+| mask fainted foe attacks | a fainted foe still in its slot showed 0.80 expected damage and a 0.91 KO chance on an own active; both are 0 after the fix |
+| include `baseAbility` in the own-Pokemon cache key | the key could reuse features from a different base ability; this was practically unreachable |
+
+The generic stand-in attacks choosing physical damage when Attack >= Sp. Atk was not a bug. They are
+generic attacks, not Tera Blast.
+
+The [Rust encoder](#rust-observation-encoding-and-scripted-play) adds four action and six token columns.
+There are now 27 action and 16 token columns. The Python reference is frozen at 23 action and 10 token
+columns, with the added columns zero-padded. Parity tests compare the reference columns.
+`crates/encoder/src/damage.rs` documents the calculations; `training/damage.py` lists the layout in
+`ACTION_COLUMNS` and `TOKEN_COLUMNS`.
+
+| Per move-code column | Meaning |
+|---|---|
+| `protect_chance_a`, `protect_chance_b` | chance each targeted foe chooses and successfully uses Protect, from its Protect prior times the move's blocking factor; 0 for moves that bypass Protect |
+| `damage_after_protect` | expected damage to the foes after discounting each foe's damage share by its Protect chance |
+| `ko_after_protect` | expected KO share on the foes after the same discount |
+
+| Per Pokemon column | Meaning |
+|---|---|
+| `offense_a`, `offense_b` | each own Pokemon's best damage against foe a/b, including bench Pokemon as if on the field |
+| `offense_ko_a`, `offense_ko_b` | each own Pokemon's best KO chance against foe a/b, including the bench |
+| `entry_damage` | own-side Stealth Rock and Spikes damage on entry, as a fraction of max HP; includes Heavy-Duty Boots, Magic Guard and grounding, capped at current HP |
+| `protect_now` | foe actives' Protect prior before the per-move blocking factor |
+
+The Protect prior is `min(0.8, 0.1 + 0.2 x damage + 0.3 x KO) x can-protect`. Damage and KO are the
+threat from the own actives; can-protect includes move availability and success chance. It is a prior
+the model learns to trust or not. The four new action columns are identical with and without Tera.
+
+The entropy bonus over the joint 47 codes kept Tera on half the move codes every turn until it was used.
+`training/ppo.py`'s `tera_choice_entropy` marginalizes out the Tera bit: the 20 move pairs become 20 base
+choices, alongside six switches and PASS. The entropy bonus and controller now use that base entropy.
+`H(joint) = H(base) + E[H(Tera | base)]`; `--tera-entropy-weight` weights the conditional Tera term in
+the bonus (default 0; 1 restores the joint bonus). Joint log-probs, sampling, actors and `evaluate.py`
+are unchanged.
+
+| New metric | Meaning |
+|---|---|
+| `tera_entropy` | expected conditional Tera entropy, summed over both slots and averaged over trained rows |
+| `tera_turn1` | share of Tera uses on turn 1 |
+| `tera_mean_turn` | mean turn of Tera uses |
+
+With no exploration bonus on the Tera split, it settles almost at once. In a 3-minute smoke run,
+`tera_entropy` was 0.08 and 70% of Teras were on turn 1. Watch `tera_turn1`; a small
+`--tera-entropy-weight` is the knob if it does not move.
+
+Request JSON is now parsed borrowing strings. Encoder measurements:
+
+| Measure | Before | After |
+|---|---:|---:|
+| Rust bench, parse us/row | 26.4 | 11.0 |
+| Rust bench, parse + encode us/row | 45.9 | 27.0 |
+| Python-visible Rust encoder, ms/row | 0.067 | 0.047 |
+
+The Rust encoder is about 11x the Python encoder; the Rust smart player is about 43x the Python one.
+Training stays learner-bound: in the 3-minute smoke run rollouts took 1.4 s and the PPO update took 3.2 s.
+
+The Rust smart player now seeds from a spawned stream, so `evaluate.py`'s non-smart matchups keep their
+games. The [PGO workload](../design/PGO.md) now runs the encoder and smart player too.
+The [fourth run](#fourth-run-2026-10-11) started on 2026-10-11 with these changes.
+
+## Fourth run (2026-10-11)
+
+The first run with commit `b996acb`: the encoder fixes, Protect and switching inputs, Tera as its own
+choice and the Rust encoder, plus the [move guards](#move-guards). It started fresh with
+`--minutes 60 --pool-fraction 0.45 --scripted-share 0.5`. The second hour resumed from its `latest.pt`:
+`--resume ... --minutes 120 --lr 1.5e-4 --lr-final 0.4 --entropy-target 1.8 --entropy-target-final 1.2`.
+Training time and schedules match the third run.
+
+| Measure | Hour 1 | Hour 2 |
+|---|---:|---:|
+| battles, cumulative | 291,537 | 580,862 |
+| trainer memory, MB, start -> end | | 695 -> 790 |
+| training-time score vs smart (temperature 0.05) | 10% at 5 min -> 40% at 60 min | 44-46% at 65-75 min -> 50% at 105-120 min |
+| `tera_turn1`, share of Teras on turn 1 | 0.68 at start -> 0.33 at 60 min | 0.28-0.30 at end |
+| `tera_mean_turn` | 1.5 -> 3.5 | about 4.0 at end |
+| Fake Out used when it would work | 25% at 5 min -> 70% at 60 min | 82% at end |
+
+Throughput was 78-87 battles/s, against the third run's 70-79. The third run scored 38% against smart
+at 60 min, then 47-49% at the end.
+The Rust encoder keeps rollouts at about 1.4 s against about 3.2 s per PPO update. Training is learner-bound.
+Evaluation at temperature 1:
+
+| Snapshot | vs heuristic | vs smart |
+|---|---:|---:|
+| m060 | 77.8% (400 games) | 39.8% (400 games) |
+| m120 | 79.2% (1,000 games) | 48.5% (1,000 games) |
+
+The third run's m060 scored 71.7% / 36.7%, and m120 scored 77.3% / 46.4%, with 1,000 games per baseline.
+
+| Within-run matchup | Score |
+|---|---:|
+| m120 vs m060 | 57.0% (about +49 Elo) |
+| m120 vs m070 | 58.2% |
+| m120 vs m080 | 53.8% |
+| m120 vs m090 | 54.0% |
+| m120 vs m100 | 48.8% |
+| m120 vs m110 | 54.0% |
+
+Paired seed-5150 checks (1,000 duplicate games per matchup):
+
+| Matchup | temperature 1 | temperature 0 |
+|---|---:|---:|
+| m120 vs smart | 46.7% | 50.9% |
+| m120 vs third run's m120 | 53.1% | 51.2% |
+| m120 vs first run's final model | 60.0% | 61.4% |
+
+The third run's m120 scored 44.7% / 49.0% against smart and 62.4% / 62.0% against the first run's final
+model. Single 1,000-game checks are good to about +/-3 points (see the second run). The fourth run is
+ahead of the third by a small margin: about +10 to +20 Elo head-to-head and +2 points against smart.
+Behaviour against smart, from the logged evaluation games:
+
+| Measure | Fourth run, m120 | Third run, m120 |
+|---|---:|---:|
+| Protect uses per battle | 1.09 | 1.69 |
+| attacks at foes that could Protect, blocked | 43% | 46% |
+| attacks into Protect, all attacks | 9.0% | 9.4% |
+| Fake Out per battle / failing | 0.29 / 0% | 0.28 / 0% |
+| Tera per battle | 0.95 | 0.96 |
+| voluntary switch actions per battle | 1.35 | 0.94 |
+| overkill | 3.7% | 4.1% |
+| focus fire | 11.8% | 12.3% |
+
+Smart used Tera 0.72 times per battle. The policy's Tera count barely moved; its timing changed as shown above.
+`scratch/training/switch_analysis.py` recorded switches in m120 vs smart for both runs. Smart's numbers below
+come from the fourth run's games.
+
+| Voluntary switches | Fourth run | Third run | smart |
+|---|---:|---:|---:|
+| per battle | 1.31 | 0.87 | 0.20 |
+| KO chance of Pokemon leaving / coming in | 0.55 / 0.08 | 0.64 / 0.08 | 0.86 / 0.00 |
+| safest bench option picked | 49% | 47% | 92% |
+| extra expected damage above safest option, fraction of max HP | +15% | +16% | +1% |
+| switch-ins fainting that turn | 4.7% | 4.9% | 1.6% |
+
+| Forced switches | Fourth run | Third run | smart |
+|---|---:|---:|---:|
+| expected damage on chosen / average option, fraction of max HP | 0.76 / 0.79 | 0.78 / 0.79 | 0.77 / 0.89 |
+| safest option picked | 39% | 36% | 60% |
+
+These switch metrics are defensive only. The new offense columns may let the policy trade some safety for a
+switch-in that hits back, which this analysis does not measure.
+
+Tera timing changed as intended: turn-1 Teras fell from about 70% to under 30%, with the count still near
+one per battle. Protect use fell and attacks into Protect improved only slightly. It switches more, but
+switch-in choice is still far from smart's. Overall this was a small gain over the third run at equal
+training time; it was still improving at the end (m120 vs m110: 54%).
+
+Outputs (git-ignored): `scratch/training/fourth-run/` (hour 1) and `scratch/training/fourth-run-2h/`
+(hour 2, with `evaluation.json`, `cross.log`, `metrics.jsonl` and `switches-m120.json`).
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.
