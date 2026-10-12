@@ -31,7 +31,8 @@ HELP = (f"Hi! I play {FORMAT_NAME} only. Challenge me to that format, or PM me \
 class ShowdownClient:
     """A bot account on the Showdown server. ``run`` keeps it connected until ``stop``."""
 
-    def __init__(self, worker: BotWorker, url: str, bot_log: BotLog, log_dir: Path | None, timer: bool = False):
+    def __init__(self, worker: BotWorker, url: str, bot_log: BotLog, log_dir: Path | None, timer: bool = False,
+                 room_options: dict | None = None):
         self.worker = worker
         self.name = worker.name
         self.userid = to_id(worker.name)
@@ -39,6 +40,7 @@ class ShowdownClient:
         self.bot_log = bot_log
         self.log_dir = log_dir
         self.timer = timer
+        self.room_options = dict(room_options or {})  # extra BattleRoom keywords (observer, timing, rating_wait_s)
         self.ws = None
         self.send_lock = asyncio.Lock()
         self.logged_in = asyncio.Event()
@@ -48,6 +50,7 @@ class ShowdownClient:
         self.finished: asyncio.Queue[BattleRoom] = asyncio.Queue()
         self.helped: set[str] = set()
         self.done_rooms: set[str] = set()  # finished battles: never rejoined
+        self.rejoining: set[str] = set()  # running battles we asked to join again (after a reconnect)
         self.battles_played = 0
 
     @property
@@ -120,7 +123,7 @@ class ShowdownClient:
             return
         for line in message.split("\n"):
             if line.startswith("|challstr|"):
-                asyncio.create_task(self.send(f"|/trn {self.name},0,"))
+                asyncio.create_task(self.login(line[len("|challstr|"):]))
             elif line.startswith("|updateuser|"):
                 self._on_updateuser(line)
             elif line.startswith("|nametaken|"):
@@ -131,6 +134,11 @@ class ShowdownClient:
                 self._on_updatesearch(line)
             elif line.startswith("|popup|"):
                 log.warning("%s: popup: %s", self.name, line[len("|popup|"):].replace("||", " "))
+
+    async def login(self, challstr: str) -> None:
+        """Answer the server's challenge string: here a passwordless login (``noguestsecurity`` servers). A registered
+        account overrides this with an assertion from the login server."""
+        await self.send(f"|/trn {self.name},0,")
 
     def _on_updateuser(self, line: str) -> None:
         parts = line.split("|")
@@ -160,6 +168,7 @@ class ShowdownClient:
             return
         for roomid in self.games - set(self.rooms) - self.done_rooms:
             log.info("%s: joining running battle %s", self.name, roomid)
+            self.rejoining.add(roomid)
             asyncio.create_task(self.send(f"|/join {roomid}"))
 
     def _on_pm(self, line: str) -> None:
@@ -209,10 +218,11 @@ class ShowdownClient:
             if roomid in self.done_rooms:
                 asyncio.create_task(self.send(f"{roomid}|/leave"))
                 return
-            room = self._open_room(roomid)
+            room = self._open_room(roomid, rejoined=roomid in self.rejoining)
+            self.rejoining.discard(roomid)
         room.push(received_at, message)
 
-    def _open_room(self, roomid: str) -> BattleRoom:
+    def _open_room(self, roomid: str, rejoined: bool = False) -> BattleRoom:
         log_path = None
         if self.log_dir is not None:
             log_path = self.log_dir / f"{roomid}-{self.userid}.json"
@@ -220,7 +230,8 @@ class ShowdownClient:
             while log_path.exists():  # room numbers restart when the Showdown server loses its logs/ directory
                 log_path = self.log_dir / f"{roomid}-{self.userid}-{n}.json"
                 n += 1
-        room = BattleRoom(roomid, self.worker, self.send, self.bot_log, log_path, self.url, on_end=self._room_ended)
+        room = BattleRoom(roomid, self.worker, self.send, self.bot_log, log_path, self.url, on_end=self._room_ended,
+                          rejoined=rejoined, **self.room_options)
         self.rooms[roomid] = room
         room.start()
         log.info("%s: joined %s", self.name, roomid)

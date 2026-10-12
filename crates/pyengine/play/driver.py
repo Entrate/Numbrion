@@ -21,6 +21,34 @@ the driver sends ``default``. Errors about stale choices ("too late", "nothing t
 
 Threads. All calls into a bot's players run on that bot's single worker thread (``BotWorker``), in submission
 order, so the event loop keeps answering the websocket while a bot thinks and one bot never decides twice at once.
+
+Deadlines (``DecisionTiming``, ladder play). Each request's time is measured from the receipt of its message. The
+player gets the search allowance as ``budget_ms`` and the absolute ``deadline`` (``time.monotonic()``), and posts a
+policy decision early as ``fallback`` (``(token, Decision)``). If its decision is not back by the deadline (less
+``reserve_s``, and earlier when the battle clock runs low), the room sends that fallback, or ``default`` when there is
+none yet, and tells the player afterwards (``record_choice``) once its late decision is done. Computed decisions are
+held until ``min_response_s`` after receipt; fallbacks go out at once.
+
+Observer events. ``observer.room_event(room, kind, data)`` is called on the event loop for every event below; it must
+not block (queue the work). Exceptions are logged and ignored. ``time``/``received``/``submitted`` are ``time.time()``.
+
+* ``message`` {time, text}: every websocket message of the room, as received.
+* ``sent`` {time, text}: every command the room sends (``ROOM|/choose ...|rqid``).
+* ``request`` {seq, rqid, received, text, lines, resent, clock}: a request handed to the player with the lines fed
+  before it; ``seq`` counts the room's requests; ``clock`` is the last battle-clock reading or None.
+* ``decision`` {seq, rqid, turn, choice, a0, a1, source, fallback, analysis, timing}: a choice sent. ``source`` is
+  the analysis source (``search``, ``policy``, ``default``) or ``fallback``; ``fallback`` names why the room did not
+  wait for the player (None normally). ``timing`` = {received, dispatched, decided, submitted, deadline, budget_ms,
+  queue_ms, compute_ms, paced_ms, total_ms}: ``decided`` is None for a fallback, ``total_ms`` = receipt to send.
+* ``late_decision`` {seq, rqid, choice, analysis, compute_ms}: the player's decision after a fallback was sent.
+* ``refused`` {rqid, choice, message}; ``server_error`` {message}.
+* ``timer`` {time, state ("on"/"off"), line}; ``clock`` {time, turn_left, total_left, grace, line}.
+* ``rating`` {time, user, userid, old, new, delta, reason, line}: a ladder rating line after a rated battle.
+* ``end`` {time, result, won, end_reason, turns}: ``won`` is True/False/None (tie or unknown side); ``end_reason`` is
+  ``normal``, ``forfeit``, ``inactivity`` or ``other``.
+* ``closed`` {time, ended, abandoned, stats, player_stats, rated, players, ratings}: the room is done (``ended``: the
+  battle finished; ``abandoned``: connection lost or shutdown before the end).
+* ``unhealthy`` {time, reason}: the bot's worker is stuck (a decision far past its deadline).
 """
 from __future__ import annotations
 
@@ -32,8 +60,9 @@ import re
 import time
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Protocol
 
 from training.player import Bot, Decision, Player
 
@@ -52,6 +81,26 @@ NON_PROGRESS = frozenset({
     "bigerror", "-hint", "debug", "player", "gametype", "gen", "tier", "rule", "rated", "seed", "teamsize",
     "request", "error",
 })
+
+
+@dataclass
+class DecisionTiming:
+    """Time rules of each decision in a room, in seconds from the receipt of the request (module docstring)."""
+    search_s: float | None = None    # search allowance, given to the player as budget_ms; None: the bot's own setting
+    deadline_s: float | None = None  # hard cap from receipt to sending the choice; None: no deadline
+    min_response_s: float = 0.0      # computed decisions are not sent earlier than this (pacing)
+    reserve_s: float = 0.5           # kept back from the deadline for the fallback and the send
+    clock_margin_s: float = 10.0     # battle-clock seconds the bot never plans to use
+    hang_s: float = 30.0             # a decision this long past its deadline marks the worker unhealthy
+
+    @classmethod
+    def from_dict(cls, values: dict | None) -> "DecisionTiming":
+        known = {k: v for k, v in (values or {}).items() if k in cls.__dataclass_fields__}
+        return cls(**known)
+
+
+class RoomObserver(Protocol):
+    def room_event(self, room: "BattleRoom", kind: str, data: dict) -> None: ...
 
 
 def to_id(text: str) -> str:
@@ -183,7 +232,9 @@ class BattleRoom:
     """One bot account's view of one battle room. Messages go into ``queue``; ``run`` processes them in order."""
 
     def __init__(self, room: str, worker: BotWorker, send: Callable[[str], Awaitable[None]], bot_log: BotLog,
-                 log_path: Path | None, server: str, on_end: Callable[["BattleRoom"], None] | None = None):
+                 log_path: Path | None, server: str, on_end: Callable[["BattleRoom"], None] | None = None, *,
+                 observer: RoomObserver | None = None, timing: DecisionTiming | None = None,
+                 rating_wait_s: float = 0.0, rejoined: bool = False):
         self.room = room
         self.worker = worker
         self.send_raw = send
@@ -191,6 +242,10 @@ class BattleRoom:
         self.log_path = log_path
         self.server = server
         self.on_end = on_end
+        self.observer = observer
+        self.timing = timing or DecisionTiming()
+        self.rating_wait_s = rating_wait_s  # after a rated battle ends, wait this long for the rating lines
+        self.rejoined = rejoined  # opened again after a reconnect: the player missed the battle so far
         self.queue: asyncio.Queue = asyncio.Queue()
         self.task: asyncio.Task | None = None
         self.player: Player | None = None
@@ -220,6 +275,21 @@ class BattleRoom:
         self.sent: list[dict] = []
         self.decisions: list[dict] = []  # this bot's resolved bot-log entries in this room
         self.player_stats: dict | None = None  # the player's own ``stats`` dict at the end, if it has one
+        # Ladder facts read off the room's lines.
+        self.players: dict[str, dict] = {}  # "p1" -> {"name", "userid", "rating" (int or None)}
+        self.rated: str | bool = False  # the |rated| line's text ("" counts as rated: True), False if none
+        self.end_reason: str | None = None
+        self.ratings: dict[str, dict] = {}  # userid -> the rating line's {old, new, delta, reason}
+        self.timer_on: float | None = None  # when the server confirmed the battle timer
+        self.clock: dict | None = None  # last "Time left" reading: {time, turn_left, total_left, grace}
+
+    def _emit(self, kind: str, data: dict) -> None:
+        if self.observer is None:
+            return
+        try:
+            self.observer.room_event(self, kind, data)
+        except Exception:  # recording must never break play
+            log.exception("%s %s: observer failed on %s", self.worker.name, self.room, kind)
 
     # -- plumbing ----------------------------------------------------------------------------------------------
 
@@ -234,7 +304,9 @@ class BattleRoom:
         self.queue.put_nowait(None)
 
     async def send(self, text: str) -> None:
-        self.sent.append({"time": time.time(), "text": text})
+        now = time.time()
+        self.sent.append({"time": now, "text": text})
+        self._emit("sent", {"time": now, "text": text})
         await self.send_raw(text)
 
     def _timeout(self) -> float | None:
@@ -267,6 +339,7 @@ class BattleRoom:
 
     async def _on_message(self, received_at: float, text: str) -> None:
         self.received.append({"time": received_at, "text": text})
+        self._emit("message", {"time": received_at, "text": text})
         lines = text.split("\n")
         if lines and lines[0].startswith(">"):
             lines = lines[1:]
