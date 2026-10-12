@@ -144,10 +144,13 @@ impl Battle {
             match acts.choices(a0, a1, &g.party(side)) {
                 Some(ch) => g.choose_typed(side, &ch),
                 None => {
-                    // Ask the engine on a throw-away copy what it makes of it, for Showdown's wording.
-                    let mut probe = g.duplicate();
-                    let ch = [probe.unchecked_choice(side, 0, a0), probe.unchecked_choice(side, 1, a1)];
-                    match probe.choose_typed(side, &ch) {
+                    // Ask the engine on a throw-away copy what it makes of it, for Showdown's wording. A pair the
+                    // engine accepts (a forced-move alias, a pass on a Revival Blessing slot) is not submitted to the
+                    // copy: that would run the turn, and that pass makes Showdown's turn loop throw.
+                    let ch = [g.unchecked_choice(side, 0, a0), g.unchecked_choice(side, 1, a1)];
+                    let engine_accepts = g.engine_joint_legal(side, &ch);
+                    let rejected = if engine_accepts { Ok(()) } else { g.duplicate().choose_typed(side, &ch) };
+                    match rejected {
                         Err(e) => Err(e),
                         Ok(()) => Err(engine::sim::ChoiceError {
                             text: format!(
@@ -418,6 +421,7 @@ fn out_to_dict<'py>(py: Python<'py>, o: StepOut) -> PyResult<Bound<'py, PyDict>>
     d.set_item("final_turns", o.final_turns.into_pyarray(py))?;
     d.set_item("battle_id", o.battle_id.into_pyarray(py))?;
     d.set_item("illegal", bools(py, &o.illegal).reshape([n, 2])?)?;
+    d.set_item("aborted", bools(py, &o.aborted))?;
     d.set_item("decisions", o.decisions)?;
     Ok(d)
 }
@@ -433,6 +437,7 @@ fn stats_dict<'py>(py: Python<'py>, s: RunStats, seconds: f64) -> PyResult<Bound
     d.set_item("boundaries", s.boundaries)?;
     d.set_item("turns", s.turns)?;
     d.set_item("illegal", s.illegal)?;
+    d.set_item("crashed", s.crashed)?;
     d.set_item("seconds", seconds)?;
     Ok(d)
 }
@@ -574,7 +579,30 @@ impl BatchEnv {
         Ok(Battle { g: Mutex::new(g) })
     }
 
-    /// Cumulative counters since construction: battles, decisions (side choices), boundaries, turns, illegal.
+    /// Battles that panicked inside the engine since the last call, as dicts: `env`, `battle_id`, `seed`, `teams`
+    /// (both packed teams), `actions` (`[a0, a1]` of side 0 then side 1 per boundary since the battle started, -1
+    /// for a side without a request; the last row is the step that panicked) and `message`. Each was aborted
+    /// (`aborted` in the step dict) and replaced by a fresh battle. Replay one with `Battle(seed, *teams)`,
+    /// `start()` and `choose_action` per row.
+    fn crashes<'py>(&self, py: Python<'py>) -> PyResult<Vec<Bound<'py, PyDict>>> {
+        let crashes = lock(&self.env).take_crashes();
+        crashes
+            .into_iter()
+            .map(|c| {
+                let d = PyDict::new(py);
+                d.set_item("env", c.env)?;
+                d.set_item("battle_id", c.battle_id)?;
+                d.set_item("seed", c.seed.to_vec())?;
+                d.set_item("teams", c.teams.to_vec())?;
+                d.set_item("actions", c.actions.iter().map(|a| a.to_vec()).collect::<Vec<_>>())?;
+                d.set_item("message", c.message)?;
+                Ok(d)
+            })
+            .collect()
+    }
+
+    /// Cumulative counters since construction: battles, decisions (side choices), boundaries, turns, illegal,
+    /// crashed (battles aborted by an engine panic).
     fn stats<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
         stats_dict(py, lock(&self.env).stats(), 0.0)
     }

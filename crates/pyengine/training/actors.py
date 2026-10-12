@@ -248,7 +248,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 # the actor's sampling stream or the scripted opponent's.
                 teacher = SmartHeuristicAgent(np.random.default_rng([seed, 1]), dex,
                                               temperature=model_config.get("teacher_temperature", 0.0))
-            stats = dict(completed=0, turns=0, guarded=0)
+            stats = dict(completed=0, turns=0, guarded=0, crashes=[])
             inference = teaching = 0.0
             for t in range(steps):
                 for k in OBS_KEYS:
@@ -310,6 +310,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 result = env.step(actions)
                 if result["illegal"].any():
                     raise RuntimeError("A sampled action violated the exact mask")
+                if result["aborted"].any():  # an engine panic aborted a battle, which was replaced; keep the report
+                    stats["crashes"].extend(env.crashes())
                 b = observe(result)
                 done = result["done"]
                 reward = result["reward"].reshape(-1).astype(np.float32)
@@ -407,6 +409,7 @@ class Actors:
             if isinstance(reply, tuple) and reply and reply[0] == "error":
                 raise RuntimeError("actor failed:\n" + reply[1])
         totals = {k: sum(r[k] for r in replies) for k in ("completed", "turns", "guarded")}
+        totals["crashes"] = [c for r in replies for c in r["crashes"]]
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
         totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)

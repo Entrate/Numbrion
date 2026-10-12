@@ -8,6 +8,7 @@ use crate::{
     pool::{SplitMix, TeamPool},
 };
 use rayon::prelude::*;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -59,6 +60,7 @@ struct EnvOut {
     needs: [bool; 2],
     mask0: [u64; 2],
     mask1_any: [u64; 2],
+    aborted: bool,
 }
 
 impl EnvOut {
@@ -74,6 +76,34 @@ pub struct EnvStats {
     pub boundaries: u64,
     pub turns: u64,
     pub illegal: u64,
+    pub crashed: u64,
+}
+
+/// A battle whose step panicked inside the engine, with what replays it: `Battle(seed, teams[0], teams[1])`,
+/// `start()`, then `choose_action(side, a0, a1)` for every side with `actions[k][2 * side] >= 0`, boundary by
+/// boundary. The last entry holds the actions of the step that panicked.
+#[derive(Clone, Debug)]
+pub struct Crash {
+    pub env: usize,
+    pub battle_id: i64,
+    pub seed: [u16; 4],
+    pub teams: [String; 2],
+    /// `[a0, a1]` of side 0 then side 1 per decision boundary since the battle started (-1: the side had no
+    /// request).
+    pub actions: Vec<[i32; 4]>,
+    pub message: String,
+}
+
+/// Unit tests only: the env with this index panics once at its next step, as an engine bug would.
+#[cfg(test)]
+static INJECT_PANIC: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(usize::MAX);
+
+fn panic_text(payload: &(dyn std::any::Any + Send)) -> String {
+    payload
+        .downcast_ref::<&str>()
+        .map(|s| s.to_string())
+        .or_else(|| payload.downcast_ref::<String>().cloned())
+        .unwrap_or_else(|| "non-string panic payload".into())
 }
 
 struct Env {
@@ -87,6 +117,10 @@ struct Env {
     out: EnvOut,
     joint: Vec<u8>,
     stats: EnvStats,
+    /// Action codes applied since the current battle started, for crash reports.
+    history: Vec<[i32; 4]>,
+    /// A panic caught in this env's last step, collected by `BatchEnv` after the parallel loop.
+    crash: Option<Crash>,
 }
 
 struct Shared<'a> {
@@ -99,6 +133,8 @@ pub struct BatchEnv {
     pool: Arc<TeamPool>,
     envs: Vec<Env>,
     tp: rayon::ThreadPool,
+    /// Panicked battles not yet taken by `take_crashes`.
+    crashes: Vec<Crash>,
 }
 
 /// Flat, C-ordered result arrays (`n` = number of environments, `A` = `N_ACTIONS`).
@@ -129,6 +165,9 @@ pub struct StepOut {
     pub battle_id: Vec<i64>,
     /// `[n, 2]` the submitted action was not legal and the engine default was used (`OnIllegal::Default`).
     pub illegal: Vec<u8>,
+    /// `[n]` the battle that ended on this step was aborted because the engine panicked (`done` is set, the
+    /// rewards are 0 and the winner -1, as for a tie); `BatchEnv::take_crashes` has the details.
+    pub aborted: Vec<u8>,
     /// Side choices applied by this step.
     pub decisions: u64,
 }
@@ -151,6 +190,7 @@ pub struct RunStats {
     pub boundaries: u64,
     pub turns: u64,
     pub illegal: u64,
+    pub crashed: u64,
 }
 
 fn bit_nth(mut m: u64, n: usize) -> usize {
@@ -222,6 +262,8 @@ impl Env {
             out: EnvOut::fresh(),
             joint: if cfg.joint_mask { vec![0; 2 * N_ACTIONS * N_ACTIONS] } else { Vec::new() },
             stats: EnvStats::default(),
+            history: Vec::new(),
+            crash: None,
         };
         e.refresh(shared);
         Ok(e)
@@ -268,6 +310,7 @@ impl Env {
                 self.game.reset_from_team_defs(seed, [shared.pool.get(i).clone(), shared.pool.get(j).clone()], [p1, p2])));
             match reset {
                 Ok(()) => {
+                    self.history.clear();
                     self.game.start().map_err(|e| format!("battle failed to start (teams {i} vs {j}, seed {seed:?}): {e}"))?;
                     return Ok(());
                 }
@@ -328,6 +371,21 @@ impl Env {
         self.out.winner = -1;
         self.out.final_turns = 0;
         self.out.illegal = [false; 2];
+        self.out.aborted = false;
+        let mut applied_actions = [-1; 4];
+        for s in 0..2 {
+            if self.acts[s].needs_action() {
+                applied_actions[2 * s..2 * s + 2].copy_from_slice(&actions[2 * s..2 * s + 2]);
+            }
+        }
+        self.history.push(applied_actions);
+        #[cfg(test)]
+        if INJECT_PANIC
+            .compare_exchange(self.idx, usize::MAX, std::sync::atomic::Ordering::SeqCst, std::sync::atomic::Ordering::SeqCst)
+            .is_ok()
+        {
+            panic!("injected test panic");
+        }
         let party = [self.game.party(0), self.game.party(1)];
         let mut applied = 0;
         for s in 0..2 {
@@ -384,6 +442,56 @@ impl Env {
         Ok(())
     }
 
+    /// `advance`, but a panic inside the engine aborts only this battle (see `recover`) instead of unwinding
+    /// through the thread pool into Python and ending the whole run.
+    fn advance_guarded(&mut self, shared: &Shared, actions: &[i32]) -> Result<(), String> {
+        match catch_unwind(AssertUnwindSafe(|| self.advance(shared, actions))) {
+            Ok(result) => result,
+            Err(payload) => self.recover(shared, panic_text(&*payload)),
+        }
+    }
+
+    /// After a panic: record the battle (teams, seed, action history) in `crash`, report it as finished with no
+    /// winner and `aborted` set, and continue with a freshly built battle (the panicked one may be inconsistent,
+    /// so it is dropped rather than reset in place).
+    fn recover(&mut self, shared: &Shared, message: String) -> Result<(), String> {
+        let teams = self.game.packed_teams();
+        let teams = [teams[0].to_string(), teams[1].to_string()];
+        self.crash = Some(Crash {
+            env: self.idx,
+            battle_id: self.battle_id,
+            seed: self.game.initial_seed(),
+            teams,
+            actions: std::mem::take(&mut self.history),
+            message,
+        });
+        self.stats.crashed += 1;
+        let turns = self.game.turn() as i32;
+        let mut last = String::new();
+        let mut game = None;
+        for _ in 0..10 {
+            match catch_unwind(AssertUnwindSafe(|| Self::new_game(&mut self.rng, shared))) {
+                Ok(Ok(g)) => {
+                    game = Some(g);
+                    break;
+                }
+                Ok(Err(e)) => return Err(e),
+                Err(payload) => last = panic_text(&*payload),
+            }
+        }
+        self.game = game.ok_or_else(|| format!("env {}: ten replacement battles panicked at start: {last}", self.idx))?;
+        self.battle_id += 1;
+        self.prev_log = [Vec::new(), Vec::new()];
+        self.out.reward = [0.0; 2];
+        self.out.done = true;
+        self.out.winner = -1;
+        self.out.final_turns = turns;
+        self.out.illegal = [false; 2];
+        self.out.aborted = true;
+        self.refresh(shared);
+        Ok(())
+    }
+
     /// Random legal actions for the sides that have to act, `-1` elsewhere.
     fn sample(&mut self, p: &SamplerParams) -> [i32; 4] {
         let mut out = [-1; 4];
@@ -425,7 +533,7 @@ impl BatchEnv {
         let shared = Shared { pool: &pool, cfg: &cfg };
         let envs: Result<Vec<Env>, String> = tp.install(|| (0..cfg.n_envs).into_par_iter().map(|i| Env::create(i, &shared)).collect());
         let envs = envs?;
-        Ok(BatchEnv { cfg, pool, envs, tp })
+        Ok(BatchEnv { cfg, pool, envs, tp, crashes: Vec::new() })
     }
 
     pub fn config(&self) -> &Config {
@@ -470,7 +578,8 @@ impl BatchEnv {
         let envs = &mut self.envs;
         let r: Vec<Result<(), String>> = self
             .tp
-            .install(|| envs.par_iter_mut().map(|e| e.advance(&shared, &actions[e.idx * 4..e.idx * 4 + 4])).collect());
+            .install(|| envs.par_iter_mut().map(|e| e.advance_guarded(&shared, &actions[e.idx * 4..e.idx * 4 + 4])).collect());
+        self.collect_crashes();
         for x in r {
             x?;
         }
@@ -495,6 +604,7 @@ impl BatchEnv {
             final_turns: vec![0; n],
             battle_id: vec![0; n],
             illegal: vec![0; n * 2],
+            aborted: vec![0; n],
             decisions,
         };
         for (i, e) in self.envs.iter().enumerate() {
@@ -504,6 +614,7 @@ impl BatchEnv {
             o.turn[i] = eo.turn;
             o.final_turns[i] = eo.final_turns;
             o.battle_id[i] = eo.battle_id;
+            o.aborted[i] = eo.aborted as u8;
             for s in 0..2 {
                 let k = i * 2 + s;
                 o.needs_action[k] = eo.needs[s] as u8;
@@ -584,8 +695,22 @@ impl BatchEnv {
             r.boundaries += e.stats.boundaries;
             r.turns += e.stats.turns;
             r.illegal += e.stats.illegal;
+            r.crashed += e.stats.crashed;
         }
         r
+    }
+
+    fn collect_crashes(&mut self) {
+        for e in &mut self.envs {
+            if let Some(c) = e.crash.take() {
+                self.crashes.push(c);
+            }
+        }
+    }
+
+    /// The battles that panicked since the last call (each was aborted and replaced, see `StepOut::aborted`).
+    pub fn take_crashes(&mut self) -> Vec<Crash> {
+        std::mem::take(&mut self.crashes)
     }
 
     /// Benchmark/test driver that never leaves Rust: every environment plays random legal self-play until it
@@ -599,14 +724,15 @@ impl BatchEnv {
                 .with_max_len(1)
                 .map(|e| {
                     let target = e.stats.battles + battles_per_env;
-                    while e.stats.battles < target {
+                    while e.stats.battles + e.stats.crashed < target {
                         let a = e.sample(p);
-                        e.advance(&shared, &a)?;
+                        e.advance_guarded(&shared, &a)?;
                     }
                     Ok(())
                 })
                 .collect()
         });
+        self.collect_crashes();
         for x in r {
             x?;
         }
@@ -617,6 +743,92 @@ impl BatchEnv {
             boundaries: after.boundaries - before.boundaries,
             turns: after.turns - before.turns,
             illegal: after.illegal - before.illegal,
+            crashed: after.crashed - before.crashed,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::atomic::Ordering::SeqCst;
+    use std::sync::Mutex;
+
+    /// INJECT_PANIC is global: tests that use it run one at a time.
+    static INJECTING: Mutex<()> = Mutex::new(());
+
+    fn batch(log: bool) -> BatchEnv {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/pool-400.txt.gz");
+        let pool = TeamPool::load(&[path], Some(40)).expect("test pool");
+        let cfg = Config { n_envs: 4, seed: 7, threads: 2, log, joint_mask: false, on_illegal: OnIllegal::Raise };
+        BatchEnv::new(cfg, Arc::new(pool)).expect("batch env")
+    }
+
+    /// The battle a crash report describes, replayed up to (not including) the step that panicked.
+    fn replay(c: &Crash) -> Game {
+        let mut g = Game::new(c.seed, Arc::from(c.teams[0].as_str()), Arc::from(c.teams[1].as_str()),
+                              ["Player 1".into(), "Player 2".into()], false, false).expect("replay game");
+        g.start().expect("replay start");
+        for row in &c.actions[..c.actions.len() - 1] {
+            for s in 0..2 {
+                if row[2 * s] >= 0 {
+                    let ch = g.side_actions(s).choices(row[2 * s] as usize, row[2 * s + 1] as usize, &g.party(s));
+                    g.choose_typed(s, &ch.expect("recorded action is legal")).expect("replayed choice");
+                }
+            }
+        }
+        g
+    }
+
+    #[test]
+    fn a_panicking_battle_is_aborted_and_replaced() {
+        let _serial = INJECTING.lock().unwrap_or_else(|e| e.into_inner());
+        let mut e = batch(true);
+        let p = SamplerParams::default();
+        for _ in 0..6 {
+            let a = e.random_actions(&p);
+            e.step(&a).unwrap();
+        }
+        let before = e.envs[2].battle_id;
+        let signature = e.envs[2].game.signature();
+        INJECT_PANIC.store(2, SeqCst);
+        let a = e.random_actions(&p);
+        let o = e.step(&a).unwrap();
+        assert_eq!(o.aborted, [0, 0, 1, 0]);
+        assert_eq!((o.done[2], o.winner[2], o.reward[4], o.reward[5]), (1, -1, 0.0, 0.0));
+        assert_eq!(o.battle_id[2], before + 1);
+        assert_eq!(e.stats().crashed, 1);
+        let crashes = e.take_crashes();
+        assert_eq!(crashes.len(), 1);
+        let c = &crashes[0];
+        assert_eq!((c.env, c.battle_id, c.message.as_str()), (2, before, "injected test panic"));
+        let last = c.actions.last().unwrap();
+        for s in 0..2 {
+            if last[2 * s] >= 0 {
+                assert_eq!(last[2 * s..2 * s + 2], a[8 + 2 * s..8 + 2 * s + 2]);
+            }
+        }
+        // The report replays the battle exactly to the boundary where it panicked.
+        assert_eq!(replay(c).signature(), signature);
+        // The env carries on with its new battle; the other envs were not touched.
+        for _ in 0..30 {
+            let a = e.random_actions(&p);
+            let o = e.step(&a).unwrap();
+            assert!(o.aborted.iter().all(|&x| x == 0));
+        }
+        assert!(e.take_crashes().is_empty());
+        assert_eq!(e.stats().crashed, 1);
+    }
+
+    #[test]
+    fn run_random_survives_a_panic() {
+        let _serial = INJECTING.lock().unwrap_or_else(|e| e.into_inner());
+        let mut e = batch(false);
+        let p = SamplerParams::default();
+        INJECT_PANIC.store(1, SeqCst);
+        let r = e.run_random(3, &p).unwrap();
+        assert_eq!(r.crashed, 1);
+        assert_eq!(r.battles + r.crashed, 12);
+        assert_eq!(e.take_crashes().len(), 1);
     }
 }
