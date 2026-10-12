@@ -29,6 +29,10 @@ Run from the repository root:
   actors (training.actors; slot b's label answers the learner's sampled slot a), and the loss adds the weighted
   cross-entropy of those labels, DAgger-style imitation that falls linearly to zero at ``--teacher-end-minutes``;
   then the actors stop labelling. PPO's data (actions, behaviour log-probs, masks) is unchanged by it.
+* Search distillation (``--distill DIR``, ``--distill-coef``, off by default): positions labelled offline by the
+  search (search_labels.py), whose strategy over its candidate pairs the policy imitates (training.distill). Every
+  minibatch adds ``--distill-batch`` labelled positions with weight ``--distill-coef``, falling linearly to zero at
+  ``--distill-end-minutes``; held-out shards report ``distill_val_loss`` and ``distill_val_agree``.
 * Schedule: the learning rate anneals over the time budget; snapshots every ``--snapshot-minutes`` feed
   evaluate.py. ``latest.pt`` (with optimizer, opponent-pool and entropy-controller state) supports ``--resume``.
 * Metrics: besides the losses, win rates against snapshots and against the heuristic, the PFSP table, and the
@@ -49,6 +53,7 @@ import torch
 from training.actors import Actors, memory_mb
 from training.device import BACKENDS, training_device
 from training.diagnostics import ActionUsage
+from training.distill import DistillData, distill_loss, validate
 from training.dex import load_dex
 from training.guards import MoveGuards
 from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
@@ -157,13 +162,26 @@ def teacher_coefficient(args, elapsed: float) -> float:
     return args.teacher_coef * max(0.0, 1 - elapsed / end)
 
 
+def distill_coefficient(args, elapsed: float) -> float:
+    """Search-distillation weight after ``elapsed`` training seconds: ``--distill-coef`` falling linearly to zero at
+    ``--distill-end-minutes``."""
+    end = getattr(args, "distill_end_minutes", 0.0) * 60
+    if getattr(args, "distill_coef", 0.0) <= 0 or end <= 0:
+        return 0.0
+    return args.distill_coef * max(0.0, 1 - elapsed / end)
+
+
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device,
-               teacher_coef: float = 0.0) -> tuple[dict, int]:
+               teacher_coef: float = 0.0, distill: DistillData | None = None,
+               distill_coef: float = 0.0) -> tuple[dict, int]:
     """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays.
 
     With ``--teacher-coef`` set, the buffer carries teacher labels and the loss imitates them with weight
     ``teacher_coef`` (see ppo_loss). The term stays in the loss for the whole run, at weight 0 and without labels after
-    the fade, so a compiled loss keeps one graph."""
+    the fade, so a compiled loss keeps one graph.
+
+    With ``distill`` and ``distill_coef`` > 0, every minibatch also imitates ``--distill-batch`` search-labelled
+    positions (training.distill), uncompiled, with weight ``distill_coef``."""
     steps, R = data["a0"].shape
     partner = np.arange(R) ^ 1
     advantages, returns = gae(data["reward"], data["value"], data["done"], data["bootstrap"], args.gamma, args.lam)
@@ -188,7 +206,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                        teacher_labelled=labelled.astype(np.float32))
     terms_keys = ("policy_loss", "value_loss", "entropy", "tera_entropy", "aux_loss", "kl", "clipfrac",
                   *(("teacher_loss",) if teach else ()))
-    stats = {k: [] for k in (*terms_keys, "grad_norm")}
+    distilling = distill is not None and distill_coef > 0
+    stats = {k: [] for k in (*terms_keys, "grad_norm", *(("distill_loss", "distill_agree") if distilling else ()))}
     # Loss coefficients as device tensors: the entropy coefficient changes every update, and DirectML keeps host
     # memory for every op given a new Python scalar (see training.ppo.Adam).
     dtype = next(model.parameters()).dtype
@@ -196,6 +215,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
         torch.full((), float(x), device=device, dtype=dtype)
         for x in (args.value_coef, entropy_coef, args.aux_coef, args.tera_entropy_weight))
     teacher_weight = torch.full((), float(teacher_coef), device=device, dtype=dtype) if teach else None
+    distill_weight = torch.full((), float(distill_coef), device=device, dtype=dtype) if distilling else None
     loss_fn = compiled_ppo_loss() if getattr(args, "compile", False) else ppo_loss
 
     def up(array):
@@ -224,6 +244,11 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                                   rows("logp", index), weights[pick] if resident else up(weights[pick]),
                                   rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip,
                                   tera_entropy_weight, **teacher)
+            if distilling:
+                imitation, agree = distill_loss(model, distill.sample(rng, args.distill_batch))
+                loss = loss + distill_weight * imitation
+                stats["distill_loss"].append(imitation.detach())
+                stats["distill_agree"].append(agree)
             optimizer.zero_grad()
             loss.backward()
             norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
@@ -240,6 +265,10 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     values, rets = data["value"].reshape(-1)[selected], returns_all[selected]
     summary = {k: round(float(np.mean(v)), 4) for k, v in stats.items()}
     summary["explained_variance"] = round(float(1 - np.var(rets - values) / (np.var(rets) + 1e-8)), 3)
+    if distill is not None:
+        summary["distill_coef"] = round(float(distill_coef), 5)
+        summary.setdefault("distill_loss", None)
+        summary.setdefault("distill_agree", None)
     if teach:
         # Agreement of the learner's sampled codes with the labels, over slot decisions with a choice (forced ones
         # agree trivially); slot b's label answers the learner's own slot a.
@@ -256,6 +285,9 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--minutes", type=float, default=60.0, help="training wall-clock budget")
+    parser.add_argument("--stop-minutes", type=float,
+                        help="stop after this many minutes while the schedules still span --minutes (to reproduce "
+                             "the start of a longer run)")
     parser.add_argument("--device", choices=BACKENDS, default="auto")
     parser.add_argument("--adapter", type=int, default=0)
     parser.add_argument("--pool", type=Path, default=REPO / "data/teams/train-s42-2000.txt")
@@ -299,6 +331,16 @@ def main():
                         help="elapsed training minutes at which the imitation weight reaches 0 and labelling stops")
     parser.add_argument("--teacher-temperature", type=float, default=0.0,
                         help="Gumbel noise on the teacher's pair values (0: its best pair)")
+    parser.add_argument("--distill", type=Path, nargs="+",
+                        help="search_labels.py output directories (or label files) for search distillation")
+    parser.add_argument("--distill-coef", type=float, default=0.0,
+                        help="search-distillation loss weight (0: off); falls linearly to 0 at --distill-end-minutes")
+    parser.add_argument("--distill-end-minutes", type=float, default=60.0)
+    parser.add_argument("--distill-batch", type=int, default=128, help="labelled positions per minibatch")
+    parser.add_argument("--distill-pairs", type=int, default=4,
+                        help="most weighted search candidates per position that the loss imitates")
+    parser.add_argument("--distill-validate-every", type=int, default=25,
+                        help="updates between held-out distillation losses in the metrics")
     parser.add_argument("--ko-bonus", type=float, default=0.02,
                         help="potential-based bonus per KO difference (sums to zero over a battle)")
     parser.add_argument("--ko-bonus-end", type=float, default=0.25,
@@ -327,6 +369,8 @@ def main():
     args = parser.parse_args()
     if args.teacher_coef < 0 or args.teacher_temperature < 0:
         parser.error("--teacher-coef and --teacher-temperature must be nonnegative")
+    if args.distill_coef < 0 or (args.distill_coef > 0 and not args.distill):
+        parser.error("--distill-coef must be nonnegative and needs --distill")
 
     torch.manual_seed(args.seed)
     torch.set_num_threads(1)
@@ -361,9 +405,14 @@ def main():
     (args.output / "config.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=1))
     n_params = sum(p.numel() for p in model.parameters())
     print(json.dumps({"adapter": adapter, "device": str(device), "parameters": n_params}), flush=True)
+    distill = None
+    if args.distill and args.distill_coef > 0:
+        distill = DistillData(args.distill, device, pairs=args.distill_pairs)
+        print(json.dumps({"distill": distill.describe()}), flush=True)
 
     kinds = opponent_kinds(args.envs, args.pool_fraction, args.scripted_share)  # fixed per env for the whole run
     budget = args.minutes * 60
+    stop = min(budget, args.stop_minutes * 60) if args.stop_minutes else budget
     next_pool = elapsed_before + args.pool_minutes * 60 if len(pool) else 0.0
     next_snapshot = (int(elapsed_before // (args.snapshot_minutes * 60)) + (1 if elapsed_before else 0)) * args.snapshot_minutes * 60
     loaded = {"snapshot": None}  # id of the snapshot in the actors' opponent weights
@@ -409,7 +458,7 @@ def main():
                      {"model": cpu_state(model), "width": args.width, "layers": args.layers, "minutes": elapsed / 60,
                       "battles": battles, "update": update})
                 next_snapshot += args.snapshot_minutes * 60
-            if elapsed >= budget:
+            if elapsed >= stop:
                 break
             # The actors fill the other buffer with the current weights while the GPU trains on this one.
             collected, collected_info = rollout, info
@@ -430,10 +479,11 @@ def main():
             else:
                 entropy_coef = args.entropy + (args.entropy_final - args.entropy) * progress
             teacher_coef = teacher_coefficient(args, elapsed)
+            distill_coef = distill_coefficient(args, elapsed)
             t1 = time.perf_counter()
             model.train()
             stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device,
-                                        teacher_coef)
+                                        teacher_coef, distill, distill_coef)
             train_seconds = time.perf_counter() - t1
             if controller is not None:
                 controller.update(stats["entropy"], progress)
@@ -460,6 +510,9 @@ def main():
                 **({"mps_mb": torch.mps.driver_allocated_memory() >> 20} if device.type == "mps" else {}),
                 **{k: v for k, v in collected.items() if k.startswith("actor_")},  # largest actor's memory
             }
+            if distill is not None and update % args.distill_validate_every == 0:
+                model.eval()
+                metrics.update(validate(model, distill) or {})
             print(json.dumps(metrics), flush=True)
             with (args.output / "metrics.jsonl").open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(metrics) + "\n")

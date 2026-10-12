@@ -417,6 +417,8 @@ class SearchPlayer(Player):
         self.budget_ms: float | None = None  # per-decision time budget (scales the number of worlds)
         self.decisions = 0
         self.stats = dict(search=0, policy=0, forced=0, no_worlds=0)
+        # The last decision's search (None if the policy decided): what search_labels.py stores for distillation.
+        self.last_search: dict | None = None
 
     # -- protocol bookkeeping
     def _ensure_builder(self, request: dict, side: int) -> None:
@@ -482,6 +484,7 @@ class SearchPlayer(Player):
 
     # -- decisions
     def decide(self) -> Decision | None:
+        self.last_search = None
         request = json.loads(self.request_json) if self.request_json else {}
         if not request or request.get("wait") or request.get("teamPreview"):
             return None
@@ -528,6 +531,7 @@ class SearchPlayer(Player):
         self.stats["cells"] = self.stats.get("cells", 0) + result["cells"]
         self.stats["search"] += 1
         x, q = result["x"], result["q"]
+        self.last_search = dict(side=side, arrays=arrays, mask0=mask0, joint=joint, pairs=pairs, x=x, q=q, full=full)
         if cfg.play == "sample":
             best = int(self.bot.rng.choice(len(x), p=x / x.sum()))
         else:

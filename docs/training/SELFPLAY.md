@@ -753,6 +753,43 @@ pair-based Elo error), and two engine panics fixed. An aborted battle no longer 
 a panic per battle, reports it in `crashes()` and the trainer's `crashes.jsonl`, and starts a fresh battle (see
 the training API).
 
+## Search distillation (2026-10-12, Mac)
+
+The one-turn search (docs/play/SEARCH.md) beats its own policy about 80% of the time, so the policy learns to imitate
+it. `search_labels.py` plays search-vs-search games of a checkpoint on the training pool. A quarter of the moves are
+sampled from the policy instead, so the positions also cover worse play. Each searched decision is stored with the
+player's observation row, the guarded masks, the search's candidate pairs, their strategy weights `x` and values `q`,
+and the policy's prior. Policy fallbacks and forced choices are not stored. The trainer's
+`--distill DIR --distill-coef C --distill-end-minutes M` adds to every minibatch `--distill-batch` (128) labelled
+positions, weighted by C, which falls linearly to zero at minute M (training.distill). The loss is
+`-sum_k x_k log pi(a0_k, a1_k)` over the `--distill-pairs` (4) most weighted candidates; slot b is conditioned on
+each candidate's own slot a. Every 20th shard is held out, and the metrics report `distill_val_loss` and
+`distill_val_agree` (how often the policy's most likely candidate is the search's most weighted one).
+`--stop-minutes` stops a run early while its schedules still span `--minutes`.
+
+With m240 of teacher-s43-4h (128x3) as the labeller, the M1 Pro made 99,523 labels in an hour (27.6 per second, five
+games at a time). The run used the flags of the Windows run w192-l4-teacher-4h (192x4, seed 42), with its 240-minute
+schedule compressed into 120 minutes and the minute-based settings halved, plus `--distill-coef 0.5
+--distill-end-minutes 120`. It made 1,888 updates (3.7 s each with distillation; Windows takes 4.0 s without). Its
+m120 scored as follows at temperature 0.5 (compare.py; 4,000 games head to head):
+
+| m120 against | Score | 95% interval |
+|---|---:|---|
+| w192-l4-teacher-4h m240 (3,427 updates) | 55.3% | 53.9-56.7 |
+| same, both with search (search_eval.py, 100 pairs) | 61.5% | about 55-68 |
+| w192-l4-teacher-4h m130 (1,853 updates, same count) | 63.7% | 62.3-65.1 |
+| its labeller, teacher-s43-4h m240 | 51.8% | 50.3-53.3 |
+
+It also scores higher against smart and the heuristic than the Windows m240. The held-out loss levelled off at about
+1.64 by update 600, while the training loss went on falling to about 1.25. For reference, the labeller's own policy
+scores 1.30 and the floor (the targets' entropy) is 0.74. So the student memorised the 95k training positions, and
+more labels, or labels from the improved model, should help further. Distilling the labeller's policy alone, without
+search, was not tested: the labels' `prior` column allows it.
+
+The same day, a test of whether training on 2,000 teams memorises them came out negative. m240 scored 65.5% against
+smart on its training teams and 65.2% on 2,000 unseen teams from pool-s1-200k (20,000 games each; difference +0.3
+points, 95% interval -0.6 to +1.2). The training pool stays as it is.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.
