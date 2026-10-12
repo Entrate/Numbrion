@@ -85,6 +85,13 @@ pub fn effect_at<L: LogSink>(b: &Battle<L>, cx: HookCtx, index: usize) -> Effect
         | EventArg::Null
         | EventArg::Relay(Relay::Undefined)
         | EventArg::Relay(Relay::Null) => EffectRef::None,
+        // A relay variable an earlier handler replaced with a primitive (e.g. Unnerve's onFoeTryEatItem returns
+        // true before Berserk's onTryEatItem(item) runs): JS reads `.id`/`.effectType` of it as undefined.
+        EventArg::Bool(_)
+        | EventArg::Number(_)
+        | EventArg::Relay(Relay::Bool(_))
+        | EventArg::Relay(Relay::Number(_))
+        | EventArg::Relay(Relay::NotFail) => EffectRef::None,
         _ => panic!("callback requires effect argument"),
     }
 }
