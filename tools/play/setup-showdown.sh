@@ -106,6 +106,8 @@ cd "$DEST"
 # platform binary is optional too and the build needs it: omit them only where the build still works without.
 if [[ "$(uname -s)" == MINGW* || "$(uname -s)" == MSYS* || "$(uname -s)" == CYGWIN* ]]; then
     npm ci --no-audit --no-fund --prefer-offline
+    # cloud-env (optional) would make the server listen on 0.0.0.0 instead of BIND (server/sockets.ts).
+    rm -rf node_modules/cloud-env
 else
     npm ci --omit=optional --no-audit --no-fund --prefer-offline
 fi
