@@ -489,7 +489,9 @@ def test_git_identity_reads_real_worktree_without_changing_config():
     identity = ladder.code_identity()
     assert len(identity["commit"]) == 40
     assert identity["branch"]
-    assert identity["dirty"] is True and len(identity["diff_sha256"]) == 64
+    # A dirty checkout carries the hash of its diff, a clean one none.
+    assert (identity["diff_sha256"] is not None) == identity["dirty"]
+    assert identity["diff_sha256"] is None or len(identity["diff_sha256"]) == 64
 
 
 def test_initial_species_before_side_and_late_decision_sequence(tmp_path):
