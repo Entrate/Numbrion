@@ -676,7 +676,7 @@ class BattleRoom:
         if future.done() or self.finished is not None:
             return
         self.stats["unhealthy"] += 1
-        reason = f"a decision is still running {self.timing.hang_s:.0f} s after its deadline"
+        reason = f"worker stuck: a decision is still running {self.timing.hang_s:.0f} s after its deadline"
         log.error("%s %s: %s", self.worker.name, self.room, reason)
         self._emit("unhealthy", {"time": time.time(), "reason": reason})
 
