@@ -151,6 +151,7 @@ def test_worker_fast_path_preserves_finished_logs(monkeypatch, fast, log_games):
             out["battle_id"][:] = 10 + self.boundary
             out["winner"][:] = 1
             out["illegal"] = np.zeros((1, 2), dtype=bool)
+            out["aborted"] = np.zeros(1, dtype=bool)
             return out
 
         def reset(self):

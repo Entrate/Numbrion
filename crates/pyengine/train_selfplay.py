@@ -413,6 +413,12 @@ def main():
                 break
             # The actors fill the other buffer with the current weights while the GPU trains on this one.
             collected, collected_info = rollout, info
+            if collected["crashes"]:  # battles an engine panic aborted (as ties); the run goes on, the reports stay
+                with (args.output / "crashes.jsonl").open("a", encoding="utf-8") as stream:
+                    for crash in collected["crashes"]:
+                        stream.write(json.dumps(crash) + "\n")
+                print(f"warning: {len(collected['crashes'])} battle(s) aborted by an engine panic, see crashes.jsonl: "
+                      f"{collected['crashes'][0]['message']}", flush=True)
             snapshot_envs = collected_info["opponents"] == SNAPSHOT  # PFSP: credit games begun against the snapshot
             pool.record(collected_info["snapshot"], float(collected["clean_games"][snapshot_envs].sum()),
                         float(collected["clean_score"][snapshot_envs].sum()))
@@ -445,7 +451,7 @@ def main():
                 "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
                 **({"actor_teacher_s": round(collected["teacher_seconds"], 2)} if args.teacher_coef > 0 else {}),
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
-                "guarded_slots": collected["guarded"],
+                "guarded_slots": collected["guarded"], "aborted_battles": len(collected["crashes"]),
                 **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
                 "lr": optimizer.lr, "entropy_coef": round(entropy_coef, 5),
                 "entropy_target": round(controller.target(progress), 3) if controller is not None else None,

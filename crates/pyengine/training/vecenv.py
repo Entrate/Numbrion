@@ -142,6 +142,10 @@ def _worker(connection, names, n_envs, begin, end, pools, seed, threads, log_gam
                 result = env.step(np.ascontiguousarray(a["actions"][envs]))
                 if result["illegal"].any():
                     raise RuntimeError("A sampled action violated the exact mask")
+                if result["aborted"].any():  # an engine panic aborted a battle (scored as a tie) and replaced it
+                    for crash in env.crashes():
+                        print(f"warning: engine panic aborted a battle (env {begin + crash['env']}): {crash['message']}",
+                              file=sys.stderr, flush=True)
                 publish(result)
                 connection.send(None)
             elif command == "random":

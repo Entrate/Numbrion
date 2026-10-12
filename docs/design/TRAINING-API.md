@@ -106,6 +106,10 @@ from `Battle::legal_actions` (`sim/choices/legal.rs`), are:
 * **replacement request** (after faints or U-turn-style moves): every flagged slot must be consumed
   exactly: `forced_switches = min(flagged, living bench)` slots switch (distinct Pokémon), the others pass;
   Revival Blessing slots revive instead of consuming a bench Pokémon.
+* **one deliberate exception**: a Revival Blessing slot never offers `pass`. Showdown accepts that pass when no
+  living Pokémon is in reserve, then throws "Choices are done immediately after a request" at the turn's next
+  `makeRequest` (7332b60, and upstream as of 2026-10-12); the engine reproduces it faithfully as a panic. The
+  request only exists while a fainted Pokémon can be revived, so a revive code is always available.
 
 Mask API (all arrays are numpy `bool`, `True` = legal):
 
@@ -282,6 +286,7 @@ r = env.step(actions)             # int32-compatible [n_envs, 2 sides, 2 slots]
 | `turn` | int32 `[n]` | turn counter of the battle now running |
 | `battle_id` | int64 `[n]` | episode counter of the running battle, +1 at every auto-reset |
 | `illegal` | bool `[n, 2]` | the side's submitted action was illegal and replaced by the engine default (`on_illegal="default"`) |
+| `aborted` | bool `[n]` | the battle that ended on this step was aborted by an engine panic: `done` is set, rewards are 0, `winner` -1 (as a tie), and a fresh battle runs; see `crashes()` |
 | `decisions` | int | side choices applied by this step |
 
 `step(actions)`: for every environment, each side with `needs_action` must give `(a0, a1)` that is in the
@@ -307,7 +312,12 @@ never returned in a finished state.
   auto-reset (`\|win\|...` etc.). Same hidden-information rules as `Battle`.
 * `clone_battle(env)` -> `numbrion.Battle` copy of an environment's current position (for search).
 * `run_random(battles_per_env)` -> counters and wall seconds; plays random legal self-play entirely in Rust
-  (benchmark/smoke driver; same code path as `step`). `stats()` gives cumulative counters.
+  (benchmark/smoke driver; same code path as `step`). `stats()` gives cumulative counters, including `crashed`.
+* `crashes()` -> the battles an engine panic aborted since the last call: `env`, `battle_id`, `seed`, `teams`,
+  `actions` (`[a0, a1]` of side 0 then side 1 per boundary since the battle started, -1 for a side without a
+  request; the last row panicked) and `message`. A panic inside one battle no longer ends the whole run; replay a
+  report with `Battle(seed, *teams)`, `start()` and `choose_action` per row. The trainer appends them to
+  `crashes.jsonl` in the run's output directory and logs `aborted_battles` per update.
 
 Typical loop:
 

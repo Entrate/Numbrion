@@ -21,6 +21,7 @@ struct Coverage {
     forced_move_slots: usize,
     auto_pass_slots: usize,
     revival_slots: usize,
+    revival_passes_excluded: usize,
     forced_pass_slots: usize,
     tera_offered: usize,
     pairs_checked: usize,
@@ -82,6 +83,8 @@ fn check_typed(base: &Game, trial: &mut Game, acts: &[SideActions; 2], cov: &mut
                 let engine_says = base.engine_joint_legal(s, &choices);
                 if legal {
                     assert!(engine_says, "side {s}: engine predicate rejects mask-legal ({a0},{a1})");
+                } else if engine_says && a.passes_on_revival(a0, a1) {
+                    cov.revival_passes_excluded += 1;
                 } else if engine_says {
                     let c = a.canonical([a0, a1]);
                     assert!(
@@ -101,6 +104,8 @@ fn check_typed(base: &Game, trial: &mut Game, acts: &[SideActions; 2], cov: &mut
                         // Nothing committed: the stored choice must be exactly what was asked for.
                         assert_eq!(trial.encode_choice(s), Some([a0, a1]), "round trip of ({a0},{a1})");
                     }
+                } else if r.is_ok() && a.passes_on_revival(a0, a1) {
+                    // Accepted like Showdown does; left out of the masks on purpose.
                 } else if r.is_ok() {
                     let c = a.canonical([a0, a1]);
                     assert!(
@@ -163,6 +168,9 @@ fn check_text(base: &Game, trial: &mut Game, acts: &[SideActions; 2], universe: 
                         cov.text_accepted += 1;
                         let actual = if both { trial.encode_choice(s) } else { mapped };
                         let actual = actual.unwrap_or_else(|| panic!("side {s}: accepted `{text}` has no canonical code"));
+                        if a.passes_on_revival(actual[0], actual[1]) {
+                            continue; // accepted like Showdown does; left out of the masks on purpose
+                        }
                         let canon = a.canonical(actual);
                         assert!(
                             a.is_legal(canon[0], canon[1]),
@@ -321,6 +329,8 @@ fn masks_equal_engine_predicate_on_many_battles() {
                     let eng = g.engine_joint_legal(s, &choices);
                     if legal {
                         assert!(eng, "engine predicate rejects mask-legal ({a0},{a1})");
+                    } else if eng && a.passes_on_revival(a0, a1) {
+                        // Accepted like Showdown does; left out of the masks on purpose.
                     } else if eng {
                         let c = a.canonical([a0, a1]);
                         assert!(c != [a0, a1] && a.is_legal(c[0], c[1]), "predicate accepts masked-out ({a0},{a1})");
@@ -358,6 +368,14 @@ fn revival_blessing_boundaries_match() {
             let has_revival = acts.iter().any(|a| a.revival.iter().any(|&r| r));
             if has_revival {
                 revival_boundaries += 1;
+                for a in &acts {
+                    for k in 0..2 {
+                        if a.revival[k] {
+                            assert_eq!(a.slot_set[k] >> PASS & 1, 0, "a Revival Blessing slot offers pass");
+                            assert_ne!(a.slot_set[k], 0, "a Revival Blessing slot has no revive code");
+                        }
+                    }
+                }
                 record(&mut cov, &acts);
                 if trial.as_ref().is_none_or(|t| !t.same_origin(&g)) {
                     trial = Some(g.duplicate());

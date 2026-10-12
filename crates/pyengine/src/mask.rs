@@ -8,6 +8,8 @@
 //! Joint constraints (see `engine::sim::choices::legal`): the two incoming Pokemon must differ, at most
 //! one Tera per side (Move requests); the forced switch / forced pass budget of a replacement request,
 //! which every flagged slot must consume exactly (Switch requests).
+//!
+//! One deliberate exception: a Revival Blessing slot never offers `pass` (`SideActions::passes_on_revival`).
 
 use crate::action::*;
 use engine::{
@@ -123,13 +125,24 @@ impl SideActions {
                         set |= 1 << switch_action(p);
                     }
                 }
-                if ls.can_pass {
+                // Never `pass` on a Revival Blessing slot. Showdown accepts it when no living Pokemon is in reserve
+                // (a forced pass), then throws "Choices are done immediately after a request" at the turn's next
+                // makeRequest('switch') (sim/battle.ts runAction; 7332b60 and upstream as of 2026-10-12); the
+                // engine reproduces that as a panic. The request only exists while a fainted Pokemon can be
+                // revived, so a revive code is always legal.
+                if ls.can_pass && ls.revival_mask == 0 {
                     set |= 1 << PASS;
                 }
             }
             out.slot_set[k] = set;
         }
         out
+    }
+
+    /// The pair passes on a Revival Blessing slot: the engine accepts that whenever Showdown does (no living
+    /// Pokemon in reserve), but the masks leave it out on purpose (see `from_battle`).
+    pub fn passes_on_revival(&self, a0: usize, a1: usize) -> bool {
+        (self.revival[0] && a0 == PASS) || (self.revival[1] && a1 == PASS)
     }
 
     /// The side has to submit a choice now.
