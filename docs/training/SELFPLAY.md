@@ -4,6 +4,7 @@ This pipeline implements the first round of [training tips](TIPS.md) on top of t
 [training API](../design/TRAINING-API.md) and the [Windows GPU setup](WINDOWS-GPU.md)
 ([Apple silicon setup](MAC.md)).
 The older `train.py` MLP baseline is unchanged.
+See [continuous search distillation](DISTILL-LOOP.md) for the Mac label maker, relay sync, and Windows trainer supervisor.
 
 | Piece | File |
 |---|---|
