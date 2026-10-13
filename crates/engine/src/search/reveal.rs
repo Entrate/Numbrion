@@ -449,6 +449,42 @@ pub struct RevealTracker {
     dancer: Option<Ref>,
 }
 
+/// Constraint-relevant observations, compacted once when guided search is needed. HP/status
+/// traffic does not constrain a pool set; repeated move reveals within a stint add no facts.
+pub(crate) struct IllusionSource {
+    mons: Vec<MonInfo>,
+}
+
+impl IllusionSource {
+    pub(crate) fn view(&self, moved: &[u32], user: &str, species: &str) -> Vec<MonInfo> {
+        let mut out: Vec<_> = self.mons.iter().map(|m| {
+            let mut fresh = m.identity();
+            for &(st, obs) in &m.log {
+                if !moved.contains(&st) { fresh.apply(obs); }
+            }
+            fresh
+        }).collect();
+        let index = out.iter().position(|m| m.name == user).unwrap_or_else(|| {
+            let mut m = MonInfo::new(user);
+            m.identify(species);
+            m.level = 0;
+            out.push(m);
+            out.len() - 1
+        });
+        let mut log: Vec<_> = self.mons.iter().flat_map(|m| {
+            m.log.iter().copied().filter(move |(st, _)| m.name == user || moved.contains(st))
+        }).collect();
+        log.sort_by_key(|(st, _)| *st);
+        out[index] = out[index].identity();
+        for (_, mut obs) in log {
+            if let Obs::SwitchIn { species, .. } = &mut obs { *species = out[index].species; }
+            out[index].apply(obs);
+        }
+        out[index].apply(Obs::Ability(dex::ABILITY_ILLUSION));
+        out
+    }
+}
+
 const STATUSES: &[&str] = &["brn", "par", "slp", "frz", "psn", "tox", "fnt"];
 
 fn status_str(s: &str) -> &'static str {
@@ -501,7 +537,12 @@ fn abilities_differ(a: EffectId, b: EffectId) -> bool {
             .any(|s| !has(sa, s.id))
 }
 
-const ITEM_TAKERS: &[&str] = &["move: Thief", "move: Covet", "ability: Magician", "ability: Pickpocket"];
+const ITEM_TAKERS: &[&str] = &[
+    "move: Thief",
+    "move: Covet",
+    "ability: Magician",
+    "ability: Pickpocket",
+];
 const ITEM_SWAPS: &[&str] = &["move: Trick", "move: Switcheroo"];
 
 impl RevealTracker {
@@ -570,43 +611,34 @@ impl RevealTracker {
 
     /// Per-world observation view. Only the six small folds are built; neither the tracker nor
     /// its logs are cloned. Disguise details constrain the disguise, never the user's true level.
+    #[cfg(test)]
     pub(crate) fn illusion_view(&self, side: SideId, moved: &[u32], user: &str, species: &str) -> Vec<MonInfo> {
-        let mut out: Vec<_> = self
-            .mons(side)
-            .iter()
-            .map(|m| {
-                let mut fresh = m.identity();
-                for &(st, obs) in &m.log {
-                    if !moved.contains(&st) {
-                        fresh.apply(obs);
-                    }
+        self.illusion_source(side).view(moved, user, species)
+    }
+
+    pub(crate) fn illusion_source(&self, side: SideId) -> IllusionSource {
+        let mons = self.mons(side).iter().map(|m| {
+            let mut fresh = m.identity();
+            let mut stint = u32::MAX;
+            let mut moves = Vec::new();
+            for &(st, obs) in &m.log {
+                if st != stint || matches!(obs, Obs::Transform(_) | Obs::SwitchIn { .. }) {
+                    stint = st;
+                    moves.clear();
                 }
-                fresh
-            })
-            .collect();
-        let index = out.iter().position(|m| m.name == user).unwrap_or_else(|| {
-            let mut m = MonInfo::new(user);
-            m.identify(species);
-            // The pool supplies the level, gender and shiny flag of a hidden user.
-            m.level = 0;
-            out.push(m);
-            out.len() - 1
-        });
-        let mut log: Vec<_> = self
-            .mons(side)
-            .iter()
-            .flat_map(|m| m.log.iter().copied().filter(move |(st, _)| m.name == user || moved.contains(st)))
-            .collect();
-        log.sort_by_key(|(st, _)| *st);
-        out[index] = out[index].identity();
-        for (_, mut obs) in log {
-            if let Obs::SwitchIn { species, .. } = &mut obs {
-                *species = out[index].species;
+                match obs {
+                    Obs::Hp { .. } | Obs::Status(_) | Obs::CureStatus | Obs::Swap { .. } => continue,
+                    Obs::Move(id) => {
+                        if moves.contains(&id) { continue; }
+                        moves.push(id);
+                    }
+                    _ => {}
+                }
+                if fresh.log.last() != Some(&(st, obs)) { fresh.log.push((st, obs)); }
             }
-            out[index].apply(obs);
-        }
-        out[index].apply(Obs::Ability(dex::ABILITY_ILLUSION));
-        out
+            fresh
+        }).collect();
+        IllusionSource { mons }
     }
 
     /// One player-view line. Lines that are not protocol lines, unknown commands and malformed
@@ -617,11 +649,15 @@ impl RevealTracker {
         let Some(l) = Line::parse(line) else { return };
         let cmd = l.cmd();
         if self.swap.is_some()
-            && !(matches!(cmd, "-item" | "-enditem") && l.tag("from").is_some_and(|f| ITEM_SWAPS.contains(&f)))
+            && !(matches!(cmd, "-item" | "-enditem")
+                && l.tag("from").is_some_and(|f| ITEM_SWAPS.contains(&f)))
         {
             self.finish_swap();
         }
-        if matches!(cmd, "" | "move" | "cant" | "switch" | "drag" | "faint" | "turn" | "upkeep") {
+        if matches!(
+            cmd,
+            "" | "move" | "cant" | "switch" | "drag" | "faint" | "turn" | "upkeep"
+        ) {
             self.foreign_item = None;
         }
         let as_one = self.as_one.take();
@@ -646,7 +682,9 @@ impl RevealTracker {
             "move" => self.on_move(&l),
             "cant" => self.on_cant(&l),
             "-damage" | "-heal" | "-sethp" => {
-                if let (Some(r), Some((hp, max_hp, status))) = (self.resolve(l.arg(0)), condition(l.arg(1))) {
+                if let (Some(r), Some((hp, max_hp, status))) =
+                    (self.resolve(l.arg(0)), condition(l.arg(1)))
+                {
                     self.observe(r, Obs::Hp { hp, max_hp, status });
                     if l.cmd() == "-heal" && l.tag("from") == Some("move: Revival Blessing") {
                         let name = self.mon(r).name.clone();
@@ -670,7 +708,14 @@ impl RevealTracker {
             "-cureteam" => {
                 if let Some(side) = parse_side(l.arg(0)) {
                     for idx in 0..self.sides[side.0 as usize].mons.len() {
-                        self.observe(Ref { side, idx, stint: 0 }, Obs::CureStatus);
+                        self.observe(
+                            Ref {
+                                side,
+                                idx,
+                                stint: 0,
+                            },
+                            Obs::CureStatus,
+                        );
                     }
                 }
             }
@@ -679,7 +724,7 @@ impl RevealTracker {
                     && let Some(r) = self.resolve(l.arg(0))
                 {
                     self.observe(r, Obs::Faint { pos: id.position });
-                    if let Some(e) = self.sides[r.side.0 as usize].entries.iter_mut().rev().find(|e| e.id == r.stint) {
+                    if let Some(e) = self.sides[r.side.0 as usize].entries.iter_mut().find(|e| e.id == r.stint) {
                         e.faint_line = Some(at);
                     }
                     self.sides[r.side.0 as usize].party_events.push(PartyEvent::Faint(r.stint));
@@ -753,7 +798,8 @@ impl RevealTracker {
     }
 
     fn observe(&mut self, r: Ref, o: Obs) {
-        if let Some(entry) = self.sides[r.side.0 as usize].entries.iter_mut().rev().find(|e| e.id == r.stint) {
+        let entries = &mut self.sides[r.side.0 as usize].entries;
+        if let Some(entry) = entries.binary_search_by_key(&r.stint, |e| e.id).ok().map(|i| &mut entries[i]) {
             entry.last = self.compared;
         }
         if matches!(o, Obs::Ability(a) if a != dex::ABILITY_ILLUSION)
@@ -770,7 +816,9 @@ impl RevealTracker {
     /// Ability `name` shown for `r`; Calyrex's As One shows as `As One` plus its components.
     fn ability_id(&self, r: Ref, name: &str) -> Option<EffectId> {
         let species = self.mon(r).species;
-        if species != EffectId::NONE && matches!(name, "As One" | "Unnerve" | "Chilling Neigh" | "Grim Neigh") {
+        if species != EffectId::NONE
+            && matches!(name, "As One" | "Unnerve" | "Chilling Neigh" | "Grim Neigh")
+        {
             let as_one = dex::species(species)
                 .abilities
                 .iter()
@@ -851,7 +899,14 @@ impl RevealTracker {
             self.sides[s].mons[r.idx].identify(l.arg(1));
         }
         if let Some((prev, stint)) = self.sides[s].at[pos as usize] {
-            self.observe(Ref { side: r.side, idx: prev, stint }, Obs::SwitchOut { pos });
+            self.observe(
+                Ref {
+                    side: r.side,
+                    idx: prev,
+                    stint,
+                },
+                Obs::SwitchOut { pos },
+            );
         }
         self.stints += 1;
         let stint = self.stints;
@@ -879,7 +934,15 @@ impl RevealTracker {
         }
         let species = species_id(details.species);
         let condition = condition(l.arg(2));
-        self.observe(Ref { stint, ..r }, Obs::SwitchIn { pos, species, condition, tera });
+        self.observe(
+            Ref { stint, ..r },
+            Obs::SwitchIn {
+                pos,
+                species,
+                condition,
+                tera,
+            },
+        );
     }
 
     /// `|replace|POS: REAL|DETAILS`: the Pokemon at POS since its switch-in was REAL in disguise.
@@ -906,7 +969,8 @@ impl RevealTracker {
         let (moved, stint) = match current {
             Some((disguise, stint)) if disguise != real => {
                 let log = std::mem::take(&mut self.sides[s].mons[disguise].log);
-                let (moved, kept): (Vec<_>, Vec<_>) = log.into_iter().partition(|&(st, _)| st == stint);
+                let (moved, kept): (Vec<_>, Vec<_>) =
+                    log.into_iter().partition(|&(st, _)| st == stint);
                 self.sides[s].mons[disguise].log = kept;
                 self.sides[s].mons[disguise].refold();
                 (moved, stint)
@@ -916,7 +980,18 @@ impl RevealTracker {
                 self.stints += 1;
                 let condition = None;
                 let tera = None;
-                (vec![(self.stints, Obs::SwitchIn { pos, species: real_species, condition, tera })], self.stints)
+                (
+                    vec![(
+                        self.stints,
+                        Obs::SwitchIn {
+                            pos,
+                            species: real_species,
+                            condition,
+                            tera,
+                        },
+                    )],
+                    self.stints,
+                )
             }
         };
         {
@@ -1000,15 +1075,32 @@ impl RevealTracker {
             return;
         }
         let s = id.side.0 as usize;
-        let (a, b) = (self.sides[s].at[from as usize], self.sides[s].at[to as usize]);
+        let (a, b) = (
+            self.sides[s].at[from as usize],
+            self.sides[s].at[to as usize],
+        );
         self.sides[s].party_events.push(PartyEvent::Swap(from, to));
         self.sides[s].at[from as usize] = b;
         self.sides[s].at[to as usize] = a;
         if let Some((idx, stint)) = a {
-            self.observe(Ref { side: id.side, idx, stint }, Obs::Swap { from, to });
+            self.observe(
+                Ref {
+                    side: id.side,
+                    idx,
+                    stint,
+                },
+                Obs::Swap { from, to },
+            );
         }
         if let Some((idx, stint)) = b {
-            self.observe(Ref { side: id.side, idx, stint }, Obs::Swap { from: to, to: from });
+            self.observe(
+                Ref {
+                    side: id.side,
+                    idx,
+                    stint,
+                },
+                Obs::Swap { from: to, to: from },
+            );
         }
     }
 

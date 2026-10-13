@@ -96,8 +96,13 @@ Worlds also depend on when `update`/`worlds` are called, not only on the inputs 
 the species clause are not modelled. Illusion entry owners are pinned by stint; team construction solves
 the evolving party order (switches, faints, Ally Switch and Revival Blessing) before replay. Ordering includes
 the Tera exceptions for Ogerpon/Terapagos; replay checks ambiguous copied forms under Transform. Fresh worlds
-include a small pool-frequency prior for a hidden Illusion user, and rebuilds try hypotheses over up to six
-ambiguous entries before patching off-pool sets. Each hypothesis folds those stints onto the user without
+include a small pool-frequency prior for a hidden Illusion user (its own RNG stream, so the plain path is
+unchanged). Rebuilds try hypotheses over up to six ambiguous entries (rotating, evidence first) before patching
+off-pool sets only on strong evidence (an off-pool fact, a known Illusion stint, a fainted Pokemon back); on
+weak evidence (worlds died while a possible disguise was active) they get every other build, at most a quarter
+of the budget, so battles without Illusion rebuild as before. A patched set costs a world a factor of about
+1/1000 in weight, and while every survivor is patched one fresh build per update looks for an exact
+explanation. Each hypothesis folds those stints onto the user without
 changing the tracker, including a silent disguised faint followed by the living disguise. Known broken
 stints have no six-entry limit. Hypotheses share the existing replay/build budgets, so ambiguous histories
 can still exhaust them. Viewer request content beyond what the engine itself writes (Showdown's `rqid`) is ignored;

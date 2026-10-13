@@ -20,8 +20,7 @@ pub fn n_battles(default: usize) -> usize {
 }
 
 pub fn new_game_with(pool: &TeamPool, i: usize, j: usize, seed: [u16; 4], log: bool) -> Option<Game> {
-    let mut g =
-        Game::new(seed, pool.get(i).clone(), pool.get(j).clone(), ["Alice".into(), "Bob".into()], log, true).ok()?;
+    let mut g = Game::new(seed, pool.get(i).clone(), pool.get(j).clone(), ["Alice".into(), "Bob".into()], log, true).ok()?;
     g.start().expect("start");
     Some(g)
 }
@@ -68,12 +67,7 @@ pub fn apply_codes(g: &mut Game, codes: &[(usize, usize, usize)]) {
 }
 
 /// Like `random_step_prefer`, returning the decisions taken.
-pub fn random_step_codes(
-    g: &mut Game,
-    rng: &mut SplitMix,
-    p: &SamplerParams,
-    prefer: Option<EffectId>,
-) -> Vec<(usize, usize, usize)> {
+pub fn random_step_codes(g: &mut Game, rng: &mut SplitMix, p: &SamplerParams, prefer: Option<EffectId>) -> Vec<(usize, usize, usize)> {
     let mut n = Vec::new();
     let party = [g.party(0), g.party(1)];
     // Randomize which side submits first: it must not matter.

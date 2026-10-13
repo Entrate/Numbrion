@@ -171,7 +171,10 @@ impl SetPool {
     pub fn add_set(&mut self, set: &SetDef) {
         self.ensure_index();
         let _ = self.cumulative.take();
-        self.total = self.total.checked_add(1).expect("SetPool holds at most u32::MAX sets");
+        self.total = self
+            .total
+            .checked_add(1)
+            .expect("SetPool holds at most u32::MAX sets");
         if set.ability == dex::ABILITY_ILLUSION {
             if let Some((_, count)) = self.illusion.iter_mut().find(|(s, _)| *s == set.species) {
                 *count += 1;
@@ -571,18 +574,14 @@ mod tests {
     use crate::{Battle, ids::MonId, log::NoLog};
     use std::sync::Arc;
 
-    const LATIAS: &str =
-        "Latias||SoulDew|Levitate|mistball,recover,dracometeor,tailwind||85,,85,85,85,85|F|,0,,,,||80|,,,,,Steel";
+    const LATIAS: &str = "Latias||SoulDew|Levitate|mistball,recover,dracometeor,tailwind||85,,85,85,85,85|F|,0,,,,||80|,,,,,Steel";
     const UMBREON_A: &str = "Umbreon||SitrusBerry|InnerFocus|snarl,thunderwave,foulplay,moonlight||85,,85,85,85,85|M|,0,,,,||85|,,,,,Poison";
     // UMBREON_A with another gender and move order: the same stored set.
     const UMBREON_A2: &str = "Umbreon||SitrusBerry|InnerFocus|moonlight,foulplay,snarl,thunderwave||85,,85,85,85,85|F|,0,,,,||85|,,,,,Poison";
-    const UMBREON_B: &str =
-        "Umbreon||Leftovers|InnerFocus|snarl,protect,foulplay,moonlight||85,,85,85,85,85|M|,0,,,,||85|,,,,,Dark";
+    const UMBREON_B: &str = "Umbreon||Leftovers|InnerFocus|snarl,protect,foulplay,moonlight||85,,85,85,85,85|M|,0,,,,||85|,,,,,Dark";
     const MUK_ALOLA: &str = "Muk|MukAlola|SitrusBerry|PoisonTouch|poisonjab,helpinghand,knockoff,drainpunch||85,85,85,85,85,85|M|||82|,,,,,Flying";
-    const MUK: &str =
-        "Muk||Leftovers|PoisonTouch|poisonjab,protect,knockoff,drainpunch||85,85,85,85,85,85|M|||88|,,,,,Dark";
-    const MESPRIT: &str =
-        "Mesprit||LifeOrb|Levitate|protect,psychic,nastyplot,dazzlinggleam||85,,85,85,85,85|N|,0,,,,||86|,,,,,Psychic";
+    const MUK: &str = "Muk||Leftovers|PoisonTouch|poisonjab,protect,knockoff,drainpunch||85,85,85,85,85,85|M|||88|,,,,,Dark";
+    const MESPRIT: &str = "Mesprit||LifeOrb|Levitate|protect,psychic,nastyplot,dazzlinggleam||85,,85,85,85,85|N|,0,,,,||86|,,,,,Psychic";
     const GRENINJA_BOND: &str = "Greninja|GreninjaBond|LifeOrb|BattleBond|hydropump,darkpulse,icebeam,protect||85,85,85,85,85,85|M|||80|,,,,,Water";
     const ZAMAZENTA: &str = "Zamazenta||RustedShield|DauntlessShield|bodypress,ironhead,protect,wideguard||85,85,85,85,85,85|N|||70|,,,,,Fighting";
 

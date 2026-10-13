@@ -26,7 +26,9 @@
 //! * Illusion entries are pinned to their attributed owner. Unbroken entries may instead belong
 //!   to a per-world hidden Illusion user: observations are folded by stint, and at most 6! party
 //!   orders are checked against switches, faints and swaps before replay. Fresh worlds carry a
-//!   pool-frequency prior; failed rebuilds try recent ambiguous stints before repairing pool sets.
+//!   pool-frequency prior on a separate RNG. Guided rebuilds require off-pool facts, opponent death
+//!   lines or known Illusion stints; evidence and unresolved leads precede rotating older entries.
+//!   Preparation is capped separately, and particles share constraint views for each update.
 //! * `worlds` returns copies at the current decision boundary, reseeded from the caller's seed (the
 //!   PRNG state is hidden information too).
 //!
@@ -36,7 +38,7 @@
 use super::{
     SplitMix64,
     protocol::{self, Line, parse_ident},
-    reveal::{MonInfo, PartyEvent, RevealTracker, Stint},
+    reveal::{IllusionSource, MonInfo, PartyEvent, RevealTracker, Stint},
     sets::{SetConstraints, SetPool},
 };
 use crate::{
@@ -48,7 +50,7 @@ use crate::{
     state::choices::{ChoiceKind, RequestKind, SlotChoice},
     teams::{SetDef, TeamDef},
 };
-use std::sync::Arc;
+use std::{cell::Cell, sync::Arc};
 
 /// Tuning of a `WorldBuilder`. The defaults favour robustness over speed.
 #[derive(Clone, Copy, Debug)]
@@ -71,6 +73,12 @@ impl Default for WorldConfig {
         Self { particles: 8, segment_budget: 1000, rebuild_budget: 16, fresh_per_update: 1, shown_target: 0.85 }
     }
 }
+
+/// Log-weight a world pays per set patched by `repair` (a factor of about 1/1000): an off-pool set
+/// is possible (the live server's sets drift) but far less likely than any explanation the pool
+/// supports, such as a hidden Illusion user. When every world needed patching, weights are relative,
+/// so nothing changes.
+const REPAIR_LOG_PENALTY: f64 = 6.9;
 
 /// Why a world was dropped, or why no world could be built.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -183,7 +191,9 @@ struct Particle {
     log_w: f64,
     /// Why the world was dropped (diagnostics).
     why: String,
-    hypothesis: Option<IllusionHypothesis>,
+    hypothesis: Option<Arc<IllusionHypothesis>>,
+    /// Some opponent set was patched by `repair`.
+    repaired: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -191,22 +201,19 @@ struct IllusionHypothesis {
     user: String,
     species: String,
     stints: Vec<u32>,
+    view: Vec<MonInfo>,
+    revision: usize,
+    exact: bool,
 }
 
 /// What the protocol says one opponent slot chose at a boundary.
 #[derive(Clone, Debug, PartialEq)]
 enum SlotSpec {
     Pass,
-    Move {
-        id: EffectId,
-        loc: Option<i8>,
-        tera: bool,
-    },
+    Move { id: EffectId, loc: Option<i8>, tera: bool },
     /// The slot acted invisibly (flinch, sleep, fainted first) or not at all: any legal move,
     /// terastallizing when the protocol showed its Tera.
-    AnyMove {
-        tera: bool,
-    },
+    AnyMove { tera: bool },
     Switch(String, usize),
     Revive(String),
 }
@@ -214,7 +221,7 @@ enum SlotSpec {
 /// A dropped world.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Dead {
-    Budget,
+    Budget { line: usize },
     Desync,
     Choice,
     Swap,
@@ -234,6 +241,8 @@ struct Ctx<'a> {
     seen: &'a [MonInfo],
     hypothesis: Option<&'a IllusionHypothesis>,
     repair: bool,
+    /// Sets patched by `repair` so far (a world pays `REPAIR_LOG_PENALTY` for each).
+    repairs: &'a Cell<u32>,
 }
 
 impl Ctx<'_> {
@@ -256,6 +265,9 @@ pub struct WorldBuilder {
     pool: Arc<SetPool>,
     config: WorldConfig,
     rng: SplitMix64,
+    proposal_rng: SplitMix64,
+    evidence: Vec<u32>,
+    rotation: usize,
     tracker: RevealTracker,
     /// Observed compared lines.
     lines: Vec<String>,
@@ -307,6 +319,9 @@ impl WorldBuilder {
             pool,
             config,
             rng: SplitMix64(seed),
+            proposal_rng: SplitMix64(seed ^ 0x494c4c5553494f4e),
+            evidence: Vec::new(),
+            rotation: 0,
             tracker: RevealTracker::new(),
             lines: Vec::new(),
             choices: Vec::new(),
@@ -376,9 +391,7 @@ impl WorldBuilder {
         // A transformed Pokemon's request lists the copied opponent's move slots in order.
         let json = normalize_request(json);
         for (k, ids) in active_move_ids(&json).into_iter().enumerate().take(2) {
-            let Some(i) = self.tracker.active(self.viewer, k as u8) else {
-                continue;
-            };
+            let Some(i) = self.tracker.active(self.viewer, k as u8) else { continue };
             let m = &self.tracker.mons(self.viewer)[i];
             if !m.transformed {
                 continue;
@@ -414,6 +427,7 @@ impl WorldBuilder {
         if self.choices.last().is_some_and(|c| c.0 == self.lines.len()) {
             return Err(WorldError::PendingChoice);
         }
+        let repairs = Cell::new(0);
         let cx = Ctx {
             viewer: self.viewer,
             lines: &self.lines,
@@ -426,12 +440,35 @@ impl WorldBuilder {
             seen: self.tracker.mons(SideId(1 - self.viewer.0)),
             hypothesis: None,
             repair: true,
+            repairs: &repairs,
         };
         let mut alive = Vec::with_capacity(self.config.particles);
+        let mut source = None;
+        let mut cached: Vec<Arc<IllusionHypothesis>> = Vec::new();
         for mut p in std::mem::take(&mut self.particles) {
+            if let Some(h) = &p.hypothesis {
+                if h.stints.iter().all(|st| stint(&cx, *st).is_some_and(|e| e.owner == h.user)) {
+                    p.hypothesis = None;
+                } else if h.revision != cx.lines.len() {
+                    let view = cached.iter().find(|v| v.user == h.user && v.species == h.species && v.stints == h.stints);
+                    p.hypothesis = Some(match view {
+                        Some(v) => v.clone(),
+                        None => {
+                            let src = source.get_or_insert_with(|| cx.tracker.illusion_source(cx.opp()));
+                            let next = IllusionHypothesis { user: h.user.clone(), species: h.species.clone(),
+                                stints: h.stints.clone(), view: src.view(&h.stints, &h.user, &h.species),
+                                revision: cx.lines.len(), exact: h.exact };
+                            let next = Arc::new(next);
+                            cached.push(next.clone());
+                            next
+                        }
+                    });
+                }
+            }
             match advance(&cx, &mut p, &mut self.stats) {
                 Ok(()) => alive.push(p),
                 Err(d) => {
+                    record_evidence(&cx, d, &mut self.evidence);
                     self.stats.deaths += 1;
                     self.last_failure = format!("{d:?}: {}", p.why);
                 }
@@ -445,42 +482,75 @@ impl WorldBuilder {
             (self.config.particles.div_ceil(2), self.config.rebuild_budget)
         } else {
             let collapsed = alive.len() >= 2 && ess(&alive) < self.config.particles as f64 / 4.0;
-            let want = if collapsed || alive.len() < self.config.particles { self.config.fresh_per_update } else { 0 };
+            // Worlds that all needed a patched set never die on their own; keep looking for an
+            // exact explanation (an Illusion user), which then outweighs them.
+            let patched = !cx.pool.illusion_species().is_empty() && alive.iter().all(|p| p.repaired);
+            let want = if collapsed || patched || alive.len() < self.config.particles {
+                self.config.fresh_per_update
+            } else {
+                0
+            };
             (alive.len() + want, want)
         };
+        // A surviving replay already explains its compared lines. Death-only evidence is unresolved
+        // only when all particles died; do not keep spending fresh diversity builds on settled lines.
+        if !alive.is_empty() { self.evidence.clear(); }
         let mut builds = 0;
         let mut error = None;
-        let hypotheses = if budget > 0 { hypotheses(&cx) } else { Vec::new() };
-        let ordinary_exact =
-            hypotheses.is_empty() || (0..cx.seen.len()).all(|i| cx.pool.consistent(&constraints(&cx, i)));
-        let rebuilding = alive.is_empty();
+        let possible = !cx.pool.illusion_species().is_empty()
+            && cx.tracker.stints(cx.opp()).iter().any(|e| can_explain_entry(&cx, e));
+        let unsupported: Vec<_> = if possible && budget > 0 {
+            (0..cx.seen.len()).filter(|&i| !cx.pool.consistent(&constraints(&cx, i)))
+                .map(|i| cx.seen[i].name.as_str()).collect()
+        } else { Vec::new() };
+        let known = cx.seen.iter().any(|m| m.illusion);
+        let contradiction = possible && cx.tracker.stints(cx.opp()).iter().any(|e| {
+            e.faint_line.is_some_and(|line| cx.tracker.stints(cx.opp()).iter()
+                .any(|later| later.line > line && later.owner == e.owner))
+        });
+        // Strong evidence (an off-pool fact, a known Illusion stint, a fainted Pokemon back) puts
+        // the hypotheses first. Weak evidence (worlds died while a possible disguise was active,
+        // as happens in any battle) only gets every other build up to a quarter of the budget, so
+        // ordinary rebuilds keep most of their plain attempts. Deaths during this loop count from
+        // the next update on.
+        let strong = possible && (!unsupported.is_empty() || known || contradiction);
+        let weak = possible && !strong && !self.evidence.is_empty();
+        let evidence = if strong || weak { self.evidence.clone() } else { Vec::new() };
+        let allowance = if strong { (budget * 3 / 4).max(1) } else { (budget / 4).max(1) };
+        let mut proposals = Vec::new();
+        let mut prepared = false;
+        let mut guided_builds = 0;
         let mut tried_illusion = false;
         while alive.len() < target.max(1) && builds < budget {
-            // All paths share the existing build budget. Exact worlds get the first quarter,
-            // guided Illusion the middle half, repair the rest. An off-pool fact skips straight
-            // to Illusion (sampling rejects it before any replay), rather than patching a disguise.
-            let exact_end = if ordinary_exact { (budget / 4).max(1) } else { 0 };
-            let illusion_end = (budget * 3 / 4).max(exact_end).max(1);
-            let guided = !hypotheses.is_empty()
-                && builds < illusion_end
-                && (!ordinary_exact || rebuilding && builds >= exact_end);
-            let prior = !hypotheses.is_empty() && !guided && self.rng.chance(illusion_prior(&cx));
-            let h = if guided {
-                Some(hypotheses[(builds - exact_end) % hypotheses.len()].clone())
-            } else if rebuilding
-                && !hypotheses.is_empty()
-                && builds >= illusion_end
-                && (builds - illusion_end).is_multiple_of(2)
-            {
-                // Repair can also be needed for the user's real, off-pool set. Alternate that
-                // explanation with repairing the ordinary team, after the exact hypotheses failed.
-                Some(hypotheses[(builds - illusion_end) / 2 % hypotheses.len()].clone())
-            } else if prior {
-                Some(prior_hypothesis(&cx, &hypotheses, &mut self.rng).clone())
-            } else {
-                None
-            };
-            let repairing = hypotheses.is_empty() || rebuilding && builds >= illusion_end;
+            let guided = strong || weak && builds % 2 == 1 && guided_builds < allowance;
+            // The prior has its own stream and is drawn before any preparation. Without evidence,
+            // every rejected prior leaves the plain builds, repair policy and RNG exactly as before.
+            let prior = possible && !guided && self.proposal_rng.chance(illusion_prior(&cx));
+            if (guided || prior) && !prepared {
+                let src = source.get_or_insert_with(|| cx.tracker.illusion_source(cx.opp()));
+                proposals = prepare_hypotheses(&cx, src, &unsupported, &evidence, self.rotation,
+                    if guided { budget.saturating_mul(2).clamp(1, 32) } else { 2 });
+                self.rotation = self.rotation.wrapping_add(1);
+                prepared = true;
+            }
+            let use_guided = guided && guided_builds < allowance && !proposals.is_empty();
+            let h = if use_guided {
+                let h = proposals[guided_builds % proposals.len()].clone();
+                guided_builds += 1;
+                Some(h)
+            } else if prior && !proposals.is_empty() {
+                Some(prior_hypothesis(&cx, &proposals, &mut self.proposal_rng).clone())
+            } else { None };
+            // Exact-support proposals lead. The second half also tries the retained repair-needed
+            // proposals, rather than reusing a list from which those explanations were discarded.
+            let repairing = !use_guided || guided_builds > allowance.div_ceil(2);
+            let h = if use_guided && repairing {
+                let exact = proposals.partition_point(|h| h.exact);
+                if exact == proposals.len() { h } else {
+                    Some(proposals[exact + (guided_builds - allowance.div_ceil(2) - 1)
+                        % (proposals.len() - exact)].clone())
+                }
+            } else { h };
             let build_cx = Ctx { repair: repairing, ..cx };
             tried_illusion |= h.is_some();
             builds += 1;
@@ -488,18 +558,20 @@ impl WorldBuilder {
                 Ok(mut p) => match advance(&cx, &mut p, &mut self.stats) {
                     Ok(()) => {
                         if alive.len() >= self.config.particles {
-                            let lightest =
-                                (0..alive.len()).min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w)).unwrap();
+                            let lightest = (0..alive.len())
+                                .min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w))
+                                .unwrap();
                             alive.swap_remove(lightest);
                         }
                         alive.push(p);
                     }
                     Err(d) => {
+                        record_evidence(&cx, d, &mut self.evidence);
                         self.stats.deaths += 1;
                         self.last_failure = format!("{d:?}: {}", p.why);
                     }
                 },
-                Err(e @ WorldError::Team(_)) => {
+                Err(e @ (WorldError::Team(_) | WorldError::UnknownSpecies(_))) => {
                     error = Some(e);
                     break;
                 }
@@ -649,21 +721,23 @@ fn systematic(weights: &[f64], k: usize, u: u64) -> Vec<usize> {
 /// A fresh world at the start of the battle: the viewer's team and a sampled opponent team.
 fn build(
     cx: &Ctx<'_>,
-    hypothesis: Option<IllusionHypothesis>,
+    hypothesis: Option<Arc<IllusionHypothesis>>,
     own: Arc<TeamDef>,
     names: &[String; 2],
     rng: &mut SplitMix64,
     stats: &mut WorldStats,
 ) -> Result<Particle, WorldError> {
     let mut prng = rng.fork();
-    let view = hypothesis.as_ref().map(|h| cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species));
-    let cx = &Ctx { seen: view.as_deref().unwrap_or(cx.seen), hypothesis: hypothesis.as_ref(), ..*cx };
+    let cx = &Ctx { seen: hypothesis.as_ref().map_or(cx.seen, |h| &h.view), hypothesis: hypothesis.as_deref(), ..*cx };
+    let before = cx.repairs.get();
     let opp = Arc::new(sample_team(cx, &mut prng)?);
+    let log_w = -REPAIR_LOG_PENALTY * f64::from(cx.repairs.get() - before);
     let (p1, p2) = if cx.viewer.0 == 0 { (own, opp) } else { (opp, own) };
-    let log = DrawLog { track_entries: !cx.pool.illusion_species().is_empty(), ..DrawLog::default() };
+    let log = DrawLog { track_entries: has_illusion(&p1, &p2, cx.opp()), ..DrawLog::default() };
     let battle = Battle::from_team_defs(prng.seed(), p1, p2, names.clone(), log).map_err(|e| WorldError::Team(e.0))?;
     stats.builds += 1;
-    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w: 0.0, why: String::new(), hypothesis })
+    let repaired = cx.repairs.get() > before;
+    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w, why: String::new(), hypothesis, repaired })
 }
 
 /// Constraints for an opponent Pokemon from what the tracker saw.
@@ -680,7 +754,7 @@ fn move_order<'a>(cx: &'a Ctx<'_>, name: &str) -> Option<&'a [EffectId]> {
         .iter()
         .rev()
         .find(|(n, st, _)| {
-            let owner = cx.tracker.stints(cx.opp()).iter().find(|e| e.id == *st).map_or(n.as_str(), |e| cx.owner(e));
+            let owner = stint(cx, *st).map_or(n.as_str(), |e| cx.owner(e));
             owner == name
         })
         .map(|(_, _, order)| order.as_slice())
@@ -702,13 +776,17 @@ fn mon_constraints(m: &MonInfo) -> SetConstraints<'_> {
 
 fn sample_revealed(cx: &Ctx<'_>, index: usize, rng: &mut SplitMix64) -> Result<SetDef, WorldError> {
     let c = constraints(cx, index);
-    let sampled = cx.pool.sample(&c, rng).ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
+    let sampled = cx
+        .pool
+        .sample(&c, rng)
+        .ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
     let mut set = sampled.set;
     if !sampled.consistent {
         if !cx.repair {
             return Err(WorldError::NoConsistentWorld);
         }
         repair(&mut set, &c);
+        cx.repairs.set(cx.repairs.get() + 1);
     }
     if let Some(order) = move_order(cx, c.name) {
         set.moves = [EffectId::NONE; 4];
@@ -767,9 +845,7 @@ fn repair(set: &mut SetDef, c: &SetConstraints<'_>) {
 /// engine's and Showdown's requests list `"id":"..."` per move inside `"moves":[...]`); empty for an
 /// entry that is not a full moveset.
 fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
-    let Some(start) = json.find("\"active\":[") else {
-        return Vec::new();
-    };
+    let Some(start) = json.find("\"active\":[") else { return Vec::new() };
     let rest = &json[start..];
     let end = rest.find("\"side\":").unwrap_or(rest.len());
     rest[..end]
@@ -815,6 +891,7 @@ fn sample_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError
                     return Err(WorldError::NoConsistentWorld);
                 }
                 repair(&mut set, &c);
+                cx.repairs.set(cx.repairs.get() + 1);
             }
             sets.push(set);
         }
@@ -852,7 +929,7 @@ fn party_order(cx: &Ctx<'_>, sets: &[SetDef], rng: &mut SplitMix64) -> Option<[u
         Transform(usize),
     }
     let index = |name: &str| sets.iter().position(|s| s.name == name);
-    let entry = |st| cx.tracker.stints(cx.opp()).iter().find(|e| e.id == st);
+    let entry = |st| stint(&cx, st);
     let mut events = Vec::new();
     for event in cx.tracker.party_events(cx.opp()) {
         events.push(match *event {
@@ -964,10 +1041,10 @@ fn illusion_prior(cx: &Ctx<'_>) -> f64 {
 
 fn prior_hypothesis<'a>(
     cx: &Ctx<'_>,
-    hypotheses: &'a [IllusionHypothesis],
+    hypotheses: &'a [Arc<IllusionHypothesis>],
     rng: &mut SplitMix64,
-) -> &'a IllusionHypothesis {
-    let weight = |h: &IllusionHypothesis| {
+) -> &'a Arc<IllusionHypothesis> {
+    let weight = |h: &Arc<IllusionHypothesis>| {
         cx.pool
             .illusion_species()
             .iter()
@@ -991,7 +1068,15 @@ fn prior_hypothesis<'a>(
 /// then recent evidence. Subsets of at most six entries include non-adjacent disguised stints;
 /// pool support and overlapping active positions prune them before spending any replay budget.
 /// Known Illusion users may explain earlier unbroken entries, but never create another clause peer.
-fn hypotheses(cx: &Ctx<'_>) -> Vec<IllusionHypothesis> {
+#[cfg(test)]
+fn hypotheses(cx: &Ctx<'_>) -> Vec<Arc<IllusionHypothesis>> {
+    let unsupported: Vec<_> = (0..cx.seen.len()).filter(|&i| !cx.pool.consistent(&constraints(cx, i)))
+        .map(|i| cx.seen[i].name.as_str()).collect();
+    prepare_hypotheses(cx, &cx.tracker.illusion_source(cx.opp()), &unsupported, &[], 0, 126)
+}
+
+fn prepare_hypotheses(cx: &Ctx<'_>, source: &IllusionSource, unsupported: &[&str], evidence: &[u32],
+    rotation: usize, limit: usize) -> Vec<Arc<IllusionHypothesis>> {
     if cx.pool.illusion_species().is_empty() {
         return Vec::new();
     }
@@ -1039,52 +1124,79 @@ fn hypotheses(cx: &Ctx<'_>) -> Vec<IllusionHypothesis> {
                 && cutoff.is_none_or(|line| e.line < line)
         })
         .collect();
-    let unsupported: Vec<_> = (0..cx.seen.len())
-        .filter(|&i| !cx.pool.consistent(&constraints(cx, i)))
-        .map(|i| cx.seen[i].name.as_str())
-        .collect();
-    entries.sort_by_key(|e| core::cmp::Reverse((unsupported.contains(&e.shown.name.as_str()), e.last)));
-    entries.truncate(6);
-    let mut groups = Vec::new();
-    for n in 1..=entries.len() {
-        for mask in 1usize..1 << entries.len() {
-            if mask.count_ones() as usize == n {
-                groups.push(
-                    entries
-                        .iter()
-                        .enumerate()
-                        .filter(|(i, _)| mask & (1 << i) != 0)
-                        .map(|(_, e)| e.id)
-                        .collect::<Vec<_>>(),
-                );
-            }
-        }
+    // Evidence and unresolved leads survive recency pressure. Rotate the remainder so every older
+    // attribution remains reachable across rebuilds, while at most six entries enter subset search.
+    entries.sort_by_key(|e| core::cmp::Reverse((evidence.contains(&e.id),
+        unsupported.contains(&e.shown.name.as_str()), e.lead, e.last)));
+    if entries.len() > 6 {
+        let mut leads: Vec<_> = entries.iter().copied().filter(|e| e.lead).collect();
+        entries.retain(|e| !e.lead);
+        // Reserve a rotating slot even when more than six stints have evidence. Otherwise the
+        // evidence list itself could permanently crowd out an older necessary attribution.
+        let fixed = entries.iter().take_while(|e| evidence.contains(&e.id)
+            || unsupported.contains(&e.shown.name.as_str())).count().min(5 - leads.len());
+        let n = entries.len() - fixed;
+        if n > 0 { entries[fixed..].rotate_left(rotation % n); }
+        entries.truncate(6 - leads.len());
+        entries.append(&mut leads);
+        entries.sort_by_key(|e| core::cmp::Reverse((evidence.contains(&e.id),
+            unsupported.contains(&e.shown.name.as_str()), e.lead, e.last)));
     }
     let mut out = Vec::new();
-    for stints in groups {
-        for (user, species) in &users {
-            let h = IllusionHypothesis { user: user.clone(), species: species.clone(), stints: stints.clone() };
-            if attributable(cx, &h) {
-                out.push(h);
+    let mut examined = 0;
+    'groups: for n in 1..=entries.len() {
+        for mask in 1usize..1 << entries.len() {
+            if mask.count_ones() as usize != n { continue; }
+            for (user, species) in &users {
+                if examined == limit { break 'groups; }
+                examined += 1;
+                let stints = entries.iter().enumerate().filter(|(i, _)| mask & (1 << i) != 0)
+                    .map(|(_, e)| e.id).collect();
+                let mut h = IllusionHypothesis { user: user.clone(), species: species.clone(),
+                    stints, view: Vec::new(), revision: cx.lines.len(), exact: false };
+                if attributable(cx, &h) {
+                    h.view = source.view(&h.stints, &h.user, &h.species);
+                    let view_cx = Ctx { seen: &h.view, hypothesis: Some(&h), ..*cx };
+                    h.exact = (0..h.view.len()).all(|i| cx.pool.consistent(&constraints(&view_cx, i)));
+                    out.push(Arc::new(h));
+                }
             }
         }
     }
-    let exact: Vec<_> = out
-        .iter()
-        .filter(|h| {
-            let view = cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species);
-            let cx = Ctx { seen: &view, hypothesis: Some(h), ..*cx };
-            (0..view.len()).all(|i| cx.pool.consistent(&constraints(&cx, i)))
-        })
-        .cloned()
-        .collect();
-    if exact.is_empty() { out } else { exact }
+    out.sort_by_key(|h| !h.exact);
+    out
+}
+
+fn stint<'a>(cx: &Ctx<'a>, id: u32) -> Option<&'a Stint> {
+    let entries = cx.tracker.stints(cx.opp());
+    entries.binary_search_by_key(&id, |e| e.id).ok().map(|i| &entries[i])
+}
+
+fn has_illusion(p1: &TeamDef, p2: &TeamDef, opp: SideId) -> bool {
+    let team = if opp.0 == 0 { p1 } else { p2 };
+    team.sets[..team.len as usize].iter().any(|s| s.ability == dex::ABILITY_ILLUSION)
+}
+
+fn record_evidence(cx: &Ctx<'_>, dead: Dead, evidence: &mut Vec<u32>) {
+    // The offending line often names only the viewer's Pokemon (damage a disguise dealt), so every
+    // opponent entry on the field at that line is a suspect: at most one per position.
+    let Dead::Budget { line } = dead else { return };
+    let entries = cx.tracker.stints(cx.opp());
+    for pos in 0..2u8 {
+        if let Some(e) = entries.iter().rev().find(|e| e.position == pos && e.line <= line)
+            && e.faint_line.is_none_or(|f| f >= line)
+            && can_explain_entry(cx, e)
+            && !evidence.contains(&e.id)
+        {
+            evidence.push(e.id);
+        }
+    }
 }
 
 fn attributable(cx: &Ctx<'_>, hypothesis: &IllusionHypothesis) -> bool {
     let cx = Ctx { hypothesis: Some(hypothesis), ..*cx };
     let mut active = [None; 2];
-    let entry = |st| cx.tracker.stints(cx.opp()).iter().find(|e| e.id == st);
+    let entry = |st| stint(&cx, st);
     for event in cx.tracker.party_events(cx.opp()) {
         match *event {
             PartyEvent::Enter(st) => {
@@ -1131,7 +1243,11 @@ fn sample_plain_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, Worl
             continue;
         }
         let free: Vec<usize> = (0..size).filter(|&s| slots[s].is_none() && s >= 2.min(size)).collect();
-        let free = if free.is_empty() { (0..size).filter(|&s| slots[s].is_none()).collect() } else { free };
+        let free = if free.is_empty() {
+            (0..size).filter(|&s| slots[s].is_none()).collect()
+        } else {
+            free
+        };
         if free.is_empty() {
             return Err(WorldError::Desync("more opponent Pokemon revealed than its team size"));
         }
@@ -1143,8 +1259,10 @@ fn sample_plain_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, Worl
         team.sets[s] = match slot {
             Some(set) => set,
             None => {
-                let set =
-                    cx.pool.sample_unrevealed(&species, rng).ok_or(WorldError::Desync("the set pool is empty"))?;
+                let set = cx
+                    .pool
+                    .sample_unrevealed(&species, rng)
+                    .ok_or(WorldError::Desync("the set pool is empty"))?;
                 species.push(set.species);
                 set
             }
@@ -1173,10 +1291,10 @@ fn set_name<L: LogSink>(b: &Battle<L>, mon: MonId) -> &str {
 /// Replay `p` to the end of the observed stream.
 fn advance(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<(), Dead> {
     // Battle::clone gives copies a default empty sink; restore the capture flag for every replay.
-    p.battle.log.track_entries = !cx.pool.illusion_species().is_empty();
+    p.battle.log.track_entries = p.battle.teams().sides[cx.opp().0 as usize].sets.iter()
+        .any(|s| s.ability == dex::ABILITY_ILLUSION);
     let hypothesis = p.hypothesis.clone();
-    let view = hypothesis.as_ref().map(|h| cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species));
-    let cx = &Ctx { seen: view.as_deref().unwrap_or(cx.seen), hypothesis: hypothesis.as_ref(), ..*cx };
+    let cx = &Ctx { seen: hypothesis.as_ref().map_or(cx.seen, |h| &h.view), hypothesis: hypothesis.as_deref(), ..*cx };
     let mut idle = 0;
     loop {
         let before = p.cursor;
@@ -1242,7 +1360,10 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
     }
     // Lines after the boundary up to the end of the turn: the opponent's choices show there, even
     // past a mid-turn replacement of the viewer.
-    let turn_end = cx.lines[p.cursor..].iter().position(|l| l.starts_with("|turn|")).map_or(end, |i| p.cursor + i);
+    let turn_end = cx.lines[p.cursor..]
+        .iter()
+        .position(|l| l.starts_with("|turn|"))
+        .map_or(end, |i| p.cursor + i);
     let window = &cx.lines[p.cursor..turn_end.max(limit.min(end))];
     if started {
         introduce(cx, p, window, stats)?;
@@ -1302,7 +1423,10 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
                     Some(region.len())
                 } else if produced.len() < region.len() && (at_viewer || p.battle.state.ended) {
                     Some(produced.len())
-                } else if produced.len() == region.len() && !at_viewer && limit < end {
+                } else if produced.len() == region.len()
+                    && !at_viewer
+                    && limit < end
+                {
                     // The stream says the viewer acts next; the world disagrees.
                     Some(produced.len())
                 } else {
@@ -1341,7 +1465,9 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
             level += 1;
             threshold = threshold * 2 + 6;
         }
-        let mut emission: Vec<u32> = core::iter::once(seg_draws).chain(produced[..l].iter().map(|&(_, d)| d)).collect();
+        let mut emission: Vec<u32> = core::iter::once(seg_draws)
+            .chain(produced[..l].iter().map(|&(_, d)| d))
+            .collect();
         emission.dedup();
         let at = emission[emission.len() - 1 - level.min(emission.len() - 1)];
         if at == seg_draws
@@ -1371,7 +1497,7 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
     {
         p.why.push_str(&format!("; entry owner expected {:?}, replayed {:?}", cx.owner(e), set_name(&p.battle, mon)));
     }
-    Err(Dead::Budget)
+    Err(Dead::Budget { line: p.cursor.saturating_add(last_l) })
 }
 
 fn entry_actor(log: &DrawLog, raw: usize) -> Option<MonId> {
@@ -1383,7 +1509,9 @@ fn entry_actor(log: &DrawLog, raw: usize) -> Option<MonId> {
 
 fn entry_matches(cx: &Ctx<'_>, b: &Battle<DrawLog>, raw: usize, observed: usize) -> bool {
     entry_actor(&b.log, raw).is_none_or(|mon| {
-        mon.side() != cx.opp() || cx.tracker.entry(cx.opp(), observed).is_none_or(|e| set_name(b, mon) == cx.owner(e))
+        mon.side() != cx.opp() || cx.tracker.entry(cx.opp(), observed).is_none_or(|e| {
+            !e.certain && cx.hypothesis.is_none() || set_name(b, mon) == cx.owner(e)
+        })
     })
 }
 
@@ -1419,9 +1547,7 @@ fn introduce(cx: &Ctx<'_>, p: &mut Particle, window: &[String], stats: &mut Worl
         if !matches!(l.cmd(), "switch" | "drag" | "replace") {
             continue;
         }
-        let Some(id) = parse_ident(l.arg(0)).filter(|id| id.side == opp) else {
-            continue;
-        };
+        let Some(id) = parse_ident(l.arg(0)).filter(|id| id.side == opp) else { continue };
         let side = &p.battle.state.sides[opp.0 as usize];
         let party = side.party[..side.pokemon_count as usize].to_vec();
         if party.iter().any(|&m| set_name(&p.battle, m) == id.name) {
@@ -1434,9 +1560,7 @@ fn introduce(cx: &Ctx<'_>, p: &mut Particle, window: &[String], stats: &mut Worl
         // Prefer slots holding a set nobody has been seen as.
         let mut slots: Vec<MonId> = party.iter().copied().filter(|m| hidden & (1 << m.0) != 0).collect();
         slots.sort_by_key(|&m| cx.tracker.find(opp, set_name(&p.battle, m)).is_some());
-        let Some(&first) = slots.first() else {
-            return Err(Dead::Swap);
-        };
+        let Some(&first) = slots.first() else { return Err(Dead::Swap) };
         let preferred = cx.tracker.find(opp, set_name(&p.battle, first)).is_some();
         let pool: Vec<MonId> = slots
             .iter()
@@ -1446,11 +1570,14 @@ fn introduce(cx: &Ctx<'_>, p: &mut Particle, window: &[String], stats: &mut Worl
         let mon = pool[p.rng.below(pool.len())];
         let exact_first = cx.tracker.entry(opp, p.cursor + offset).is_some_and(|e| can_explain_entry(cx, e));
         let sample_cx = Ctx { repair: cx.repair && !exact_first, ..*cx };
+        let before = cx.repairs.get();
         let set = sample_revealed(&sample_cx, index, &mut p.rng).map_err(|e| {
             p.why = format!("new entry {} needs rebuilding before pool repair: {e}", id.name);
             Dead::Swap
         })?;
         p.battle.replace_hidden_set(cx.viewer, mon, &set).map_err(|_| Dead::Swap)?;
+        p.log_w -= REPAIR_LOG_PENALTY * f64::from(cx.repairs.get() - before);
+        p.repaired |= cx.repairs.get() > before;
         stats.swaps += 1;
     }
     Ok(())
@@ -1574,9 +1701,7 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String], at: usize) -> S
                     dancing -= 1;
                     continue;
                 }
-                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else {
-                    return SlotSpec::AnyMove { tera };
-                };
+                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else { return SlotSpec::AnyMove { tera } };
                 let loc = if l.has_tag("spread") || l.has_tag("notarget") || l.has_tag("still") {
                     None
                 } else {
@@ -1696,7 +1821,10 @@ fn slot_choice(
         }
         SlotSpec::Move { id, loc, tera } => {
             // A forced move (lock, charge, Recharge, Struggle) is the only option anyway.
-            let Some(m) = moves.iter().find(|m| m.move_slot == 255).or_else(|| moves.iter().find(|m| m.move_id == *id))
+            let Some(m) = moves
+                .iter()
+                .find(|m| m.move_slot == 255)
+                .or_else(|| moves.iter().find(|m| m.move_id == *id))
             else {
                 // Not in this world's moveset (or misread): any legal move keeps the world alive;
                 // the replay decides.
@@ -1725,10 +1853,30 @@ fn slot_choice(
             };
             let options: Vec<usize> = (0..6).filter(|&p| mask & (1 << p) != 0).collect();
             let exact: Vec<usize> = options.iter().copied().filter(|&p| set_name(b, party[p]) == name).collect();
-            if exact.is_empty() {
-                return None;
-            }
-            let p = exact[rng.below(exact.len())];
+            let pinned = match spec {
+                SlotSpec::Switch(_, at) => cx.tracker.entry(cx.opp(), *at).is_some_and(|e| {
+                    e.certain || cx.hypothesis.is_some_and(|h| h.stints.contains(&e.id))
+                }),
+                _ => true,
+            };
+            let p = if pinned {
+                if exact.is_empty() { return None; }
+                exact[rng.below(exact.len())]
+            } else {
+                // An ordinary particle keeps main's switch choices and draw stream until an
+                // entry is publicly attributed or selected by a guided hypothesis.
+                let disguised: Vec<_> = options.iter().copied()
+                    .filter(|&p| b.state.pokemon[party[p].0 as usize].ability == dex::ABILITY_ILLUSION).collect();
+                match (exact.is_empty(), disguised.is_empty()) {
+                    (true, true) => return None,
+                    (false, true) => exact[rng.below(exact.len())],
+                    (true, false) => disguised[rng.below(disguised.len())],
+                    (false, false) => {
+                        if rng.chance(0.9) { exact[rng.below(exact.len())] }
+                        else { disguised[rng.below(disguised.len())] }
+                    }
+                }
+            };
             SlotChoice { kind: ChoiceKind::Switch, switch_to: party[p], ..SlotChoice::default() }
         }
     })
@@ -1768,7 +1916,58 @@ mod tests {
             seen: tracker.mons(SideId(1)),
             hypothesis: None,
             repair: false,
+            repairs: Box::leak(Box::new(Cell::new(0))),
         }
+    }
+
+    #[test]
+    fn no_evidence_keeps_the_plain_budget_and_rng() {
+        let own = Arc::new(TeamDef::unpack(&[L, U].join("]")).unwrap());
+        let pool = Arc::new(fixture_pool());
+        let config = WorldConfig { particles: 1, segment_budget: 0, rebuild_budget: 4,
+            ..WorldConfig::default() };
+        let mut builder = WorldBuilder::new(SideId(0), own.clone(), ["A".into(), "B".into()],
+            pool, config, 7).unwrap();
+        builder.push_lines(["|teamsize|p2|6", "|switch|p2a: Latias|Latias, L80, F|100/100",
+            "|switch|p2b: Umbreon|Umbreon, L85, M|100/100", "|turn|1"]);
+        // Reject all four priors, so this update must be exactly the ordinary rebuild schedule.
+        let cx = context(&builder.tracker, &builder.pool, &config);
+        while {
+            let mut prior = builder.proposal_rng;
+            (0..4).any(|_| prior.chance(illusion_prior(&cx)))
+        } { builder.proposal_rng.next_u64(); }
+        let mut expected = SplitMix64(7);
+        let mut stats = WorldStats::default();
+        for _ in 0..4 {
+            let p = build(&Ctx { repair: true, ..cx }, None, own.clone(), &builder.names,
+                &mut expected, &mut stats).unwrap();
+            assert!(p.hypothesis.is_none());
+        }
+        assert_eq!(builder.update(), Err(WorldError::NoConsistentWorld));
+        assert_eq!(builder.stats.builds, 4);
+        assert_eq!(builder.rng, expected);
+    }
+
+    #[test]
+    fn older_nonlead_entries_rotate_even_when_evidence_is_crowded() {
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let mut t = RevealTracker::new();
+        t.feed_all(["|teamsize|p2|6", "|turn|1"]);
+        for i in 0..12 {
+            t.feed(if i % 2 == 0 { "|switch|p2a: Umbreon|Umbreon, L85, M|100/100" }
+                else { "|switch|p2a: Blastoise|Blastoise, L83, F|100/100" });
+        }
+        let cx = context(&t, &pool, &config);
+        let source = t.illusion_source(cx.opp());
+        let evidence: Vec<_> = t.stints(cx.opp()).iter().map(|e| e.id).collect();
+        let mut reached = Vec::new();
+        for rotation in 0..12 {
+            for h in prepare_hypotheses(&cx, &source, &[], &evidence, rotation, 32) {
+                reached.extend(h.stints.iter().copied());
+            }
+        }
+        assert!(evidence.iter().all(|st| reached.contains(st)));
     }
 
     #[test]

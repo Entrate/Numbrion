@@ -14,6 +14,8 @@
 mod common;
 #[path = "world/real_zoroark.rs"]
 mod real_zoroark;
+#[path = "world/illusion_review.rs"]
+mod illusion_review;
 
 use _numbrion::pool::TeamPool;
 use engine::{
@@ -251,8 +253,7 @@ fn worlds_reproduce_the_viewer_state() {
         let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
         let viewer = SideId(battle as u8 % 2);
         let turns = 1 + rng.below(8) as u32;
-        let Some((b, events, _)) =
-            play([teams_of(&pool, i), teams_of(&pool, j)], rng.seed(), viewer, turns, &mut rng, None)
+        let Some((b, events, _)) = play([teams_of(&pool, i), teams_of(&pool, j)], rng.seed(), viewer, turns, &mut rng, None)
         else {
             continue;
         };
@@ -296,7 +297,14 @@ fn worlds_reproduce_the_viewer_state() {
 }
 
 /// The opponent team with every detail the viewer never saw changed.
-fn disguise(real: &TeamDef, b: &B, opp: SideId, played: &[Boundary], sets: &[SetDef], rng: &mut SplitMix64) -> TeamDef {
+fn disguise(
+    real: &TeamDef,
+    b: &B,
+    opp: SideId,
+    played: &[Boundary],
+    sets: &[SetDef],
+    rng: &mut SplitMix64,
+) -> TeamDef {
     let mut t = real.clone();
     let revealed = b.revealed_mons();
     // Move slots each opponent Pokemon was ever told to use (stable MonIds).
@@ -436,9 +444,7 @@ fn identical_public_information_gives_identical_worlds() {
             }
         }
     }
-    eprintln!(
-        "leak test: {pairs} pairs ({differed} with different hidden opponent info), {discarded} discarded, {failed} without worlds"
-    );
+    eprintln!("leak test: {pairs} pairs ({differed} with different hidden opponent info), {discarded} discarded, {failed} without worlds");
     assert!(differed >= n / 6, "too few informative pairs: {differed}");
 }
 
@@ -454,15 +460,13 @@ fn worlds_follow_a_battle_decision_by_decision() {
     for battle in 0..n {
         let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
         let viewer = SideId(battle as u8 % 2);
-        let Ok(mut b) =
-            B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
+        let Ok(mut b) = B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
         else {
             continue;
         };
         b.start().unwrap();
         let own = Arc::new((*b.teams().sides[viewer.0 as usize]).clone());
-        let mut w =
-            WorldBuilder::new(viewer, own, names(), sets.clone(), WorldConfig::default(), rng.next_u64()).unwrap();
+        let mut w = WorldBuilder::new(viewer, own, names(), sets.clone(), WorldConfig::default(), rng.next_u64()).unwrap();
         w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
         let mut cursor = b.log.entries.len();
         let mut broken = false;
