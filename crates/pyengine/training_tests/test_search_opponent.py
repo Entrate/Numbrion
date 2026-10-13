@@ -1,5 +1,6 @@
 """Tests for the in-training search opponent (training.search_opponent): the batched matrix-game solve against
 ``training.search.solve``, the SEARCH opponent kind, and legal choices plus valid label shards on real battles."""
+import json
 import sys
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from training.guards import MoveGuards
 from training.league import SEARCH, SELF, opponent_kinds
 from training.model import Model
 from training.search import solve, solve_batch
-from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent
+from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent, load_bench_sets, _base
 
 REPO = Path(__file__).resolve().parents[3]
 POOL = REPO / "data" / "teams" / "train-s42-2000.txt"
@@ -59,7 +60,7 @@ def test_search_opponent_plays_legal_pairs_and_writes_valid_labels(tmp_path):
     env = nb.BatchEnv(count, [str(POOL)], seed=11, threads=1, log=True)
     encoder = Encoder(2 * count)
     opponent = SearchOpponent(str(dex.path), MoveGuards(), OpponentSearch(iterations=50), seed=3,
-                              labels=LabelWriter(tmp_path, size=32))
+                              labels=LabelWriter(tmp_path, size=32), bench_sets=load_bench_sets([POOL]))
     result = env.reset()
     encoder.encode_env(env)
     b = encoder.buffers
@@ -81,6 +82,7 @@ def test_search_opponent_plays_legal_pairs_and_writes_valid_labels(tmp_path):
         encoder.encode_env(env)
     opponent.labels.flush()
     assert opponent.stats["searched"] > 50
+    assert opponent.stats["swapped"] > 100 and opponent.stats["unswapped"] == 0
     files = sorted(tmp_path.glob("labels-*.npz"))
     assert files and sum(len(np.load(f)["x"]) for f in files) == opponent.labels.written == opponent.stats["searched"]
     for f in files:
@@ -88,3 +90,30 @@ def test_search_opponent_plays_legal_pairs_and_writes_valid_labels(tmp_path):
         assert float(raw["teacher_minutes"]) == 2.0
         DistillStream._validate_rows(raw)
     assert DistillData([tmp_path], torch.device("cpu"), pairs=4).size == opponent.labels.written
+
+
+def test_hide_bench_replaces_only_the_unseen_pokemon():
+    env = nb.BatchEnv(4, [str(POOL)], seed=21, threads=1, log=True)
+    env.reset()
+    rng = np.random.default_rng(0)
+    for _ in range(3):  # a few turns, so some of the learner's Pokemon have been seen
+        env.step(env.random_actions(0.2, 0.0))
+    opponent = SearchOpponent(str(load_dex().path), MoveGuards(), seed=1, bench_sets=load_bench_sets([POOL]))
+    changed = 0
+    for e in range(4):
+        battle = env.clone_battle(e)
+        hidden = battle.hidden_team_indices(1)
+        before = battle.teams[0].split("]")
+        opponent.hide_bench(battle)
+        after = battle.teams[0].split("]")
+        assert battle.hidden_team_indices(1) == hidden
+        for i in range(6):
+            if i in hidden:
+                changed += after[i] != before[i]
+            else:
+                assert after[i] == before[i]
+        keys = [_base(s.split("|")[0] or s.split("|")[1]) for s in after]
+        assert len(set(keys)) == 6
+        shown = [_base(p["details"].split(",")[0]) for p in json.loads(battle.request_json(0))["side"]["pokemon"]]
+        assert sorted(keys) == sorted(shown)  # the request (the learner's view of the copy) has the new bench
+    assert changed >= 8

@@ -603,7 +603,8 @@ def main():
                 "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
                 **({"actor_teacher_s": round(collected["teacher_seconds"], 2)} if args.teacher_coef > 0 else {}),
                 **({"actor_search_s": round(collected["search_seconds"], 2),
-                    **{k: collected[k] for k in ("search_decisions", "search_forced", "search_cells", "search_labels")}}
+                    **{k: collected[k] for k in ("search_decisions", "search_forced", "search_cells", "search_labels",
+                                                  "search_unswapped")}}
                    if args.search_fraction > 0 else {}),
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
                 "guarded_slots": collected["guarded"], "aborted_battles": len(collected["crashes"]),

@@ -1,21 +1,23 @@
 """A shallow search opponent inside the training actors (train_selfplay.py ``--search-fraction``).
 
 Side 2 of a ``SEARCH`` env (training.league) is played by one-turn search (training.search) with the learner's own
-current weights. Unlike the protocol-driven SearchPlayer it searches the env's true battle: one world, the actual
-state (no world building, no log replay), the learner's real observation row for the opponent's candidates, and both
-sides' trackers from the actor's encoder. All search envs of an actor at a boundary share one grid call, one batched
+current weights. Unlike the protocol-driven SearchPlayer it searches a copy of the env's battle: one world, the
+actual state (no world building, no log replay), and both sides' trackers from the actor's encoder. The learner's
+Pokemon the searcher has never seen are first replaced by sets drawn from the training team pool (``bench_sets``;
+``Battle.replace_hidden_set``, in place, no replay), and the learner's candidates come from its observation of that
+copy, so the search does not know the learner's bench. What it still knows: the unrevealed moves, item, ability,
+Tera type and stats of the learner's Pokemon it has seen. All search envs of an actor at a boundary share one grid call, one batched
 value-head call and one batched matrix-game solve, so the cost is a few small CPU batches per step.
 
 Defaults (``ours`` 4, ``theirs`` 3, ``seeds`` 1) are the 11-cell setting that kept 71% vs the m535 policy with
 sampled worlds (full search 76.7%; scratch/shallow-search, 2026-10-13).
 
 Labels: every searched decision can become a distillation row (search_labels.py's format), written as
-``labels-<run>-<seq>.npz`` shards into a ``--distill-stream`` directory. These break the fair-information rule for
-training targets (docs/design/SEARCH-PREREQUISITES.md) on purpose, for speed: world building would cost ~25-35 ms per
-decision instead of ~4. The true battle is a sample from the searcher's posterior over hidden information, so in
-expectation the targets equal one-world search with an exact world sampler; like any one-world search they average
-per-world best replies (strategy fusion) where multi-world search shares one strategy across worlds. Judge them by
-head-to-head results of the trained policy, never by the searcher's own score.
+``labels-<run>-<seq>.npz`` shards into a ``--distill-stream`` directory. These still break the fair-information rule for
+training targets (docs/design/SEARCH-PREREQUISITES.md) for the seen Pokemon, on purpose, for speed: world building would
+cost ~25-35 ms per decision instead of ~4-5. Like any one-world search the targets average per-world best replies
+(strategy fusion) where multi-world search shares one strategy across worlds. Judge them by head-to-head results of
+the trained policy, never by the searcher's own score.
 """
 from __future__ import annotations
 
@@ -90,11 +92,33 @@ class LabelWriter:
         self.rows, self.minutes = [], []
 
 
+def _base(species: str) -> str:
+    """Species-clause key: the lowercase alphanumeric name before the first hyphen (forms share a key)."""
+    return "".join(ch for ch in species.split("-")[0].lower() if ch.isalnum())
+
+
+def load_bench_sets(paths) -> tuple[list[str], list[str]]:
+    """Every single packed set of the packed-team files ``paths`` and its species-clause key."""
+    sets, keys = [], []
+    for path in paths:
+        for line in Path(path).read_text().splitlines():
+            for packed in line.strip().split("]"):
+                fields = packed.split("|")
+                if len(fields) > 2:
+                    sets.append(packed)
+                    keys.append(_base(fields[0] or fields[1]))  # the name: the display species (ids drop hyphens)
+    if not sets:
+        raise ValueError(f"no packed sets in {paths}")
+    return sets, keys
+
+
 class SearchOpponent:
     """Search for the side-2 rows of the actor's SEARCH envs (see the module docstring)."""
 
     def __init__(self, dex_path: str, guards: MoveGuards, config: OpponentSearch | None = None, seed: int = 0,
-                 labels: LabelWriter | None = None, threads: int = 1):
+                 labels: LabelWriter | None = None, threads: int = 1, bench_sets: tuple | None = None):
+        """``bench_sets``: (packed sets, species keys) from ``load_bench_sets`` to hide the learner's unseen
+        Pokemon; None searches the true battle (the learner's bench included)."""
         import numbrion
 
         self.cfg = config or OpponentSearch()
@@ -102,7 +126,33 @@ class SearchOpponent:
         self.grid = numbrion.SearchGrid(dex_path, threads)
         self.rng = np.random.default_rng(seed)
         self.labels = labels
-        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0)
+        self.bench_sets = bench_sets
+        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0, swapped=0, unswapped=0)
+
+    def hide_bench(self, battle) -> None:
+        """Replace the learner's Pokemon the searcher has never seen with pool sets (distinct species-clause keys,
+        none shared with the learner's seen Pokemon). A set the engine refuses is retried; after 8 refusals the
+        true set stays (counted in ``unswapped``)."""
+        hidden = battle.hidden_team_indices(SEARCH_SIDE)
+        if not hidden or self.bench_sets is None:
+            return
+        sets, keys = self.bench_sets
+        team = battle.teams[1 - SEARCH_SIDE].split("]")
+        used = {_base(team[i].split("|")[0] or team[i].split("|")[1]) for i in range(len(team)) if i not in hidden}
+        for index in hidden:
+            for _ in range(8):
+                pick = int(self.rng.integers(len(sets)))
+                if keys[pick] in used:
+                    continue
+                try:
+                    battle.replace_hidden_set(SEARCH_SIDE, int(index), sets[pick])
+                except ValueError:
+                    continue
+                used.add(keys[pick])
+                self.stats["swapped"] += 1
+                break
+            else:
+                self.stats["unswapped"] += 1
 
     @torch.no_grad()
     def act(self, model, env, encoder, state: dict, arrays: dict, envs: np.ndarray, needs_action: np.ndarray,
@@ -129,6 +179,8 @@ class SearchOpponent:
         envs_s = np.asarray([envs[i] for i in searched])
         battles = [battles[i] for i in searched]
         own = [own[i] for i in searched]
+        for battle in battles:
+            self.hide_bench(battle)
         rows = 2 * envs_s + SEARCH_SIDE
         ours = pair_candidates(model, _take(state, torch.from_numpy(rows)), arrays["guard"][rows], own, cfg.ours,
                                cfg.first_codes, cfg.prior_temperature, self.guards)
@@ -137,8 +189,16 @@ class SearchOpponent:
         if acting:
             their_rows = 2 * envs_s[acting] + (1 - SEARCH_SIDE)
             masks = [battles[i].legal_mask(1 - SEARCH_SIDE) for i in acting]
-            found = pair_candidates(model, _take(state, torch.from_numpy(their_rows)), arrays["guard"][their_rows],
-                                    masks, cfg.theirs, cfg.first_codes, 1.0, self.guards)
+            if self.bench_sets is None:  # the learner's real observation row
+                their_state, their_guard = _take(state, torch.from_numpy(their_rows)), arrays["guard"][their_rows]
+            else:  # the learner's observation of the copy: its tracker with the copy's request (hidden bench)
+                view = self.grid.encode_states([encoder.snapshot(int(r)) for r in their_rows],
+                                               [battles[i].request_json(1 - SEARCH_SIDE) for i in acting])
+                their_state = model.trunk(*(torch.from_numpy(view[k]) for k in
+                                            ("ids", "floats", "field", "action_features", "token_features")))
+                their_guard = view["guard"]
+            found = pair_candidates(model, their_state, their_guard, masks, cfg.theirs, cfg.first_codes, 1.0,
+                                    self.guards)
             for i, (pairs, logp, _) in zip(acting, found):
                 if len(pairs):
                     theirs[i] = (pairs, logp)

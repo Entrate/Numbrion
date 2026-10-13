@@ -201,11 +201,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     teacher = None  # the smart player labelling the learner's decisions, made for the first teaching rollout
     searcher = None
     if model_config.get("search") is not None:
-        from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent
+        from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent, load_bench_sets
 
         labels_dir = model_config.get("search_labels")
         searcher = SearchOpponent(str(dex.path), guards, OpponentSearch(**model_config["search"]), seed=seed + 7,
-                                  labels=LabelWriter(labels_dir, tag=f"a{begin}-") if labels_dir else None)
+                                  labels=LabelWriter(labels_dir, tag=f"a{begin}-") if labels_dir else None,
+                                  bench_sets=load_bench_sets(pools))
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
 
@@ -373,6 +374,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 stats["search_decisions"] = searcher.stats["searched"]
                 stats["search_forced"] = searcher.stats["forced"]
                 stats["search_cells"] = searcher.stats["cells"]
+                stats["search_unswapped"] = searcher.stats["unswapped"]
                 stats["search_labels"] = (searcher.labels.written + len(searcher.labels.rows) - labels_before
                                           if searcher.labels else 0)
             stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
@@ -455,7 +457,7 @@ class Actors:
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
         totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)
         totals["search_seconds"] = max(r["search_seconds"] for r in replies)
-        for key in ("search_decisions", "search_forced", "search_cells", "search_labels"):
+        for key in ("search_decisions", "search_forced", "search_cells", "search_labels", "search_unswapped"):
             totals[key] = sum(r.get(key, 0) for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
         for key in RESULT_KEYS:

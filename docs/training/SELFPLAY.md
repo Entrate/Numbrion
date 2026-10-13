@@ -794,18 +794,24 @@ points, 95% interval -0.6 to +1.2). The training pool stays as it is.
 ## Search opponent in training (2026-10-13, Mac)
 
 `--search-fraction F` gives F of the battles (taken from self-play) a side-2 opponent that plays shallow one-turn
-search with the learner's own current weights (`training/search_opponent.py`). It searches the env's true battle:
-one world, no world building or log replay, the learner's real observation row for the opponent's candidates. All
+search with the learner's own current weights (`training/search_opponent.py`). It searches a copy of the env's
+battle: one world, no world building or log replay. The learner's Pokemon the searcher has never seen are first
+replaced by sets drawn from the training team pool (`Battle.replace_hidden_set`), and the learner's candidates come
+from its view of that copy, so the search does not know the learner's bench (+10% per decision). All
 search envs of an actor share one grid call, one batched value-head call and one batched matrix-game solve
 (`training.search.solve_batch`). Default `--search-config`: 4 x 3 pairs, 1 seed, 8 slot-a codes expanded, the
 11-cell setting that kept 71.0% +/- 2.2 vs the m535 policy with sampled worlds (full search 76.7%;
 `scratch/shallow-search/`). Every searched decision becomes a label row in `--search-labels` (default
 `--distill-stream`), so the stream also gets labels from the positions the learner actually reaches.
 
-These labels break the fair-information rule for training targets ([SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md))
-on purpose, for speed (`allow_live=True`): world building would cost ~25-35 ms per decision instead of ~4. The true
-battle is a sample of the searcher's posterior, so the targets equal one-world search with an exact world sampler in
-expectation, with one-world search's strategy fusion. Judge the result by head-to-head of the trained policy.
+These labels still break the fair-information rule for training targets ([SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md))
+for the Pokemon the searcher has seen (their unrevealed moves, item, ability, Tera type and stats), on purpose, for
+speed (`allow_live=True`): world building would cost ~25-35 ms per decision instead of ~4-5. One-world search also
+averages per-world best replies (strategy fusion). Judge the result by head-to-head of the trained policy.
+
+Windows (Ryzen 5 3600, DirectML; true-battle version without the bench swap): actors run ~3x slower than the Mac's,
+so search does not fit in the GPU update. Per update: 3.99 s without search (4 actors); 5.44 s with 20% search and 4
+actors (+36%); 4.61 s with 6 actors (+15%). Use `--workers 6` with search on Windows.
 
 Timing check (Mac M1 Pro, 192x4 from run-1 `latest.pt`, 128 envs, 4 actors, ~90 updates each): with 20% search
 games the rollout grew from 0.93 s to 1.72 s (0.87 s of search, ~680 searched decisions per update, ~4 ms each), still
