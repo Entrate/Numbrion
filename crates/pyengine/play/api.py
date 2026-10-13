@@ -155,6 +155,9 @@ class Api:
                 log.exception("advise %s %s failed", worker.name, room)
                 await worker.run(state.close)
                 return fail(f"{type(error).__name__}: {error}", 500)
+            analysis = getattr(decision, "analysis", None) or {}
+            if getattr(worker.bot, "search", None) and analysis.get("source") != "search":
+                log.info("advise %s %s: no search (%s)", worker.name, room, analysis.get("note") or "no note")
             return reply({"ok": True, "room": room, "rqid": rqid, "bot": worker.name,
                           "decision": decision_json(decision), "replay": info})
 

@@ -589,17 +589,65 @@ fn constraints<'a>(cx: &'a Ctx<'_>, index: usize) -> SetConstraints<'a> {
 
 fn sample_revealed(cx: &Ctx<'_>, index: usize, rng: &mut SplitMix64) -> Result<SetDef, WorldError> {
     let c = constraints(cx, index);
-    let mut set = cx
+    let sampled = cx
         .pool
         .sample(&c, rng)
-        .map(|s| s.set)
         .ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
+    let mut set = sampled.set;
+    if !sampled.consistent {
+        repair(&mut set, &c);
+    }
     if let Some((_, order)) = cx.move_orders.iter().find(|(n, _)| *n == c.name) {
         set.moves = [EffectId::NONE; 4];
         set.moves[..order.len()].copy_from_slice(order);
         set.move_count = order.len() as u8;
     }
     Ok(set)
+}
+
+/// Makes the best pool set fit what was revealed when no pool set does (a live server whose sets
+/// changed since the pool was generated: a new move, item, ability or level). Without this, one
+/// off-pool reveal kills every world for the rest of the battle. Revealed moves replace the set's
+/// unrevealed ones from the end; an item that would change the shown species is left alone.
+fn repair(set: &mut SetDef, c: &SetConstraints<'_>) {
+    let mut revealed: Vec<EffectId> = Vec::with_capacity(4);
+    for &m in c.moves {
+        if !revealed.contains(&m) && revealed.len() < 4 {
+            revealed.push(m);
+        }
+    }
+    let have = &set.moves[..set.move_count as usize];
+    if revealed.iter().any(|m| !have.contains(m)) {
+        let mut moves: Vec<EffectId> = have.to_vec();
+        for &m in &revealed {
+            if moves.contains(&m) {
+                continue;
+            }
+            if moves.len() < 4 {
+                moves.push(m);
+            } else if let Some(slot) = moves.iter().rposition(|x| !revealed.contains(x)) {
+                moves[slot] = m;
+            }
+        }
+        set.moves = [EffectId::NONE; 4];
+        set.moves[..moves.len()].copy_from_slice(&moves);
+        set.move_count = moves.len() as u8;
+    }
+    if let Some(level) = c.level {
+        set.level = level;
+    }
+    if let Some(ability) = c.ability {
+        set.ability = ability;
+    }
+    if let Some(tera) = c.tera {
+        set.tera_type = tera;
+    }
+    if let Some(item) = c.item.filter(|&i| i != set.item) {
+        let old = std::mem::replace(&mut set.item, item);
+        if SetPool::shown_species(set) != c.shown_species {
+            set.item = old;
+        }
+    }
 }
 
 /// Move ids of each `active` entry of a normalized request JSON, in slot order (a minimal scan: the
@@ -1251,6 +1299,24 @@ mod tests {
         let client = "{\"active\": [{\"moves\": [{\"move\": \"Protect\", \"id\": \"protect\", \"pp\": 16, \"maxpp\": 16}]}],\n \"side\": {\"name\": \"A B\"}, \"rqid\": 7}";
         assert_eq!(normalize_request(client), engine);
         assert_eq!(normalize_request(engine), engine);
+    }
+
+    #[test]
+    fn off_pool_reveals_are_patched_into_the_set() {
+        let mut pool = SetPool::new();
+        pool.add_team("Bastiodon||Leftovers|Sturdy|foulplay,wideguard,irondefense,bodypress||85,,85,85,85,85|M|,0,,,,||90|,,,,,Fighting").unwrap();
+        let revealed = [move_id("protect"), move_id("bodypress")];
+        let mut c = SetConstraints::new("Bastiodon", "Bastiodon");
+        c.moves = &revealed;
+        c.level = Some(88);
+        let sampled = pool.sample(&c, &mut SplitMix64(1)).unwrap();
+        assert!(!sampled.consistent);
+        let mut set = sampled.set;
+        repair(&mut set, &c);
+        let moves = &set.moves[..set.move_count as usize];
+        assert_eq!(moves.len(), 4);
+        assert!(revealed.iter().all(|m| moves.contains(m)), "{moves:?}");
+        assert_eq!(set.level, 88);
     }
 
     #[test]
