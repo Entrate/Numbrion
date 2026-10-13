@@ -12,6 +12,8 @@
 //! `NUMBRION_TEST_BATTLES` scales both (defaults 40 and 60).
 #![cfg(feature = "search")]
 mod common;
+#[path = "world/real_zoroark.rs"]
+mod real_zoroark;
 
 use _numbrion::pool::TeamPool;
 use engine::{
