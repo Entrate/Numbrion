@@ -6,6 +6,7 @@ Every env has a fixed opponent kind for the whole run, so a battle never changes
 * ``SELF``: the learner plays both sides and both are trained,
 * ``SNAPSHOT``: a frozen older snapshot plays side 2 (one snapshot per rollout, chosen by PFSP),
 * ``HEURISTIC``: the scripted "always use the strongest attack" player (training.scripted) plays side 2.
+* ``SEARCH``: shallow one-turn search with the learner's current weights plays side 2 (training.search_opponent).
 
 Only the learner's own decisions are trained on. Snapshot envs play self-play until the pool has two snapshots.
 """
@@ -13,8 +14,8 @@ from __future__ import annotations
 
 import numpy as np
 
-SELF, SNAPSHOT, HEURISTIC = 0, 1, 2
-KIND_NAMES = {SELF: "self", SNAPSHOT: "snapshot", HEURISTIC: "heuristic"}
+SELF, SNAPSHOT, HEURISTIC, SEARCH = 0, 1, 2, 3
+KIND_NAMES = {SELF: "self", SNAPSHOT: "snapshot", HEURISTIC: "heuristic", SEARCH: "search"}
 
 
 def spread_mask(n: int, fraction: float) -> np.ndarray:
@@ -23,14 +24,20 @@ def spread_mask(n: int, fraction: float) -> np.ndarray:
     return np.floor((index + 1) * fraction) > np.floor(index * fraction)
 
 
-def opponent_kinds(n_envs: int, pool_fraction: float, scripted_share: float) -> np.ndarray:
+def opponent_kinds(n_envs: int, pool_fraction: float, scripted_share: float, search_fraction: float = 0.0) -> np.ndarray:
     """Per-env opponent kind: ``pool_fraction`` of the envs get a non-self opponent, ``scripted_share`` of those
-    the heuristic and the rest a snapshot, both evenly spread over the envs (and so over the actors)."""
+    the heuristic and the rest a snapshot, both evenly spread over the envs (and so over the actors). Then
+    ``search_fraction`` of all envs (taken from the self-play envs, evenly spread) get the search opponent."""
     kinds = np.full(n_envs, SELF, dtype=np.int8)
     pool = np.flatnonzero(spread_mask(n_envs, pool_fraction))
     scripted = spread_mask(len(pool), scripted_share)
     kinds[pool[scripted]] = HEURISTIC
     kinds[pool[~scripted]] = SNAPSHOT
+    if search_fraction > 0:
+        self_envs = np.flatnonzero(kinds == SELF)
+        wanted = min(int(round(n_envs * search_fraction)), len(self_envs))
+        if wanted:
+            kinds[self_envs[np.arange(wanted) * len(self_envs) // wanted]] = SEARCH
     return kinds
 
 

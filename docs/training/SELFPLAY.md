@@ -791,6 +791,28 @@ The same day, a test of whether training on 2,000 teams memorises them came out 
 smart on its training teams and 65.2% on 2,000 unseen teams from pool-s1-200k (20,000 games each; difference +0.3
 points, 95% interval -0.6 to +1.2). The training pool stays as it is.
 
+## Search opponent in training (2026-10-13, Mac)
+
+`--search-fraction F` gives F of the battles (taken from self-play) a side-2 opponent that plays shallow one-turn
+search with the learner's own current weights (`training/search_opponent.py`). It searches the env's true battle:
+one world, no world building or log replay, the learner's real observation row for the opponent's candidates. All
+search envs of an actor share one grid call, one batched value-head call and one batched matrix-game solve
+(`training.search.solve_batch`). Default `--search-config`: 4 x 3 pairs, 1 seed, 8 slot-a codes expanded, the
+11-cell setting that kept 71.0% +/- 2.2 vs the m535 policy with sampled worlds (full search 76.7%;
+`scratch/shallow-search/`). Every searched decision becomes a label row in `--search-labels` (default
+`--distill-stream`), so the stream also gets labels from the positions the learner actually reaches.
+
+These labels break the fair-information rule for training targets ([SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md))
+on purpose, for speed (`allow_live=True`): world building would cost ~25-35 ms per decision instead of ~4. The true
+battle is a sample of the searcher's posterior, so the targets equal one-world search with an exact world sampler in
+expectation, with one-world search's strategy fusion. Judge the result by head-to-head of the trained policy.
+
+Timing check (Mac M1 Pro, 192x4 from run-1 `latest.pt`, 128 envs, 4 actors, ~90 updates each): with 20% search
+games the rollout grew from 0.93 s to 1.72 s (0.87 s of search, ~680 searched decisions per update, ~4 ms each), still
+well under the 2.8-3.3 s GPU update, so updates did not get slower (3.31 -> 2.85 s; search envs train one side, so
+an update has ~10% fewer PPO rows). The learner scored 24.3% against the search opponent over 4564 games. Labels: ~680
+per update, about ten times the Mac label maker's rate.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.

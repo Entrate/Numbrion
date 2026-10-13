@@ -22,6 +22,7 @@ When no world reproduces the observations, or the decision has only one legal pa
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import threading
 import time
@@ -88,6 +89,59 @@ def _log_softmax(logits: np.ndarray, mask: np.ndarray, temperature: float) -> np
 _GPU_LOCK = threading.Lock()
 
 
+@torch.no_grad()
+def pair_candidates(model: Model, state: dict, guard: np.ndarray, masks: list, k: int, first: int,
+                    temperature: float, guards: MoveGuards, lock=None):
+    """``Net.candidates`` from trunk outputs ``state`` (one row per entry of ``masks``; ``guard`` their guard
+    arrays). ``lock`` (optional) is held around the model calls."""
+    lock = lock or contextlib.nullcontext()
+    n = len(masks)
+    mask0 = np.stack([m[0] for m in masks])
+    mask0, _ = guards.apply(mask0, guard, 0)
+    with lock:
+        logits0, vectors0 = model.logits(state, 0)
+        logits0 = logits0.numpy()
+    lp0 = _log_softmax(logits0, mask0, 1.0)
+    lp0_t = _log_softmax(logits0, mask0, temperature)
+    expand_rows, expand_a0 = [], []
+    for i in range(n):
+        legal = np.flatnonzero(mask0[i])
+        order = legal[np.argsort(-lp0[i, legal], kind="stable")][:first]
+        expand_rows += [i] * len(order)
+        expand_a0 += order.tolist()
+    expand_rows = np.asarray(expand_rows, dtype=np.int64)
+    expand_a0 = np.asarray(expand_a0, dtype=np.int64)
+    if not len(expand_rows):
+        return [(np.zeros((0, 2), np.int32), np.zeros(0, np.float32), {}) for _ in range(n)]
+    mask1 = np.stack([masks[i][1][a] for i, a in zip(expand_rows, expand_a0)])
+    mask1, _ = guards.apply(mask1, guard[expand_rows], 1)
+    with lock:
+        index = torch.from_numpy(expand_rows)
+        sub = _take(state, index)
+        a0 = torch.from_numpy(expand_a0)
+        onehot = (a0.view(-1, 1) == torch.arange(N_ACTIONS)).float()
+        chosen = (onehot.unsqueeze(-1) * vectors0.index_select(0, index)).sum(1)
+        joint = model.act_joint(model.partner_features(sub, onehot)) if model.joint_features else None
+        logits1, _ = model.logits(sub, 1, chosen, joint)
+        logits1 = logits1.numpy()
+    lp1 = _log_softmax(logits1, mask1, 1.0)
+    lp1_t = _log_softmax(logits1, mask1, temperature)
+    out = [([], [], {}) for _ in range(n)]
+    for e, (i, a0v) in enumerate(zip(expand_rows, expand_a0)):
+        legal = np.flatnonzero(mask1[e])
+        pairs, priors, full = out[i]
+        for a1v in legal:
+            pairs.append((a0v, a1v))
+            priors.append(lp0_t[i, a0v] + lp1_t[e, a1v])
+            full[(int(a0v), int(a1v))] = (float(lp0[i, a0v] + lp1[e, a1v]), float(lp0_t[i, a0v] + lp1_t[e, a1v]))
+    result = []
+    for pairs, priors, full in out:
+        pairs, priors = np.asarray(pairs, dtype=np.int32).reshape(-1, 2), np.asarray(priors, dtype=np.float32)
+        order = np.argsort(-priors, kind="stable")[:k]
+        result.append((pairs[order], priors[order], full))
+    return result
+
+
 class Net:
     """The policy/value network for search: batched candidate enumeration and leaf values."""
 
@@ -115,53 +169,12 @@ class Net:
         Returns per row (pairs int32 [m, 2], log_prior float32 [m], full): the top pairs, most likely first, and
         ``full`` = {(a0, a1): (log-prob at T=1, log-prob at ``temperature``)} for every enumerated legal pair (slot a
         restricted to its ``first`` most likely codes). Tempering is per slot, as the base policy samples."""
-        n = len(rows)
-        guard = arrays["guard"][rows]
-        mask0 = np.stack([m[0] for m in masks])
-        mask0, _ = self.guards.apply(mask0, guard, 0)
         model = self.policy_model
         with self.policy_lock:
             x = {k: torch.from_numpy(np.ascontiguousarray(arrays[k][rows])) for k in OBS_KEYS}
             state = model.trunk(x["ids"], x["floats"], x["field"], x["action_features"], x["token_features"])
-            logits0, vectors0 = model.logits(state, 0)
-            logits0 = logits0.numpy()
-        lp0 = _log_softmax(logits0, mask0, 1.0)
-        lp0_t = _log_softmax(logits0, mask0, temperature)
-        expand_rows, expand_a0 = [], []
-        for i in range(n):
-            legal = np.flatnonzero(mask0[i])
-            order = legal[np.argsort(-lp0[i, legal], kind="stable")][:first]
-            expand_rows += [i] * len(order)
-            expand_a0 += order.tolist()
-        expand_rows = np.asarray(expand_rows)
-        expand_a0 = np.asarray(expand_a0)
-        mask1 = np.stack([masks[i][1][a] for i, a in zip(expand_rows, expand_a0)])
-        mask1, _ = self.guards.apply(mask1, guard[expand_rows], 1)
-        with self.policy_lock:
-            index = torch.from_numpy(expand_rows)
-            sub = _take(state, index)
-            a0 = torch.from_numpy(expand_a0.astype(np.int64))
-            onehot = (a0.view(-1, 1) == torch.arange(N_ACTIONS)).float()
-            chosen = (onehot.unsqueeze(-1) * vectors0.index_select(0, index)).sum(1)
-            joint = model.act_joint(model.partner_features(sub, onehot)) if model.joint_features else None
-            logits1, _ = model.logits(sub, 1, chosen, joint)
-            logits1 = logits1.numpy()
-        lp1 = _log_softmax(logits1, mask1, 1.0)
-        lp1_t = _log_softmax(logits1, mask1, temperature)
-        out = [([], [], {}) for _ in range(n)]
-        for e, (i, a0v) in enumerate(zip(expand_rows, expand_a0)):
-            legal = np.flatnonzero(mask1[e])
-            pairs, priors, full = out[i]
-            for a1v in legal:
-                pairs.append((a0v, a1v))
-                priors.append(lp0_t[i, a0v] + lp1_t[e, a1v])
-                full[(int(a0v), int(a1v))] = (float(lp0[i, a0v] + lp1[e, a1v]), float(lp0_t[i, a0v] + lp1_t[e, a1v]))
-        result = []
-        for pairs, priors, full in out:
-            pairs, priors = np.asarray(pairs, dtype=np.int32).reshape(-1, 2), np.asarray(priors, dtype=np.float32)
-            order = np.argsort(-priors, kind="stable")[:k]
-            result.append((pairs[order], priors[order], full))
-        return result
+        return pair_candidates(model, state, arrays["guard"][rows], masks, k, first, temperature, self.guards,
+                               self.policy_lock)
 
     @torch.no_grad()
     def values(self, arrays: dict, partner_ids: np.ndarray, partner_floats: np.ndarray, chunk: int = 2048):
@@ -235,6 +248,48 @@ def solve(payoffs: list, valid: list, world_weights: np.ndarray, our_prior: np.n
             y = _softmax(log_y0[k] - (xs @ a) / opponent_anchor)
             y_avg[k] += (y - y_avg[k]) / (t + 1)
     return x_avg, y_avg, our_values(y_avg)
+
+
+def solve_batch(payoffs: np.ndarray, our_prior: np.ndarray, their_prior: np.ndarray, anchor: float,
+                opponent_anchor: float, iterations: int):
+    """``solve`` for B independent one-world games at once (the in-training search opponent).
+
+    ``payoffs`` [B, N, M]; ``our_prior`` [B, N] and ``their_prior`` [B, M] are probabilities, 0 for padding
+    entries (which then get no weight; padded payoffs are ignored). Every unpadded pair is valid. Returns (x [B, N],
+    q [B, N]) as ``solve`` does for one world with all pairs valid."""
+    ours_ok, theirs_ok = our_prior > 0, their_prior > 0
+    our_prior = our_prior / our_prior.sum(1, keepdims=True)
+    their_prior = their_prior / their_prior.sum(1, keepdims=True)
+    a = np.where(ours_ok[:, :, None] & theirs_ok[:, None, :], payoffs, 0.0)
+    with np.errstate(divide="ignore"):
+        log_x0 = np.where(ours_ok, np.log(np.maximum(our_prior, 1e-300)), -np.inf)
+        log_y0 = np.where(theirs_ok, np.log(np.maximum(their_prior, 1e-12)), -np.inf)
+
+    def values(y):
+        return np.where(ours_ok, np.einsum("bnm,bm->bn", a, y), -2.0)
+
+    def softmax(z):
+        z = z - z.max(1, keepdims=True)
+        e = np.exp(z)
+        return e / e.sum(1, keepdims=True)
+
+    def respond(q):
+        if anchor > 0:
+            return softmax(log_x0 + q / anchor)
+        best = (q == np.where(ours_ok, q, -np.inf).max(1, keepdims=True)) & ours_ok
+        return best / best.sum(1, keepdims=True)
+
+    y_avg = their_prior.copy()
+    if opponent_anchor <= 0:
+        q = values(y_avg)
+        return respond(q), q
+    x_avg = our_prior.copy()
+    for t in range(1, iterations + 1):
+        x = respond(values(y_avg))
+        x_avg += (x - x_avg) / (t + 1)
+        y = softmax(log_y0 - np.einsum("bn,bnm->bm", x_avg, a) / opponent_anchor)
+        y_avg += (y - y_avg) / (t + 1)
+    return x_avg, values(y_avg)
 
 
 # ---- players -------------------------------------------------------------------------------------------------------

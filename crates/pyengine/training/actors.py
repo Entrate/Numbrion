@@ -13,6 +13,9 @@ Teacher labels (``Actors(teacher=True)``, rollouts started with ``teacher=True``
 ``teacher_a0`` is its slot-a choice under the learner's guarded slot-a mask, ``teacher_a1`` its slot-b choice for the
 learner's sampled slot-a code under the learner's guarded slot-b mask (the same slot-a code the learner's slot-b
 log-probs are conditioned on), -1 for rows without a label. The labels change nothing the learner plays or samples.
+
+Search opponent (``Actors(search=...)``): side 2 of SEARCH envs is played by shallow one-turn search with the learner's
+weights on the env's true battle (training.search_opponent), which can write its decisions as distillation labels.
 """
 from __future__ import annotations
 
@@ -168,7 +171,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     import numbrion as nb
     from training.dex import load_dex
     from training.encoder import Encoder
-    from training.league import SELF, SNAPSHOT
+    from training.league import SEARCH, SELF, SNAPSHOT
     from training.model import Model
     from training.ppo import ko_shaping, sample
     from training.scripted import HeuristicAgent, forced_logprobs
@@ -196,6 +199,13 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
     else:
         heuristic = HeuristicAgent(rng)
     teacher = None  # the smart player labelling the learner's decisions, made for the first teaching rollout
+    searcher = None
+    if model_config.get("search") is not None:
+        from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent
+
+        labels_dir = model_config.get("search_labels")
+        searcher = SearchOpponent(str(dex.path), guards, OpponentSearch(**model_config["search"]), seed=seed + 7,
+                                  labels=LabelWriter(labels_dir, tag=f"a{begin}-") if labels_dir else None)
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
 
@@ -216,6 +226,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         while True:
             command, argument = connection.recv()
             if command == "close":
+                if searcher is not None and searcher.labels is not None:
+                    searcher.labels.flush()
                 connection.send(None)
                 break
             # command == "collect"
@@ -231,8 +243,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             opp_rows[1::2] = kinds != SELF
             snapshot_rows = np.zeros(2 * count, dtype=bool)
             snapshot_rows[1::2] = kinds == SNAPSHOT
+            search_rows = np.zeros(2 * count, dtype=bool)
+            search_rows[1::2] = kinds == SEARCH
+            if search_rows.any() and searcher is None:
+                raise RuntimeError("SEARCH opponents need Actors(search=...)")
             opp_index = np.flatnonzero(snapshot_rows)  # rows the opponent snapshot plays
-            scripted_index = np.flatnonzero(opp_rows & ~snapshot_rows)  # rows the heuristic plays
+            scripted_index = np.flatnonzero(opp_rows & ~snapshot_rows & ~search_rows)  # rows the heuristic plays
             policy_rows = ~opp_rows | snapshot_rows  # learner and pool snapshot rows
             # Per-env finished games, side-1 score (win 1, tie 0.5) and battle turns; "clean" games began during
             # this rollout, so they were played entirely against this rollout's opponent.
@@ -249,7 +265,10 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 teacher = SmartHeuristicAgent(np.random.default_rng([seed, 1]), dex,
                                               temperature=model_config.get("teacher_temperature", 0.0))
             stats = dict(completed=0, turns=0, guarded=0, crashes=[])
-            inference = teaching = 0.0
+            inference = teaching = searching = 0.0
+            if searcher is not None:
+                searcher.stats.update(searched=0, forced=0, cells=0, seconds=0.0)
+                labels_before = searcher.labels.written + len(searcher.labels.rows) if searcher.labels else 0
             for t in range(steps):
                 for k in OBS_KEYS:
                     out[k][t, rows] = getattr(b, k)
@@ -275,6 +294,14 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     if len(scripted_index):  # opponent selection: the heuristic's codes as one-hot log-probs
                         lp0[scripted_index] = forced_logprobs(heuristic.first(
                             b.arrays(), scripted_index, mask0[scripted_index]))
+                    searched_index = np.flatnonzero(search_rows & active)
+                    if len(searched_index):  # the search opponent's pairs as one-hot log-probs
+                        t1 = time.perf_counter()
+                        chosen = searcher.act(learner, env, encoder, state, {**b.arrays(), "guard": b.guard},
+                                              searched_index // 2, result["needs_action"], argument["minutes"])
+                        pairs = np.array([chosen[int(e)] for e in searched_index // 2], dtype=np.int64).reshape(-1, 2)
+                        lp0[searched_index] = forced_logprobs(pairs[:, 0])
+                        searching += time.perf_counter() - t1
                     a0 = sample(lp0, rng)
                     mask1 = env.mask_slot1(np.where(active, a0, -1).reshape(count, 2).astype(np.int32)).reshape(-1, N_ACTIONS).copy()
                     mask1[~active] = False
@@ -287,6 +314,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                                                         torch.from_numpy(mask1[opp_index])).numpy()
                     if len(scripted_index):
                         lp1[scripted_index] = forced_logprobs(heuristic.second(scripted_index, mask1[scripted_index]))
+                    if len(searched_index):
+                        lp1[searched_index] = forced_logprobs(pairs[:, 1])
                     a1 = sample(lp1, rng)
                 inference += time.perf_counter() - t0
                 if "teacher_a0" in out:  # -1: no label
@@ -339,6 +368,13 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             stats["seconds"] = time.perf_counter() - started
             stats["inference_seconds"] = inference
             stats["teacher_seconds"] = teaching
+            stats["search_seconds"] = searching
+            if searcher is not None:
+                stats["search_decisions"] = searcher.stats["searched"]
+                stats["search_forced"] = searcher.stats["forced"]
+                stats["search_cells"] = searcher.stats["cells"]
+                stats["search_labels"] = (searcher.labels.written + len(searcher.labels.rows) - labels_before
+                                          if searcher.labels else 0)
             stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
             stats.update(memory_mb())
             connection.send(stats)
@@ -357,9 +393,11 @@ class Actors:
 
     def __init__(self, n_envs: int, steps: int, pools: list[Path], seed: int, workers: int, model,
                  scripted: str = "heuristic", scripted_temperature: float = 0.0, guards: MoveGuards = MoveGuards(),
-                 teacher: bool = False, teacher_temperature: float = 0.0):
+                 teacher: bool = False, teacher_temperature: float = 0.0, search: dict | None = None,
+                 search_labels: Path | None = None):
         """``teacher``: the buffers hold teacher labels, written in rollouts started with ``teacher=True`` (smart
-        player with Gumbel noise ``teacher_temperature``)."""
+        player with Gumbel noise ``teacher_temperature``). ``search``: training.search_opponent.OpponentSearch
+        fields for SEARCH envs (None: no search opponent); ``search_labels``: directory for its label shards."""
         self.n_envs, self.steps, self.teacher = n_envs, steps, teacher
         self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs, teacher)) for _ in range(2)]
         self.layout = weight_layout(model)
@@ -368,7 +406,8 @@ class Actors:
         self.versions = {"learner": 0, "opponent": 0}
         config = dict(size=size, width=model.width, layers=len(model.blocks), joint_features=model.joint_features,
                       scripted=scripted, scripted_temperature=scripted_temperature, guards=asdict(guards),
-                      teacher=teacher, teacher_temperature=teacher_temperature)
+                      teacher=teacher, teacher_temperature=teacher_temperature, search=search,
+                      search_labels=None if search_labels is None else str(search_labels))
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])
@@ -390,14 +429,16 @@ class Actors:
         write_weights(self.weights.arrays[key], self.layout, state)
         self.versions[key] += 1
 
-    def start(self, buffer: int, opponents: np.ndarray, ko_bonus: float, teacher: bool = False) -> None:
-        """``opponents``: per-env opponent kind (training.league SELF / SNAPSHOT / HEURISTIC) for this rollout.
-        ``teacher``: label the learner's decisions (otherwise the labels are all -1)."""
+    def start(self, buffer: int, opponents: np.ndarray, ko_bonus: float, teacher: bool = False,
+              minutes: float = 0.0) -> None:
+        """``opponents``: per-env opponent kind (training.league SELF / SNAPSHOT / HEURISTIC / SEARCH) for this
+        rollout. ``teacher``: label the learner's decisions (otherwise the labels are all -1). ``minutes``: training
+        minutes of the learner weights (the search labels' ``teacher_minutes``)."""
         if teacher and not self.teacher:
             raise ValueError("teacher labels need Actors(teacher=True)")
         argument = dict(buffer=buffer, opponents=np.asarray(opponents).tolist(), ko_bonus=ko_bonus,
                         learner_version=self.versions["learner"], opponent_version=self.versions["opponent"],
-                        teacher=bool(teacher))
+                        teacher=bool(teacher), minutes=float(minutes))
         for connection in self.connections:
             connection.send(("collect", argument))
         self.pending = True
@@ -413,6 +454,9 @@ class Actors:
         totals["seconds"] = max(r["seconds"] for r in replies)
         totals["inference_seconds"] = max(r["inference_seconds"] for r in replies)
         totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)
+        totals["search_seconds"] = max(r["search_seconds"] for r in replies)
+        for key in ("search_decisions", "search_forced", "search_cells", "search_labels"):
+            totals[key] = sum(r.get(key, 0) for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
         for key in RESULT_KEYS:
             totals[key] = np.concatenate([np.asarray(r[key], dtype=np.float64) for r in replies])

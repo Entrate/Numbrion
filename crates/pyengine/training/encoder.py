@@ -859,6 +859,10 @@ class RustEncoder:
     def encode_env(self, env, keep_logs: bool = False):
         return self._encoder.encode_env(env, *self._outputs(), keep_logs=keep_logs)
 
+    def snapshot(self, row: int):
+        """A ``numbrion.TrackerState`` copy of ``row``'s tracker (for ``SearchGrid``)."""
+        return self._encoder.snapshot(row)
+
 
 def _has_rust_encoder():
     try:

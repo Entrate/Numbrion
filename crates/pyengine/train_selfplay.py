@@ -18,7 +18,9 @@ Run from the repository root:
   (fixed envs) put another player on side 2: ``--scripted-share`` of them a scripted player (``--scripted``: the
   doubles-aware smart player by default, or the strongest-attack heuristic), the rest an older snapshot (added every ``--pool-minutes``) chosen per rollout by prioritized
   fictitious self-play from the learner's results against each snapshot. Only the learner's own decisions are
-  trained on.
+  trained on. ``--search-fraction`` of the battles (taken from self-play) put shallow one-turn search with the
+  learner's own weights on side 2 (training.search_opponent: the env's true battle, ``--search-config`` fields);
+  its searched decisions become distillation label shards in ``--search-labels`` (default: ``--distill-stream``).
 * Reward: +1 win, -1 loss, plus a potential-based KO-difference bonus (sums to zero over a battle) that decays
   linearly to zero at ``--ko-bonus-end`` of the run.
 * Exploration: the entropy-bonus coefficient adapts so the summed slot-a + slot-b base-choice entropy tracks a target
@@ -60,7 +62,7 @@ from training.diagnostics import ActionUsage
 from training.distill import DistillData, DistillStream, distill_loss, validate
 from training.dex import load_dex
 from training.guards import MoveGuards
-from training.league import HEURISTIC, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
+from training.league import HEURISTIC, SEARCH, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
 from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches, tera_choice_entropy
 
@@ -99,8 +101,10 @@ def opponent_results(collected: dict, info: dict) -> dict:
     """Finished games, the learner's score (not for self-play) and mean battle turns by opponent kind for one
     rollout, over all games that finished in the envs of that kind."""
     out = {}
-    for kind, name in ((SELF, "self"), (SNAPSHOT, "pool"), (HEURISTIC, "scripted")):
+    for kind, name in ((SELF, "self"), (SNAPSHOT, "pool"), (HEURISTIC, "scripted"), (SEARCH, "search")):
         envs = info["opponents"] == kind
+        if kind == SEARCH and not envs.any():
+            continue
         games = float(collected["games"][envs].sum())
         out[f"{name}_games"] = int(games)
         if kind != SELF:
@@ -391,6 +395,12 @@ def parse_args(argv=None):
                              "strongest-attack heuristic")
     parser.add_argument("--scripted-temperature", type=float, default=0.05,
                         help="Gumbel noise on the smart player's pair values, so it cannot be memorized")
+    parser.add_argument("--search-fraction", type=float, default=0.0,
+                        help="share of battles (taken from self-play) against shallow search with the learner's weights")
+    parser.add_argument("--search-config", default="{}",
+                        help="training.search_opponent.OpponentSearch fields as JSON (default: 4x3 pairs, 1 seed)")
+    parser.add_argument("--search-labels", type=Path,
+                        help="directory for the search opponent's label shards (default: --distill-stream; none without)")
     parser.add_argument("--pool-minutes", type=float, default=3.0)
     parser.add_argument("--pool-size", type=int, default=12)
     parser.add_argument("--pfsp-power", type=float, default=2.0,
@@ -424,6 +434,17 @@ def parse_args(argv=None):
         parser.error("--distill-max-uses must be positive and --distill-reuse-gap must be nonnegative")
     if math.isnan(args.distill_max_age_minutes) or args.distill_max_age_minutes < 0:
         parser.error("--distill-max-age-minutes must be nonnegative (inf is allowed)")
+    if not 0 <= args.search_fraction <= 1 or args.search_fraction + args.pool_fraction > 1:
+        parser.error("--search-fraction must be in [0, 1] and fit beside --pool-fraction")
+    try:
+        from training.search_opponent import OpponentSearch
+
+        args.search_config = json.loads(args.search_config)
+        OpponentSearch(**args.search_config)
+    except (ValueError, TypeError) as error:
+        parser.error(f"--search-config: {error}")
+    if args.search_labels is None and args.search_fraction > 0:
+        args.search_labels = args.distill_stream
     if args.distill_max_resident_rows <= 0 or (args.distill_stream and args.distill_max_resident_rows < args.distill_batch):
         parser.error("--distill-max-resident-rows must be positive and fit --distill-batch for a stream")
     return args
@@ -478,7 +499,8 @@ def main():
         distill = DistillData(args.distill, device, pairs=args.distill_pairs)
         print(json.dumps({"distill": distill.describe()}), flush=True)
 
-    kinds = opponent_kinds(args.envs, args.pool_fraction, args.scripted_share)  # fixed per env for the whole run
+    kinds = opponent_kinds(args.envs, args.pool_fraction, args.scripted_share,
+                           args.search_fraction)  # fixed per env for the whole run
     budget = args.minutes * 60
     stop = min(budget, args.stop_minutes * 60) if args.stop_minutes is not None else budget
     next_pool = elapsed_before + args.pool_minutes * 60 if len(pool) else 0.0
@@ -512,14 +534,16 @@ def main():
         opponents = np.where((kinds == SNAPSHOT) & (snapshot is None), SELF, kinds).astype(np.int8)
         ko_bonus = args.ko_bonus * max(0.0, 1 - progress / args.ko_bonus_end) if args.ko_bonus_end > 0 else 0.0
         teacher = teacher_coefficient(args, elapsed) > 0  # label only while the labels will still be trained on
-        actors.start(buffer, opponents, ko_bonus, teacher=teacher)
+        actors.start(buffer, opponents, ko_bonus, teacher=teacher, minutes=elapsed / 60)
         return dict(opponents=opponents, ko_bonus=ko_bonus, snapshot=None if snapshot is None else snapshot["id"],
                     snapshot_minutes=None if snapshot is None else snapshot["minutes"])
 
     with Actors(args.envs, args.steps, [args.pool], args.seed + update, args.workers, model,
                 scripted=args.scripted, scripted_temperature=args.scripted_temperature,
                 guards=MoveGuards(repeat_protect=not args.allow_repeat_protect), teacher=args.teacher_coef > 0,
-                teacher_temperature=args.teacher_temperature) as actors:
+                teacher_temperature=args.teacher_temperature,
+                search=args.search_config if args.search_fraction > 0 else None,
+                search_labels=args.search_labels if args.search_fraction > 0 else None) as actors:
         start = time.perf_counter() - elapsed_before
         current = 0
         info = launch(actors, current, elapsed_before)
@@ -573,6 +597,9 @@ def main():
                 "cycle_s": round(cycle, 2), "train_s": round(train_seconds, 2), "wait_s": round(cycle - train_seconds, 2),
                 "rollout_s": round(collected["seconds"], 2), "actor_inference_s": round(collected["inference_seconds"], 2),
                 **({"actor_teacher_s": round(collected["teacher_seconds"], 2)} if args.teacher_coef > 0 else {}),
+                **({"actor_search_s": round(collected["search_seconds"], 2),
+                    **{k: collected[k] for k in ("search_decisions", "search_forced", "search_cells", "search_labels")}}
+                   if args.search_fraction > 0 else {}),
                 "mean_turns": round(collected["turns"] / max(collected["completed"], 1), 1),
                 "guarded_slots": collected["guarded"], "aborted_battles": len(collected["crashes"]),
                 **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
