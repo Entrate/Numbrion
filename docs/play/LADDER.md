@@ -11,13 +11,15 @@ connect -> log in -> rejoin running battles -> search -> play -> record result a
 
 ## Once
 
-1. **A search-enabled `numbrion`.** The training venv's extension has no search feature and is in use by training,
-   so the ladder bot loads its own build from `scratch/ladder/bundle` (`numbrion_path` in the config):
+1. **A search-enabled `numbrion`.** The venv's editable extension, built with search (it costs training no measurable
+   speed). Rebuild after engine changes, while no training run has the extension loaded:
 
    ```sh
-   cd crates/pyengine && maturin build --release --features python,search --out ../../scratch/ladder/wheels
-   cd ../.. && python -m zipfile -e scratch/ladder/wheels/numbrion-*.whl scratch/ladder/bundle
+   cd crates/pyengine && maturin develop --release --features python,search
    ```
+
+   `--features search` alone drops the `python` feature and fails. To pin the bot to a separate build instead, set
+   `numbrion_path` in the config to an unpacked wheel directory; it goes first on `sys.path`.
 
 2. **Team pools** for the world builder, from the pinned Showdown checkout (about 4 minutes each):
 

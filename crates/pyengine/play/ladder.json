@@ -3,7 +3,6 @@
   "server": "wss://sim3.psim.us/showdown/websocket",
   "format": "gen9randomdoublesbattle",
   "credentials": null,
-  "numbrion_path": "scratch/ladder/bundle",
   "bot": {
     "factory": "training.search:SearchBot",
     "checkpoint": "scratch/training/teacher-s43-4h/snapshots/m240.pt",
