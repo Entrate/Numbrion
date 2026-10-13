@@ -269,7 +269,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
             if distilling and (stream_batches is None or minibatch_index in stream_batches):
                 labels_batch = (distill.sample(rng, args.distill_batch) if stream_batches is None
                                 else stream_batches.pop(minibatch_index))
-                imitation, agree = distill_loss(model, labels_batch)
+                tilt = getattr(args, "distill_tilt", 0.0)
+                imitation, agree = distill_loss(model, labels_batch, tilt) if tilt > 0 else distill_loss(model, labels_batch)
                 loss = loss + distill_weight * imitation
                 stats["distill_loss"].append(imitation.detach())
                 stats["distill_agree"].append(agree)
@@ -370,6 +371,8 @@ def parse_args(argv=None):
                         help="search-distillation loss weight (0: off); falls linearly to 0 at --distill-end-minutes")
     parser.add_argument("--distill-end-minutes", type=float, default=60.0)
     parser.add_argument("--distill-batch", type=int, default=128, help="labelled positions per minibatch")
+    parser.add_argument("--distill-tilt", type=float, default=0.0,
+                        help="> 0: imitate the search's values applied to the current policy, pi * exp(q / tilt) over the candidates, instead of the labelling teacher's strategy (training.distill)")
     parser.add_argument("--distill-max-batches", type=int, default=4, help="maximum stream batches per PPO update")
     parser.add_argument("--distill-max-uses", type=int, default=4, help="maximum batches per stream row over its life")
     parser.add_argument("--distill-reuse-gap", type=int, default=50, help="minimum PPO updates between stream row uses")
@@ -426,6 +429,8 @@ def parse_args(argv=None):
         parser.error("--teacher-coef and --teacher-temperature must be nonnegative")
     if args.distill_coef < 0 or (args.distill_coef > 0 and not (args.distill or args.distill_stream)):
         parser.error("--distill-coef must be nonnegative and needs --distill or --distill-stream")
+    if math.isnan(args.distill_tilt) or args.distill_tilt < 0:
+        parser.error("--distill-tilt must be nonnegative")
     if args.distill_batch <= 0 or args.distill_pairs <= 0 or args.distill_validate_every <= 0:
         parser.error("--distill-batch, --distill-pairs and --distill-validate-every must be positive")
     if args.distill_max_batches < 0 or args.distill_holdout_rows < 0:

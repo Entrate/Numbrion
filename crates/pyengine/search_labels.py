@@ -17,7 +17,6 @@ reloads newer teachers between games; ``--minutes inf`` runs until ``<out>/STOP`
 from __future__ import annotations
 
 import argparse
-import fcntl
 import gzip
 import json
 import os
@@ -27,6 +26,11 @@ import sys
 import threading
 import time
 import uuid
+
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import fcntl
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -101,8 +105,12 @@ def output_lock(out: Path):
     out.mkdir(parents=True, exist_ok=True)
     with (out / ".labels.lock").open("a") as lock:
         try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as error:
+            if sys.platform == "win32":  # locks the file's first byte; released when the process exits
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as error:  # BlockingIOError (flock) or a lock-violation OSError (msvcrt)
             raise RuntimeError(f"another label maker holds {out / '.labels.lock'}") from error
         yield
 

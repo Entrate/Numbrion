@@ -148,6 +148,9 @@ class Net:
     def __init__(self, checkpoint: Path, dex: Dex, device: str = "auto"):
         if device == "auto":  # the Apple GPU evaluates search batches ~1.5-2x faster than the CPU and frees it
             device = "mps" if torch.backends.mps.is_available() else "cpu"
+        if device == "directml":  # Windows AMD/Intel GPUs (training.device); leaf batches only, like MPS
+            from .device import training_device
+            device = training_device("directml")[0]
         state = torch.load(checkpoint, map_location="cpu", weights_only=False)
         self.width, self.layers = state.get("width", 128), state.get("layers", 3)
         # Policy calls are a few rows each, where the GPU's per-call latency dominates: they use a CPU copy. Leaf

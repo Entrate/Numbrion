@@ -53,7 +53,7 @@ class DistillData:
 
     def _prepare(self, shards: list[dict]) -> dict:
         data = {k: shards[0][k] if len(shards) == 1 else np.concatenate([s[k] for s in shards])
-                for k in (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior")}
+                for k in (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior", "q")}
         x = data["x"].astype(np.float32)
         top = np.argsort(-x, axis=1, kind="stable")[:, :self.pairs]  # most weighted candidates first
         rows = np.arange(len(x))[:, None]
@@ -67,7 +67,9 @@ class DistillData:
         weight = weight / weight.sum(1, keepdims=True, dtype=np.float64)
         prior = np.where(missing, 0.0, data["prior"][rows, top])
         out = {k: data[k] for k in OBS_KEYS}
-        out.update(mask0=data["mask0"], mask1=mask1, a0=pairs[..., 0], a1=pairs[..., 1], weight=weight.astype(np.float32))
+        out.update(mask0=data["mask0"], mask1=mask1, a0=pairs[..., 0], a1=pairs[..., 1], weight=weight.astype(np.float32),
+                   q=np.where(missing, 0.0, data["q"][rows, top]).astype(np.float32),
+                   valid=(~missing).astype(np.float32))
         # Reference losses over the same candidates: the targets' own entropy (the floor) and the labelling policy's
         # cross-entropy (its prior's log-probs of the candidates).
         safe = np.where(weight > 0, weight, 1.0)
@@ -558,9 +560,17 @@ class DistillStream(DistillData):
             self.pending_moves.clear()
 
 
-def distill_loss(model, batch: dict) -> tuple[torch.Tensor, torch.Tensor]:
+def distill_loss(model, batch: dict, tilt: float = 0.0) -> tuple[torch.Tensor, torch.Tensor]:
     """Mean over positions of ``-sum_k w_k log pi(a0_k, a1_k)``, and the share of positions whose most likely
-    candidate under the policy is the most weighted one (detached)."""
+    candidate under the policy is the most weighted one (detached).
+
+    The search's strategy is ``x ~ prior * exp(q / anchor)`` over its candidates (training.search: the KL anchor to
+    the labelling policy's prior), so ``w`` carries the labelling teacher's own preferences. ``tilt`` > 0 replaces
+    the target with the same improvement applied to the current policy: over the valid candidates,
+    ``t ~ pi_cond * exp(q / tilt)`` (``pi_cond``: the policy's pair probabilities renormalized over them, detached),
+    and the loss is ``-sum_k t_k log pi(k)``. The log-probabilities stay unconditional, like the strategy loss: with the
+    conditional ones, lowering a candidate spread its mass over every other legal pair (the policy's entropy doubled
+    within minutes of training)."""
     state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
     lp0, vectors0 = model.slot0(state, batch["mask0"])
     B, P = batch["a0"].shape
@@ -572,6 +582,13 @@ def distill_loss(model, batch: dict) -> tuple[torch.Tensor, torch.Tensor]:
     onehot1 = (a1.view(-1, 1) == torch.arange(n, device=a1.device)).float()
     logp = ((lp0.index_select(0, rows) * onehot0).sum(-1) + (lp1 * onehot1).sum(-1)).view(B, P)
     weight = batch["weight"]
+    if tilt > 0:
+        # Padding repeats the first candidate: push it out of the renormalization with a finite offset (no -inf on
+        # DirectML), so it gets no target weight and no gradient.
+        cond = logp + (batch["valid"] - 1) * 1e4
+        cond = cond - torch.logsumexp(cond, 1, keepdim=True)
+        target = torch.softmax(cond.detach() + batch["q"] / tilt, 1)
+        return -(target * logp).sum(1).mean(), (logp.detach().argmax(1) == weight.argmax(1)).float().mean()
     loss = -(weight * logp).sum(1).mean()
     agree = (logp.detach().argmax(1) == weight.argmax(1)).float().mean()
     return loss, agree

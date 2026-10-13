@@ -118,3 +118,37 @@ def test_loss_can_be_learned(tmp_path):
     last, agree = distill_loss(model, batch)
     assert float(last) < 0.7 * float(first)
     assert float(agree) > 0.5
+
+
+def test_tilt_target_is_the_search_improvement_of_the_current_policy(tmp_path):
+    """``tilt``: the target is the policy renormalized over the valid candidates times exp(q / tilt), imitated with
+    the unconditional pair log-probs; padding gets no weight."""
+    synthetic_labels(tmp_path, shards=1)
+    data = DistillData([tmp_path], torch.device("cpu"), pairs=4)
+    model = model_for_test(2)
+    batch = data.batch(np.arange(min(16, data.size)))
+    valid = batch["valid"].numpy() > 0
+    assert (valid == (batch["weight"].numpy() > 0)).all()  # synthetic weights are positive for every candidate
+
+    def pair_logp():
+        state = model.trunk(*(batch[k] for k in OBS_KEYS))
+        lp0, vectors0 = model.slot0(state, batch["mask0"])
+        rows = []
+        for p in range(4):
+            lp1 = model.slot1(state, vectors0, batch["a0"][:, p], batch["mask1"][:, p])
+            rows.append(lp0.gather(1, batch["a0"][:, p:p + 1]).squeeze(1) + lp1.gather(1, batch["a1"][:, p:p + 1]).squeeze(1))
+        return torch.stack(rows, 1)
+
+    rng = np.random.default_rng(3)
+    for q in (np.zeros(batch["q"].shape), rng.uniform(-0.2, 0.2, size=batch["q"].shape)):
+        batch["q"] = torch.from_numpy(q.astype(np.float32))
+        loss, _ = distill_loss(model, batch, tilt=0.05)
+        with torch.no_grad():
+            logp = pair_logp().double().numpy()
+        expected = []
+        for i in range(len(logp)):
+            lp = logp[i][valid[i]]
+            z = lp - np.logaddexp.reduce(lp) + q[i][valid[i]] / 0.05
+            target = np.exp(z - np.logaddexp.reduce(z))
+            expected.append(-(target * lp).sum())
+        assert abs(float(loss.detach()) - float(np.mean(expected))) < 1e-4
