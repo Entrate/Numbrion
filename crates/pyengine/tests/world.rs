@@ -27,6 +27,7 @@ use engine::{
     teams::{SetDef, TeamDef},
 };
 use std::sync::Arc;
+use std::time::Instant;
 
 type B = Battle<TextLog>;
 
@@ -248,7 +249,8 @@ fn worlds_reproduce_the_viewer_state() {
         let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
         let viewer = SideId(battle as u8 % 2);
         let turns = 1 + rng.below(8) as u32;
-        let Some((b, events, _)) = play([teams_of(&pool, i), teams_of(&pool, j)], rng.seed(), viewer, turns, &mut rng, None)
+        let Some((b, events, _)) =
+            play([teams_of(&pool, i), teams_of(&pool, j)], rng.seed(), viewer, turns, &mut rng, None)
         else {
             continue;
         };
@@ -292,14 +294,7 @@ fn worlds_reproduce_the_viewer_state() {
 }
 
 /// The opponent team with every detail the viewer never saw changed.
-fn disguise(
-    real: &TeamDef,
-    b: &B,
-    opp: SideId,
-    played: &[Boundary],
-    sets: &[SetDef],
-    rng: &mut SplitMix64,
-) -> TeamDef {
+fn disguise(real: &TeamDef, b: &B, opp: SideId, played: &[Boundary], sets: &[SetDef], rng: &mut SplitMix64) -> TeamDef {
     let mut t = real.clone();
     let revealed = b.revealed_mons();
     // Move slots each opponent Pokemon was ever told to use (stable MonIds).
@@ -439,7 +434,9 @@ fn identical_public_information_gives_identical_worlds() {
             }
         }
     }
-    eprintln!("leak test: {pairs} pairs ({differed} with different hidden opponent info), {discarded} discarded, {failed} without worlds");
+    eprintln!(
+        "leak test: {pairs} pairs ({differed} with different hidden opponent info), {discarded} discarded, {failed} without worlds"
+    );
     assert!(differed >= n / 6, "too few informative pairs: {differed}");
 }
 
@@ -455,13 +452,15 @@ fn worlds_follow_a_battle_decision_by_decision() {
     for battle in 0..n {
         let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
         let viewer = SideId(battle as u8 % 2);
-        let Ok(mut b) = B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
+        let Ok(mut b) =
+            B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
         else {
             continue;
         };
         b.start().unwrap();
         let own = Arc::new((*b.teams().sides[viewer.0 as usize]).clone());
-        let mut w = WorldBuilder::new(viewer, own, names(), sets.clone(), WorldConfig::default(), rng.next_u64()).unwrap();
+        let mut w =
+            WorldBuilder::new(viewer, own, names(), sets.clone(), WorldConfig::default(), rng.next_u64()).unwrap();
         w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
         let mut cursor = b.log.entries.len();
         let mut broken = false;
@@ -498,4 +497,229 @@ fn worlds_follow_a_battle_decision_by_decision() {
     }
     eprintln!("incremental: {ok} decisions with worlds, {failed} battles lost their worlds");
     assert!(ok > 0 && failed * 3 <= n, "{failed} of {n} battles lost their worlds");
+}
+
+/// Fixed simulation seeds, independent of the builder's draws and successes. Also usable on the
+/// base implementation: `cargo test ... --test world world_availability_and_timing -- --ignored --nocapture`.
+#[test]
+#[ignore = "availability and maintenance timing measurement"]
+fn world_availability_and_timing() {
+    measure_worlds(false);
+    measure_worlds(true);
+}
+
+fn measure_worlds(illusion: bool) -> (usize, usize) {
+    let pool = common::test_pool();
+    let sets = set_pool(&pool);
+    let candidates: Vec<_> = (0..pool.len())
+        .filter(|&i| {
+            let t = teams_of(&pool, i);
+            t.sets[..t.len as usize].iter().any(|s| s.ability == engine::dex::ABILITY_ILLUSION) == illusion
+        })
+        .collect();
+    let mut times = Vec::new();
+    let mut counts = [[0usize; 2]; 2];
+    for battle in 0..common::n_battles(12) {
+        let mut rng = SplitMix64(2000 + battle as u64);
+        let own = teams_of(&pool, rng.below(pool.len()));
+        let mut opp = (*teams_of(&pool, candidates[battle % candidates.len()])).clone();
+        if illusion {
+            let z =
+                opp.sets[..opp.len as usize].iter().position(|s| s.ability == engine::dex::ABILITY_ILLUSION).unwrap();
+            opp.sets.swap(0, z);
+        }
+        let mut b = B::from_team_defs(rng.seed(), own, Arc::new(opp), names(), TextLog::default()).unwrap();
+        b.start().unwrap();
+        let viewer = SideId(0);
+        let mut w = WorldBuilder::new(
+            viewer,
+            b.teams().sides[0].clone(),
+            names(),
+            sets.clone(),
+            WorldConfig::default(),
+            3000 + battle as u64,
+        )
+        .unwrap();
+        w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
+        let mut cursor = b.log.entries.len();
+        let mut revealed = false;
+        while !b.state.ended && b.turn() <= 10 {
+            for side in [viewer, SideId(1)] {
+                if !needs(&b, side) {
+                    continue;
+                }
+                let choice = pick(&b, side, &mut rng);
+                if side == viewer {
+                    w.push_request(&b.request_json(0).unwrap());
+                    let start = Instant::now();
+                    let result = w.worlds::<TextLog>(2, 4000 + counts.iter().flatten().sum::<usize>() as u64);
+                    if std::env::var_os("NUMBRION_WORLD_TRACE").is_some()
+                        && let Err(e) = &result
+                    {
+                        eprintln!(
+                            "measurement battle {battle} turn {} revealed {revealed}: {e}; {}",
+                            b.turn(),
+                            w.last_failure()
+                        );
+                    }
+                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                    counts[revealed as usize][result.is_ok() as usize] += 1;
+                    if let Ok(worlds) = result {
+                        for world in worlds {
+                            assert_eq!(world.request_json(0), b.request_json(0));
+                        }
+                    }
+                    w.push_choice(&choice_text(&b, side, &choice));
+                }
+                b.choose_typed(side, &choice).unwrap();
+            }
+            let lines = player_view(&b.log.entries, cursor, viewer);
+            revealed |= lines.iter().any(|s| s.starts_with("|replace|p2"));
+            w.push_lines(lines.iter().map(String::as_str));
+            cursor = b.log.entries.len();
+        }
+    }
+    times.sort_by(f64::total_cmp);
+    let n = times.len();
+    eprintln!(
+        "{}: before replace {}/{}; after replace {}/{}; update/worlds ms median {:.3}, mean {:.3}, p90 {:.3}",
+        if illusion { "Illusion" } else { "normal" },
+        counts[0][1],
+        counts[0].iter().sum::<usize>(),
+        counts[1][1],
+        counts[1].iter().sum::<usize>(),
+        times[n / 2],
+        times.iter().sum::<f64>() / n as f64,
+        times[n * 9 / 10]
+    );
+    (counts.iter().map(|c| c[1]).sum(), n)
+}
+
+#[test]
+fn illusion_worlds_follow_random_battles() {
+    let (ok, total) = measure_worlds(true);
+    assert!(ok * 10 >= total * 9, "Illusion worlds at only {ok}/{total} decisions");
+}
+
+fn illusion_fixture() -> (Arc<TeamDef>, Arc<TeamDef>, Arc<SetPool>) {
+    let pool = common::test_pool();
+    let z = teams_of(&pool, 5).sets[4].clone();
+    let b = (0..pool.len())
+        .flat_map(|i| teams_of(&pool, i).sets[..6].to_vec())
+        .find(|s| s.species == engine::dex::SPECIES_BASTIODON)
+        .unwrap();
+    let u = TeamDef::unpack(
+        "Umbreon||Leftovers|InnerFocus|snarl,protect,foulplay,moonlight||85,,85,85,85,85|M|,0,,,,||85|,,,,,Dark",
+    )
+    .unwrap()
+    .sets[0]
+        .clone();
+    let l = TeamDef::unpack(
+        "Latias||SoulDew|Levitate|mistball,recover,dracometeor,tailwind||85,,85,85,85,85|F|,0,,,,||80|,,,,,Steel",
+    )
+    .unwrap()
+    .sets[0]
+        .clone();
+    let bl = teams_of(&pool, 5).sets[5].clone();
+    let m = TeamDef::unpack(
+        "Mesprit||LifeOrb|Levitate|protect,psychic,nastyplot,dazzlinggleam||85,,85,85,85,85|N|,0,,,,||86|,,,,,Psychic",
+    )
+    .unwrap()
+    .sets[0]
+        .clone();
+    let mut opp = TeamDef { len: 6, ..TeamDef::default() };
+    opp.sets = [z, l, u, m, bl, b];
+    let mut own = opp.clone();
+    own.sets.swap(0, 4);
+    own.sets.swap(1, 2);
+    let mut sets = SetPool::new();
+    for s in &opp.sets {
+        sets.add_set(s);
+    }
+    (Arc::new(own), Arc::new(opp), Arc::new(sets))
+}
+
+#[test]
+fn bastiodon_uses_zoroark_moves_and_damage_before_replace() {
+    let (own, opp, sets) = illusion_fixture();
+    let mut b = B::from_team_defs([1, 2, 3, 4], own, opp, names(), TextLog::default()).unwrap();
+    b.start().unwrap();
+    let mut w =
+        WorldBuilder::new(SideId(0), b.teams().sides[0].clone(), names(), sets, WorldConfig::default(), 41).unwrap();
+    w.push_lines(player_view(&b.log.entries, 0, SideId(0)).iter().map(String::as_str));
+    let mut cursor = b.log.entries.len();
+    for turn in 1..=5 {
+        w.push_request(&b.request_json(0).unwrap());
+        let worlds = w.worlds::<TextLog>(2, turn).unwrap_or_else(|e| panic!("turn {turn}: {e}; {}", w.last_failure()));
+        for world in worlds {
+            assert_eq!(world.request_json(0), b.request_json(0));
+        }
+        if turn == 5 {
+            break;
+        }
+        let own = if turn == 4 { "move 4 +1, move 4" } else { "move 2, move 4" };
+        let opp = match turn {
+            1 => "move 2, move 2",
+            3 => "move 4 +2, move 2",
+            _ => "move 3, move 2",
+        };
+        w.push_choice(own);
+        b.choose(0, own).unwrap();
+        b.choose(1, opp).unwrap();
+        let lines = player_view(&b.log.entries, cursor, SideId(0));
+        if turn == 3 {
+            assert!(lines.iter().any(|s| s.starts_with("|move|p2a: Bastiodon|Sludge Bomb")));
+            assert!(lines.iter().any(|s| s.starts_with("|-damage|p2a: Bastiodon|") && s.contains("Life Orb")));
+            assert!(!b.log.entries.iter().any(|s| s.starts_with("|replace|")));
+        }
+        if turn == 4 {
+            assert!(lines.iter().any(|s| s.starts_with("|replace|p2a: Zoroark|")));
+        }
+        w.push_lines(lines.iter().map(String::as_str));
+        cursor = b.log.entries.len();
+    }
+}
+
+#[test]
+fn hidden_illusion_and_a_real_disguise_have_identical_world_inputs() {
+    let (own, opp, sets) = illusion_fixture();
+    let mut alt = (*opp).clone();
+    alt.sets.swap(0, 5);
+    alt.sets[0].moves[1] = engine::dex::MOVE_PROTECT;
+    let mut battles: Vec<_> = [opp, Arc::new(alt)]
+        .into_iter()
+        .map(|opp| {
+            let mut b = B::from_team_defs([1, 2, 3, 4], own.clone(), opp, names(), TextLog::default()).unwrap();
+            b.start().unwrap();
+            b.choose(0, "move 1, move 4").unwrap();
+            b.choose(1, "move 2, move 2").unwrap();
+            b
+        })
+        .collect();
+    let a = battles.remove(0);
+    let b = battles.remove(0);
+    let la = player_view(&a.log.entries, 0, SideId(0));
+    let lb = player_view(&b.log.entries, 0, SideId(0));
+    assert_eq!(la, lb);
+    let config = WorldConfig { particles: 32, rebuild_budget: 64, ..WorldConfig::default() };
+    let mut wa = WorldBuilder::new(SideId(0), a.teams().sides[0].clone(), names(), sets.clone(), config, 32).unwrap();
+    let mut wb = WorldBuilder::new(SideId(0), b.teams().sides[0].clone(), names(), sets, config, 32).unwrap();
+    // Update before and after the same public choice, so the hypothesis prior also runs.
+    for w in [&mut wa, &mut wb] {
+        let initial = la.iter().position(|s| s == "|turn|1").unwrap() + 1;
+        w.push_lines(la[..initial].iter().map(String::as_str));
+        w.update().unwrap();
+        w.push_choice("move 1, move 4");
+        w.push_lines(la[initial..].iter().map(String::as_str));
+        w.push_request(&a.request_json(0).unwrap());
+        w.update().unwrap();
+    }
+    assert!(
+        wa.opponent_teams().iter().any(|t| { t.sets[..2].iter().any(|s| s.ability == engine::dex::ABILITY_ILLUSION) })
+    );
+    assert_eq!(wa.stats, wb.stats);
+    assert_eq!(wa.opponent_teams(), wb.opponent_teams());
+    for (x, y) in wa.worlds::<TextLog>(4, 77).unwrap().into_iter().zip(wb.worlds::<TextLog>(4, 77).unwrap()) {
+        assert_eq!(format!("{:?}", x.state), format!("{:?}", y.state));
+    }
 }

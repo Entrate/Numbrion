@@ -20,8 +20,10 @@
 //! observations, and dropped when that switch-in was its only appearance. Observations are kept
 //! per Pokemon (`MonInfo` is a fold over them) and tagged with the stint (one switch-in at one
 //! position) they were made in, so a disguise active next to the Pokemon it imitates is split
-//! correctly. A disguise that breaks only by fainting (no `|replace|`) cannot be detected: its
-//! observations stay on the imitated Pokemon.
+//! correctly. Entry identities and party events are retained even when a disguise record is
+//! dropped. Search can fold a stint-filtered view, moving unbroken stints to a hypothetical
+//! Illusion user without changing the tracker. This also covers silent Illusion endings on faint:
+//! a later living appearance of the disguise is evidence for search, not a tracker contradiction.
 use super::protocol::{Line, effect_kind, parse_condition, parse_details, parse_ident, parse_side};
 use crate::{
     dex,
@@ -190,6 +192,18 @@ impl MonInfo {
 
     fn identified(&self) -> bool {
         !self.details_species.is_empty()
+    }
+
+    /// Identity plus a fresh fold, without copying the observation log.
+    fn identity(&self) -> Self {
+        let mut m = Self::new(&self.name);
+        m.species = self.species;
+        m.details_species = self.details_species.clone();
+        m.current_species = self.details_species.clone();
+        m.level = self.level;
+        m.gender = self.gender;
+        m.shiny = self.shiny;
+        m
     }
 
     /// Rebuild every observed field from the log (identity is kept).
@@ -376,6 +390,34 @@ struct SideState {
     leads: [Option<(usize, u32)>; 2],
     team_size: Option<u8>,
     tera_used: bool,
+    entries: Vec<Stint>,
+    party_events: Vec<PartyEvent>,
+}
+
+/// One public entry, indexed by its compared protocol line. `owner` changes on `replace`, while
+/// `shown` keeps the disguise's identity (including when its only record was removed).
+#[derive(Clone, Debug)]
+pub struct Stint {
+    pub id: u32,
+    pub line: usize,
+    pub last: usize,
+    pub faint_line: Option<usize>,
+    pub position: u8,
+    pub lead: bool,
+    pub shown: MonInfo,
+    pub owner: String,
+    /// A replace or an original non-Illusion ability rules out an unexplained disguise.
+    pub certain: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum PartyEvent {
+    Enter(u32),
+    Faint(u32),
+    Swap(u8, u8),
+    Revive(String),
+    Tera(u32),
+    Transform(u32),
 }
 
 /// An item swap (Trick / Switcheroo) between its `-activate` line and its `-item` / `-enditem`
@@ -393,6 +435,7 @@ pub struct RevealTracker {
     sides: [SideState; 2],
     turn: u32,
     stints: u32,
+    compared: usize,
     swap: Option<PendingSwap>,
     /// An item that left its holder for another Pokemon to use (Bug Bite / Pluck, Fling): its
     /// effect tags on others until the next action name the item, not their own.
@@ -458,12 +501,7 @@ fn abilities_differ(a: EffectId, b: EffectId) -> bool {
             .any(|s| !has(sa, s.id))
 }
 
-const ITEM_TAKERS: &[&str] = &[
-    "move: Thief",
-    "move: Covet",
-    "ability: Magician",
-    "ability: Pickpocket",
-];
+const ITEM_TAKERS: &[&str] = &["move: Thief", "move: Covet", "ability: Magician", "ability: Pickpocket"];
 const ITEM_SWAPS: &[&str] = &["move: Trick", "move: Switcheroo"];
 
 impl RevealTracker {
@@ -494,6 +532,10 @@ impl RevealTracker {
             .map(|(i, _)| i)
     }
 
+    pub(crate) fn active_stint(&self, side: SideId, position: u8) -> Option<u32> {
+        self.sides[side.0 as usize].at.get(position as usize).copied().flatten().map(|(_, st)| st)
+    }
+
     /// The Pokemon sent out before `|turn|1` (the real Pokemon when a lead's Illusion broke).
     pub fn leads(&self, side: SideId) -> [Option<usize>; 2] {
         self.sides[side.0 as usize & 1]
@@ -513,21 +555,73 @@ impl RevealTracker {
         self.sides[side.0 as usize & 1].tera_used
     }
 
+    pub fn stints(&self, side: SideId) -> &[Stint] {
+        &self.sides[side.0 as usize].entries
+    }
+
+    pub fn entry(&self, side: SideId, line: usize) -> Option<&Stint> {
+        let entries = self.stints(side);
+        entries.binary_search_by_key(&line, |s| s.line).ok().map(|i| &entries[i])
+    }
+
+    pub(crate) fn party_events(&self, side: SideId) -> &[PartyEvent] {
+        &self.sides[side.0 as usize].party_events
+    }
+
+    /// Per-world observation view. Only the six small folds are built; neither the tracker nor
+    /// its logs are cloned. Disguise details constrain the disguise, never the user's true level.
+    pub(crate) fn illusion_view(&self, side: SideId, moved: &[u32], user: &str, species: &str) -> Vec<MonInfo> {
+        let mut out: Vec<_> = self
+            .mons(side)
+            .iter()
+            .map(|m| {
+                let mut fresh = m.identity();
+                for &(st, obs) in &m.log {
+                    if !moved.contains(&st) {
+                        fresh.apply(obs);
+                    }
+                }
+                fresh
+            })
+            .collect();
+        let index = out.iter().position(|m| m.name == user).unwrap_or_else(|| {
+            let mut m = MonInfo::new(user);
+            m.identify(species);
+            // The pool supplies the level, gender and shiny flag of a hidden user.
+            m.level = 0;
+            out.push(m);
+            out.len() - 1
+        });
+        let mut log: Vec<_> = self
+            .mons(side)
+            .iter()
+            .flat_map(|m| m.log.iter().copied().filter(move |(st, _)| m.name == user || moved.contains(st)))
+            .collect();
+        log.sort_by_key(|(st, _)| *st);
+        out[index] = out[index].identity();
+        for (_, mut obs) in log {
+            if let Obs::SwitchIn { species, .. } = &mut obs {
+                *species = out[index].species;
+            }
+            out[index].apply(obs);
+        }
+        out[index].apply(Obs::Ability(dex::ABILITY_ILLUSION));
+        out
+    }
+
     /// One player-view line. Lines that are not protocol lines, unknown commands and malformed
     /// arguments are ignored.
     pub fn feed(&mut self, line: &str) {
+        let at = self.compared;
+        self.compared += usize::from(super::protocol::is_compared(line));
         let Some(l) = Line::parse(line) else { return };
         let cmd = l.cmd();
         if self.swap.is_some()
-            && !(matches!(cmd, "-item" | "-enditem")
-                && l.tag("from").is_some_and(|f| ITEM_SWAPS.contains(&f)))
+            && !(matches!(cmd, "-item" | "-enditem") && l.tag("from").is_some_and(|f| ITEM_SWAPS.contains(&f)))
         {
             self.finish_swap();
         }
-        if matches!(
-            cmd,
-            "" | "move" | "cant" | "switch" | "drag" | "faint" | "turn" | "upkeep"
-        ) {
+        if matches!(cmd, "" | "move" | "cant" | "switch" | "drag" | "faint" | "turn" | "upkeep") {
             self.foreign_item = None;
         }
         let as_one = self.as_one.take();
@@ -545,17 +639,19 @@ impl RevealTracker {
                     self.sides[side.0 as usize].team_size = Some(n);
                 }
             }
-            "switch" | "drag" => self.switch_in(&l),
+            "switch" | "drag" => self.switch_in(&l, at),
             "replace" => self.replace(&l),
             "detailschange" | "-formechange" => self.forme_change(&l),
             "swap" => self.swap_positions(&l),
             "move" => self.on_move(&l),
             "cant" => self.on_cant(&l),
             "-damage" | "-heal" | "-sethp" => {
-                if let (Some(r), Some((hp, max_hp, status))) =
-                    (self.resolve(l.arg(0)), condition(l.arg(1)))
-                {
+                if let (Some(r), Some((hp, max_hp, status))) = (self.resolve(l.arg(0)), condition(l.arg(1))) {
                     self.observe(r, Obs::Hp { hp, max_hp, status });
+                    if l.cmd() == "-heal" && l.tag("from") == Some("move: Revival Blessing") {
+                        let name = self.mon(r).name.clone();
+                        self.sides[r.side.0 as usize].party_events.push(PartyEvent::Revive(name));
+                    }
                 }
             }
             "-status" => {
@@ -574,14 +670,7 @@ impl RevealTracker {
             "-cureteam" => {
                 if let Some(side) = parse_side(l.arg(0)) {
                     for idx in 0..self.sides[side.0 as usize].mons.len() {
-                        self.observe(
-                            Ref {
-                                side,
-                                idx,
-                                stint: 0,
-                            },
-                            Obs::CureStatus,
-                        );
+                        self.observe(Ref { side, idx, stint: 0 }, Obs::CureStatus);
                     }
                 }
             }
@@ -590,6 +679,10 @@ impl RevealTracker {
                     && let Some(r) = self.resolve(l.arg(0))
                 {
                     self.observe(r, Obs::Faint { pos: id.position });
+                    if let Some(e) = self.sides[r.side.0 as usize].entries.iter_mut().rev().find(|e| e.id == r.stint) {
+                        e.faint_line = Some(at);
+                    }
+                    self.sides[r.side.0 as usize].party_events.push(PartyEvent::Faint(r.stint));
                     if let Some(p) = id.position
                         && let Some(slot) = self.sides[r.side.0 as usize].at.get_mut(p as usize)
                         && slot.is_some_and(|(i, _)| i == r.idx)
@@ -602,12 +695,14 @@ impl RevealTracker {
                 if let (Some(r), Some(t)) = (self.resolve(l.arg(0)), dex::type_id(l.arg(1))) {
                     self.sides[r.side.0 as usize].tera_used = true;
                     self.observe(r, Obs::Tera(t));
+                    self.sides[r.side.0 as usize].party_events.push(PartyEvent::Tera(r.stint));
                 }
             }
             "-transform" => {
                 if let Some(r) = self.resolve(l.arg(0)) {
                     let copied = self.resolve(l.arg(1)).and_then(|t| self.mon(t).ability);
                     self.observe(r, Obs::Transform(copied));
+                    self.sides[r.side.0 as usize].party_events.push(PartyEvent::Transform(r.stint));
                 }
             }
             "-item" => self.on_item(&l),
@@ -658,6 +753,15 @@ impl RevealTracker {
     }
 
     fn observe(&mut self, r: Ref, o: Obs) {
+        if let Some(entry) = self.sides[r.side.0 as usize].entries.iter_mut().rev().find(|e| e.id == r.stint) {
+            entry.last = self.compared;
+        }
+        if matches!(o, Obs::Ability(a) if a != dex::ABILITY_ILLUSION)
+            && !self.mon(r).ability_changed
+            && let Some(entry) = self.sides[r.side.0 as usize].entries.iter_mut().find(|e| e.id == r.stint)
+        {
+            entry.certain = true;
+        }
         let m = &mut self.sides[r.side.0 as usize].mons[r.idx];
         m.log.push((r.stint, o));
         m.apply(o);
@@ -666,12 +770,11 @@ impl RevealTracker {
     /// Ability `name` shown for `r`; Calyrex's As One shows as `As One` plus its components.
     fn ability_id(&self, r: Ref, name: &str) -> Option<EffectId> {
         let species = self.mon(r).species;
-        if species != EffectId::NONE
-            && matches!(name, "As One" | "Unnerve" | "Chilling Neigh" | "Grim Neigh")
-        {
-            let as_one = dex::species(species).abilities.iter().find(|s| {
-                s.id == dex::ABILITY_ASONEGLASTRIER || s.id == dex::ABILITY_ASONESPECTRIER
-            });
+        if species != EffectId::NONE && matches!(name, "As One" | "Unnerve" | "Chilling Neigh" | "Grim Neigh") {
+            let as_one = dex::species(species)
+                .abilities
+                .iter()
+                .find(|s| s.id == dex::ABILITY_ASONEGLASTRIER || s.id == dex::ABILITY_ASONESPECTRIER);
             if let Some(slot) = as_one {
                 return Some(slot.id);
             }
@@ -687,9 +790,8 @@ impl RevealTracker {
 
     fn reveal_item(&mut self, r: Ref, name: &str) {
         if let Some(i) = item_id(name) {
-            if self.foreign_item.is_some_and(|(holder, item)| {
-                item == i && (holder.side, holder.idx) != (r.side, r.idx)
-            }) {
+            if self.foreign_item.is_some_and(|(holder, item)| item == i && (holder.side, holder.idx) != (r.side, r.idx))
+            {
                 return;
             }
             self.observe(r, Obs::ItemSeen(i));
@@ -735,7 +837,7 @@ impl RevealTracker {
         }
     }
 
-    fn switch_in(&mut self, l: &Line) {
+    fn switch_in(&mut self, l: &Line, line: usize) {
         let Some(id) = parse_ident(l.arg(0)) else {
             return;
         };
@@ -749,17 +851,24 @@ impl RevealTracker {
             self.sides[s].mons[r.idx].identify(l.arg(1));
         }
         if let Some((prev, stint)) = self.sides[s].at[pos as usize] {
-            self.observe(
-                Ref {
-                    side: r.side,
-                    idx: prev,
-                    stint,
-                },
-                Obs::SwitchOut { pos },
-            );
+            self.observe(Ref { side: r.side, idx: prev, stint }, Obs::SwitchOut { pos });
         }
         self.stints += 1;
         let stint = self.stints;
+        let mut shown = MonInfo::new(id.name);
+        shown.identify(l.arg(1));
+        self.sides[s].entries.push(Stint {
+            id: stint,
+            line,
+            last: line,
+            faint_line: None,
+            position: pos,
+            lead: self.turn == 0 && pos < 2 && self.sides[s].leads[pos as usize].is_none(),
+            shown,
+            owner: id.name.to_owned(),
+            certain: false,
+        });
+        self.sides[s].party_events.push(PartyEvent::Enter(stint));
         self.sides[s].at[pos as usize] = Some((r.idx, stint));
         if self.turn == 0 && (pos as usize) < 2 && self.sides[s].leads[pos as usize].is_none() {
             self.sides[s].leads[pos as usize] = Some((r.idx, stint));
@@ -770,15 +879,7 @@ impl RevealTracker {
         }
         let species = species_id(details.species);
         let condition = condition(l.arg(2));
-        self.observe(
-            Ref { stint, ..r },
-            Obs::SwitchIn {
-                pos,
-                species,
-                condition,
-                tera,
-            },
-        );
+        self.observe(Ref { stint, ..r }, Obs::SwitchIn { pos, species, condition, tera });
     }
 
     /// `|replace|POS: REAL|DETAILS`: the Pokemon at POS since its switch-in was REAL in disguise.
@@ -805,8 +906,7 @@ impl RevealTracker {
         let (moved, stint) = match current {
             Some((disguise, stint)) if disguise != real => {
                 let log = std::mem::take(&mut self.sides[s].mons[disguise].log);
-                let (moved, kept): (Vec<_>, Vec<_>) =
-                    log.into_iter().partition(|&(st, _)| st == stint);
+                let (moved, kept): (Vec<_>, Vec<_>) = log.into_iter().partition(|&(st, _)| st == stint);
                 self.sides[s].mons[disguise].log = kept;
                 self.sides[s].mons[disguise].refold();
                 (moved, stint)
@@ -816,18 +916,7 @@ impl RevealTracker {
                 self.stints += 1;
                 let condition = None;
                 let tera = None;
-                (
-                    vec![(
-                        self.stints,
-                        Obs::SwitchIn {
-                            pos,
-                            species: real_species,
-                            condition,
-                            tera,
-                        },
-                    )],
-                    self.stints,
-                )
+                (vec![(self.stints, Obs::SwitchIn { pos, species: real_species, condition, tera })], self.stints)
             }
         };
         {
@@ -843,6 +932,10 @@ impl RevealTracker {
             m.refold();
         }
         self.sides[s].at[pos as usize] = Some((real, stint));
+        if let Some(entry) = self.sides[s].entries.iter_mut().find(|e| e.id == stint) {
+            entry.owner = id.name.to_owned();
+            entry.certain = true;
+        }
         for lead in &mut self.sides[s].leads {
             if lead.is_some_and(|(_, st)| st == stint) {
                 *lead = Some((real, stint));
@@ -907,31 +1000,15 @@ impl RevealTracker {
             return;
         }
         let s = id.side.0 as usize;
-        let (a, b) = (
-            self.sides[s].at[from as usize],
-            self.sides[s].at[to as usize],
-        );
+        let (a, b) = (self.sides[s].at[from as usize], self.sides[s].at[to as usize]);
+        self.sides[s].party_events.push(PartyEvent::Swap(from, to));
         self.sides[s].at[from as usize] = b;
         self.sides[s].at[to as usize] = a;
         if let Some((idx, stint)) = a {
-            self.observe(
-                Ref {
-                    side: id.side,
-                    idx,
-                    stint,
-                },
-                Obs::Swap { from, to },
-            );
+            self.observe(Ref { side: id.side, idx, stint }, Obs::Swap { from, to });
         }
         if let Some((idx, stint)) = b {
-            self.observe(
-                Ref {
-                    side: id.side,
-                    idx,
-                    stint,
-                },
-                Obs::Swap { from: to, to: from },
-            );
+            self.observe(Ref { side: id.side, idx, stint }, Obs::Swap { from: to, to: from });
         }
     }
 
@@ -1061,11 +1138,7 @@ impl RevealTracker {
         };
         match l.tag("from") {
             Some(f) if ITEM_SWAPS.contains(&f) => {
-                let own = self.swap.and_then(|p| {
-                    p.parties
-                        .iter()
-                        .position(|q| (q.side, q.idx) == (r.side, r.idx))
-                });
+                let own = self.swap.and_then(|p| p.parties.iter().position(|q| (q.side, q.idx) == (r.side, r.idx)));
                 match own {
                     Some(i) => self.swap_reveal(i, item),
                     None => {
@@ -1752,5 +1825,29 @@ mod tests {
         assert!(t.find(P2, "Snorlax").is_none());
         assert_eq!(t.leads(P2), [t.find(P2, "Zoroark"), t.find(P2, "Furret")]);
         assert_eq!(t.mons(P2).len(), 2);
+    }
+
+    #[test]
+    fn a_silent_faint_can_be_refolded_without_reviving_the_user() {
+        let t = track(
+            "|switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Sludge Bomb|p1a: X
+            |-damage|p2a: Bastiodon|0 fnt|[from] item: Life Orb
+            |faint|p2a: Bastiodon
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |move|p2a: Bastiodon|Body Press|p1a: X",
+        );
+        let stint = t.stints(P2)[0].id;
+        let view = t.illusion_view(P2, &[stint], "Zoroark", "Zoroark");
+        let z = view.iter().find(|m| m.name == "Zoroark").unwrap();
+        let b = view.iter().find(|m| m.name == "Bastiodon").unwrap();
+        assert!(z.fainted && !b.fainted);
+        assert_eq!(z.moves, [mv("Sludge Bomb")]);
+        assert_eq!(b.moves, [mv("Body Press")]);
+        assert_eq!(z.starting_item, Some(item("Life Orb")));
+        assert_eq!(z.level, 0, "a disguised level does not constrain the user");
+        assert_eq!(mon(&t, P2, "Bastiodon").moves, [mv("Sludge Bomb"), mv("Body Press")]);
     }
 }

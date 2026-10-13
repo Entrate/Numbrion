@@ -23,6 +23,10 @@
 //!   opponent Pokemon seen for the first time is swapped into a never-revealed bench slot with
 //!   `replace_hidden_set` (exact by its contract); dead worlds are rebuilt from scratch within a
 //!   budget, the rest refilled by copying survivors.
+//! * Illusion entries are pinned to their attributed owner. Unbroken entries may instead belong
+//!   to a per-world hidden Illusion user: observations are folded by stint, and at most 6! party
+//!   orders are checked against switches, faints and swaps before replay. Fresh worlds carry a
+//!   pool-frequency prior; failed rebuilds try recent ambiguous stints before repairing pool sets.
 //! * `worlds` returns copies at the current decision boundary, reseeded from the caller's seed (the
 //!   PRNG state is hidden information too).
 //!
@@ -32,13 +36,13 @@
 use super::{
     SplitMix64,
     protocol::{self, Line, parse_ident},
-    reveal::RevealTracker,
+    reveal::{MonInfo, PartyEvent, RevealTracker, Stint},
     sets::{SetConstraints, SetPool},
 };
 use crate::{
     Battle, dex,
     ids::*,
-    log::{LogEntry, LogSink, LogView, MoveLineEdit, TextLog},
+    log::{LogArg, LogEntry, LogSink, LogView, MoveLineEdit, TextLog},
     prng::RESAMPLE_CAPACITY,
     sim::choices::LegalActions,
     state::choices::{ChoiceKind, RequestKind, SlotChoice},
@@ -81,6 +85,8 @@ pub enum WorldError {
     Desync(&'static str),
     /// Team construction failed.
     Team(String),
+    /// The sampled identities cannot produce the observed disguises in any party order.
+    IllusionOrder,
 }
 
 impl core::fmt::Display for WorldError {
@@ -91,6 +97,7 @@ impl core::fmt::Display for WorldError {
             Self::PendingChoice => f.write_str("a choice was pushed without the lines it produced"),
             Self::Desync(what) => write!(f, "inconsistent observation stream: {what}"),
             Self::Team(e) => write!(f, "invalid team: {e}"),
+            Self::IllusionOrder => f.write_str("no sampled party order reproduces the observed Illusion entries"),
         }
     }
 }
@@ -119,6 +126,10 @@ pub struct WorldStats {
 pub struct DrawLog {
     pub text: TextLog,
     pub draws: Vec<u32>,
+    /// Replay-world entry identities, for forced drags and other engine-selected replacements.
+    /// Disabled when the pool cannot contain Illusion; no per-line allocation on either path.
+    track_entries: bool,
+    entry_mons: Vec<(usize, MonId)>,
 }
 
 impl LogSink for DrawLog {
@@ -127,12 +138,20 @@ impl LogSink for DrawLog {
     fn reset(&mut self) {
         self.text.reset();
         self.draws.clear();
+        self.entry_mons.clear();
     }
 
     fn emit(&mut self, view: LogView<'_>, entry: LogEntry<'_>) {
         let draws = view.state.prng.draws();
         self.text.emit(view, entry);
         self.draws.resize(self.text.entries.len(), draws);
+        if self.track_entries
+            && matches!(entry.command, "switch" | "drag")
+            && let Some(LogArg::Mon(mon)) = entry.args.first()
+        {
+            // These entries are split: the last emitted line is the opponent's public view.
+            self.entry_mons.push((self.text.entries.len() - 1, *mon));
+        }
     }
 
     fn edit_move(&mut self, view: LogView<'_>, edit: MoveLineEdit<'_>) {
@@ -142,6 +161,11 @@ impl LogSink for DrawLog {
             && let Some(i) = line
         {
             self.draws.remove(i);
+            for (at, _) in &mut self.entry_mons {
+                if *at > i {
+                    *at -= 1;
+                }
+            }
         }
     }
 }
@@ -159,17 +183,31 @@ struct Particle {
     log_w: f64,
     /// Why the world was dropped (diagnostics).
     why: String,
+    hypothesis: Option<IllusionHypothesis>,
+}
+
+#[derive(Clone, Debug)]
+struct IllusionHypothesis {
+    user: String,
+    species: String,
+    stints: Vec<u32>,
 }
 
 /// What the protocol says one opponent slot chose at a boundary.
 #[derive(Clone, Debug, PartialEq)]
 enum SlotSpec {
     Pass,
-    Move { id: EffectId, loc: Option<i8>, tera: bool },
+    Move {
+        id: EffectId,
+        loc: Option<i8>,
+        tera: bool,
+    },
     /// The slot acted invisibly (flinch, sleep, fainted first) or not at all: any legal move,
     /// terastallizing when the protocol showed its Tera.
-    AnyMove { tera: bool },
-    Switch(String),
+    AnyMove {
+        tera: bool,
+    },
+    Switch(String, usize),
     Revive(String),
 }
 
@@ -183,20 +221,31 @@ enum Dead {
 }
 
 /// Borrowed inputs of a replay.
+#[derive(Clone, Copy)]
 struct Ctx<'a> {
     viewer: SideId,
     lines: &'a [String],
     choices: &'a [(usize, String)],
     requests: &'a [Option<String>],
-    move_orders: &'a [(String, Vec<EffectId>)],
+    move_orders: &'a [(String, u32, Vec<EffectId>)],
     tracker: &'a RevealTracker,
     pool: &'a SetPool,
     config: &'a WorldConfig,
+    seen: &'a [MonInfo],
+    hypothesis: Option<&'a IllusionHypothesis>,
+    repair: bool,
 }
 
 impl Ctx<'_> {
     fn opp(&self) -> SideId {
         SideId(1 - self.viewer.0)
+    }
+
+    fn owner<'a>(&'a self, entry: &'a Stint) -> &'a str {
+        match self.hypothesis {
+            Some(h) if h.stints.contains(&entry.id) => &h.user,
+            _ => &entry.owner,
+        }
     }
 }
 
@@ -215,10 +264,10 @@ pub struct WorldBuilder {
     /// Viewer request JSON by the index of the choice that answered it (`None`: not pushed).
     requests: Vec<Option<String>>,
     /// Viewer Pokemon name -> the opponent Pokemon it is transformed into (`-transform` lines).
-    transformed: Vec<(String, String)>,
+    transformed: Vec<(String, String, u32)>,
     /// Opponent Pokemon name -> its exact moves in slot order, read off the viewer's request while a
     /// viewer Pokemon was transformed into it (Transform copies the move slots in order).
-    move_orders: Vec<(String, Vec<EffectId>)>,
+    move_orders: Vec<(String, u32, Vec<EffectId>)>,
     particles: Vec<Particle>,
     /// Why the most recently dropped world was dropped.
     last_failure: String,
@@ -307,8 +356,9 @@ impl WorldBuilder {
                 && user.side == self.viewer
                 && target.side != self.viewer
             {
-                self.transformed.retain(|(u, _)| u != user.name);
-                self.transformed.push((user.name.to_owned(), target.name.to_owned()));
+                let stint = target.position.and_then(|p| self.tracker.active_stint(target.side, p)).unwrap_or(0);
+                self.transformed.retain(|(u, _, _)| u != user.name);
+                self.transformed.push((user.name.to_owned(), target.name.to_owned(), stint));
             }
             if protocol::is_compared(line) {
                 self.lines.push(line.to_owned());
@@ -326,18 +376,20 @@ impl WorldBuilder {
         // A transformed Pokemon's request lists the copied opponent's move slots in order.
         let json = normalize_request(json);
         for (k, ids) in active_move_ids(&json).into_iter().enumerate().take(2) {
-            let Some(i) = self.tracker.active(self.viewer, k as u8) else { continue };
+            let Some(i) = self.tracker.active(self.viewer, k as u8) else {
+                continue;
+            };
             let m = &self.tracker.mons(self.viewer)[i];
             if !m.transformed {
                 continue;
             }
-            if let Some((_, target)) = self.transformed.iter().find(|(u, _)| *u == m.name)
+            if let Some((_, target, stint)) = self.transformed.iter().find(|(u, _, _)| *u == m.name)
                 && !ids.is_empty()
                 && ids.len() <= 4
             {
                 let target = target.clone();
-                self.move_orders.retain(|(t, _)| *t != target);
-                self.move_orders.push((target, ids));
+                self.move_orders.retain(|(t, st, _)| *t != target || st != stint);
+                self.move_orders.push((target, *stint, ids));
             }
         }
         let at = self.choices.len();
@@ -371,6 +423,9 @@ impl WorldBuilder {
             tracker: &self.tracker,
             pool: &self.pool,
             config: &self.config,
+            seen: self.tracker.mons(SideId(1 - self.viewer.0)),
+            hypothesis: None,
+            repair: true,
         };
         let mut alive = Vec::with_capacity(self.config.particles);
         for mut p in std::mem::take(&mut self.particles) {
@@ -395,15 +450,46 @@ impl WorldBuilder {
         };
         let mut builds = 0;
         let mut error = None;
+        let hypotheses = if budget > 0 { hypotheses(&cx) } else { Vec::new() };
+        let ordinary_exact =
+            hypotheses.is_empty() || (0..cx.seen.len()).all(|i| cx.pool.consistent(&constraints(&cx, i)));
+        let rebuilding = alive.is_empty();
+        let mut tried_illusion = false;
         while alive.len() < target.max(1) && builds < budget {
+            // All paths share the existing build budget. Exact worlds get the first quarter,
+            // guided Illusion the middle half, repair the rest. An off-pool fact skips straight
+            // to Illusion (sampling rejects it before any replay), rather than patching a disguise.
+            let exact_end = if ordinary_exact { (budget / 4).max(1) } else { 0 };
+            let illusion_end = (budget * 3 / 4).max(exact_end).max(1);
+            let guided = !hypotheses.is_empty()
+                && builds < illusion_end
+                && (!ordinary_exact || rebuilding && builds >= exact_end);
+            let prior = !hypotheses.is_empty() && !guided && self.rng.chance(illusion_prior(&cx));
+            let h = if guided {
+                Some(hypotheses[(builds - exact_end) % hypotheses.len()].clone())
+            } else if rebuilding
+                && !hypotheses.is_empty()
+                && builds >= illusion_end
+                && (builds - illusion_end).is_multiple_of(2)
+            {
+                // Repair can also be needed for the user's real, off-pool set. Alternate that
+                // explanation with repairing the ordinary team, after the exact hypotheses failed.
+                Some(hypotheses[(builds - illusion_end) / 2 % hypotheses.len()].clone())
+            } else if prior {
+                Some(prior_hypothesis(&cx, &hypotheses, &mut self.rng).clone())
+            } else {
+                None
+            };
+            let repairing = hypotheses.is_empty() || rebuilding && builds >= illusion_end;
+            let build_cx = Ctx { repair: repairing, ..cx };
+            tried_illusion |= h.is_some();
             builds += 1;
-            match build(&cx, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) {
+            match build(&build_cx, h, self.own.clone(), &self.names, &mut self.rng, &mut self.stats) {
                 Ok(mut p) => match advance(&cx, &mut p, &mut self.stats) {
                     Ok(()) => {
                         if alive.len() >= self.config.particles {
-                            let lightest = (0..alive.len())
-                                .min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w))
-                                .unwrap();
+                            let lightest =
+                                (0..alive.len()).min_by(|&a, &b| alive[a].log_w.total_cmp(&alive[b].log_w)).unwrap();
                             alive.swap_remove(lightest);
                         }
                         alive.push(p);
@@ -413,14 +499,20 @@ impl WorldBuilder {
                         self.last_failure = format!("{d:?}: {}", p.why);
                     }
                 },
-                Err(e @ (WorldError::UnknownSpecies(_) | WorldError::Team(_))) => {
+                Err(e @ WorldError::Team(_)) => {
                     error = Some(e);
                     break;
                 }
-                Err(e) => error = Some(e),
+                Err(e) => {
+                    self.last_failure = e.to_string();
+                    error = Some(e);
+                }
             }
         }
         if alive.is_empty() {
+            if tried_illusion {
+                self.last_failure = format!("Illusion hypotheses tried and failed; {}", self.last_failure);
+            }
             return Err(error.unwrap_or(WorldError::NoConsistentWorld));
         }
         // Refill by copying survivors in proportion to their weights; copies split the weight.
@@ -557,27 +649,48 @@ fn systematic(weights: &[f64], k: usize, u: u64) -> Vec<usize> {
 /// A fresh world at the start of the battle: the viewer's team and a sampled opponent team.
 fn build(
     cx: &Ctx<'_>,
+    hypothesis: Option<IllusionHypothesis>,
     own: Arc<TeamDef>,
     names: &[String; 2],
     rng: &mut SplitMix64,
     stats: &mut WorldStats,
 ) -> Result<Particle, WorldError> {
     let mut prng = rng.fork();
+    let view = hypothesis.as_ref().map(|h| cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species));
+    let cx = &Ctx { seen: view.as_deref().unwrap_or(cx.seen), hypothesis: hypothesis.as_ref(), ..*cx };
     let opp = Arc::new(sample_team(cx, &mut prng)?);
     let (p1, p2) = if cx.viewer.0 == 0 { (own, opp) } else { (opp, own) };
-    let battle = Battle::from_team_defs(prng.seed(), p1, p2, names.clone(), DrawLog::default())
-        .map_err(|e| WorldError::Team(e.0))?;
+    let log = DrawLog { track_entries: !cx.pool.illusion_species().is_empty(), ..DrawLog::default() };
+    let battle = Battle::from_team_defs(prng.seed(), p1, p2, names.clone(), log).map_err(|e| WorldError::Team(e.0))?;
     stats.builds += 1;
-    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w: 0.0, why: String::new() })
+    Ok(Particle { battle, cursor: 0, choice: 0, rng: prng, log_w: 0.0, why: String::new(), hypothesis })
 }
 
 /// Constraints for an opponent Pokemon from what the tracker saw.
 fn constraints<'a>(cx: &'a Ctx<'_>, index: usize) -> SetConstraints<'a> {
-    let m = &cx.tracker.mons(cx.opp())[index];
+    let mut c = mon_constraints(&cx.seen[index]);
+    if let Some(order) = move_order(cx, c.name) {
+        c.moves = order;
+    }
+    c
+}
+
+fn move_order<'a>(cx: &'a Ctx<'_>, name: &str) -> Option<&'a [EffectId]> {
+    cx.move_orders
+        .iter()
+        .rev()
+        .find(|(n, st, _)| {
+            let owner = cx.tracker.stints(cx.opp()).iter().find(|e| e.id == *st).map_or(n.as_str(), |e| cx.owner(e));
+            owner == name
+        })
+        .map(|(_, _, order)| order.as_slice())
+}
+
+fn mon_constraints(m: &MonInfo) -> SetConstraints<'_> {
     SetConstraints {
         name: &m.name,
         shown_species: &m.details_species,
-        level: Some(m.level),
+        level: (m.level != 0).then_some(m.level),
         gender: m.gender,
         shiny: m.shiny,
         moves: &m.moves,
@@ -589,15 +702,15 @@ fn constraints<'a>(cx: &'a Ctx<'_>, index: usize) -> SetConstraints<'a> {
 
 fn sample_revealed(cx: &Ctx<'_>, index: usize, rng: &mut SplitMix64) -> Result<SetDef, WorldError> {
     let c = constraints(cx, index);
-    let sampled = cx
-        .pool
-        .sample(&c, rng)
-        .ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
+    let sampled = cx.pool.sample(&c, rng).ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
     let mut set = sampled.set;
     if !sampled.consistent {
+        if !cx.repair {
+            return Err(WorldError::NoConsistentWorld);
+        }
         repair(&mut set, &c);
     }
-    if let Some((_, order)) = cx.move_orders.iter().find(|(n, _)| *n == c.name) {
+    if let Some(order) = move_order(cx, c.name) {
         set.moves = [EffectId::NONE; 4];
         set.moves[..order.len()].copy_from_slice(order);
         set.move_count = order.len() as u8;
@@ -654,7 +767,9 @@ fn repair(set: &mut SetDef, c: &SetConstraints<'_>) {
 /// engine's and Showdown's requests list `"id":"..."` per move inside `"moves":[...]`); empty for an
 /// entry that is not a full moveset.
 fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
-    let Some(start) = json.find("\"active\":[") else { return Vec::new() };
+    let Some(start) = json.find("\"active\":[") else {
+        return Vec::new();
+    };
     let rest = &json[start..];
     let end = rest.find("\"side\":").unwrap_or(rest.len());
     rest[..end]
@@ -677,8 +792,332 @@ fn active_move_ids(json: &str) -> Vec<Vec<EffectId>> {
 /// lead positions, the others at random bench positions), unrevealed slots sets from the pool's
 /// distribution under the species clause.
 fn sample_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError> {
+    if cx.hypothesis.is_none()
+        && !cx.seen.iter().any(|m| {
+            m.illusion
+                || m.starting_ability == Some(dex::ABILITY_ILLUSION)
+                || m.starting_ability.is_none() && cx.pool.illusion_species().iter().any(|(s, _)| *s == m.species)
+        })
+    {
+        return sample_plain_team(cx, rng);
+    }
+    let entries = cx.tracker.stints(cx.opp());
+    let mut sets: Vec<SetDef> = (0..cx.seen.len()).map(|i| sample_revealed(cx, i, rng)).collect::<Result<_, _>>()?;
+    // A broken lead's disguise may have no remaining MonInfo, but the party still needs it.
+    for e in entries {
+        if !sets.iter().any(|s| s.name == e.shown.name) {
+            let c = mon_constraints(&e.shown);
+            let sampled =
+                cx.pool.sample(&c, rng).ok_or_else(|| WorldError::UnknownSpecies(c.shown_species.to_owned()))?;
+            let mut set = sampled.set;
+            if !sampled.consistent {
+                if !cx.repair {
+                    return Err(WorldError::NoConsistentWorld);
+                }
+                repair(&mut set, &c);
+            }
+            sets.push(set);
+        }
+    }
+    let size = cx.tracker.team_size(cx.opp()).unwrap_or(6).clamp(1, 6) as usize;
+    if sets.len() > size {
+        return Err(WorldError::Desync("Illusion identities exceed opponent team size"));
+    }
+    let mut species: Vec<_> = sets.iter().map(|s| s.species).collect();
+    while sets.len() < size {
+        let set = cx.pool.sample_unrevealed(&species, rng).ok_or(WorldError::Desync("the set pool is empty"))?;
+        species.push(set.species);
+        sets.push(set);
+    }
+    let order = party_order(cx, &sets, rng).ok_or(WorldError::IllusionOrder)?;
+    let mut team = TeamDef { len: size as u8, ..TeamDef::default() };
+    for (pos, i) in order.into_iter().enumerate().take(size) {
+        team.sets[pos] = sets[i].clone();
+    }
+    Ok(team)
+}
+
+/// Compile the small public party history once, then enumerate at most 720 initial permutations.
+/// Switching swaps the incoming and outgoing party positions *before* Illusion chooses the last
+/// living member after the user. Different disguises therefore impose constraints at different
+/// times, rather than competing for one fixed last slot. Replay still checks details and damage.
+fn party_order(cx: &Ctx<'_>, sets: &[SetDef], rng: &mut SplitMix64) -> Option<[usize; 6]> {
+    #[derive(Clone, Copy)]
+    enum Event {
+        Enter { mon: usize, shown: usize, pos: usize, lead: bool },
+        Faint(usize),
+        Swap(usize, usize),
+        Revive(usize),
+        Tera(usize),
+        Transform(usize),
+    }
+    let index = |name: &str| sets.iter().position(|s| s.name == name);
+    let entry = |st| cx.tracker.stints(cx.opp()).iter().find(|e| e.id == st);
+    let mut events = Vec::new();
+    for event in cx.tracker.party_events(cx.opp()) {
+        events.push(match *event {
+            PartyEvent::Enter(st) => {
+                let e = entry(st)?;
+                Event::Enter {
+                    mon: index(cx.owner(e))?,
+                    shown: index(&e.shown.name)?,
+                    pos: e.position as usize,
+                    lead: e.lead,
+                }
+            }
+            PartyEvent::Faint(st) => Event::Faint(index(cx.owner(entry(st)?))?),
+            PartyEvent::Swap(a, b) => Event::Swap(a as usize, b as usize),
+            PartyEvent::Revive(ref name) => Event::Revive(index(name)?),
+            PartyEvent::Tera(st) => Event::Tera(index(cx.owner(entry(st)?))?),
+            PartyEvent::Transform(st) => Event::Transform(index(cx.owner(entry(st)?))?),
+        });
+    }
+    let base_blocked: [bool; 6] = core::array::from_fn(|i| {
+        sets.get(i).is_some_and(|s| {
+            matches!(dex::species(s.species).base_species, dex::SPECIES_OGERPON | dex::SPECIES_TERAPAGOS)
+        })
+    });
+    let valid = |initial: &[usize; 6]| {
+        let mut party = *initial;
+        let mut fainted = [false; 6];
+        let mut tera = [false; 6];
+        let mut blocked = base_blocked.map(Some);
+        let mut active = [None; 2];
+        for &event in &events {
+            match event {
+                Event::Enter { mon, shown, pos, lead } => {
+                    if pos >= 2 || fainted[mon] || active.contains(&Some(mon)) {
+                        return false;
+                    }
+                    let at = party[..sets.len()].iter().position(|&m| m == mon).unwrap();
+                    if lead && at != pos {
+                        return false;
+                    }
+                    party.swap(pos, at);
+                    active[pos] = Some(mon);
+                    blocked[mon] = Some(base_blocked[mon]);
+                    let mut disguise = if sets[mon].ability == dex::ABILITY_ILLUSION {
+                        party[pos + 1..sets.len()].iter().rev().copied().find(|&m| !fainted[m]).unwrap_or(mon)
+                    } else {
+                        mon
+                    };
+                    if tera[mon] && (blocked[disguise] == Some(true) || blocked[disguise].is_none() && shown == mon) {
+                        disguise = mon;
+                    }
+                    if disguise != shown {
+                        return false;
+                    }
+                }
+                Event::Faint(mon) => {
+                    fainted[mon] = true;
+                    for a in &mut active {
+                        if *a == Some(mon) {
+                            *a = None;
+                        }
+                    }
+                }
+                Event::Swap(a, b) => {
+                    if a >= 2 || b >= 2 {
+                        return false;
+                    }
+                    party.swap(a, b);
+                    active.swap(a, b);
+                }
+                Event::Revive(mon) => fainted[mon] = false,
+                Event::Tera(mon) => tera[mon] = true,
+                // Transform's copied species can depend on another Illusion. Allow either Tera
+                // exception here; replay, using sampled teams and the viewer's own team, decides.
+                Event::Transform(mon) => blocked[mon] = None,
+            }
+        }
+        true
+    };
+    fn visit(
+        pos: usize,
+        size: usize,
+        order: &mut [usize; 6],
+        valid: &impl Fn(&[usize; 6]) -> bool,
+        out: &mut Vec<[usize; 6]>,
+    ) {
+        if pos == size {
+            if valid(order) {
+                out.push(*order);
+            }
+            return;
+        }
+        for i in pos..size {
+            order.swap(pos, i);
+            visit(pos + 1, size, order, valid, out);
+            order.swap(pos, i);
+        }
+    }
+    let mut orders = Vec::new();
+    visit(0, sets.len(), &mut [0, 1, 2, 3, 4, 5], &valid, &mut orders);
+    if orders.is_empty() { None } else { Some(orders[rng.below(orders.len())]) }
+}
+
+fn illusion_prior(cx: &Ctx<'_>) -> f64 {
+    let free = (cx.tracker.team_size(cx.opp()).unwrap_or(6) as usize).saturating_sub(cx.seen.len());
+    let count: u32 = cx.pool.illusion_species().iter().map(|(_, n)| n).sum();
+    (free as f64 * count as f64 / cx.pool.len().max(1) as f64).min(0.1)
+}
+
+fn prior_hypothesis<'a>(
+    cx: &Ctx<'_>,
+    hypotheses: &'a [IllusionHypothesis],
+    rng: &mut SplitMix64,
+) -> &'a IllusionHypothesis {
+    let weight = |h: &IllusionHypothesis| {
+        cx.pool
+            .illusion_species()
+            .iter()
+            .find(|(s, _)| dex::species(*s).name == h.species)
+            .map_or(1, |(_, n)| *n as usize)
+    };
+    let total: usize = hypotheses.iter().map(weight).sum();
+    let mut draw = rng.below(total);
+    hypotheses
+        .iter()
+        .find(|h| {
+            let n = weight(h);
+            let hit = draw < n;
+            draw = draw.saturating_sub(n);
+            hit
+        })
+        .unwrap()
+}
+
+/// Bounded proposals from public ambiguous entries. Unsupported disguise constraints come first,
+/// then recent evidence. Subsets of at most six entries include non-adjacent disguised stints;
+/// pool support and overlapping active positions prune them before spending any replay budget.
+/// Known Illusion users may explain earlier unbroken entries, but never create another clause peer.
+fn hypotheses(cx: &Ctx<'_>) -> Vec<IllusionHypothesis> {
+    if cx.pool.illusion_species().is_empty() {
+        return Vec::new();
+    }
+    let size = cx.tracker.team_size(cx.opp()).unwrap_or(6) as usize;
+    let known = cx.seen.iter().find(|m| {
+        m.starting_ability == Some(dex::ABILITY_ILLUSION)
+            || (m.species != EffectId::NONE
+                && dex::species(m.species).abilities.iter().any(|a| a.id == dex::ABILITY_ILLUSION))
+    });
+    // A revealed dead user can explain older entries, but cannot be proposed at a later entry.
+    // Its lead may have switched out unbroken long before its identity and faint were observed.
+    let cutoff = known.filter(|m| m.fainted).and_then(|m| {
+        cx.tracker.stints(cx.opp()).iter().filter(|e| e.owner == m.name).filter_map(|e| e.faint_line).max()
+    });
+    let users: Vec<(String, String)> = if let Some(m) = known {
+        if m.fainted && cutoff.is_none() {
+            return Vec::new();
+        }
+        vec![(m.name.clone(), m.details_species.clone())]
+    } else {
+        if cx.seen.len() >= size {
+            return Vec::new();
+        }
+        cx.pool
+            .illusion_species()
+            .iter()
+            .filter(|(s, _)| {
+                !cx.seen.iter().any(|m| {
+                    m.species != EffectId::NONE
+                        && dex::species(m.species).base_species_name == dex::species(*s).base_species_name
+                })
+            })
+            .map(|(s, _)| (dex::species(*s).base_species_name.to_owned(), dex::species(*s).name.to_owned()))
+            .collect()
+    };
+    let mut entries: Vec<_> = cx
+        .tracker
+        .stints(cx.opp())
+        .iter()
+        .rev()
+        .filter(|e| {
+            !e.certain
+                && e.owner == e.shown.name
+                && !users.iter().any(|(name, _)| *name == e.owner)
+                && cutoff.is_none_or(|line| e.line < line)
+        })
+        .collect();
+    let unsupported: Vec<_> = (0..cx.seen.len())
+        .filter(|&i| !cx.pool.consistent(&constraints(cx, i)))
+        .map(|i| cx.seen[i].name.as_str())
+        .collect();
+    entries.sort_by_key(|e| core::cmp::Reverse((unsupported.contains(&e.shown.name.as_str()), e.last)));
+    entries.truncate(6);
+    let mut groups = Vec::new();
+    for n in 1..=entries.len() {
+        for mask in 1usize..1 << entries.len() {
+            if mask.count_ones() as usize == n {
+                groups.push(
+                    entries
+                        .iter()
+                        .enumerate()
+                        .filter(|(i, _)| mask & (1 << i) != 0)
+                        .map(|(_, e)| e.id)
+                        .collect::<Vec<_>>(),
+                );
+            }
+        }
+    }
+    let mut out = Vec::new();
+    for stints in groups {
+        for (user, species) in &users {
+            let h = IllusionHypothesis { user: user.clone(), species: species.clone(), stints: stints.clone() };
+            if attributable(cx, &h) {
+                out.push(h);
+            }
+        }
+    }
+    let exact: Vec<_> = out
+        .iter()
+        .filter(|h| {
+            let view = cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species);
+            let cx = Ctx { seen: &view, hypothesis: Some(h), ..*cx };
+            (0..view.len()).all(|i| cx.pool.consistent(&constraints(&cx, i)))
+        })
+        .cloned()
+        .collect();
+    if exact.is_empty() { out } else { exact }
+}
+
+fn attributable(cx: &Ctx<'_>, hypothesis: &IllusionHypothesis) -> bool {
+    let cx = Ctx { hypothesis: Some(hypothesis), ..*cx };
+    let mut active = [None; 2];
+    let entry = |st| cx.tracker.stints(cx.opp()).iter().find(|e| e.id == st);
+    for event in cx.tracker.party_events(cx.opp()) {
+        match *event {
+            PartyEvent::Enter(st) => {
+                let Some(e) = entry(st) else {
+                    return false;
+                };
+                let pos = e.position as usize;
+                let owner = cx.owner(e);
+                if pos >= 2 || active.contains(&Some(owner)) {
+                    return false;
+                }
+                active[pos] = Some(owner);
+            }
+            PartyEvent::Faint(st) => {
+                let Some(e) = entry(st) else {
+                    return false;
+                };
+                for a in &mut active {
+                    if *a == Some(cx.owner(e)) {
+                        *a = None;
+                    }
+                }
+            }
+            PartyEvent::Swap(a, b) if a < 2 && b < 2 => active.swap(a as usize, b as usize),
+            _ => {}
+        }
+    }
+    true
+}
+
+fn sample_plain_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError> {
     let opp = cx.opp();
-    let seen = cx.tracker.mons(opp);
+    let seen = cx.seen;
     let size = (cx.tracker.team_size(opp).unwrap_or(6) as usize).max(seen.len().max(1)).min(6);
     let mut slots: [Option<SetDef>; 6] = Default::default();
     let leads = cx.tracker.leads(opp);
@@ -692,11 +1131,7 @@ fn sample_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError
             continue;
         }
         let free: Vec<usize> = (0..size).filter(|&s| slots[s].is_none() && s >= 2.min(size)).collect();
-        let free = if free.is_empty() {
-            (0..size).filter(|&s| slots[s].is_none()).collect()
-        } else {
-            free
-        };
+        let free = if free.is_empty() { (0..size).filter(|&s| slots[s].is_none()).collect() } else { free };
         if free.is_empty() {
             return Err(WorldError::Desync("more opponent Pokemon revealed than its team size"));
         }
@@ -708,10 +1143,8 @@ fn sample_team(cx: &Ctx<'_>, rng: &mut SplitMix64) -> Result<TeamDef, WorldError
         team.sets[s] = match slot {
             Some(set) => set,
             None => {
-                let set = cx
-                    .pool
-                    .sample_unrevealed(&species, rng)
-                    .ok_or(WorldError::Desync("the set pool is empty"))?;
+                let set =
+                    cx.pool.sample_unrevealed(&species, rng).ok_or(WorldError::Desync("the set pool is empty"))?;
                 species.push(set.species);
                 set
             }
@@ -739,6 +1172,11 @@ fn set_name<L: LogSink>(b: &Battle<L>, mon: MonId) -> &str {
 
 /// Replay `p` to the end of the observed stream.
 fn advance(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<(), Dead> {
+    // Battle::clone gives copies a default empty sink; restore the capture flag for every replay.
+    p.battle.log.track_entries = !cx.pool.illusion_species().is_empty();
+    let hypothesis = p.hypothesis.clone();
+    let view = hypothesis.as_ref().map(|h| cx.tracker.illusion_view(cx.opp(), &h.stints, &h.user, &h.species));
+    let cx = &Ctx { seen: view.as_deref().unwrap_or(cx.seen), hypothesis: hypothesis.as_ref(), ..*cx };
     let mut idle = 0;
     loop {
         let before = p.cursor;
@@ -804,23 +1242,23 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
     }
     // Lines after the boundary up to the end of the turn: the opponent's choices show there, even
     // past a mid-turn replacement of the viewer.
-    let turn_end = cx.lines[p.cursor..]
-        .iter()
-        .position(|l| l.starts_with("|turn|"))
-        .map_or(end, |i| p.cursor + i);
+    let turn_end = cx.lines[p.cursor..].iter().position(|l| l.starts_with("|turn|")).map_or(end, |i| p.cursor + i);
     let window = &cx.lines[p.cursor..turn_end.max(limit.min(end))];
     if started {
         introduce(cx, p, window, stats)?;
     }
     let checkpoint = p.battle.clone();
-    let specs = if opp_acts { Some(infer(cx, &checkpoint, window)) } else { None };
+    let specs = if opp_acts { Some(infer(cx, &checkpoint, window, p.cursor)) } else { None };
     let region = &cx.lines[p.cursor..limit];
     let viewer_text = viewer_acts.then(|| cx.choices[p.choice].1.as_str());
     let seg_draws = checkpoint.state.prng.draws();
     let key = p.rng.next_u64();
     let mut points: Vec<(u32, u32)> = Vec::with_capacity(RESAMPLE_CAPACITY);
     let mut opp_choice = match &specs {
-        Some(s) => Some(sample_choice(cx, &checkpoint, s, false, &mut p.rng).ok_or(Dead::Choice)?),
+        Some(s) => Some(sample_choice(cx, &checkpoint, s, false, &mut p.rng).ok_or_else(|| {
+            p.why = format!("no legal opponent choice for {s:?} at line {}", p.cursor);
+            Dead::Choice
+        })?),
         None => None,
     };
     let (mut last_l, mut fails) = (usize::MAX, 0u32);
@@ -855,16 +1293,16 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
         let mismatch = produced
             .iter()
             .zip(region)
-            .position(|(&(i, _), want)| entries[i] != *want)
-            .or_else(|| {
+            .enumerate()
+            .position(|(offset, (&(i, _), want))| {
+                entries[i] != *want || !entry_matches(cx, &p.battle, i, p.cursor + offset)
+            })
+            .or({
                 if produced.len() > region.len() {
                     Some(region.len())
                 } else if produced.len() < region.len() && (at_viewer || p.battle.state.ended) {
                     Some(produced.len())
-                } else if produced.len() == region.len()
-                    && !at_viewer
-                    && limit < end
-                {
+                } else if produced.len() == region.len() && !at_viewer && limit < end {
                     // The stream says the viewer acts next; the world disagrees.
                     Some(produced.len())
                 } else {
@@ -903,9 +1341,7 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
             level += 1;
             threshold = threshold * 2 + 6;
         }
-        let mut emission: Vec<u32> = core::iter::once(seg_draws)
-            .chain(produced[..l].iter().map(|&(_, d)| d))
-            .collect();
+        let mut emission: Vec<u32> = core::iter::once(seg_draws).chain(produced[..l].iter().map(|&(_, d)| d)).collect();
         emission.dedup();
         let at = emission[emission.len() - 1 - level.min(emission.len() - 1)];
         if at == seg_draws
@@ -929,7 +1365,26 @@ fn step(cx: &Ctx<'_>, p: &mut Particle, stats: &mut WorldStats) -> Result<bool, 
         region.get(last_l),
         produced.get(last_l).map(|&(i, _)| &entries[i])
     );
+    if let Some(&(raw, _)) = produced.get(last_l)
+        && !entry_matches(cx, &p.battle, raw, p.cursor + last_l)
+        && let (Some(e), Some(mon)) = (cx.tracker.entry(opp, p.cursor + last_l), entry_actor(&p.battle.log, raw))
+    {
+        p.why.push_str(&format!("; entry owner expected {:?}, replayed {:?}", cx.owner(e), set_name(&p.battle, mon)));
+    }
     Err(Dead::Budget)
+}
+
+fn entry_actor(log: &DrawLog, raw: usize) -> Option<MonId> {
+    if !log.track_entries {
+        return None;
+    }
+    log.entry_mons.binary_search_by_key(&raw, |(at, _)| *at).ok().map(|i| log.entry_mons[i].1)
+}
+
+fn entry_matches(cx: &Ctx<'_>, b: &Battle<DrawLog>, raw: usize, observed: usize) -> bool {
+    entry_actor(&b.log, raw).is_none_or(|mon| {
+        mon.side() != cx.opp() || cx.tracker.entry(cx.opp(), observed).is_none_or(|e| set_name(b, mon) == cx.owner(e))
+    })
 }
 
 /// The viewer's player view of the sink's entries (`|split|` resolved like `extractChannelMessages`),
@@ -959,23 +1414,29 @@ fn view(log: &DrawLog, viewer: SideId, out: &mut Vec<(usize, u32)>) {
 /// takes over a never-revealed bench slot (`replace_hidden_set`, exact for such slots).
 fn introduce(cx: &Ctx<'_>, p: &mut Particle, window: &[String], stats: &mut WorldStats) -> Result<(), Dead> {
     let opp = cx.opp();
-    for line in window {
+    for (offset, line) in window.iter().enumerate() {
         let Some(l) = Line::parse(line) else { continue };
         if !matches!(l.cmd(), "switch" | "drag" | "replace") {
             continue;
         }
-        let Some(id) = parse_ident(l.arg(0)).filter(|id| id.side == opp) else { continue };
+        let Some(id) = parse_ident(l.arg(0)).filter(|id| id.side == opp) else {
+            continue;
+        };
         let side = &p.battle.state.sides[opp.0 as usize];
         let party = side.party[..side.pokemon_count as usize].to_vec();
         if party.iter().any(|&m| set_name(&p.battle, m) == id.name) {
             continue;
         }
-        let Some(index) = cx.tracker.find(opp, id.name) else { return Err(Dead::Swap) };
+        let Some(index) = cx.seen.iter().position(|m| m.name == id.name) else {
+            return Err(Dead::Swap);
+        };
         let hidden = p.battle.hidden_mons(cx.viewer);
         // Prefer slots holding a set nobody has been seen as.
         let mut slots: Vec<MonId> = party.iter().copied().filter(|m| hidden & (1 << m.0) != 0).collect();
         slots.sort_by_key(|&m| cx.tracker.find(opp, set_name(&p.battle, m)).is_some());
-        let Some(&first) = slots.first() else { return Err(Dead::Swap) };
+        let Some(&first) = slots.first() else {
+            return Err(Dead::Swap);
+        };
         let preferred = cx.tracker.find(opp, set_name(&p.battle, first)).is_some();
         let pool: Vec<MonId> = slots
             .iter()
@@ -983,15 +1444,41 @@ fn introduce(cx: &Ctx<'_>, p: &mut Particle, window: &[String], stats: &mut Worl
             .filter(|&m| cx.tracker.find(opp, set_name(&p.battle, m)).is_some() == preferred)
             .collect();
         let mon = pool[p.rng.below(pool.len())];
-        let set = sample_revealed(cx, index, &mut p.rng).map_err(|_| Dead::Swap)?;
+        let exact_first = cx.tracker.entry(opp, p.cursor + offset).is_some_and(|e| can_explain_entry(cx, e));
+        let sample_cx = Ctx { repair: cx.repair && !exact_first, ..*cx };
+        let set = sample_revealed(&sample_cx, index, &mut p.rng).map_err(|e| {
+            p.why = format!("new entry {} needs rebuilding before pool repair: {e}", id.name);
+            Dead::Swap
+        })?;
         p.battle.replace_hidden_set(cx.viewer, mon, &set).map_err(|_| Dead::Swap)?;
         stats.swaps += 1;
     }
     Ok(())
 }
 
+fn can_explain_entry(cx: &Ctx<'_>, entry: &Stint) -> bool {
+    if entry.certain || cx.pool.illusion_species().is_empty() {
+        return false;
+    }
+    if let Some(m) = cx.seen.iter().find(|m| m.starting_ability == Some(dex::ABILITY_ILLUSION)) {
+        return !m.fainted
+            || cx
+                .tracker
+                .stints(cx.opp())
+                .iter()
+                .any(|e| e.owner == m.name && e.faint_line.is_some_and(|line| entry.line < line));
+    }
+    cx.seen.len() < cx.tracker.team_size(cx.opp()).unwrap_or(6) as usize
+        && cx.pool.illusion_species().iter().any(|(s, _)| {
+            !cx.seen.iter().any(|m| {
+                m.species != EffectId::NONE
+                    && dex::species(m.species).base_species_name == dex::species(*s).base_species_name
+            })
+        })
+}
+
 /// Read the opponent's choice at this boundary off the protocol.
-fn infer(cx: &Ctx<'_>, b: &Battle<DrawLog>, window: &[String]) -> [SlotSpec; 2] {
+fn infer(cx: &Ctx<'_>, b: &Battle<DrawLog>, window: &[String], at: usize) -> [SlotSpec; 2] {
     let opp = cx.opp();
     let legal = b.legal_actions(opp);
     let switch_request = b.side_request_kind(opp) == RequestKind::Switch;
@@ -1000,15 +1487,15 @@ fn infer(cx: &Ctx<'_>, b: &Battle<DrawLog>, window: &[String]) -> [SlotSpec; 2] 
             return SlotSpec::Pass;
         }
         if switch_request {
-            return infer_replacement(opp, k as u8, legal.slots[k].revival_mask != 0, window);
+            return infer_replacement(opp, k as u8, legal.slots[k].revival_mask != 0, window, at);
         }
         let mon = b.state.sides[opp.0 as usize].active[k];
-        infer_move(opp, k as u8, shown_name(b, mon), window)
+        infer_move(opp, k as u8, shown_name(b, mon), window, at)
     })
 }
 
-fn infer_replacement(opp: SideId, k: u8, reviving: bool, window: &[String]) -> SlotSpec {
-    for line in window {
+fn infer_replacement(opp: SideId, k: u8, reviving: bool, window: &[String], at: usize) -> SlotSpec {
+    for (i, line) in window.iter().enumerate() {
         let Some(l) = Line::parse(line) else { continue };
         match l.cmd() {
             "switch" if !reviving => {
@@ -1016,7 +1503,7 @@ fn infer_replacement(opp: SideId, k: u8, reviving: bool, window: &[String]) -> S
                     && id.side == opp
                     && id.position == Some(k)
                 {
-                    return SlotSpec::Switch(id.name.to_owned());
+                    return SlotSpec::Switch(id.name.to_owned(), at + i);
                 }
             }
             "-heal" if reviving && l.tag("from") == Some("move: Revival Blessing") => {
@@ -1032,24 +1519,39 @@ fn infer_replacement(opp: SideId, k: u8, reviving: bool, window: &[String]) -> S
     SlotSpec::Pass
 }
 
-fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
+fn infer_move(opp: SideId, k: u8, name: &str, window: &[String], at: usize) -> SlotSpec {
     let mut acted = false;
     let mut tera = false;
     // Uses forced by Instruct (announced by `-singleturn|X|move: Instruct`) carry no `[from]`.
     let mut instructed = 0;
     let mut dancing = 0;
-    for line in window {
+    let (mut actor_name, mut position) = (name, k);
+    for (i, line) in window.iter().enumerate() {
         let Some(l) = Line::parse(line) else { continue };
         let ident = parse_ident(l.arg(0));
-        let mine = ident.is_some_and(|id| id.side == opp && id.name == name && id.position.is_some());
+        let mine = ident.is_some_and(|id| id.side == opp && id.name == actor_name && id.position == Some(position));
         match l.cmd() {
+            "replace" if ident.is_some_and(|id| id.side == opp && id.position == Some(position)) => {
+                actor_name = ident.unwrap().name;
+            }
+            "swap" => {
+                if let Some(id) = ident.filter(|id| id.side == opp)
+                    && let (Some(from), Ok(to)) = (id.position, l.arg(1).parse::<u8>())
+                {
+                    if position == from {
+                        position = to;
+                    } else if position == to {
+                        position = from;
+                    }
+                }
+            }
             // Switches resolve before Tera and moves.
             "switch" if !acted => {
                 if let Some(id) = ident
                     && id.side == opp
                     && id.position == Some(k)
                 {
-                    return SlotSpec::Switch(id.name.to_owned());
+                    return SlotSpec::Switch(id.name.to_owned(), at + i);
                 }
             }
             "-terastallize" if mine => tera = true,
@@ -1072,7 +1574,9 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
                     dancing -= 1;
                     continue;
                 }
-                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else { return SlotSpec::AnyMove { tera } };
+                let Some(id) = dex::lookup(EffectKind::Move, l.arg(1)) else {
+                    return SlotSpec::AnyMove { tera };
+                };
                 let loc = if l.has_tag("spread") || l.has_tag("notarget") || l.has_tag("still") {
                     None
                 } else {
@@ -1088,7 +1592,8 @@ fn infer_move(opp: SideId, k: u8, name: &str, window: &[String]) -> SlotSpec {
                 // `|cant|HOLDER|ability: Armor Tail|MOVE|[of] USER`: the holder blocked USER's move.
                 let blocked = protocol::effect_kind(l.arg(1)).0 == "ability";
                 let actor = if blocked { l.tag("of").and_then(parse_ident) } else { ident };
-                let actor_mine = actor.is_some_and(|id| id.side == opp && id.name == name);
+                let actor_mine =
+                    actor.is_some_and(|id| id.side == opp && id.name == actor_name && id.position == Some(position));
                 if actor_mine && dancing == 0 {
                     return match dex::lookup(EffectKind::Move, l.arg(2)) {
                         Some(id) if !l.arg(2).is_empty() => SlotSpec::Move { id, loc: None, tera },
@@ -1191,10 +1696,7 @@ fn slot_choice(
         }
         SlotSpec::Move { id, loc, tera } => {
             // A forced move (lock, charge, Recharge, Struggle) is the only option anyway.
-            let Some(m) = moves
-                .iter()
-                .find(|m| m.move_slot == 255)
-                .or_else(|| moves.iter().find(|m| m.move_id == *id))
+            let Some(m) = moves.iter().find(|m| m.move_slot == 255).or_else(|| moves.iter().find(|m| m.move_id == *id))
             else {
                 // Not in this world's moveset (or misread): any legal move keeps the world alive;
                 // the replay decides.
@@ -1215,28 +1717,18 @@ fn slot_choice(
             let loc = pick_loc(m, None, rng);
             mv(m, loc, *tera)
         }
-        SlotSpec::Switch(name) | SlotSpec::Revive(name) => {
+        SlotSpec::Switch(name, _) | SlotSpec::Revive(name) => {
             let mask = if matches!(spec, SlotSpec::Revive(_)) { ls.revival_mask } else { ls.switch_mask };
-            let illusion = dex::lookup(EffectKind::Ability, "illusion");
+            let name = match spec {
+                SlotSpec::Switch(_, at) => cx.tracker.entry(cx.opp(), *at).map_or(name.as_str(), |e| cx.owner(e)),
+                _ => name.as_str(),
+            };
             let options: Vec<usize> = (0..6).filter(|&p| mask & (1 << p) != 0).collect();
             let exact: Vec<usize> = options.iter().copied().filter(|&p| set_name(b, party[p]) == name).collect();
-            let disguised: Vec<usize> = options
-                .iter()
-                .copied()
-                .filter(|&p| Some(b.state.pokemon[party[p].0 as usize].ability) == illusion)
-                .collect();
-            let p = match (exact.is_empty(), disguised.is_empty()) {
-                (true, true) => return None,
-                (false, true) => exact[rng.below(exact.len())],
-                (true, false) => disguised[rng.below(disguised.len())],
-                (false, false) => {
-                    if rng.chance(0.9) {
-                        exact[rng.below(exact.len())]
-                    } else {
-                        disguised[rng.below(disguised.len())]
-                    }
-                }
-            };
+            if exact.is_empty() {
+                return None;
+            }
+            let p = exact[rng.below(exact.len())];
             SlotChoice { kind: ChoiceKind::Switch, switch_to: party[p], ..SlotChoice::default() }
         }
     })
@@ -1245,6 +1737,404 @@ fn slot_choice(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const Z: &str =
+        "Zoroark||LifeOrb|Illusion|darkpulse,protect,nastyplot,sludgebomb||85,,85,85,85,85|F|,0,,,,||84|,,,,,Poison";
+    const B: &str = "Bastiodon||Leftovers|Sturdy|foulplay,wideguard,irondefense,bodypress||85,,85,85,85,85|M|,0,,,,||90|,,,,,Fighting";
+    const U: &str =
+        "Umbreon||Leftovers|InnerFocus|snarl,protect,foulplay,moonlight||85,,85,85,85,85|M|,0,,,,||85|,,,,,Dark";
+    const L: &str =
+        "Latias||SoulDew|Levitate|mistball,recover,dracometeor,tailwind||85,,85,85,85,85|F|,0,,,,||80|,,,,,Steel";
+    const M: &str =
+        "Mesprit||LifeOrb|Levitate|protect,psychic,nastyplot,dazzlinggleam||85,,85,85,85,85|N|,0,,,,||86|,,,,,Psychic";
+    const BL: &str = "Blastoise||WhiteHerb|Torrent|shellsmash,protect,muddywater,dragonpulse||85,,85,85,85,85|F|,0,,,,||83|,,,,,Dragon";
+
+    fn fixture_pool() -> SetPool {
+        let mut pool = SetPool::new();
+        pool.add_team(&[L, U, Z, M, BL, B].join("]")).unwrap();
+        pool
+    }
+
+    fn context<'a>(tracker: &'a RevealTracker, pool: &'a SetPool, config: &'a WorldConfig) -> Ctx<'a> {
+        Ctx {
+            viewer: SideId(0),
+            lines: &[],
+            choices: &[],
+            requests: &[],
+            move_orders: &[],
+            tracker,
+            pool,
+            config,
+            seen: tracker.mons(SideId(1)),
+            hypothesis: None,
+            repair: false,
+        }
+    }
+
+    #[test]
+    fn known_entries_pin_both_the_user_and_the_real_disguise() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |replace|p2a: Zoroark|Zoroark, L84, F
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |-ability|p2a: Bastiodon|Sturdy",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        let team = Arc::new(TeamDef::unpack(&[L, U, Z, M, BL, B].join("]")).unwrap());
+        let mut b =
+            Battle::from_team_defs([1, 2, 3, 4], team.clone(), team, ["A".into(), "B".into()], DrawLog::default())
+                .unwrap();
+        b.start().unwrap();
+        let legal = b.legal_actions(SideId(1));
+        let mut rng = SplitMix64(9);
+        for e in &t.stints(SideId(1))[2..] {
+            let spec = SlotSpec::Switch(e.shown.name.clone(), e.line);
+            for _ in 0..100 {
+                let c = slot_choice(&cx, &b, &legal, 0, &spec, &mut rng).unwrap();
+                assert_eq!(set_name(&b, c.switch_to), e.owner);
+            }
+        }
+    }
+
+    #[test]
+    fn party_order_solves_one_and_two_different_disguises() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Nasty Plot|p2a: Bastiodon
+            |replace|p2a: Zoroark|Zoroark, L84, F",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        for two in [false, true] {
+            if two {
+                t.feed_all(
+                    lines(
+                        "|switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+                    |switch|p2a: Latias|Latias, L80, F|100/100
+                    |switch|p2a: Latias|Latias, L80, F|100/100
+                    |move|p2a: Latias|Sludge Bomb|p1a: X
+                    |replace|p2a: Zoroark|Zoroark, L84, F",
+                    )
+                    .iter()
+                    .map(String::as_str),
+                );
+            }
+            let cx = context(&t, &pool, &config);
+            for seed in 0..10 {
+                let mut rng = SplitMix64(seed);
+                let team = sample_team(&cx, &mut rng).unwrap();
+                assert_eq!(team.sets[0].name, "Zoroark");
+                assert_eq!(team.sets[5].name, "Bastiodon");
+                let z = &team.sets[0];
+                assert!(z.moves.contains(&move_id("nastyplot")));
+                let b = team.sets.iter().find(|s| s.name == "Bastiodon").unwrap();
+                assert!(!b.moves.contains(&move_id("nastyplot")));
+            }
+        }
+    }
+
+    #[test]
+    fn hypotheses_require_a_slot_and_respect_species_clause_and_fainting() {
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Nasty Plot|p2a: Bastiodon",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let hs = hypotheses(&context(&t, &pool, &config));
+        assert!(!hs.is_empty());
+        assert_eq!(hs[0].stints, [t.stints(SideId(1))[0].id]);
+        t.feed("|teamsize|p2|2");
+        assert!(hypotheses(&context(&t, &pool, &config)).is_empty());
+        t.feed("|teamsize|p2|6");
+        t.feed("|switch|p2a: Zoroark|Zoroark-Hisui, L80, M|100/100");
+        let hs = hypotheses(&context(&t, &pool, &config));
+        assert!(hs.iter().all(|h| h.species == "Zoroark-Hisui"));
+        t.feed("|faint|p2a: Zoroark");
+        assert!(hypotheses(&context(&t, &pool, &config)).is_empty());
+        let empty = SetPool::new();
+        assert!(hypotheses(&context(&t, &empty, &config)).is_empty());
+    }
+
+    #[test]
+    fn party_order_explains_a_fainted_disguise_appearing_alive() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Sludge Bomb|p1a: X
+            |faint|p2a: Bastiodon
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |move|p2a: Bastiodon|Body Press|p1a: X",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        let h = hypotheses(&cx).into_iter().find(|h| h.stints == [t.stints(SideId(1))[0].id]).unwrap();
+        let view = t.illusion_view(cx.opp(), &h.stints, &h.user, &h.species);
+        let cx = Ctx { seen: &view, hypothesis: Some(&h), ..cx };
+        let team = sample_team(&cx, &mut SplitMix64(10)).unwrap();
+        assert_eq!(team.sets[0].name, "Zoroark");
+        assert_eq!(team.sets[5].name, "Bastiodon");
+    }
+
+    #[test]
+    fn non_adjacent_unbroken_stints_can_use_different_disguises() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Nasty Plot|p2a: Bastiodon
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |move|p2a: Latias|Draco Meteor|p1a: X
+            |switch|p2b: Mesprit|Mesprit, L86|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |move|p2a: Latias|Sludge Bomb|p1a: X",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        let ids = [t.stints(cx.opp())[0].id, t.stints(cx.opp()).last().unwrap().id];
+        let h = hypotheses(&cx)
+            .into_iter()
+            .find(|h| ids.iter().all(|s| h.stints.contains(s)) && h.stints.len() == 2)
+            .unwrap();
+        let view = t.illusion_view(cx.opp(), &h.stints, &h.user, &h.species);
+        let cx = Ctx { seen: &view, hypothesis: Some(&h), ..cx };
+        let team = sample_team(&cx, &mut SplitMix64(10)).unwrap();
+        assert_eq!(team.sets[0].name, "Zoroark");
+        assert_eq!(team.sets[5].name, "Bastiodon");
+        assert_eq!(view.iter().find(|m| m.name == "Latias").unwrap().moves, [move_id("dracometeor")]);
+    }
+
+    #[test]
+    fn copied_move_order_follows_the_attributed_stint() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |turn|1
+            |replace|p2a: Zoroark|Zoroark, L84, F",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let orders =
+            [("Bastiodon".to_owned(), t.stints(SideId(1))[0].id, vec![move_id("nastyplot"), move_id("protect")])];
+        let cx = Ctx { move_orders: &orders, ..context(&t, &pool, &config) };
+        let z = sample_revealed(&cx, t.find(SideId(1), "Zoroark").unwrap(), &mut SplitMix64(7)).unwrap();
+        assert_eq!(&z.moves[..2], orders[0].2);
+    }
+
+    #[test]
+    fn a_pool_without_illusion_uses_the_ordinary_sampling_path() {
+        let mut pool = SetPool::new();
+        pool.add_team(&[L, U, M, BL, B].join("]")).unwrap();
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|5
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        assert!(hypotheses(&cx).is_empty());
+        let (mut a, mut b) = (SplitMix64(7), SplitMix64(7));
+        assert_eq!(sample_team(&cx, &mut a).unwrap(), sample_plain_team(&cx, &mut b).unwrap());
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn a_revealed_fainted_user_only_explains_entries_before_its_faint() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |move|p2a: Bastiodon|Nasty Plot|p2a: Bastiodon
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |replace|p2a: Zoroark|Zoroark, L84, F
+            |faint|p2a: Zoroark
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |move|p2a: Bastiodon|Body Press|p1a: X",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        let old = t.stints(cx.opp())[0].id;
+        let new = t.stints(cx.opp()).last().unwrap().id;
+        let hs = hypotheses(&cx);
+        assert!(hs.iter().all(|h| !h.stints.contains(&new)));
+        let h = hs.into_iter().find(|h| h.stints == [old]).unwrap();
+        let view = t.illusion_view(cx.opp(), &h.stints, &h.user, &h.species);
+        assert!(sample_team(&Ctx { seen: &view, hypothesis: Some(&h), ..cx }, &mut SplitMix64(8)).is_ok());
+    }
+
+    #[test]
+    fn forced_drag_checks_the_real_entry_owner_even_when_text_matches() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|drag|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |replace|p2a: Zoroark|Zoroark, L84, F",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let cx = context(&t, &pool, &config);
+        let team = Arc::new(TeamDef::unpack(&[L, U, Z, M, BL, B].join("]")).unwrap());
+        let log = DrawLog { track_entries: true, ..DrawLog::default() };
+        let mut wrong =
+            Battle::from_team_defs([1, 2, 3, 4], team.clone(), team, ["A".into(), "B".into()], log).unwrap();
+        wrong.start().unwrap();
+        let mut right = wrong.clone_with_log(DrawLog { track_entries: true, ..DrawLog::default() });
+        wrong.log.reset();
+        wrong.switch_in(MonId(11), 0, crate::event::EffectRef::None, true);
+        right.switch_in(MonId(8), 0, crate::event::EffectRef::None, true);
+        let a = wrong.log.entry_mons[0].0;
+        let b = right.log.entry_mons[0].0;
+        assert_eq!(wrong.log.text.entries[a], right.log.text.entries[b]);
+        assert!(!entry_matches(&cx, &wrong, a, 0));
+        assert!(entry_matches(&cx, &right, b, 0));
+    }
+
+    #[test]
+    fn a_terastallized_user_does_not_disguise_as_ogerpon() {
+        let mut pool = SetPool::new();
+        pool.add_team(&[Z, U, L].join("]")).unwrap();
+        let mut ogre = TeamDef::unpack(B).unwrap().sets[0].clone();
+        ogre.name = "Ogerpon".into();
+        ogre.species = dex::SPECIES_OGERPON;
+        ogre.ability = dex::ABILITY_DEFIANT;
+        ogre.gender = crate::teams::Gender::Female;
+        pool.add_set(&ogre);
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|4
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2b: Umbreon|Umbreon, L85, M|100/100
+            |turn|1
+            |switch|p2a: Ogerpon|Ogerpon, L90, F|100/100
+            |replace|p2a: Zoroark|Zoroark, L84, F
+            |-terastallize|p2a: Zoroark|Poison
+            |switch|p2a: Latias|Latias, L80, F|100/100
+            |switch|p2a: Zoroark|Zoroark, L84, F|100/100",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let config = WorldConfig::default();
+        let team = sample_team(&context(&t, &pool, &config), &mut SplitMix64(10)).unwrap();
+        assert_eq!(team.sets[3].name, "Ogerpon");
+    }
+
+    #[test]
+    fn a_transformed_disguise_can_invoke_the_tera_exception() {
+        let mut pool = SetPool::new();
+        pool.add_team(
+            &[Z, U, "Ditto||ChoiceScarf|Imposter|transform||85,,85,85,85,85|N|,0,,,,||90|,,,,,Steel"].join("]"),
+        )
+        .unwrap();
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|3
+            |switch|p2a: Umbreon|Umbreon, L85, M|100/100
+            |switch|p2b: Ditto|Ditto, L90|100/100
+            |-transform|p2b: Ditto|p1a: Ogerpon|[from] ability: Imposter
+            |turn|1
+            |replace|p2a: Zoroark|Zoroark, L84, F
+            |-terastallize|p2a: Zoroark|Poison
+            |switch|p2a: Umbreon|Umbreon, L85, M|100/100
+            |faint|p2a: Umbreon
+            |switch|p2a: Zoroark|Zoroark, L84, F|100/100",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let config = WorldConfig::default();
+        let team = sample_team(&context(&t, &pool, &config), &mut SplitMix64(10)).unwrap();
+        assert_eq!(team.sets[0].name, "Zoroark");
+        assert_eq!(team.sets[1].name, "Ditto");
+    }
+
+    #[test]
+    fn replacements_before_turn_one_keep_only_the_original_lead_fixed() {
+        let mut t = RevealTracker::new();
+        t.feed_all(
+            lines(
+                "|teamsize|p2|6
+            |switch|p2a: Bastiodon|Bastiodon, L90, M|100/100
+            |switch|p2b: Mesprit|Mesprit, L86|100/100
+            |switch|p2b: Latias|Latias, L80, F|100/100
+            |replace|p2a: Zoroark|Zoroark, L84, F
+            |turn|1",
+            )
+            .iter()
+            .map(String::as_str),
+        );
+        let pool = fixture_pool();
+        let config = WorldConfig::default();
+        let team = sample_team(&context(&t, &pool, &config), &mut SplitMix64(10)).unwrap();
+        assert_eq!(team.sets[0].name, "Zoroark");
+        assert_eq!(team.sets[1].name, "Mesprit");
+    }
 
     fn lines(text: &str) -> Vec<String> {
         text.lines().map(|l| l.trim().to_owned()).filter(|l| !l.is_empty()).collect()
@@ -1262,13 +2152,38 @@ mod tests {
         );
         let opp = SideId(1);
         assert_eq!(
-            infer_move(opp, 0, "Tsareena", &window),
+            infer_move(opp, 0, "Tsareena", &window, 0),
             SlotSpec::Move { id: move_id("powerwhip"), loc: Some(2), tera: false }
         );
         // From the other side: the blocked user chose Fake Out.
         assert_eq!(
-            infer_move(SideId(0), 0, "Incineroar", &window),
+            infer_move(SideId(0), 0, "Incineroar", &window, 0),
             SlotSpec::Move { id: move_id("fakeout"), loc: None, tera: false }
+        );
+    }
+
+    #[test]
+    fn coactive_disguises_replace_and_ally_switch_keep_separate_choices() {
+        let window = lines(
+            "|move|p2a: Klawf|Sludge Bomb|p2b: Klawf
+            |move|p2b: Klawf|Knock Off|p1a: X",
+        );
+        assert_eq!(
+            infer_move(SideId(1), 0, "Klawf", &window, 0),
+            SlotSpec::Move { id: move_id("sludgebomb"), loc: Some(-2), tera: false }
+        );
+        assert_eq!(
+            infer_move(SideId(1), 1, "Klawf", &window, 0),
+            SlotSpec::Move { id: move_id("knockoff"), loc: Some(1), tera: false }
+        );
+        let window = lines(
+            "|replace|p2a: Zoroark|Zoroark, L84
+            |swap|p2b: Klawf|0
+            |move|p2b: Zoroark|Sludge Bomb|p1a: X",
+        );
+        assert_eq!(
+            infer_move(SideId(1), 0, "Klawf", &window, 0),
+            SlotSpec::Move { id: move_id("sludgebomb"), loc: Some(1), tera: false }
         );
     }
 
@@ -1279,7 +2194,7 @@ mod tests {
             "|-terastallize|p2a: Kommo-o|Steel
              |cant|p2a: Kommo-o|flinch",
         );
-        assert_eq!(infer_move(opp, 0, "Kommo-o", &window), SlotSpec::AnyMove { tera: true });
+        assert_eq!(infer_move(opp, 0, "Kommo-o", &window, 0), SlotSpec::AnyMove { tera: true });
         let window = lines(
             "|-activate|p2a: Oricorio|ability: Dancer
              |move|p2a: Oricorio|Swords Dance||[still]
@@ -1288,7 +2203,7 @@ mod tests {
              |move|p2a: Oricorio|Hurricane|p1b: Y",
         );
         assert_eq!(
-            infer_move(opp, 0, "Oricorio", &window),
+            infer_move(opp, 0, "Oricorio", &window, 0),
             SlotSpec::Move { id: move_id("hurricane"), loc: Some(2), tera: false }
         );
     }

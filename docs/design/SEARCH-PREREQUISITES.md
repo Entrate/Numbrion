@@ -93,8 +93,14 @@ reason (`last_failure`); fall back to the policy for that decision.
 **Known limits.** The world distribution is not a calibrated posterior: weights are a search-effort
 heuristic, and the opponent's policy is modelled as uniform over choices consistent with the protocol.
 Worlds also depend on when `update`/`worlds` are called, not only on the inputs and seed. Generator team rules other than
-the species clause are not modelled. Illusion stints that end without a `replace` line stay attributed to the
-disguise. Viewer request content beyond what the engine itself writes (Showdown's `rqid`) is ignored;
+the species clause are not modelled. Illusion entry owners are pinned by stint; team construction solves
+the evolving party order (switches, faints, Ally Switch and Revival Blessing) before replay. Ordering includes
+the Tera exceptions for Ogerpon/Terapagos; replay checks ambiguous copied forms under Transform. Fresh worlds
+include a small pool-frequency prior for a hidden Illusion user, and rebuilds try hypotheses over up to six
+ambiguous entries before patching off-pool sets. Each hypothesis folds those stints onto the user without
+changing the tracker, including a silent disguised faint followed by the living disguise. Known broken
+stints have no six-entry limit. Hypotheses share the existing replay/build budgets, so ambiguous histories
+can still exhaust them. Viewer request content beyond what the engine itself writes (Showdown's `rqid`) is ignored;
 ladder-specific protocol lines are excluded from comparison by `search::protocol::is_compared`. The pool
 must contain the opponent's species (`UnknownSpecies` otherwise); use the 600k-team pools for real runs.
 
