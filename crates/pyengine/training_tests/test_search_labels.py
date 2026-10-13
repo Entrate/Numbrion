@@ -123,15 +123,19 @@ def test_run_names_are_unique_in_one_instant_and_sort_by_time(tmp_path, monkeypa
 
 
 def test_output_lock_refuses_another_process_and_releases_on_error(tmp_path):
-    script = """import fcntl, sys
+    script = ("""import msvcrt, sys
+with open(sys.argv[1], 'a') as lock:
+    lock.seek(0)
+    msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+""" if sys.platform == "win32" else """import fcntl, sys
 with open(sys.argv[1], 'a') as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-"""
+""")
     lock_path = tmp_path / '.labels.lock'
     with pytest.raises(ValueError, match='generation failed'):
         with labels.output_lock(tmp_path):
             child = subprocess.run([sys.executable, '-c', script, str(lock_path)], capture_output=True, text=True)
-            assert child.returncode != 0 and 'BlockingIOError' in child.stderr
+            assert child.returncode != 0 and ('BlockingIOError' in child.stderr or 'PermissionError' in child.stderr)
             with pytest.raises(RuntimeError, match='another label maker holds'):
                 labels.generate(args(tmp_path))
             assert not (tmp_path / 'config.json').exists()
