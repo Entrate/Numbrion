@@ -5,9 +5,12 @@
 //! exactly the same number of draws, with the same range mapping, as the TypeScript.
 //!
 //! With the opt-in `search` feature (no Showdown counterpart): a draw counter and a short
-//! schedule of *resample points*. A point `(draw, salt)` replaces the LCG state right before
-//! draw number `draw` with a state derived from the schedule key and `salt`, so every draw
-//! from there on is fresh while all earlier draws are unchanged. The world builder
+//! schedule of *resample points*. A point `(draw, salt)` switches the generator, right before
+//! draw number `draw`, to the stream of the schedule key and `salt`, so every draw from there
+//! on is fresh while all earlier draws are unchanged. A point with salt `RESUME` switches back
+//! to the stream the generator had when the schedule was installed, so a pair of points
+//! resamples a window of draws and keeps every later one. Streams are indexed by absolute draw
+//! number: splitting a window with another point keeps the draws on both sides. The world builder
 //! (`search::world`) uses it to resample the random outcomes behind one protocol line at a time.
 //! Equality, hashing and `Debug` ignore the counter while no point is pending: two generators
 //! are equal when they will produce the same stream. Without the feature the generator is the
@@ -16,6 +19,11 @@
 /// Most resample points one schedule can hold.
 #[cfg(feature = "search")]
 pub const RESAMPLE_CAPACITY: usize = 16;
+
+/// Salt of a resample point that resumes the stream the schedule was installed on: from its draw
+/// on, draws are what they would have been without any point.
+#[cfg(feature = "search")]
+pub const RESUME: u32 = u32::MAX;
 
 #[cfg(not(feature = "search"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -35,11 +43,15 @@ pub struct Prng {
     len: u8,
     key: u64,
     points: [(u32, u32); RESAMPLE_CAPACITY],
+    /// State and draw count when the schedule was installed (what `RESUME` points return to).
+    base: u64,
+    base_draws: u32,
 }
 
-/// LCG state, and while points are pending: key, draw position, points.
+/// LCG state, and while points are pending: key, draw position, points, and the stream `RESUME`
+/// points return to.
 #[cfg(feature = "search")]
-type Stream<'a> = (u64, Option<(u64, u32, &'a [(u32, u32)])>);
+type Stream<'a> = (u64, Option<(u64, u32, &'a [(u32, u32)], Option<(u64, u32)>)>);
 
 #[cfg(feature = "search")]
 impl Prng {
@@ -47,7 +59,8 @@ impl Prng {
     /// the key, the draw position and the points.
     fn stream(&self) -> Stream<'_> {
         let pending = self.pending();
-        (self.state, (!pending.is_empty()).then_some((self.key, self.draws, pending)))
+        let resume = pending.iter().any(|p| p.1 == RESUME).then_some((self.base, self.base_draws));
+        (self.state, (!pending.is_empty()).then_some((self.key, self.draws, pending, resume)))
     }
 }
 
@@ -76,12 +89,30 @@ impl core::fmt::Debug for Prng {
             d.field("key", &self.key)
                 .field("draws", &self.draws)
                 .field("pending", &self.pending());
+            if self.pending().iter().any(|p| p.1 == RESUME) {
+                d.field("base", &(self.base, self.base_draws));
+            }
         }
         d.finish()
     }
 }
 
-/// SplitMix64 finalizer: the state a resample point installs.
+/// `state` advanced by `n` LCG steps (composing `x -> MUL * x + ADD` by squaring).
+#[cfg(feature = "search")]
+const fn skip(mut state: u64, mut n: u32) -> u64 {
+    let (mut mul, mut add) = (MUL, ADD);
+    while n > 0 {
+        if n & 1 == 1 {
+            state = state.wrapping_mul(mul).wrapping_add(add);
+        }
+        add = add.wrapping_mul(mul.wrapping_add(1));
+        mul = mul.wrapping_mul(mul);
+        n >>= 1;
+    }
+    state
+}
+
+/// SplitMix64 finalizer: the seed of a resample stream.
 #[cfg(feature = "search")]
 #[inline]
 const fn mix(mut z: u64) -> u64 {
@@ -110,6 +141,8 @@ impl Prng {
             len: 0,
             key: 0,
             points: [(0, 0); RESAMPLE_CAPACITY],
+            base: 0,
+            base_draws: 0,
         }
     }
 
@@ -145,8 +178,9 @@ impl Prng {
     }
 
     /// Install a resample schedule: before draw `points[i].0` (absolute, see `draws`) the state
-    /// becomes a function of `key` and `points[i].1`. Indices must be strictly increasing and not
-    /// below `draws()`; at most `RESAMPLE_CAPACITY` points. Replaces any pending schedule.
+    /// becomes a function of `key` and `points[i].1`, or with salt `RESUME` the state the stream had
+    /// without any point. Indices must be strictly increasing and not below `draws()`; at most
+    /// `RESAMPLE_CAPACITY` points. Replaces any pending schedule.
     #[cfg(feature = "search")]
     pub fn set_resample(&mut self, key: u64, points: &[(u32, u32)]) {
         assert!(points.len() <= RESAMPLE_CAPACITY, "too many resample points");
@@ -156,6 +190,7 @@ impl Prng {
             "resample points must be increasing and in the future"
         );
         self.key = key;
+        (self.base, self.base_draws) = (self.state, self.draws);
         self.points[..points.len()].copy_from_slice(points);
         self.len = points.len() as u8;
         self.next = 0;
@@ -184,7 +219,11 @@ impl Prng {
     #[cold]
     fn resample(&mut self) {
         let (draw, salt) = self.points[self.next as usize];
-        self.state = mix(self.key ^ mix((draw as u64) << 32 | salt as u64));
+        self.state = if salt == RESUME {
+            skip(self.base, draw - self.base_draws)
+        } else {
+            skip(mix(self.key ^ mix(salt as u64)), draw)
+        };
         self.next += 1;
         self.hook = if self.next < self.len {
             self.points[self.next as usize].0
@@ -299,6 +338,18 @@ mod tests {
         let other: Vec<u32> = (0..12).map(|_| r.next_u32()).collect();
         assert_eq!(other[..8], got[..8]);
         assert_ne!(other[8..], got[8..]);
+        // Splitting a window keeps its draws: (4, 1) then (6, 1) is the same stream as (4, 1).
+        let mut split = base;
+        split.set_resample(99, &[(4, 1), (6, 1), (8, 2)]);
+        assert_eq!((0..12).map(|_| split.next_u32()).collect::<Vec<_>>(), got);
+        // A window: draws 4..8 resampled, the plain stream from draw 8 on.
+        let mut w = base;
+        w.next_u32();
+        w.set_resample(99, &[(4, 1), (8, RESUME)]);
+        let windowed: Vec<u32> = core::iter::once(plain[0]).chain((1..12).map(|_| w.next_u32())).collect();
+        assert_eq!(windowed[..4], plain[..4]);
+        assert_eq!(windowed[4..8], got[4..8]);
+        assert_eq!(windowed[8..], plain[8..]);
         // The counter is invisible to equality and Debug.
         let (mut a, b) = (Prng::from_seed([1, 1, 1, 1]), Prng::from_seed([1, 1, 1, 1]));
         a.draws = 7;

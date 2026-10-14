@@ -401,9 +401,9 @@ impl BattleState {
 #[cfg(not(feature = "search"))]
 const _: () = assert!(core::mem::size_of::<BattleState>() == 37688);
 #[cfg(feature = "search")]
-const _: () = assert!(core::mem::size_of::<BattleState>() == 37840);
+const _: () = assert!(core::mem::size_of::<BattleState>() == 37848);
 #[cfg(feature = "search")]
-const _: () = assert!(core::mem::size_of::<crate::prng::Prng>() == 160);
+const _: () = assert!(core::mem::size_of::<crate::prng::Prng>() == 168);
 const _: () = assert!(core::mem::size_of::<Pokemon>() == 540);
 const _: () = assert!(core::mem::size_of::<Side>() == 74);
 const _: () = assert!(core::mem::size_of::<FaintEntry>() == 4);

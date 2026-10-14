@@ -1,0 +1,137 @@
+|rated|
+|
+|teamsize|p1|6
+|teamsize|p2|6
+|start
+|switch|p1a: Toxapex|Toxapex, L92, F|241/241
+|switch|p1b: Squawkabilly|Squawkabilly-White, L91, M|297/297
+|switch|p2a: Blissey|Blissey, L96, F|100/100
+|switch|p2b: Munkidori|Munkidori, L80, M|100/100
+|-ability|p1b: Squawkabilly|Intimidate|boost
+|-unboost|p2a: Blissey|atk|1
+|-unboost|p2b: Munkidori|atk|1
+|turn|1
+|
+|switch|p2a: Okidogi|Okidogi, L78, M|100/100
+|move|p2b: Munkidori|Psychic|p1a: Toxapex
+|-supereffective|p1a: Toxapex
+|-damage|p1a: Toxapex|91/241
+|move|p1b: Squawkabilly|Brave Bird|p2b: Munkidori
+|-damage|p2b: Munkidori|11/100
+|-damage|p1b: Squawkabilly|217/297|[from] Recoil
+|-damage|p1b: Squawkabilly|188/297|[from] item: Life Orb
+|move|p1a: Toxapex|Toxic|p2a: Okidogi
+|-immune|p2a: Okidogi
+|
+|-heal|p1a: Toxapex|106/241|[from] item: Leftovers
+|upkeep
+|turn|2
+|
+|switch|p1a: Calyrex|Calyrex, L94|340/340
+|-ability|p1a: Calyrex|Unnerve
+|move|p2b: Munkidori|Psychic|p1a: Calyrex
+|-resisted|p1a: Calyrex
+|-damage|p1a: Calyrex|286/340
+|move|p1b: Squawkabilly|Brave Bird|p2a: Okidogi
+|-supereffective|p2a: Okidogi
+|-damage|p2a: Okidogi|0 fnt
+|faint|p2a: Okidogi
+|-damage|p1b: Squawkabilly|101/297|[from] Recoil
+|-damage|p1b: Squawkabilly|72/297|[from] item: Life Orb
+|
+|upkeep
+|
+|switch|p2a: Regieleki|Regieleki, L79|100/100
+|turn|3
+|
+|switch|p2b: Blissey|Blissey, L96, F|100/100
+|move|p1b: Squawkabilly|Quick Attack|p2b: Blissey
+|-damage|p2b: Blissey|76/100
+|-damage|p1b: Squawkabilly|43/297|[from] item: Life Orb
+|move|p2a: Regieleki|Electroweb|p1a: Calyrex|[spread] p1b
+|-miss|p2a: Regieleki|p1a: Calyrex
+|-supereffective|p1b: Squawkabilly
+|-damage|p1b: Squawkabilly|0 fnt
+|faint|p1b: Squawkabilly
+|move|p1a: Calyrex|Psychic|p2a: Regieleki
+|-damage|p2a: Regieleki|37/100
+|
+|upkeep
+|
+|switch|p1b: Lycanroc|Lycanroc, L84, F|263/263
+|turn|4
+|
+|move|p2b: Blissey|Helping Hand|p2a: Regieleki
+|-singleturn|p2a: Regieleki|Helping Hand|[of] p2b: Blissey
+|move|p1b: Lycanroc|Protect|p1b: Lycanroc
+|-singleturn|p1b: Lycanroc|Protect
+|move|p2a: Regieleki|Thunderbolt|p1b: Lycanroc
+|-activate|p1b: Lycanroc|move: Protect
+|move|p1a: Calyrex|Leech Seed|p2b: Blissey|[miss]
+|-miss|p1a: Calyrex|p2b: Blissey
+|
+|upkeep
+|turn|5
+|
+|move|p2b: Blissey|Helping Hand|p2a: Regieleki
+|-singleturn|p2a: Regieleki|Helping Hand|[of] p2b: Blissey
+|move|p2a: Regieleki|Thunderbolt|p1b: Lycanroc
+|-damage|p1b: Lycanroc|0 fnt
+|faint|p1b: Lycanroc
+|move|p1a: Calyrex|Leech Seed|p2b: Blissey
+|-start|p2b: Blissey|move: Leech Seed
+|
+|-damage|p2b: Blissey|64/100|[from] Leech Seed|[of] p1a: Calyrex
+|-heal|p1a: Calyrex|340/340|[silent]
+|upkeep
+|
+|switch|p1b: Bastiodon|Bastiodon, L90, M|254/254
+|turn|6
+|
+|switch|p2b: Munkidori|Munkidori, L80, M|11/100
+|-terastallize|p2a: Regieleki|Ice
+|-terastallize|p1b: Bastiodon|Fighting
+|move|p2a: Regieleki|Tera Blast|p1a: Calyrex|[anim] Tera Blast Ice
+|-supereffective|p1a: Calyrex
+|-damage|p1a: Calyrex|206/340
+|move|p1a: Calyrex|Leech Seed|p2b: Munkidori
+|-start|p2b: Munkidori|move: Leech Seed
+|move|p1b: Bastiodon|Iron Defense|p1b: Bastiodon
+|-boost|p1b: Bastiodon|def|2
+|
+|-damage|p2b: Munkidori|0 fnt|[from] Leech Seed|[of] p1a: Calyrex
+|-heal|p1a: Calyrex|235/340|[silent]
+|faint|p2b: Munkidori
+|upkeep
+|
+|switch|p2b: Kyogre|Kyogre, L65|100/100
+|-weather|RainDance|[from] ability: Drizzle|[of] p2b: Kyogre
+|turn|7
+|
+|move|p2a: Regieleki|Tera Blast|p1a: Calyrex|[anim] Tera Blast Ice
+|-supereffective|p1a: Calyrex
+|-damage|p1a: Calyrex|85/340
+|-enditem|p1a: Calyrex|Sitrus Berry|[eat]
+|-heal|p1a: Calyrex|170/340|[from] item: Sitrus Berry
+|move|p2b: Kyogre|Water Spout|p1b: Bastiodon|[spread] p1a,p1b
+|-resisted|p1a: Calyrex
+|-damage|p1a: Calyrex|90/340
+|-damage|p1b: Bastiodon|155/254
+|move|p1a: Calyrex|Leaf Storm|p2b: Kyogre
+|-supereffective|p2b: Kyogre
+|-damage|p2b: Kyogre|0 fnt
+|-unboost|p1a: Calyrex|spa|2
+|faint|p2b: Kyogre
+|move|p1b: Bastiodon|Body Press|p2a: Regieleki
+|-supereffective|p2a: Regieleki
+|-damage|p2a: Regieleki|0 fnt
+|faint|p2a: Regieleki
+|
+|-weather|RainDance|[upkeep]
+|-heal|p1b: Bastiodon|170/254|[from] item: Leftovers
+|upkeep
+|
+|switch|p2a: Blissey|Blissey, L96, F|64/100
+|switch|p2b: Kyurem|Kyurem-Black, L75|100/100
+|-ability|p2b: Kyurem|Teravolt
+|turn|8

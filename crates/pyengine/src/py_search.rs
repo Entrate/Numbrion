@@ -284,7 +284,8 @@ impl WorldBuilder {
         lock(&self.w).weights()
     }
 
-    /// Cumulative counters: attempts (segment replays), segments, builds, deaths, copies, swaps.
+    /// Cumulative counters: attempts (segment replays), segments, builds, deaths, copies, swaps,
+    /// collapse recovery (collapses, restores, backtracks) and exact set repair.
     fn stats<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
         let s = lock(&self.w).stats;
         let d = PyDict::new(py);
@@ -294,6 +295,13 @@ impl WorldBuilder {
         d.set_item("deaths", s.deaths)?;
         d.set_item("copies", s.copies)?;
         d.set_item("swaps", s.swaps)?;
+        d.set_item("collapses", s.collapses)?;
+        d.set_item("restores", s.restores)?;
+        d.set_item("backtracks", s.backtracks)?;
+        d.set_item("set_repair_attempts", s.set_repair_attempts)?;
+        d.set_item("set_repairs", s.set_repairs)?;
+        d.set_item("repair_replays", s.repair_replays)?;
+        d.set_item("repair_draw_shifts", s.repair_draw_shifts)?;
         Ok(d)
     }
 

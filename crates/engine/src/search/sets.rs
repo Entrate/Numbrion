@@ -245,6 +245,41 @@ impl SetPool {
         }
     }
 
+    /// Among the pool's sets equal to `set` in everything but the Tera type (and gender, move order,
+    /// name/extras, and shininess, which sampled sets take from the protocol), the share whose Tera type is
+    /// `tera`, by count. `None` when the pool has no such set.
+    pub fn tera_share(&self, set: &SetDef, tera: TypeId) -> Option<f64> {
+        let g = *self.by_shown.get(Self::shown_species(set))?;
+        let n = (set.move_count as usize).min(4);
+        let mut moves = [EffectId::NONE; 4];
+        moves[..n].copy_from_slice(&set.moves[..n]);
+        moves[..n].sort_unstable_by_key(|m| m.0);
+        let (mut all, mut with) = (0u64, 0u64);
+        for &i in &self.groups[g as usize] {
+            let e = &self.entries[i as usize];
+            let k = &e.key;
+            if k.species == set.species
+                && k.item == set.item
+                && k.ability == set.ability
+                && k.level == set.level
+                && k.move_count as usize == n
+                && k.moves == moves
+                && k.evs == set.evs
+                && k.ivs == set.ivs
+                && k.nature == set.nature
+                && k.happiness == set.happiness
+                && k.dynamax_level == set.dynamax_level
+                && k.gigantamax == set.gigantamax
+            {
+                all += e.count as u64;
+                if k.tera_type == tera {
+                    with += e.count as u64;
+                }
+            }
+        }
+        (all > 0).then(|| with as f64 / all as f64)
+    }
+
     /// Whether any set in the pool shows this species text.
     pub fn contains_species(&self, shown: &str) -> bool {
         self.by_shown.contains_key(shown)
@@ -268,6 +303,31 @@ impl SetPool {
         })
     }
 
+    /// Bounded repair proposals, exact except for Tera, most frequent first, ties in pool order.
+    /// Returns the pool record identity, set and share of all records satisfying the other
+    /// constraints, including records outside the bound. Gender and move order follow `sample`.
+    pub(crate) fn repair_candidates(
+        &self,
+        c: &SetConstraints<'_>,
+        limit: usize,
+        rng: &mut SplitMix64,
+    ) -> Vec<(u32, SetDef, f64)> {
+        let Some(&g) = self.by_shown.get(c.shown_species) else { return Vec::new() };
+        let mut candidates: Vec<_> = self.groups[g as usize].iter().copied().filter(|&i| {
+            let k = &self.entries[i as usize].key;
+            c.level.is_none_or(|x| x == k.level)
+                && c.item.is_none_or(|x| x == k.item)
+                && c.ability.is_none_or(|x| x == k.ability)
+                && c.moves.iter().all(|m| k.moves[..k.move_count as usize].contains(m))
+        }).collect();
+        let total: u64 = candidates.iter().map(|&i| self.entries[i as usize].count as u64).sum();
+        candidates.sort_by_key(|&i| (std::cmp::Reverse(self.entries[i as usize].count), i));
+        candidates.into_iter().take(limit).map(|i| {
+            let e = &self.entries[i as usize];
+            (i, self.build(&e.key, Some(c.name), c.shiny, c.gender, rng), e.count as f64 / total as f64)
+        }).collect()
+    }
+
     /// A set for a revealed Pokemon: among the sets showing `c.shown_species`, those that satisfy
     /// the most soft constraints (level, each distinct move, item, ability, Tera type), weighted
     /// by count. `None` if no set in the pool shows that species.
@@ -278,6 +338,28 @@ impl SetPool {
     /// PRNG: one draw for the candidate, one for a coin gender (only when drawn), then
     /// `move_count - 1` for the move order.
     pub fn sample(&self, c: &SetConstraints, rng: &mut SplitMix64) -> Option<Sampled> {
+        self.sample_candidates(c, rng, None).map(|(sampled, _)| sampled)
+    }
+
+    /// Rebuild proposal: visit distinct best-fitting pool records before repeating one. `used`
+    /// contains record indices from earlier proposals for this Pokemon under the same constraints.
+    /// Once exhausted, start another weighted pass. The returned factor corrects the proposal's
+    /// weight back to the ordinary pool prior; no candidate is ruled out by a failed replay.
+    pub(crate) fn sample_distinct(
+        &self,
+        c: &SetConstraints,
+        rng: &mut SplitMix64,
+        used: &mut Vec<u32>,
+    ) -> Option<(Sampled, f64)> {
+        self.sample_candidates(c, rng, Some(used))
+    }
+
+    fn sample_candidates(
+        &self,
+        c: &SetConstraints,
+        rng: &mut SplitMix64,
+        mut used: Option<&mut Vec<u32>>,
+    ) -> Option<(Sampled, f64)> {
         let g = *self.by_shown.get(c.shown_species)?;
         let members = &self.groups[g as usize];
         let mut moves: Vec<EffectId> = Vec::with_capacity(c.moves.len());
@@ -312,22 +394,44 @@ impl SetPool {
                 weight += e.count as u64;
             }
         }
-        let mut target = rng.below(weight as usize) as u64;
-        let pick = members
+        let mut remaining = weight;
+        if let Some(used) = &mut used {
+            remaining = members
+                .iter()
+                .copied()
+                .filter(|i| !used.contains(i))
+                .map(|i| &self.entries[i as usize])
+                .filter(|e| score(&e.key) == best)
+                .map(|e| e.count as u64)
+                .sum();
+            if remaining == 0 {
+                used.clear();
+                remaining = weight;
+            }
+        }
+        let mut target = rng.below(remaining as usize) as u64;
+        let pick = *members
             .iter()
-            .map(|&i| &self.entries[i as usize])
-            .filter(|e| score(&e.key) == best)
-            .find(|e| {
+            .filter(|i| used.as_ref().is_none_or(|used| !used.contains(i)))
+            .filter(|&&i| score(&self.entries[i as usize].key) == best)
+            .find(|&&i| {
+                let e = &self.entries[i as usize];
                 let hit = target < e.count as u64;
                 target = target.saturating_sub(e.count as u64);
                 hit
             })
             .expect("weighted pick within the best candidates");
-        let set = self.build(&pick.key, Some(c.name), c.shiny, c.gender, rng);
-        Some(Sampled {
-            set,
-            consistent: best == max,
-        })
+        if let Some(used) = used {
+            used.push(pick);
+        }
+        let set = self.build(&self.entries[pick as usize].key, Some(c.name), c.shiny, c.gender, rng);
+        Some((
+            Sampled {
+                set,
+                consistent: best == max,
+            },
+            remaining as f64 / weight as f64,
+        ))
     }
 
     /// A set for a never-seen team slot, weighted by count over all sets whose Species Clause key
@@ -633,6 +737,40 @@ mod tests {
     }
 
     #[test]
+    fn rebuild_sampling_covers_candidates_then_restarts_with_the_pool_prior() {
+        let p = pool();
+        let c = SetConstraints::new("Umbreon", "Umbreon");
+        let mut rng = SplitMix64(7);
+        let mut ordinary_rng = rng;
+        let mut used = Vec::new();
+        let (first, weight) = p.sample_distinct(&c, &mut rng, &mut used).unwrap();
+        assert_eq!(first, p.sample(&c, &mut ordinary_rng).unwrap());
+        assert_eq!(weight, 1.0);
+        let (second, weight) = p.sample_distinct(&c, &mut rng, &mut used).unwrap();
+        assert_ne!(first.set.item, second.set.item);
+        assert!(first.consistent && second.consistent);
+        // Three Sitrus Berry entries and one Leftovers entry. The proposal correction retains
+        // that prior even when the next draw is forced to cover the other candidate.
+        assert_eq!(
+            weight,
+            if second.set.item == item("Sitrus Berry") { 0.75 } else { 0.25 }
+        );
+        let (_, weight) = p.sample_distinct(&c, &mut rng, &mut used).unwrap();
+        assert_eq!(weight, 1.0);
+        assert_eq!(used.len(), 1);
+
+        // Exhausting the best candidates must never admit a lower-scoring set.
+        let moves = [mv("Protect")];
+        let c = SetConstraints { moves: &moves, ..c };
+        for _ in 0..3 {
+            let (sampled, weight) = p.sample_distinct(&c, &mut rng, &mut used).unwrap();
+            assert!(sampled.consistent);
+            assert_eq!(sampled.set.item, item("Leftovers"));
+            assert_eq!(weight, 1.0);
+        }
+    }
+
+    #[test]
     fn dedupes_with_counts_ignoring_gender_and_move_order() {
         let p = pool();
         assert_eq!(p.len(), 10);
@@ -900,5 +1038,66 @@ mod tests {
         // Adding after shrinking still deduplicates.
         p.add_team(UMBREON_B).unwrap();
         assert_eq!((p.len(), p.distinct()), (11, 8));
+    }
+
+    #[test]
+    fn tera_share_conditions_on_every_stored_field_except_tera_and_extras() {
+        let mut p = SetPool::new();
+        let a = TeamDef::unpack(&UMBREON_A.replacen("||85", "|Adamant|85", 1)).unwrap().sets[0].clone();
+        let mut b = TeamDef::unpack(&UMBREON_A.replacen("||85", "|Timid|85", 1)).unwrap().sets[0].clone();
+        b.tera_type = dex::type_id("Ghost").unwrap();
+        assert_ne!(a.nature, b.nature);
+        for _ in 0..9 { p.add_set(&a); }
+        p.add_set(&b);
+        assert_eq!(p.tera_share(&a, a.tera_type), Some(1.0));
+        assert_eq!(p.tera_share(&b, a.tera_type), Some(0.0));
+        assert_eq!(p.tera_share(&b, b.tera_type), Some(1.0));
+        for field in 0..3 {
+            let mut other = a.clone();
+            match field {
+                0 => other.happiness -= 1,
+                1 => other.dynamax_level -= 1,
+                _ => other.gigantamax = !other.gigantamax,
+            }
+            assert_eq!(p.tera_share(&other, a.tera_type), None);
+        }
+        // A shiny opponent takes its shininess from the protocol, not from the pool.
+        let shiny = SetDef { shiny: !a.shiny, ..a.clone() };
+        assert_eq!(p.tera_share(&shiny, a.tera_type), Some(1.0));
+        let mut same = b;
+        same.tera_type = a.tera_type;
+        same.name = "nickname".into();
+        same.pokeball = "Ultra Ball".into();
+        same.hp_type = "Fire".into();
+        same.gender = Gender::Female;
+        same.moves.reverse();
+        assert_eq!(p.tera_share(&same, a.tera_type), Some(0.0));
+    }
+
+    #[test]
+    fn repair_proposals_are_exact_ranked_and_keep_the_full_prior_denominator() {
+        let mut p = SetPool::new();
+        let a = TeamDef::unpack(UMBREON_A).unwrap().sets[0].clone();
+        let mut b = a.clone();
+        b.item = dex::ITEM_CHOICESCARF;
+        let mut c = b.clone();
+        c.tera_type = dex::type_id("Water").unwrap();
+        for _ in 0..10 { p.add_set(&a); }
+        for _ in 0..3 { p.add_set(&b); }
+        for _ in 0..2 { p.add_set(&c); }
+        let mut constraints = SetConstraints::new("Umbreon", "Umbreon");
+        constraints.item = Some(dex::ITEM_CHOICESCARF);
+        let proposals = p.repair_candidates(&constraints, 1, &mut SplitMix64(1));
+        assert_eq!(proposals.len(), 1);
+        assert_eq!(proposals[0].1.tera_type, b.tera_type);
+        assert_eq!(proposals[0].2, 3.0 / 5.0);
+        constraints.tera = Some(dex::type_id("Fire").unwrap());
+        assert_eq!(p.repair_candidates(&constraints, 1, &mut SplitMix64(1)), proposals,
+            "Tera is integrated separately, including off-pool types");
+        constraints.item = None;
+        let all = p.repair_candidates(&constraints, 3, &mut SplitMix64(1));
+        assert_eq!(all[1].0, proposals[0].0, "record identities survive a changed filter and rank");
+        constraints.moves = &[dex::MOVE_FLASHCANNON];
+        assert!(p.repair_candidates(&constraints, 8, &mut SplitMix64(1)).is_empty());
     }
 }

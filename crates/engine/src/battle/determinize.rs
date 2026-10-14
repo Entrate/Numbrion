@@ -32,6 +32,9 @@ pub enum HiddenSetError {
     GenderRequired,
     /// The set fails `SetDef` validation or overflows the stat range.
     InvalidSet(TeamError),
+    /// `set_hidden_tera_type`: the Pokemon already terastallized, its species fixes its Tera
+    /// type, or the type is not a Tera type.
+    TeraFixed,
 }
 
 impl core::fmt::Display for HiddenSetError {
@@ -48,6 +51,7 @@ impl core::fmt::Display for HiddenSetError {
                 "the new set needs an explicit gender: the replaced input drew none at construction"
             }
             Self::InvalidSet(e) => return write!(f, "invalid set: {e}"),
+            Self::TeraFixed => "the Tera type is fixed (already terastallized, a species with a required Tera type, or not a type)",
         })
     }
 }
@@ -165,6 +169,48 @@ impl<L: LogSink> Battle<L> {
             *parsed = Arc::clone(&self.teams.sides[side]);
         } else {
             Arc::make_mut(parsed).sets[index] = set.clone();
+        }
+        self.invalidate_derived_caches();
+        Ok(())
+    }
+
+    /// Determinization of a hidden Tera type: give `mon`, a Pokemon of `viewer`'s opponent that has
+    /// not terastallized, the Tera type `tera`. Unlike `replace_hidden_set` the Pokemon may have been
+    /// revealed: until it terastallizes, its set's Tera type affects nothing (battle code reads it
+    /// only to terastallize and for a terastallized Tera Blast), so the battle so far is exactly
+    /// what it would have been with `tera` from the start. Refused (`TeraFixed`) when it already
+    /// terastallized or its species requires a Tera type (Ogerpon, Terapagos). Requires a flushed
+    /// decision boundary. No events, logs or PRNG draws.
+    pub fn set_hidden_tera_type(&mut self, viewer: SideId, mon: MonId, tera: TypeId) -> Result<(), HiddenSetError> {
+        self.assert_boundary();
+        if viewer.0 >= 2
+            || mon.0 >= 12
+            || mon.side() == viewer
+            || mon.0 as usize % 6 >= self.state.sides[mon.side().0 as usize].pokemon_count as usize
+        {
+            return Err(HiddenSetError::NotOpponent);
+        }
+        if self.state.ended {
+            return Err(HiddenSetError::Ended);
+        }
+        let (side, index) = (mon.side().0 as usize, mon.0 as usize % 6);
+        let species = self.teams.sides[side].sets[index].species;
+        if self.state.pokemon[mon.0 as usize].terastallized != TypeId::NONE
+            || dex::species(species).required_tera_type != TypeId::NONE
+            || !(1..=dex::TYPE_NAMES.len()).contains(&(tera.0 as usize))
+        {
+            return Err(HiddenSetError::TeraFixed);
+        }
+        if self.teams.sides[side].sets[index].tera_type == tera {
+            return Ok(());
+        }
+        let shared = Arc::ptr_eq(&self.teams.sides[side], &self.parsed.sides[side]);
+        Arc::make_mut(&mut Arc::make_mut(&mut self.teams).sides[side]).sets[index].tera_type = tera;
+        let parsed = &mut Arc::make_mut(&mut self.parsed).sides[side];
+        if shared {
+            *parsed = Arc::clone(&self.teams.sides[side]);
+        } else {
+            Arc::make_mut(parsed).sets[index].tera_type = tera;
         }
         self.invalidate_derived_caches();
         Ok(())

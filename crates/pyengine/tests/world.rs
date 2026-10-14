@@ -16,6 +16,14 @@ mod common;
 mod real_zoroark;
 #[path = "world/illusion_review.rs"]
 mod illusion_review;
+#[path = "world/tera_reveal.rs"]
+mod tera_reveal;
+#[path = "world/real_golgan.rs"]
+mod real_golgan;
+#[path = "world/backtrack.rs"]
+mod backtrack;
+#[path = "world/set_repair.rs"]
+mod set_repair;
 
 use _numbrion::pool::TeamPool;
 use engine::{
@@ -290,6 +298,10 @@ fn worlds_reproduce_the_viewer_state() {
         stats.deaths += s.deaths;
         stats.copies += s.copies;
         stats.swaps += s.swaps;
+        stats.set_repair_attempts += s.set_repair_attempts;
+        stats.set_repairs += s.set_repairs;
+        stats.repair_replays += s.repair_replays;
+        stats.repair_draw_shifts += s.repair_draw_shifts;
     }
     eprintln!("worlds: {ok} positions ok, {failed} failed, {checked} worlds checked; {stats:?}");
     assert!(ok > 0);
@@ -524,6 +536,9 @@ fn measure_worlds(illusion: bool) -> (usize, usize) {
         })
         .collect();
     let mut times = Vec::new();
+    let mut surviving_times = Vec::new();
+    let mut collapses = 0;
+    let mut repair_counts = [0u64; 4];
     let mut counts = [[0usize; 2]; 2];
     for battle in 0..common::n_battles(12) {
         let mut rng = SplitMix64(2000 + battle as u64);
@@ -557,6 +572,8 @@ fn measure_worlds(illusion: bool) -> (usize, usize) {
                 let choice = pick(&b, side, &mut rng);
                 if side == viewer {
                     w.push_request(&b.request_json(0).unwrap());
+                    let before = w.stats;
+                    let alive = w.alive();
                     let start = Instant::now();
                     let result = w.worlds::<TextLog>(2, 4000 + counts.iter().flatten().sum::<usize>() as u64);
                     if std::env::var_os("NUMBRION_WORLD_TRACE").is_some()
@@ -568,7 +585,15 @@ fn measure_worlds(illusion: bool) -> (usize, usize) {
                             w.last_failure()
                         );
                     }
-                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                    let ms = start.elapsed().as_secs_f64() * 1000.0;
+                    times.push(ms);
+                    if alive > 0 && w.stats.builds - before.builds > WorldConfig::default().fresh_per_update as u64 {
+                        collapses += 1;
+                    }
+                    if alive > 0 && w.stats.deaths == before.deaths && w.stats.builds == before.builds
+                        && w.stats.set_repair_attempts == before.set_repair_attempts {
+                        surviving_times.push(ms);
+                    }
                     counts[revealed as usize][result.is_ok() as usize] += 1;
                     if let Ok(worlds) = result {
                         for world in worlds {
@@ -584,6 +609,10 @@ fn measure_worlds(illusion: bool) -> (usize, usize) {
             w.push_lines(lines.iter().map(String::as_str));
             cursor = b.log.entries.len();
         }
+        repair_counts[0] += w.stats.set_repair_attempts;
+        repair_counts[1] += w.stats.set_repairs;
+        repair_counts[2] += w.stats.repair_replays;
+        repair_counts[3] += w.stats.repair_draw_shifts;
     }
     times.sort_by(f64::total_cmp);
     let n = times.len();
@@ -598,7 +627,92 @@ fn measure_worlds(illusion: bool) -> (usize, usize) {
         times.iter().sum::<f64>() / n as f64,
         times[n * 9 / 10]
     );
+    eprintln!("{} sweep: {} decisions, {} failures, {collapses} collapses; surviving mean {:.3} ms over {} decisions",
+        if illusion { "Illusion" } else { "normal" }, n, n - counts.iter().map(|c| c[1]).sum::<usize>(),
+        surviving_times.iter().sum::<f64>() / surviving_times.len().max(1) as f64, surviving_times.len());
+    eprintln!("repair: {} candidates, {} successes, {} historical segments replayed, {} draw-count rejections",
+        repair_counts[0], repair_counts[1], repair_counts[2], repair_counts[3]);
     (counts.iter().map(|c| c[1]).sum(), n)
+}
+
+/// Segment search effort over long random battles, decision by decision as a live client asks
+/// (failed decisions are retried at the next one). Fixed simulation and builder seeds:
+/// `cargo test --release --features search --test world segment_search_sweep -- --ignored --nocapture`.
+#[test]
+#[ignore = "segment search measurement"]
+fn segment_search_sweep() {
+    let pool = common::test_pool();
+    let sets = set_pool(&pool);
+    let mut stats = engine::search::world::WorldStats::default();
+    let (mut ok, mut failed, mut times) = (0usize, 0usize, Vec::new());
+    for battle in 0..common::n_battles(40) {
+        let mut rng = SplitMix64(5000 + battle as u64);
+        let (i, j) = (rng.below(pool.len()), rng.below(pool.len()));
+        let Ok(mut b) = B::from_team_defs(rng.seed(), teams_of(&pool, i), teams_of(&pool, j), names(), TextLog::default())
+        else {
+            continue;
+        };
+        b.start().unwrap();
+        let viewer = SideId(battle as u8 % 2);
+        let own = b.teams().sides[viewer.0 as usize].clone();
+        // Oracle mode: the pool holds only the real opponent team, so worlds die only when the
+        // search misses an outcome (or an exact HP fixed in an earlier segment).
+        let sets = if std::env::var_os("NUMBRION_SWEEP_ORACLE").is_some() {
+            let mut pool = SetPool::new();
+            pool.add_team(&b.teams().sides[1 - viewer.0 as usize].pack()).unwrap();
+            Arc::new(pool)
+        } else {
+            sets.clone()
+        };
+        let mut w =
+            WorldBuilder::new(viewer, own, names(), sets, WorldConfig::default(), 6000 + battle as u64).unwrap();
+        w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
+        let mut cursor = b.log.entries.len();
+        while !b.state.ended && b.turn() <= 20 {
+            for side in [viewer, SideId(1 - viewer.0)] {
+                if !needs(&b, side) {
+                    continue;
+                }
+                let choice = pick(&b, side, &mut rng);
+                if side == viewer {
+                    w.push_request(&b.request_json(viewer.0 as usize).unwrap());
+                    let start = Instant::now();
+                    let result = w.worlds::<TextLog>(2, 7000 + (ok + failed) as u64);
+                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                    match result {
+                        Ok(_) => ok += 1,
+                        Err(e) => {
+                            failed += 1;
+                            eprintln!("sweep battle {battle} turn {}: {e}: {}", b.turn(), w.last_failure());
+                        }
+                    }
+                    w.push_choice(&choice_text(&b, side, &choice));
+                }
+                b.choose_typed(side, &choice).unwrap();
+            }
+            w.push_lines(player_view(&b.log.entries, cursor, viewer).iter().map(String::as_str));
+            cursor = b.log.entries.len();
+        }
+        let s = w.stats;
+        stats.attempts += s.attempts;
+        stats.segments += s.segments;
+        stats.builds += s.builds;
+        stats.deaths += s.deaths;
+        stats.copies += s.copies;
+        stats.swaps += s.swaps;
+        stats.collapses += s.collapses;
+    }
+    times.sort_by(f64::total_cmp);
+    let n = times.len();
+    eprintln!(
+        "sweep: {ok}/{} decisions with worlds; attempts/segment {:.2}; {stats:?}; ms median {:.2}, mean {:.2}, p90 {:.2}, max {:.0}",
+        ok + failed,
+        stats.attempts as f64 / stats.segments.max(1) as f64,
+        times[n / 2],
+        times.iter().sum::<f64>() / n as f64,
+        times[n * 9 / 10],
+        times[n - 1]
+    );
 }
 
 #[test]
@@ -728,4 +842,153 @@ fn hidden_illusion_and_a_real_disguise_have_identical_world_inputs() {
     for (x, y) in wa.worlds::<TextLog>(4, 77).unwrap().into_iter().zip(wb.worlds::<TextLog>(4, 77).unwrap()) {
         assert_eq!(format!("{:?}", x.state), format!("{:?}", y.state));
     }
+}
+
+/// Seed sweep for collapse recovery: random battles followed decision by decision (as the live
+/// bot does: after a failure the next decision tries again), by one builder per backtrack budget in
+/// `NUMBRION_SWEEP_BUDGETS` (default `0,16`; 0 is the rebuild-only behaviour), in lockstep so their
+/// times share the machine's load. Fixed simulation seeds, independent of the builders. Reports
+/// failures, collapses, rebuild-path updates (more than `fresh_per_update` builds) and time per
+/// decision. `NUMBRION_SWEEP_POOL` (packed teams; default the test pool) with `NUMBRION_SWEEP_LIMIT`
+/// teams supplies the set pool, `NUMBRION_SWEEP_TEAMS` (default: the test pool) the battle teams,
+/// `NUMBRION_TEST_BATTLES` the battle count (default 40), `NUMBRION_SWEEP_FIRST` the first battle
+/// seed (0), `NUMBRION_SWEEP_TURNS` the turn limit (20).
+#[test]
+#[ignore = "collapse recovery measurement"]
+fn collapse_recovery_sweep() {
+    #[derive(Default)]
+    struct Tally {
+        failures: usize,
+        broken: usize,
+        rebuilds: usize,
+        times: Vec<f64>,
+        normal: Vec<f64>,
+        collapsed: Vec<f64>,
+        stats: engine::search::world::WorldStats,
+    }
+    let env = |k: &str| std::env::var(k).ok();
+    let limit = env("NUMBRION_SWEEP_LIMIT").and_then(|v| v.parse().ok());
+    let pool = match env("NUMBRION_SWEEP_POOL") {
+        Some(p) => TeamPool::load(&[p], limit).unwrap(),
+        None => common::test_pool(),
+    };
+    let teams = match env("NUMBRION_SWEEP_TEAMS") {
+        Some(p) => TeamPool::load(&[p], None).unwrap(),
+        None => common::test_pool(),
+    };
+    let turns: u32 = env("NUMBRION_SWEEP_TURNS").and_then(|v| v.parse().ok()).unwrap_or(20);
+    let first: u64 = env("NUMBRION_SWEEP_FIRST").and_then(|v| v.parse().ok()).unwrap_or(0);
+    let budgets: Vec<usize> =
+        env("NUMBRION_SWEEP_BUDGETS").unwrap_or("0,16".into()).split(',').map(|v| v.parse().unwrap()).collect();
+    let start = Instant::now();
+    let sets = set_pool(&pool);
+    eprintln!("sweep: {} pool teams, {} battle teams", pool.len(), teams.len());
+    let mut tally: Vec<Tally> = budgets.iter().map(|_| Tally::default()).collect();
+    let mut decisions = 0usize;
+    for battle in 0..common::n_battles(40) {
+        let mut rng = SplitMix64(9000 + first + battle as u64);
+        let (i, j) = (rng.below(teams.len()), rng.below(teams.len()));
+        let Ok(mut b) = B::from_team_defs(rng.seed(), teams_of(&teams, i), teams_of(&teams, j), names(), TextLog::default())
+        else {
+            continue;
+        };
+        b.start().unwrap();
+        let viewer = SideId(0);
+        let mut builders: Vec<WorldBuilder> = budgets
+            .iter()
+            .map(|&backtrack_budget| {
+                let config = WorldConfig { backtrack_budget, ..WorldConfig::default() };
+                WorldBuilder::new(viewer, b.teams().sides[0].clone(), names(), sets.clone(), config, 7000 + first + battle as u64)
+                    .unwrap()
+            })
+            .collect();
+        for w in &mut builders {
+            w.push_lines(player_view(&b.log.entries, 0, viewer).iter().map(String::as_str));
+        }
+        let mut cursor = b.log.entries.len();
+        let mut failed_here = vec![false; budgets.len()];
+        while !b.state.ended && b.turn() <= turns {
+            for side in [viewer, SideId(1)] {
+                if !needs(&b, side) {
+                    continue;
+                }
+                let choice = pick(&b, side, &mut rng);
+                if side == viewer {
+                    for (k, w) in builders.iter_mut().enumerate() {
+                        let t = &mut tally[k];
+                        w.push_request(&b.request_json(0).unwrap());
+                        let before = w.stats;
+                        let clock = Instant::now();
+                        let result = w.worlds::<TextLog>(2, decisions as u64);
+                        let ms = clock.elapsed().as_secs_f64() * 1000.0;
+                        // The first decision builds every world; later ones only after a collapse.
+                        let rebuilt = before.builds > 0
+                            && w.stats.builds - before.builds > WorldConfig::default().fresh_per_update as u64;
+                        t.rebuilds += rebuilt as usize;
+                        if before.builds > 0 {
+                            t.times.push(ms);
+                            if w.stats.collapses > before.collapses { t.collapsed.push(ms) } else { t.normal.push(ms) }
+                        }
+                        match result {
+                            Ok(worlds) => {
+                                for world in worlds {
+                                    assert_eq!(world.request_json(0), b.request_json(0));
+                                }
+                            }
+                            Err(e) => {
+                                t.failures += 1;
+                                failed_here[k] = true;
+                                if env("NUMBRION_WORLD_TRACE").is_some() {
+                                    eprintln!("sweep budget {} battle {battle} turn {}: {e}; {}", budgets[k], b.turn(),
+                                        w.last_failure());
+                                }
+                            }
+                        }
+                        w.push_choice(&choice_text(&b, side, &choice));
+                    }
+                    decisions += 1;
+                }
+                b.choose_typed(side, &choice).unwrap();
+            }
+            let lines = player_view(&b.log.entries, cursor, viewer);
+            for w in &mut builders {
+                w.push_lines(lines.iter().map(String::as_str));
+            }
+            cursor = b.log.entries.len();
+        }
+        for (k, w) in builders.iter().enumerate() {
+            let (t, s) = (&mut tally[k], w.stats);
+            t.broken += failed_here[k] as usize;
+            t.stats.attempts += s.attempts;
+            t.stats.segments += s.segments;
+            t.stats.builds += s.builds;
+            t.stats.deaths += s.deaths;
+            t.stats.copies += s.copies;
+            t.stats.swaps += s.swaps;
+            t.stats.collapses += s.collapses;
+            t.stats.restores += s.restores;
+            t.stats.backtracks += s.backtracks;
+            t.stats.set_repair_attempts += s.set_repair_attempts;
+            t.stats.set_repairs += s.set_repairs;
+            t.stats.repair_replays += s.repair_replays;
+            t.stats.repair_draw_shifts += s.repair_draw_shifts;
+        }
+    }
+    let pct = |v: &mut Vec<f64>, q: f64| {
+        v.sort_by(f64::total_cmp);
+        if v.is_empty() { 0.0 } else { v[((v.len() - 1) as f64 * q) as usize] }
+    };
+    let mean = |v: &[f64]| v.iter().sum::<f64>() / v.len().max(1) as f64;
+    for (k, t) in tally.iter_mut().enumerate() {
+        eprintln!(
+            "sweep budget {}: {decisions} decisions, {} failed ({:.2}%), {} battles with a failure, {} collapsed updates, \
+             {} rebuild-path updates; ms per later decision mean {:.2}, median {:.2}, p90 {:.2}, p99 {:.1}, max {:.1}; \
+             without collapse mean {:.2}, median {:.2}; collapsed mean {:.1}, median {:.1}, p90 {:.1}, max {:.1}; {:?}",
+            budgets[k], t.failures, 100.0 * t.failures as f64 / decisions.max(1) as f64, t.broken, t.collapsed.len(),
+            t.rebuilds, mean(&t.times), pct(&mut t.times, 0.5), pct(&mut t.times, 0.9), pct(&mut t.times, 0.99),
+            pct(&mut t.times, 1.0), mean(&t.normal), pct(&mut t.normal, 0.5), mean(&t.collapsed),
+            pct(&mut t.collapsed, 0.5), pct(&mut t.collapsed, 0.9), pct(&mut t.collapsed, 1.0), t.stats
+        );
+    }
+    eprintln!("sweep: {:.1}s", start.elapsed().as_secs_f64());
 }
