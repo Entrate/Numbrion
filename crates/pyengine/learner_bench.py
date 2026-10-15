@@ -10,6 +10,8 @@ Run from the repository root:
 The timing runs ``--repeat`` full ``ppo_update`` calls after one warm-up update and reports seconds per update and
 trained samples per second; ``--breakdown`` adds one update timed phase by phase (synchronizing after each phase,
 so its total is a little higher; DirectML has no synchronize call, so its phase times are not meaningful).
+``--noise`` also measures the policy-gradient noise scale in every update (the trainer's ``--noise-scale`` probe),
+to time its overhead.
 """
 from __future__ import annotations
 
@@ -27,6 +29,7 @@ from training.device import BACKENDS, training_device
 from training.dex import load_dex
 from training.league import opponent_kinds
 from training.model import Model
+from training.noise import GradientNoise
 from training.ppo import Adam, clip_gradients, minibatches
 
 REPO = Path(__file__).resolve().parents[2]
@@ -125,11 +128,15 @@ def bench(args) -> None:
     for i in range(args.repeat + 1):
         sync(device)
         t = time.perf_counter()
-        _, samples = ts.ppo_update(model, optimizer, data, args, rng, 0.01, device)
+        probe = GradientNoise() if args.noise else None
+        _, samples = ts.ppo_update(model, optimizer, data, args, rng, 0.01, device, noise=probe)
+        if probe is not None:
+            probe.estimate()
         sync(device)
         if i:  # the first update compiles kernels
             times.append(time.perf_counter() - t)
     out = {"device": name, "threads": torch.get_num_threads(), "minibatch": args.minibatch, "compile": args.compile,
+           "noise": args.noise, "width": args.width, "layers": args.layers,
            "samples": samples,
            "update_s": round(float(np.median(times)), 3), "samples_per_s": round(samples / float(np.median(times)))}
     if args.breakdown:
@@ -147,6 +154,7 @@ def main():
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--breakdown", action="store_true")
     parser.add_argument("--compile", action="store_true", help="torch.compile the minibatch loss (as the trainer's flag)")
+    parser.add_argument("--noise", action="store_true", help="measure the noise scale in every update")
     parser.add_argument("--envs", type=int, default=128)
     parser.add_argument("--steps", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
@@ -158,6 +166,7 @@ def main():
     args = parser.parse_args()
     # The PPO settings ppo_update reads, at the trainer's defaults.
     args.gamma, args.lam, args.clip, args.value_coef, args.aux_coef, args.max_grad_norm = 0.995, 0.95, 0.2, 0.5, 0.03, 0.5
+    args.tera_entropy_weight = 0.0
     if args.collect:
         collect(args)
     else:

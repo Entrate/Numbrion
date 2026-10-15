@@ -40,6 +40,10 @@ Run from the repository root:
 * Schedule: learning rate, entropy and KO bonus anneal over ``--schedule-minutes`` (default: ``--minutes``).
   ``--minutes inf`` runs until <output>/STOP or ``--stop-minutes``. Snapshots every ``--snapshot-minutes`` feed
   evaluate.py. ``latest.pt`` (with optimizer, opponent-pool, entropy-controller and stream state) supports ``--resume``.
+* Noise scale (``--noise-scale``, off by default): the gradient noise scale of the PPO policy loss, measured by a
+  probe pass over env-grouped chunks of the rollout and smoothed over updates (training.noise), logged as ``noise_b``. ``--auto-lr``
+  lowers the learning rate below the schedule (or sums more minibatches per step, ``--auto-lr-mode accumulate``) as
+  it grows; ``latest.pt`` keeps both states.
 * Metrics: besides the losses, win rates against snapshots and against the heuristic, the PFSP table, and the
   learner's action usage (Tera, switches, Protect, status moves, Fake Out; training.diagnostics).
 """
@@ -64,6 +68,7 @@ from training.dex import load_dex
 from training.guards import MoveGuards
 from training.league import HEURISTIC, SEARCH, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
+from training.noise import GradientNoise, LrRule, NoiseScale, env_chunks
 from training.ppo import Adam, EntropyController, WeightAverage, clip_gradients, gae, minibatches, tera_choice_entropy
 
 HERE = Path(__file__).resolve().parent
@@ -153,6 +158,17 @@ def ppo_loss(model, batch: dict, partner_ids, partner_floats, a0, a1, mask0, mas
     return loss, terms
 
 
+def policy_surrogate(model, batch: dict, a0, a1, mask0, mask1, old_logp, weight):
+    """The unclipped PPO surrogate ``-mean(ratio * advantage)``, whose gradient is the importance-weighted policy
+    gradient: ppo_loss's policy term without the clip, and without the critic and auxiliary heads (the noise-scale
+    probe differentiates it)."""
+    state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
+    lp0, vectors0 = model.slot0(state, mask0)
+    lp1 = model.slot1(state, vectors0, a0, mask1)
+    new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
+    return -((new_logp - old_logp).exp() * weight).mean()
+
+
 @lru_cache(maxsize=1)
 def compiled_ppo_loss():
     import torch._inductor.config
@@ -188,7 +204,9 @@ def schedule_progress(args, elapsed: float) -> float:
 
 def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, device,
                teacher_coef: float = 0.0, distill: DistillData | None = None,
-               distill_coef: float = 0.0, elapsed: float = 0.0, update: int | None = None) -> tuple[dict, int]:
+               distill_coef: float = 0.0, elapsed: float = 0.0, update: int | None = None,
+               noise: GradientNoise | None = None, accumulate: int = 1,
+               probe_model: torch.nn.Module | None = None) -> tuple[dict, int]:
     """PPO with the oracle critic and the auxiliary loss on one rollout buffer of [T, rows] arrays.
 
     With ``--teacher-coef`` set, the buffer carries teacher labels and the loss imitates them with weight
@@ -197,7 +215,14 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
 
     With ``distill`` and ``distill_coef`` > 0, every minibatch also imitates ``--distill-batch`` search-labelled
     positions (training.distill), uncompiled, with weight ``distill_coef``. A stream instead spreads at most
-    ``--distill-max-batches`` batches of eligible rows over the update, and starvation leaves plain PPO unchanged."""
+    ``--distill-max-batches`` batches of eligible rows over the update, and starvation leaves plain PPO unchanged.
+
+    With ``noise`` (training.noise.GradientNoise), a probe pass before the first step adds to it the gradients of the
+    unclipped PPO surrogate (the importance-weighted policy gradient) on chunks of ``--minibatch`` trained rows that
+    keep each env's rows together (training.noise.env_chunks), taken at ``probe_model``'s weights (default:
+    ``model``'s; the trainer passes the weight average); it changes neither the weights nor ``rng``. Not during the
+    critic warm-up. ``accumulate`` > 1 sums that many minibatch gradients (their
+    mean) per optimizer step, the last step of the update taking what is left (``--auto-lr-mode accumulate``)."""
     steps, R = data["a0"].shape
     partner = np.arange(R) ^ 1
     advantages, returns = gae(data["reward"], data["value"], data["done"], data["bootstrap"], args.gamma, args.lam)
@@ -244,6 +269,9 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     distill_weight = torch.full((), float(distill_coef), device=device, dtype=dtype) if distilling else None
     loss_fn = compiled_ppo_loss() if getattr(args, "compile", False) else ppo_loss
     frozen = [p for name, p in model.named_parameters() if not name.startswith(CRITIC_PREFIXES)] if warming else []
+    probing = noise is not None and not warming
+    probe_model = model if probe_model is None else probe_model
+    probed = [p for p in probe_model.parameters() if p.requires_grad] if probing else []
 
     def up(array):
         return torch.from_numpy(np.ascontiguousarray(array)).to(device)
@@ -257,21 +285,47 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     def rows(key, index, extra=()):
         return columns[key][(index, *extra)] if resident else up(columns[key][(index, *extra)])
 
-    minibatch_index = 0
+    means = {}  # 1 / summed as device tensors (DirectML keeps host memory for every op given a Python scalar)
+
+    def step(summed: int) -> None:
+        if summed > 1:  # the mean of the summed minibatch gradients
+            if summed not in means:
+                means[summed] = torch.full((), 1.0 / summed, device=device, dtype=dtype)
+            for p in optimizer.parameters:
+                if p.grad is not None:
+                    p.grad.mul_(means[summed])
+        norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
+        stats["grad_norm"].append(norm)
+        optimizer.step(skip=~torch.isfinite(norm))  # a non-finite gradient leaves the weights as they were
+
+    def minibatch_loss(pick):
+        """ppo_loss on the trained rows at positions ``pick`` of ``selected``."""
+        index, partner_rows = selected[pick], partner_index[selected[pick]]
+        if resident:
+            pick, index, partner_rows = up(pick), up(index), up(partner_rows)
+        batch = {k: rows(k, index) for k in OBS_KEYS}
+        teacher = (dict(teacher_a0=rows("teacher_a0", index), teacher_a1=rows("teacher_a1", index),
+                        teacher_labelled=rows("teacher_labelled", index), teacher_coef=teacher_weight)
+                   if teach else {})
+        return loss_fn(model, batch, rows("ids", partner_rows), rows("floats", partner_rows, (slice(0, 6),)),
+                       rows("a0", index), rows("a1", index), rows("mask0", index), rows("mask1", index),
+                       rows("logp", index), weights[pick] if resident else up(weights[pick]), rows("returns", index),
+                       value_coef, entropy_weight, aux_coef, args.clip, tera_entropy_weight, **teacher)
+
+    if probing:  # the noise-scale probe: whole envs per chunk, before the first step (training.noise)
+        for chunk in env_chunks(selected, R, args.minibatch):
+            index = selected[chunk]
+            if resident:
+                chunk, index = up(chunk), up(index)
+            surrogate = policy_surrogate(probe_model, {k: rows(k, index) for k in OBS_KEYS}, rows("a0", index),
+                                         rows("a1", index), rows("mask0", index), rows("mask1", index),
+                                         rows("logp", index), weights[chunk] if resident else up(weights[chunk]))
+            noise.add(torch.autograd.grad(surrogate, probed, allow_unused=True), len(index))
+
+    minibatch_index = summed = 0
     for _ in range(args.epochs):
         for pick in minibatches(rng.permutation(len(selected)), args.minibatch):
-            index, partner_rows = selected[pick], partner_index[selected[pick]]
-            if resident:
-                pick, index, partner_rows = up(pick), up(index), up(partner_rows)
-            batch = {k: rows(k, index) for k in OBS_KEYS}
-            teacher = (dict(teacher_a0=rows("teacher_a0", index), teacher_a1=rows("teacher_a1", index),
-                            teacher_labelled=rows("teacher_labelled", index), teacher_coef=teacher_weight)
-                       if teach else {})
-            loss, terms = loss_fn(model, batch, rows("ids", partner_rows), rows("floats", partner_rows, (slice(0, 6),)),
-                                  rows("a0", index), rows("a1", index), rows("mask0", index), rows("mask1", index),
-                                  rows("logp", index), weights[pick] if resident else up(weights[pick]),
-                                  rows("returns", index), value_coef, entropy_weight, aux_coef, args.clip,
-                                  tera_entropy_weight, **teacher)
+            loss, terms = minibatch_loss(pick)
             if distilling and (stream_batches is None or minibatch_index in stream_batches):
                 labels_batch = (distill.sample(rng, args.distill_batch) if stream_batches is None
                                 else stream_batches.pop(minibatch_index))
@@ -281,17 +335,21 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                 stats["distill_loss"].append(imitation.detach())
                 stats["distill_agree"].append(agree)
             minibatch_index += 1
-            optimizer.zero_grad()
+            if not summed:
+                optimizer.zero_grad()
             loss.backward()
             for p in frozen:
                 p.grad = None  # Adam and the clipping skip parameters without a gradient
-            norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
-            stats["grad_norm"].append(norm)
-            optimizer.step(skip=~torch.isfinite(norm))  # a non-finite gradient leaves the weights as they were
+            summed += 1
+            if summed == accumulate:
+                step(summed)
+                summed = 0
             # Statistics stay on the device and are read back once per update (a .cpu() per value per minibatch
             # stalls the DirectML queue, ~10% of the update).
             for key, item in zip(terms_keys, terms):
                 stats[key].append(item)
+    if summed:
+        step(summed)
     stats = {k: torch.stack(v).cpu().numpy() if v else np.zeros(1) for k, v in stats.items()}
     if not np.isfinite(stats["policy_loss"]).all() or not np.isfinite(stats["grad_norm"]).all():
         raise RuntimeError("Non-finite PPO loss or gradient norm in this update (the optimizer skipped those steps, "
@@ -426,6 +484,33 @@ def parse_args(argv=None):
                         help="time constant (in updates) of an exponential moving average of the weights, saved as "
                              "OUTPUT/ema/mNNN.pt beside every snapshot and as OUTPUT/ema/latest.pt (0: off). Late in a "
                              "run the average plays better than the raw weights; evaluate those files")
+    noise = parser.add_argument_group("noise scale and automatic learning rate (training.noise; off by default)")
+    noise.add_argument("--noise-scale", action="store_true",
+                       help="measure the gradient noise scale of the PPO policy loss (a probe pass, forward and "
+                            "policy backward, over the rollout) and log it as noise_b (implied by --auto-lr)")
+    noise.add_argument("--noise-every", type=int, default=4, help="measure every that many updates")
+    noise.add_argument("--noise-weights", choices=("average", "raw"),
+                       help="measure at the weight average (default with --ema-updates) or at the raw training weights "
+                            "(default without; their noise scale falls as the learning rate rises: see the docs)")
+    noise.add_argument("--noise-ema", type=float, default=50.0,
+                       help="time constant (in measured updates) of the noise-scale EMAs")
+    noise.add_argument("--auto-lr", action="store_true",
+                       help="lower the step temperature as the noise scale grows: factor = clamp((B_ref / B_noise) ** "
+                            "power, --auto-lr-min, 1) times the scheduled learning rate (or a bigger batch, see "
+                            "--auto-lr-mode)")
+    noise.add_argument("--auto-lr-mode", choices=LrRule.MODES, default="lr",
+                       help="lr: multiply the learning rate by the factor; accumulate: keep it and sum round(1 / "
+                            "factor) minibatch gradients per optimizer step")
+    noise.add_argument("--auto-lr-power", type=float, default=0.5,
+                       help="exponent of B_ref / B_noise (0.5: Adam's square-root rule; 1: linear, SGD)")
+    noise.add_argument("--auto-lr-min", type=float, default=0.1, help="smallest factor")
+    noise.add_argument("--auto-lr-max-change", type=float, default=0.02,
+                       help="largest relative change of the factor per measured update")
+    noise.add_argument("--auto-lr-bref", type=float,
+                       help="reference noise scale B_ref in rows (default: the smoothed one after --auto-lr-warmup "
+                            "measured updates; a given value also overrides a resumed one)")
+    noise.add_argument("--auto-lr-warmup", type=int, default=50,
+                       help="measured updates before B_ref is taken (without --auto-lr-bref)")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=REPO / "scratch/training/selfplay")
     parser.add_argument("--resume", type=Path)
@@ -467,6 +552,22 @@ def parse_args(argv=None):
         args.search_labels = args.distill_stream
     if args.ema_updates != 0 and not args.ema_updates >= 1:
         parser.error("--ema-updates must be 0 (off) or at least 1")
+    if args.noise_weights == "average" and not args.ema_updates:
+        parser.error("--noise-weights average needs --ema-updates")
+    if args.auto_lr and args.noise_weights is None and not args.ema_updates:
+        parser.error("--auto-lr measures the noise scale at the weight average: give --ema-updates (or --noise-weights "
+                     "raw, whose noise scale grows as the rule lowers the learning rate)")
+    if args.noise_weights is None:
+        args.noise_weights = "average" if args.ema_updates else "raw"
+    if args.auto_lr:
+        args.noise_scale = True
+        try:
+            LrRule(args.auto_lr_power, args.auto_lr_min, args.auto_lr_max_change, args.auto_lr_bref,
+                   args.auto_lr_warmup, args.auto_lr_mode)
+        except ValueError as error:
+            parser.error(f"--auto-lr: {error}")
+    if args.noise_every < 1 or not args.noise_ema >= 1:
+        parser.error("--noise-every and --noise-ema must be at least 1")
     if args.distill_max_resident_rows <= 0 or (args.distill_stream and args.distill_max_resident_rows < args.distill_batch):
         parser.error("--distill-max-resident-rows must be positive and fit --distill-batch for a stream")
     return args
@@ -486,6 +587,9 @@ def main():
     controller = (EntropyController(args.entropy, args.entropy_target, args.entropy_target_final, args.entropy_rate,
                                     args.entropy_coef_min, args.entropy_coef_max) if args.entropy_target > 0 else None)
     usage = ActionUsage(dex)
+    noise_scale = NoiseScale(args.noise_ema, args.noise_every) if args.noise_scale else None
+    lr_rule = (LrRule(args.auto_lr_power, args.auto_lr_min, args.auto_lr_max_change, args.auto_lr_bref,
+                      args.auto_lr_warmup, args.auto_lr_mode) if args.auto_lr else None)
     elapsed_before = 0.0
     update = battles = samples_total = 0
     state = {}
@@ -503,11 +607,18 @@ def main():
         pool.load_state_dict(state["pool"])
         if controller is not None and state.get("entropy_controller"):
             controller.load_state_dict(state["entropy_controller"])
+        if noise_scale is not None and state.get("noise_scale"):
+            noise_scale.load_state_dict(state["noise_scale"])
+        if lr_rule is not None and state.get("lr_rule"):
+            lr_rule.load_state_dict(state["lr_rule"], keep_b_ref=args.auto_lr_bref is not None)
         elapsed_before, update, battles, samples_total = state["elapsed"], state["update"], state["battles"], state["samples"]
         rng.bit_generator.state = state["numpy_rng"]
     average = WeightAverage(model, args.ema_updates) if args.ema_updates > 0 else None
     if average is not None and state.get("ema") is not None:
         average.load_state_dict(state["ema"])  # else it starts from the resumed weights
+    probe_model = None  # --noise-weights average: the noise-scale probe runs on a copy holding the weight average
+    if noise_scale is not None and args.noise_weights == "average":
+        probe_model = Model(dex, args.width, args.layers, joint_features=args.joint_features).to(device)
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "config.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=1))
     n_params = sum(p.numel() for p in model.parameters())
@@ -542,7 +653,9 @@ def main():
             "update": update, "battles": battles, "samples": samples_total, "numpy_rng": rng.bit_generator.state,
             "width": args.width, "layers": args.layers,
             **({"distill_stream": distill.state_dict()} if isinstance(distill, DistillStream) else {}),
-            **({"ema": average.state_dict()} if average is not None else {})})
+            **({"ema": average.state_dict()} if average is not None else {}),
+            **({"noise_scale": noise_scale.state_dict()} if noise_scale is not None else {}),
+            **({"lr_rule": lr_rule.state_dict()} if lr_rule is not None else {})})
         if average is not None:
             save(args.output / "ema" / "latest.pt", {"model": average.state_dict(), "width": args.width,
                                                      "layers": args.layers, "minutes": elapsed / 60, "update": update,
@@ -608,6 +721,8 @@ def main():
             info = launch(actors, 1 - current, elapsed)
             progress = schedule_progress(args, elapsed)
             optimizer.lr = args.lr * (1 - (1 - args.lr_final) * progress)
+            if lr_rule is not None:  # --auto-lr: on top of the schedule
+                optimizer.lr *= lr_rule.lr_factor
             # Critic warm-up: the critic heads step with their own Adam, so the main optimizer's step count (and with
             # it the bias correction of the policy's fresh moments) starts when the policy starts learning.
             warming = update + 1 <= args.critic_warmup_updates
@@ -622,12 +737,27 @@ def main():
                 entropy_coef = args.entropy + (args.entropy_final - args.entropy) * progress
             teacher_coef = teacher_coefficient(args, elapsed)
             distill_coef = distill_coefficient(args, elapsed)
+            probe = GradientNoise() if noise_scale is not None and noise_scale.due(update + 1) else None
+            if probe is not None and probe_model is not None:
+                probe_model.load_state_dict(average.state)
             t1 = time.perf_counter()
             model.train()
             stats, samples = ppo_update(model, critic_optimizer if warming else optimizer, actors.buffers[current].arrays,
                                         args, rng, entropy_coef, device, teacher_coef, distill, distill_coef, elapsed,
-                                        update=update + 1)
+                                        update=update + 1, noise=probe,
+                                        accumulate=lr_rule.accumulate if lr_rule is not None else 1,
+                                        probe_model=probe_model)
             train_seconds = time.perf_counter() - t1
+            noise_metrics = {}
+            if noise_scale is not None:
+                measured = probe.estimate() if probe is not None else None
+                if measured is not None:
+                    noise_scale.observe(measured["g2"], measured["trace"])
+                    if lr_rule is not None:
+                        lr_rule.update(noise_scale)
+                raw = measured and measured["b_noise"]
+                noise_metrics = {**noise_scale.summary(), "noise_b_update": None if raw is None else round(raw),
+                                 **(lr_rule.summary() if lr_rule is not None else {})}
             if average is not None:
                 average.update(model)
             if controller is not None:
@@ -654,7 +784,8 @@ def main():
                 **opponent_results(collected, collected_info), "opponent_minutes": collected_info["snapshot_minutes"],
                 "lr": optimizer.lr, "progress": progress, "entropy_coef": round(entropy_coef, 5),
                 "entropy_target": round(controller.target(progress), 3) if controller is not None else None,
-                "ko_bonus": round(collected_info["ko_bonus"], 4), "pool_size": len(pool), **stats, **behaviour,
+                "ko_bonus": round(collected_info["ko_bonus"], 4), "pool_size": len(pool), **stats, **noise_metrics,
+                **behaviour,
                 "pfsp": pool.summary(), **memory_mb(),
                 **({"mps_mb": torch.mps.driver_allocated_memory() >> 20} if device.type == "mps" else {}),
                 **{k: v for k, v in collected.items() if k.startswith("actor_")},  # largest actor's memory
