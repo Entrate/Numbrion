@@ -27,6 +27,8 @@ from .model import N_ACTIONS
 OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 STATE_SHARED = ("tables",)
 ROW_KEYS = (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior", "q", "value")
+VALUE_KEYS = ("partner_ids", "partner_floats", "outcome", "remaining_steps")
+OPTIONAL_ROW_KEYS = (*VALUE_KEYS, "foe_match")
 META_KEYS = ("teacher", "teacher_minutes", "created", "holdout")
 
 
@@ -70,6 +72,23 @@ class DistillData:
         out.update(mask0=data["mask0"], mask1=mask1, a0=pairs[..., 0], a1=pairs[..., 1], weight=weight.astype(np.float32),
                    q=np.where(missing, 0.0, data["q"][rows, top]).astype(np.float32),
                    valid=(~missing).astype(np.float32))
+        # Give mixed old/new shards identical batch keys. Never invent critic or auxiliary supervision for
+        # legacy rows. NaN outcomes and -1 steps denote a game stopped before its terminal reward.
+        extras = []
+        for shard in shards:
+            n = len(shard["x"])
+            present = all(k in shard for k in VALUE_KEYS)
+            outcome = shard["outcome"] if present else np.full(n, np.nan, np.float32)
+            steps = shard["remaining_steps"] if present else np.full(n, -1, np.int32)
+            extras.append(dict(
+                partner_ids=shard["partner_ids"] if present else np.zeros((n, N_TOKENS, N_IDS), np.int64),
+                partner_floats=shard["partner_floats"] if present else np.zeros((n, 6, N_POKEMON_FLOATS), np.float32),
+                outcome=np.nan_to_num(outcome, nan=0.0), remaining_steps=np.maximum(steps, 0).astype(np.float32),
+                search_value=shard["value"].astype(np.float32),
+                value_mask=(np.isfinite(outcome) & (steps >= 0)).astype(np.float32),
+                foe_match=shard.get("foe_match", np.full((n, 6), -1, np.int64)),
+                aux_mask=np.full(n, present and "foe_match" in shard, np.float32)))
+        out.update({k: np.concatenate([e[k] for e in extras]) for k in extras[0]})
         # Reference losses over the same candidates: the targets' own entropy (the floor) and the labelling policy's
         # cross-entropy (its prior's log-probs of the candidates).
         safe = np.where(weight > 0, weight, 1.0)
@@ -166,10 +185,15 @@ class DistillStream(DistillData):
         headers, metadata = {}, {}
         with ZipFile(path) as archive:
             members = archive.namelist()
-            if len(members) != len(set(members)) or any(k not in {f"{key}.npy" for key in (*ROW_KEYS, *META_KEYS)}
+            if len(members) != len(set(members)) or any(k not in {f"{key}.npy" for key in (*ROW_KEYS, *OPTIONAL_ROW_KEYS, *META_KEYS)}
                                                        for k in members):
                 raise ValueError("unexpected or duplicate shard members")
-            for key in ROW_KEYS:
+            optional = {key for key in OPTIONAL_ROW_KEYS if f"{key}.npy" in members}
+            if optional.intersection(VALUE_KEYS) and not set(VALUE_KEYS).issubset(optional):
+                raise ValueError("incomplete value fields")
+            if "foe_match" in optional and not set(VALUE_KEYS).issubset(optional):
+                raise ValueError("foe_match needs partner inputs")
+            for key in (*ROW_KEYS, *sorted(optional)):
                 member = archive.getinfo(f"{key}.npy")
                 with archive.open(member) as stream:
                     headers[key] = DistillStream._header(stream)
@@ -184,9 +208,13 @@ class DistillStream(DistillData):
                           field=(n, N_FIELD_FLOATS), action_features=(n, 2, 40, N_ACTION_FEATURES),
                           token_features=(n, N_TOKENS, N_TOKEN_FEATURES), x=shape, pairs=(n, candidates, 2),
                           mask0=(n, N_ACTIONS), mask1=(n, candidates, N_ACTIONS), prior=shape, q=shape, value=(n,))
+            shapes.update({k: v for k, v in dict(partner_ids=(n, N_TOKENS, N_IDS),
+                          partner_floats=(n, 6, N_POKEMON_FLOATS), outcome=(n,), remaining_steps=(n,),
+                          foe_match=(n, 6)).items() if k in optional})
             for key, expected in shapes.items():
                 actual, _, dtype, _ = headers[key]
-                valid_dtype = (dtype == np.dtype("int64") if key == "ids" else
+                valid_dtype = (dtype == np.dtype("int64") if key in ("ids", "partner_ids", "foe_match") else
+                               dtype == np.dtype("int32") if key == "remaining_steps" else
                                dtype.kind == "i" and dtype.itemsize in (2, 4, 8) if key == "pairs" else
                                dtype == np.dtype("bool") if key in ("mask0", "mask1") else dtype == np.dtype("float32"))
                 if actual != expected or not valid_dtype:
@@ -284,6 +312,18 @@ class DistillStream(DistillData):
                            *([dex.n_items] * (N_IDS - I_CAND_ITEMS))])
         if (raw["ids"] < 0).any() or (raw["ids"] >= limits).any():
             raise ValueError("observation ids outside embedding tables")
+        if "partner_ids" in raw:
+            if (raw["partner_ids"] < 0).any() or (raw["partner_ids"] >= limits).any():
+                raise ValueError("partner ids outside embedding tables")
+            if not np.isfinite(raw["partner_floats"]).all():
+                raise ValueError("nonfinite partner_floats")
+            outcome, steps = raw["outcome"], raw["remaining_steps"]
+            finished = np.isfinite(outcome)
+            if not (np.isin(outcome[finished], [-1, 0, 1]).all() and (steps[finished] >= 0).all()
+                    and np.isnan(outcome[~finished]).all() and (steps[~finished] == -1).all()):
+                raise ValueError("invalid outcome or remaining_steps")
+        if "foe_match" in raw and not ((raw["foe_match"] >= -1) & (raw["foe_match"] < 6)).all():
+            raise ValueError("invalid foe_match")
 
     def _reject(self, path: Path, error: Exception) -> None:
         self.shards.pop(path.name, None)
@@ -560,7 +600,7 @@ class DistillStream(DistillData):
             self.pending_moves.clear()
 
 
-def distill_loss(model, batch: dict, tilt: float = 0.0) -> tuple[torch.Tensor, torch.Tensor]:
+def distill_loss(model, batch: dict, tilt: float = 0.0, *, state: dict | None = None) -> tuple[torch.Tensor, torch.Tensor]:
     """Mean over positions of ``-sum_k w_k log pi(a0_k, a1_k)``, and the share of positions whose most likely
     candidate under the policy is the most weighted one (detached).
 
@@ -571,7 +611,8 @@ def distill_loss(model, batch: dict, tilt: float = 0.0) -> tuple[torch.Tensor, t
     and the loss is ``-sum_k t_k log pi(k)``. The log-probabilities stay unconditional, like the strategy loss: with the
     conditional ones, lowering a candidate spread its mass over every other legal pair (the policy's entropy doubled
     within minutes of training)."""
-    state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
+    if state is None:
+        state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
     lp0, vectors0 = model.slot0(state, batch["mask0"])
     B, P = batch["a0"].shape
     a0, a1 = batch["a0"].reshape(-1), batch["a1"].reshape(-1)
@@ -592,6 +633,33 @@ def distill_loss(model, batch: dict, tilt: float = 0.0) -> tuple[torch.Tensor, t
     loss = -(weight * logp).sum(1).mean()
     agree = (logp.detach().argmax(1) == weight.argmax(1)).float().mean()
     return loss, agree
+
+
+def value_target(batch: dict, mix: float = 0.5, gamma: float = 0.995) -> torch.Tensor:
+    """Monte Carlo terminal return mixed with the teacher's search-root estimate, on PPO's [-1, 1] scale."""
+    return mix * batch["outcome"] * gamma ** batch["remaining_steps"] + (1 - mix) * batch["search_value"]
+
+
+def label_losses(model, batch: dict, value_mix: float = 0.5, gamma: float = 0.995):
+    """Policy, masked critic MSE and auxiliary loss from one shared trunk pass, plus policy agreement.
+
+    Select supervised rows before the oracle forward pass so legacy rows cannot affect either loss or gradient.
+    Auxiliary targets use exactly PPO's revealed-foe matching and hidden-information masks.
+    """
+    state = model.trunk(*(batch[k] for k in OBS_KEYS))
+    policy, agree = distill_loss(model, batch, state=state)
+    zero = state["g"].sum() * 0
+    value_rows = torch.nonzero(batch["value_mask"], as_tuple=True)[0]
+    aux_rows = torch.nonzero(batch["aux_mask"], as_tuple=True)[0]
+    value = aux = zero
+    if len(value_rows):
+        prediction = model.value(_take(state, value_rows), batch["partner_ids"][value_rows],
+                                 batch["partner_floats"][value_rows])
+        value = (prediction - value_target(batch, value_mix, gamma)[value_rows]).square().mean()
+    if len(aux_rows):
+        aux = model.aux_loss(_take(state, aux_rows), batch["floats"][aux_rows], batch["foe_match"][aux_rows],
+                             batch["partner_ids"][aux_rows])
+    return policy, value, aux, agree
 
 
 @torch.no_grad()

@@ -1,5 +1,65 @@
 # Continuous search distillation
 
+## Label-only students with a critic
+
+`crates/pyengine/distill_train.py` trains a fresh policy, value head and hidden-information heads from search labels.
+The defaults follow the label learning-curve experiment: 128x3, four epochs, batches of 256, four candidate pairs,
+Adam at 1e-3 with cosine decay to zero, and the final weights. Policy loss is `training.distill.distill_loss`.
+Each training row appears once per epoch. Compact arrays stay resident up to `--resident-rows`, default 60000;
+larger datasets shuffle shards through blocks controlled by `--shuffle-buffer`, default 32768 rows.
+
+New `search_labels.py` shards add these optional row arrays. Existing `value` and `q` keep their search meanings.
+
+| Field | Shape per row, dtype | Meaning |
+|---|---|---|
+| `partner_ids` | 12 x N_IDS, int64 | Opponent row's ids from its own request and player-view log |
+| `partner_floats` | 6 x N_POKEMON_FLOATS, float32 | Opponent row's own-team floats, tokens 0:6 |
+| `foe_match` | 6, int64 | Labelled side's revealed foe tokens mapped into the partner's own-team order, -1 for unmatched |
+| `outcome` | scalar, float32 | Labelled side's terminal reward: win +1, loss -1, tie 0; NaN if unfinished |
+| `remaining_steps` | scalar, int32 | Decision boundaries after this row until the terminal transition; -1 if unfinished |
+
+Both own views are encoded before either side chooses. This matches `Actors.observe` and `partner_view`, where
+row `2e+s` pairs with row `2e+(s^1)`. Search players keep their public opponent views. The extra encoder skips damage
+features. The last decision has zero remaining steps. Forced switches and boundaries where the labelled side waits
+still count, as they do in `BatchEnv.step` and GAE. This is a terminal Monte Carlo return, without PPO's optional KO
+shaping or lambda bootstrap.
+
+The critic target is `L * outcome * gamma**remaining_steps + (1-L) * value`, with `--value-target-mix L`, default
+0.5, `--gamma 0.995`, and `--value-coef 0.5`. Equal mixing is a starting compromise between noisy game outcomes and
+the teacher critic's biased root estimates; it has not been tuned for strength. Set L to 1 for terminal returns or
+0 for search-root targets. Legacy rows and unfinished games have no critic loss, even at L=0. Rows with partner
+inputs and `foe_match` train the same auxiliary targets and hidden-information masks as PPO, weighted by
+`--aux-coef 0.03`. Auxiliary training can use unfinished games. Old rows have neither critic nor auxiliary loss.
+PPO's `--distill` and `--distill-stream` accept either format and continue to add policy loss only.
+
+Run from `crates/pyengine`, with paths adjusted to your label and checkpoint directories:
+
+```bash
+../../.venv/bin/python search_labels.py \
+  --checkpoint ../../scratch/value-labels/m535.pt --minutes 60 \
+  --device auto --concurrency 5 --shard 2000 --out ../../scratch/value-labels/labels
+../../.venv/bin/python distill_train.py train \
+  --labels ../../scratch/value-labels/labels --output ../../scratch/value-labels/student \
+  --device auto --width 128 --layers 3 --epochs 4 --lr 1e-3 \
+  --value-target-mix 0.5 --value-coef 0.5
+../../.venv/bin/python distill_train.py score ../../scratch/value-labels/student/latest.pt
+```
+
+Holdouts are whole shards with `holdout=true`, files in `heldout/`, or files explicitly passed with `--heldout`.
+For legacy shards without metadata, every twentieth shard is held out. Root, `used/` and `heldout/` directories are
+discovered together. Training refuses a split without both training and held-out rows. For a tiny run with fewer
+than twenty shards, pass `--heldout FILE`. Shards from one game can span both splits, so these metrics do not replace
+an independent battle evaluation. Score reports agreement among stored candidates, conditional CE, policy loss,
+value MSE and explained variance against the mixed target. Undefined value metrics are JSON null.
+
+`latest.pt` saves after every complete epoch. Continue label training with `train --resume FILE --output DIR
+--epochs N`, where N is the total epoch budget. Resume keeps the saved split and requires the same loss, batch,
+candidate and learning-rate settings. `--checkpoint FILE` instead initializes weights with a fresh optimizer.
+Checkpoints load with `Model.from_state`, search, `compare.py`, `search_eval.py`, and PPO `--resume`, including
+`--critic-warmup-updates`. For PPO, pass the checkpoint's width, layers and joint-feature flag. Its PPO update and
+elapsed-time schedules start at zero; label-training progress is stored separately. A resumed label run can replay
+work since the last completed epoch. Match `score`'s mix and gamma flags to any nondefault training target.
+
 The Mac makes search labels from its newest teacher checkpoint. A Mac sync process sends finished shards through
 the Linux laptop to Windows and brings back trainer snapshots. Windows runs PPO self-play with a stream of search
 labels and restarts training after a crash. All commands below run from the appropriate repository root.
