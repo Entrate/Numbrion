@@ -188,7 +188,8 @@ def args(out, follow=None, checkpoint=None):
     return argparse.Namespace(out=out, follow=follow, checkpoint=checkpoint, torch_threads=1,
                               search='{}', pool=str(out / 'teams'), set_pool='unused', seed=11,
                               device='cpu', policy_temperature=0.5, explore=0.25, games=0,
-                              concurrency=2, shard=64, minutes=float('inf'), reload_minutes=0.001)
+                              concurrency=2, shard=64, minutes=float('inf'), reload_minutes=0.001,
+                              value_checkpoint=None)
 
 
 def test_follow_rebuilds_bots_keeps_inflight_teacher_and_drains_stop(tmp_path, monkeypatch):
