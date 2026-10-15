@@ -145,7 +145,7 @@ def pair_candidates(model: Model, state: dict, guard: np.ndarray, masks: list, k
 class Net:
     """The policy/value network for search: batched candidate enumeration and leaf values."""
 
-    def __init__(self, checkpoint: Path, dex: Dex, device: str = "auto"):
+    def __init__(self, checkpoint: Path, dex: Dex, device: str = "auto", value_checkpoint: Path | None = None):
         if device == "auto":  # the Apple GPU evaluates search batches ~1.5-2x faster than the CPU and frees it
             device = "mps" if torch.backends.mps.is_available() else "cpu"
         if device == "directml":  # Windows AMD/Intel GPUs (training.device); leaf batches only, like MPS
@@ -156,7 +156,11 @@ class Net:
         # Policy calls are a few rows each, where the GPU's per-call latency dominates: they use a CPU copy. Leaf
         # values (hundreds of rows) use ``device``.
         self.policy_model = Model.from_state(dex, state["model"], self.width, self.layers).eval()
-        self.model = Model.from_state(dex, state["model"], self.width, self.layers).to(device).eval()
+        # ``value_checkpoint``: leaf values from another net (any size) than the policy's, for ablations.
+        if value_checkpoint is not None:
+            state = torch.load(value_checkpoint, map_location="cpu", weights_only=False)
+        self.model = Model.from_state(dex, state["model"], state.get("width", 128), state.get("layers", 3))
+        self.model = self.model.to(device).eval()
         self.device = torch.device(device)
         self.guards = MoveGuards()
         # Every Net of the process shares one GPU lock (MPS calls from several bots' threads are serialised).
@@ -384,13 +388,14 @@ class SearchBot(Bot):
 
     def __init__(self, name: str = "Numbrion", checkpoint: str = "", search: dict | bool | None = None,
                  pools: list | None = None, device: str = "auto", policy_temperature: float = 0.5,
-                 torch_threads: int | None = None, cell_ms: float = 0.3, **_):
+                 torch_threads: int | None = None, cell_ms: float = 0.3, value_checkpoint: str | None = None,
+                 **_):
         self.name = name
         self.dex = load_dex()
         if torch_threads:
             torch.set_num_threads(torch_threads)
         self.checkpoint = Path(checkpoint)
-        self.net = Net(self.checkpoint, self.dex, device)
+        self.net = Net(self.checkpoint, self.dex, device, Path(value_checkpoint) if value_checkpoint else None)
         # search: a SearchConfig dict, True/None for the defaults, False for the policy alone.
         self.search = None if search is False else SearchConfig.from_dict(search if isinstance(search, dict) else {})
         self.policy_temperature = policy_temperature

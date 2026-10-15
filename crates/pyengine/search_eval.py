@@ -196,6 +196,7 @@ def worlds_means(results: list) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--value-checkpoint", default=None, help="search bot's leaf values from this checkpoint")
     parser.add_argument("--base-checkpoint", default=None, help="opponent policy (default: the same checkpoint)")
     parser.add_argument("--opponent", choices=("policy", "smart", "search"), default="policy")
     parser.add_argument("--opponent-search", default="{}", help="SearchConfig JSON of --opponent search")
@@ -221,7 +222,8 @@ def main() -> None:
     torch.set_num_threads(args.torch_threads)
     search = False if args.search == "off" else json.loads(args.search)
     bot = SearchBot(name="search", checkpoint=args.checkpoint, search=search, pools=[args.set_pool],
-                    device=args.device, policy_temperature=args.policy_temperature)
+                    device=args.device, policy_temperature=args.policy_temperature,
+                    value_checkpoint=args.value_checkpoint)
     base_net = bot.net
     if args.base_checkpoint and Path(args.base_checkpoint).resolve() != Path(args.checkpoint).resolve():
         from training.search import Net
