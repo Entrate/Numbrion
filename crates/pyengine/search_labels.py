@@ -8,6 +8,8 @@ in-process like search_eval.py: each sees only its own player-view lines and req
 (not forced, not a policy fallback) becomes one label: the player's encoded observation row (training.encoder, the
 same rows the policy reads), the guarded slot-a mask, the candidate pairs (slot a, slot b) with the guarded slot-b mask
 of each pair's slot a, the search's strategy ``x`` and pair values ``q``, and the policy's log-prior of each pair.
+Rows also carry the opponent's own-view ``partner_ids`` / ``partner_floats``, ``foe_match`` for auxiliary targets,
+and the final ``outcome`` with ``remaining_steps`` for discounting. Capped games store NaN / -1 for the last two.
 
 ``--explore``: the share of decisions where the side plays a pair sampled from the policy at temperature 1 instead of
 the search's choice (the label is still the search's), so the labelled positions also cover worse play than the
@@ -47,6 +49,7 @@ REPO = HERE.parents[1]
 import numbrion  # noqa: E402
 
 from training.guards import MoveGuards  # noqa: E402
+from training.encoder import PyEncoder  # noqa: E402
 from training.protocol import choice_text  # noqa: E402
 from training.search import N_ACTIONS, OBS_KEYS, SearchBot  # noqa: E402
 
@@ -190,14 +193,22 @@ def play_game(bots, team1: str, team2: str, seed: tuple, explore: float, rng, k:
         player = bot.new_player(f"label-{seed}-{side}")
         player.team = team
         players.append(player)
-    labels, explored, rejected = [], 0, 0
+    # Separate from the players' public opponent trackers: both rows get their OWN request, just like
+    # Actors.observe's rows 2e / 2e+1. Encode before either choice can advance the battle.
+    oracle = PyEncoder(2, bots[0].dex)
+    labels, boundaries, explored, rejected, steps = [], [], 0, 0, 0
     while not battle.ended and battle.turn <= max_turns:
         lines = [battle.drain_player_log(s) for s in (0, 1)]
+        requests = [battle.request_json(s) for s in (0, 1)]
+        for side in (0, 1):
+            oracle.encode(side, dict(battle_id=1, request=requests[side], log=lines[side]))
+        oracle.match_partners()
+        own = oracle.buffers  # no damage features: the critic's partner input and aux targets do not use them
         for side in (0, 1):
             players[side].feed(lines[side])
         for side in [s for s in (0, 1) if battle.needs_action(s)]:
             player = players[side]
-            player.set_request(battle.request_json(side))
+            player.set_request(requests[side])
             for _ in range(3):
                 decision = player.decide()
                 if decision is None:
@@ -205,7 +216,12 @@ def play_game(bots, team1: str, team2: str, seed: tuple, explore: float, rng, k:
                     break
                 a0, a1 = decision.a0, decision.a1
                 if player.last_search is not None:
-                    labels.append(make_label(player.last_search, k))
+                    row = make_label(player.last_search, k)
+                    row.update(partner_ids=own.ids[side ^ 1].copy(),
+                               partner_floats=own.floats[side ^ 1, :6].copy(),
+                               foe_match=own.foe_match[side].copy())
+                    labels.append(row)
+                    boundaries.append((side, steps))
                     if rng.random() < explore:
                         full = player.last_search["full"]
                         keys = list(full)
@@ -228,9 +244,15 @@ def play_game(bots, team1: str, team2: str, seed: tuple, explore: float, rng, k:
                         player.set_request(error.args[1])
             else:
                 battle.choose(side, "default")
+        steps += 1
     winner = None if not battle.ended else (-1 if battle.tie or battle.winner is None else int(battle.winner))
+    for row, (side, step) in zip(labels, boundaries):
+        # The reward on the final transition is undiscounted in gae. Include forced-switch/wait boundaries,
+        # not just battle turns or this side's searched decisions. A capped game has no terminal target.
+        row["outcome"] = np.float32(np.nan if winner is None else 0 if winner < 0 else 1 if winner == side else -1)
+        row["remaining_steps"] = np.int32(-1 if winner is None else steps - step - 1)
     stats = {key: sum(p.stats.get(key, 0) for p in players) for key in ("search", "policy", "forced", "no_worlds")}
-    return labels, dict(turns=battle.turn, ended=battle.ended, winner=winner, labels=len(labels), explored=explored,
+    return labels, dict(turns=battle.turn, steps=steps, ended=battle.ended, winner=winner, labels=len(labels), explored=explored,
                         rejected=rejected, **stats)
 
 
