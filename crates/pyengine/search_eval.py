@@ -113,8 +113,10 @@ class SmartOpponent:
 class SearchOpponent:
     """Another SearchBot (e.g. a different budget) as the opponent, driven like the evaluated bot."""
 
-    def __init__(self, bot: SearchBot, side: int, team: str, engine_mask: bool):
+    def __init__(self, bot: SearchBot, side: int, team: str, engine_mask: bool, budget_ms: float | None = None):
         self.side, self.engine_mask = side, engine_mask
+        self.budget_ms = budget_ms
+        self.worlds: list[int] = []
         self.player = bot.new_player("opponent")
         self.player.team = team
 
@@ -125,18 +127,22 @@ class SearchOpponent:
         self.player.set_request(battle.request_json(self.side))
         if self.engine_mask:
             self.player.mask_hint = battle.legal_mask(self.side)
+        self.player.budget_ms = self.budget_ms
         decision = self.player.decide()
+        if decision.analysis.get("source") == "search":
+            self.worlds.append(decision.analysis["worlds"])
         return decision.a0, decision.a1
 
 
 def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tuple, search_side: int,
-              engine_mask: bool, max_turns: int = 400) -> dict:
+              engine_mask: bool, max_turns: int = 400, budget_ms: float | None = None) -> dict:
     battle = numbrion.Battle(seed, p1=team1, p2=team2, log=True)
     battle.start()
     player = bot.new_player(f"eval-{seed}")
     player.team = team1 if search_side == 0 else team2
     opponent = opponent_factory(1 - search_side, team2 if search_side == 0 else team1)
     rejected = 0
+    worlds: list[int] = []
     while not battle.ended and battle.turn <= max_turns:
         lines = [battle.drain_player_log(s) for s in (0, 1)]
         player.feed(lines[search_side])
@@ -148,9 +154,12 @@ def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tu
                 for attempt in range(3):
                     if engine_mask:
                         player.mask_hint = battle.legal_mask(side)
+                    player.budget_ms = budget_ms
                     decision = player.decide()
                     if decision is None:
                         break
+                    if decision.analysis.get("source") == "search":
+                        worlds.append(decision.analysis["worlds"])
                     try:
                         battle.choose_action(side, decision.a0, decision.a1)
                         break
@@ -166,8 +175,22 @@ def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tu
                 battle.choose_action(side, a0, a1)
     # A battle stopped at the turn cap has no result (None): its pair is left out of the score, not counted as a tie.
     score = None if not battle.ended else 0.5 if battle.tie or battle.winner is None else float(battle.winner == search_side)
+    opponent_worlds = opponent.worlds if isinstance(opponent, SearchOpponent) else []
     return dict(score=score, turns=battle.turn, ended=battle.ended, rejected=rejected, stats=dict(player.stats),
-                search_side=search_side)
+                search_side=search_side, worlds_count=len(worlds), worlds_mean=float(np.mean(worlds)) if worlds else None,
+                opponent_worlds_count=len(opponent_worlds),
+                opponent_worlds_mean=float(np.mean(opponent_worlds)) if opponent_worlds else None)
+
+
+def worlds_means(results: list) -> dict:
+    """Decision-weighted means across games; policy/forced decisions do not contribute."""
+    means = {}
+    for prefix in ("", "opponent_"):
+        count = sum(g[f"{prefix}worlds_count"] for r in results for g in r["games"])
+        total = sum((g[f"{prefix}worlds_mean"] or 0) * g[f"{prefix}worlds_count"]
+                    for r in results for g in r["games"])
+        means[f"{prefix}worlds_mean"] = total / count if count else None
+    return means
 
 
 def main() -> None:
@@ -179,6 +202,9 @@ def main() -> None:
     parser.add_argument("--base-temperature", type=float, default=0.5)
     parser.add_argument("--policy-temperature", type=float, default=0.5, help="search bot's fallback policy")
     parser.add_argument("--search", default="{}", help="SearchConfig JSON; 'off' for the policy alone")
+    parser.add_argument("--budget-ms", type=float, default=None, help="per-decision search budget in ms (default: off)")
+    parser.add_argument("--opponent-budget-ms", type=float, default=None,
+                        help="per-decision budget for --opponent search (default: --budget-ms)")
     parser.add_argument("--pool", default=str(REPO / "data/teams/eval-s43-200.txt"))
     parser.add_argument("--set-pool", default=str(REPO / "data/teams/pool-s1-200k.txt.gz"))
     parser.add_argument("--pairs", type=int, default=100)
@@ -190,6 +216,7 @@ def main() -> None:
     parser.add_argument("--engine-mask", action="store_true", help="give the search bot the engine's mask (debug)")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
+    opponent_budget_ms = args.opponent_budget_ms if args.opponent_budget_ms is not None else args.budget_ms
 
     torch.set_num_threads(args.torch_threads)
     search = False if args.search == "off" else json.loads(args.search)
@@ -228,11 +255,13 @@ def main() -> None:
         if args.opponent == "smart":
             factory = lambda side, team: SmartOpponent(dex_path, side, seed=args.seed * 1000 + p)  # noqa: E731
         elif args.opponent == "search":
-            factory = lambda side, team: SearchOpponent(opponent_bot, side, team, args.engine_mask)  # noqa: E731
+            factory = lambda side, team: SearchOpponent(opponent_bot, side, team, args.engine_mask,  # noqa: E731
+                                                        opponent_budget_ms)
         else:
             factory = lambda side, team: BasePolicy(base_net, dex_path, side, args.base_temperature,  # noqa: E731
                                                     game_rng)
-        games = [play_game(bot, factory, t1, t2, seed, side, args.engine_mask) for side in (0, 1)]
+        games = [play_game(bot, factory, t1, t2, seed, side, args.engine_mask, budget_ms=args.budget_ms)
+                 for side in (0, 1)]
         with lock:
             results.append(dict(pair=p, games=games))
             done = len(results)
@@ -240,7 +269,11 @@ def main() -> None:
             mean = scores.mean() if len(scores) else float("nan")
             se = scores.mean(1).std(ddof=1) / math.sqrt(len(scores)) if len(scores) > 1 else float("nan")
             if done % 5 == 0 or done == len(plan):
-                print(f"{done}/{len(plan)} pairs  score {mean:.3f} ± {se:.3f}  ({time.time() - started:.0f} s)",
+                means = worlds_means(results)
+                worlds_text = "  ".join(f"{key} {value:.2f}" if value is not None else f"{key} n/a"
+                                         for key, value in means.items())
+                print(f"{done}/{len(plan)} pairs  score {mean:.3f} ± {se:.3f}  {worlds_text}"
+                      f"  ({time.time() - started:.0f} s)",
                       flush=True)
                 save()
 
@@ -258,6 +291,7 @@ def main() -> None:
         summary = dict(pairs=len(scores), games=int(scores.size), score=float(scores.mean()),
                        pair_se=float(scores.mean(1).std(ddof=1) / math.sqrt(len(scores))) if len(scores) > 1 else None,
                        seconds=round(time.time() - started, 1), decisions=stats,
+                       **worlds_means(results),
                        rejected=sum(g["rejected"] for r in results for g in r["games"]),
                        unfinished=sum(not g["ended"] for r in results for g in r["games"]))
         out_path.write_text(json.dumps(dict(args=vars(args), bot=bot.describe(), summary=summary,
