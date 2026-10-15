@@ -51,6 +51,7 @@ probability `--explore` (default 0.25, as in search_labels.py) a side plays a pa
 at temperature 1 instead of the search's pick. That keeps the positions varied, and the label is still the search's
 strategy. `--value-checkpoint` gives the leaf values from a separate fixed net of any size. Each actor loads it
 once, and it never needs a weight sync. The actors run on the CPU, one torch thread each, at `--nice 10`.
+They use `Actors(label_only=True)` to skip unused PPO rollout buffers, rollout value-head calls, and bootstraps.
 
     .venv/bin/python crates/pyengine/shallow_labels.py --checkpoint scratch/label-student/c128-all.pt \
         --value-checkpoint scratch/play-runtime/models/distill-run1/m535.pt \
@@ -62,10 +63,15 @@ once, and it never needs a weight sync. The actors run on the CPU, one torch thr
   counts every boundary of the env up to the terminal transition, forced switches and waits included, as GAE
   counts them. Rows of battles still running at shutdown, or of a battle an engine panic aborted, are written
   capped (NaN / -1). They keep their policy target and get no value target.
+- The standalone generator excludes labels when exact legality exposes trapping or Imprison facts absent from
+  the player's request, or when any unseen opponent set cannot be swapped. This covers failed donor retries,
+  battle-start forms, and Illusion-protected bench sets. `rejected_labels` counts the exclusions. Retained masks
+  and priors use only request-visible legality. Play continues through excluded decisions.
 - Stop with `--minutes`, `--labels` (finished rows), or `touch <out>/STOP`. Each stops after the current
   `--steps` rollout. `--follow DIR` reloads the newest teacher of DIR between rollouts, and the value net stays
   fixed. A status line every `--status-seconds` reports labels/s, pending rows, disk, actor cores and RSS. It also
-  goes to `<out>/status.jsonl`.
+  goes to `<out>/status.jsonl`. SIGINT and SIGTERM sent to the parent also drain the current rollout and save
+  capped rows. Engine panic reports are saved in `<out>/crashes.jsonl`.
 - train_selfplay's `--search-fraction` opponent uses the same code with side 2 only and no exploration. Its labels
   now carry the value fields too, and its rollouts are bit-identical to before (same buffer hash).
 - Pilot on the M1 Pro (8 cores), c128-all + m535 values, both sides, 7 workers x 24 envs: ~1,180 labels/s, about

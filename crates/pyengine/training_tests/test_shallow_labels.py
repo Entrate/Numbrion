@@ -21,7 +21,7 @@ from training.encoder import Encoder
 from training.guards import MoveGuards
 from training.model import Model
 from training.ppo import gae
-from training.search_opponent import OpponentSearch, SearchOpponent, load_bench_sets
+from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent, load_bench_sets
 
 REPO = Path(__file__).resolve().parents[3]
 POOL = REPO / "data" / "teams" / "train-s42-2000.txt"
@@ -246,3 +246,309 @@ def test_actors_search_both_sides_and_explore_with_the_learner_sample(tmp_path, 
     assert (collected["search_explored"] > 0) == (explore > 0)
     written = sum(len(np.load(p)["x"]) for p in tmp_path.glob("labels-*.npz"))
     assert written == collected["search_decisions"] > live.sum() * 0.6
+
+
+def test_writer_bounds_all_teacher_buffers_and_keeps_rows_after_failed_rename(tmp_path, monkeypatch):
+    writer = LabelWriter(tmp_path, size=8)
+    for i in range(40):
+        writer.add({"outcome": np.float32(i)}, float(i), f"teacher-{i}")
+        assert writer.buffered < writer.size
+    writer.flush()
+    assert writer.written == 40 and not writer.groups
+    paths = list(tmp_path.glob("labels-*.npz"))
+    assert len(paths) == 40
+    assert sum(bool(np.load(p)["holdout"]) for p in paths) == 2
+    assert {str(np.load(p)["teacher"]) for p in paths} == {f"teacher-{i}" for i in range(40)}
+    writer.add({"outcome": np.float32(41)}, 41.0, "last")
+    import training.search_opponent as search_module
+
+    def fail(*args):
+        raise OSError("rename failed")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(search_module.os, "replace", fail)
+        with pytest.raises(OSError, match="rename failed"):
+            writer.flush()
+    assert writer.buffered == 1 and writer.written == 40
+    assert len(list(tmp_path.glob("labels-*.npz"))) == 40
+    writer.flush()
+    assert writer.written == 41 and not writer.buffered
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def battle_search(battle, *, fair=True, side=0, bench=BENCH):
+    """Search a directed real battle using only player-view observations for the encoder."""
+    from types import SimpleNamespace
+
+    encoder = Encoder(2)
+    b = encoder.encode_batch([dict(battle_id=1, request=battle.request_json(s), log=battle.drain_player_log(s))
+                              for s in (0, 1)])
+    torch.manual_seed(5)
+    model = Model(load_dex(), 32, 1).eval()
+    opponent = SearchOpponent(str(load_dex().path), MoveGuards(), OpponentSearch(iterations=20), seed=3,
+                              labels=Capture(), bench_sets=bench, fair_labels=fair)
+    with torch.no_grad():
+        state = model.trunk(*(torch.from_numpy(getattr(b, k)) for k in OBS_KEYS))
+    picks = opponent.act(model, SimpleNamespace(clone_battle=lambda e: battle.clone()), encoder, state,
+                         {**b.arrays(), "guard": b.guard}, np.array([0]),
+                         np.array([[battle.needs_action(0), battle.needs_action(1)]]), 1.0, side=side)
+    return opponent, picks, b, model, state
+
+
+@pytest.mark.parametrize("case", ["trapping", "imprison", "battle-start", "failed-swap"])
+def test_fair_labels_exclude_hidden_masks_and_unreplaced_bench(case):
+    from test_protocol import FILLER, PARTNER, PIKACHU, directed_battle, mon
+
+    raichu = mon("Raichu", ["protect", "thunderbolt", "nastyplot", "encore"], "Lightning Rod", "F")
+    foe = mon("Gothitelle", ["fakeout", "protect", "psychic", "trickroom"], "Shadow Tag", "F")
+    bench = BENCH
+    if case == "imprison":
+        foe = mon("Mew", ["imprison", "protect", "psychic", "hypervoice"], "Synchronize", "N")
+        raichu = mon("Farigiraf", ["protect", "psychic", "hypervoice"], "Armor Tail")
+    elif case in ("battle-start", "failed-swap"):
+        foe = PIKACHU
+    hidden = list(FILLER)
+    if case == "battle-start":
+        hidden[0] = mon("Zacian", ["ironhead", "protect", "swordsdance", "playrough"], "Intrepid Sword").replace(
+            "Leftovers", "Rusted Sword")
+    elif case == "failed-swap":
+        bench = ([PIKACHU], ["pikachu"])  # the only donor duplicates a seen species
+    battle = directed_battle([PIKACHU, raichu] + FILLER, [foe, PARTNER] + hidden)
+    if case == "imprison":
+        battle.choose(0, "move 2, move 1")
+        battle.choose(1, "move 1, move 1")
+    opponent, picks, *_ = battle_search(battle, bench=bench)
+    assert 0 in picks and opponent.stats["searched"] == 1
+    assert opponent.stats["rejected_labels"] == 1 and not opponent.pending
+
+
+def test_fair_label_inputs_masks_and_priors_match_public_observation():
+    from search_labels import make_label
+    from training.protocol import request_mask
+    from training.search import pair_candidates
+    from test_protocol import FILLER, PARTNER, PIKACHU, directed_battle, mon
+
+    raichu = mon("Raichu", ["protect", "thunderbolt", "nastyplot", "encore"], "Lightning Rod", "F")
+    battle = directed_battle([PIKACHU, raichu] + FILLER, [PIKACHU, PARTNER] + FILLER)
+    opponent, _, b, model, state = battle_search(battle)
+    row = opponent.pending[0][0][0]
+    masks = request_mask(battle.request_json(0))
+    from training.search import _take
+    candidates = pair_candidates(model, _take(state, torch.tensor([0])), b.guard[:1], [masks], 4, 8, .5,
+                                 MoveGuards())[0]
+    public = make_label(dict(side=0, arrays=b.arrays() | {"guard": b.guard}, mask0=masks[0], joint=masks[1],
+                             pairs=candidates[0], full=candidates[2], x=row["x"], q=row["q"]), 8)
+    for key, expected in public.items():
+        np.testing.assert_array_equal(row[key], expected)
+
+
+def test_actors_accept_teacher_feature_widths_and_close_during_collection(tmp_path):
+    from dataclasses import asdict
+    from training.actors import Actors
+    from training.league import SEARCH
+
+    torch.manual_seed(6)
+    model = Model(load_dex(), 32, 1, action_features=0, token_features=0)
+    actors = Actors(2, 8, [POOL], 3, 1, model, search=asdict(OpponentSearch(iterations=20)), search_labels=tmp_path,
+                    search_both=True)
+    actors.set_weights("learner", model.state_dict())
+    actors.set_weights("opponent", model.state_dict())
+    actors.start(0, np.full(2, SEARCH), 0.0)
+    closed = actors.close()  # receive both the rollout stats and the close acknowledgement
+    assert all(not p.is_alive() for p in actors.processes)
+    shards = list(tmp_path.glob("labels-*.npz"))
+    assert shards and sum(DistillStream._inspect(p)["size"] for p in shards) > 10
+    assert closed["search_written"] == sum(DistillStream._inspect(p)["size"] for p in shards)
+    assert not actors.pending
+
+
+@pytest.mark.parametrize("stop", ["STOP", "SIGTERM"])
+def test_follow_retries_races_checks_feature_shapes_and_drains_stop(tmp_path, monkeypatch, stop):
+    import signal
+
+    old = shallow_labels.Teacher(tmp_path / "m001.pt", 1.0, (1, 1, 0))
+    new = shallow_labels.Teacher(tmp_path / "m002.pt", 2.0, (1, 2, 0))
+    wrong = shallow_labels.Teacher(tmp_path / "m003.pt", 3.0, (1, 3, 0))
+    model = Model(load_dex(), 32, 1)
+    narrow = Model(load_dex(), 32, 1, token_features=0)
+    calls, starts, weights, closed = [], [], [], []
+    candidates = iter([old, old, new, new, wrong, wrong])
+    failed = False
+
+    def follow(directory, current=None):
+        calls.append(current)
+        return next(candidates)
+
+    def load(path):
+        nonlocal failed
+        if path == new.path and not failed:
+            failed = True
+            raise FileNotFoundError("pruned between metadata and model load")
+        selected = narrow if path == wrong.path else model
+        return selected, dict(model=selected.state_dict())
+
+    crash = dict(message="injected BatchEnv abort", seed=[1, 2, 3, 4])
+
+    class FakeActors:
+        processes = []
+
+        def __init__(self, *args, **kwargs):
+            assert kwargs["search_value"] == tmp_path / "value.pt"
+            assert kwargs["search_fair_labels"]
+
+        def set_weights(self, key, state):
+            weights.append(key)
+
+        def start(self, *args, **kwargs):
+            starts.append(kwargs["label_teacher"])
+
+        def wait(self):
+            if len(starts) == 5:
+                if stop == "STOP":
+                    (tmp_path / "out" / "STOP").touch()
+                else:
+                    signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)
+            return dict(search_decisions=4, search_forced=0, search_explored=1, search_labels=0, completed=0,
+                        crashes=[crash] if len(starts) == 1 else [], search_pending=3, search_written=0)
+
+        def close(self):
+            closed.append(True)
+            # A trainer may already have retired the shards; accounting comes from writer acknowledgements.
+            return dict(search_capped_at_close=3, search_written=3)
+
+    monkeypatch.setattr(shallow_labels, "follow_teacher", follow)
+    monkeypatch.setattr(shallow_labels, "load_model", load)
+    monkeypatch.setattr(shallow_labels, "Actors", FakeActors)
+    previous = signal.getsignal(signal.SIGTERM)
+    totals = shallow_labels.main(["--follow", str(tmp_path), "--out", str(tmp_path / "out"), "--nice", "0",
+                                  "--value-checkpoint", str(tmp_path / "value.pt")])
+    assert signal.getsignal(signal.SIGTERM) is previous
+    assert calls == [None, old, old, old, new, wrong]
+    assert starts == [old.path.name, old.path.name, new.path.name, new.path.name, new.path.name]
+    assert weights == ["learner", "opponent", "learner"] and closed == [True]
+    assert totals["written"] == totals["capped_at_close"] == 3 and totals["pending"] == 0
+    assert totals["crashes"] == 1
+    assert json.loads((tmp_path / "out" / "crashes.jsonl").read_text()) == crash
+
+
+@pytest.mark.parametrize("label_only", [False, True])
+def test_actor_exception_flushes_pending_labels(tmp_path, label_only, monkeypatch):
+    from dataclasses import asdict
+    from training.actors import SharedArrays, _actor, buffer_layout, weight_layout, write_weights
+    from training.league import SEARCH
+
+    model = Model(load_dex(), 32, 1)
+    layout = weight_layout(model)
+    size = sum(int(np.prod(shape)) for _, shape, _ in layout)
+    buffers = [SharedArrays(buffer_layout(8, 4)) for _ in range(2)]
+    weights = SharedArrays({key: ((size,), np.float32) for key in ("learner", "opponent")})
+    for key in weights.arrays:
+        write_weights(weights.arrays[key], layout, model.state_dict())
+    replies = []
+
+    class Connection:
+        def recv(self):
+            if replies:
+                raise RuntimeError("injected actor failure")
+            return "collect", dict(buffer=0, learner_version=0, opponent_version=0, opponents=[SEARCH] * 2,
+                                   ko_bonus=0.0, minutes=1.0)
+
+        def send(self, reply):
+            replies.append(reply)
+
+    config = dict(size=size, width=32, layers=1, joint_features=False, action_features=model.n_action_features,
+                  token_features=model.n_token_features, guards=asdict(MoveGuards()), search=asdict(OpponentSearch()),
+                  search_labels=str(tmp_path), search_both=True, label_only=label_only)
+    value_calls = []
+    if label_only:
+        critic = Model(load_dex(), 48, 2)
+        value_path = tmp_path / "value.pt"
+        torch.save(dict(model=critic.state_dict(), width=48, layers=2), value_path)
+        config["search_value"] = str(value_path)
+        original = Model.value
+
+        def critic_only(self, *args):
+            assert self.width == 48, "label-only mode must never evaluate unused policy values"
+            value_calls.append(True)
+            return original(self, *args)
+
+        monkeypatch.setattr(Model, "value", critic_only)
+    try:
+        with pytest.raises(RuntimeError, match="injected actor failure"):
+            _actor(Connection(), [b.names() for b in buffers], weights.names(), 2, 8, 0, 2, [POOL], 11,
+                   str(Path(__file__).resolve().parents[1]), config)
+    finally:
+        for buffer in buffers:
+            buffer.close(unlink=True)
+        weights.close(unlink=True)
+    shards = list(tmp_path.glob("labels-*.npz"))
+    assert sum(DistillStream._inspect(p)["size"] for p in shards) == replies[0]["search_decisions"] > 10
+    assert all(np.isnan(DistillStream._read(p)["outcome"]).all() for p in shards)
+    if label_only:
+        assert value_calls
+
+
+def test_exploration_plays_policy_samples_but_keeps_the_search_labels(tmp_path):
+    from dataclasses import asdict
+    from training.actors import Actors
+    from training.league import SEARCH
+
+    torch.manual_seed(7)
+    model = Model(load_dex(), 32, 1).eval()
+    expected = play(searcher(seed=3007), model, 1, count=4, seed=3000, sides=(0, 1))[0]
+    with Actors(4, 1, [POOL], 3, 1, model, search=asdict(OpponentSearch(iterations=50)), search_labels=tmp_path,
+                search_both=True, search_explore=1.0) as actors:
+        actors.set_weights("learner", model.state_dict())
+        actors.set_weights("opponent", model.state_dict())
+        actors.start(0, np.full(4, SEARCH), 0.0)
+        collected = actors.wait()
+        arrays = {k: v.copy() for k, v in actors.buffers[0].arrays.items()}
+    assert collected["search_explored"] == 8
+    raw = [DistillStream._read(p) for p in tmp_path.glob("labels-*.npz")]
+    labels = {k: np.concatenate([s[k] for s in raw]) for k in raw[0] if k in expected[0][0]}
+    changed = 0
+    for row, e, _, _, side in expected:
+        match = np.flatnonzero((labels["ids"] == row["ids"]).all((1, 2)) &
+                               (labels["floats"] == row["floats"]).all((1, 2)))
+        assert len(match) == 1
+        for key in ("pairs", "x", "q", "prior"):
+            np.testing.assert_array_equal(labels[key][match[0]], row[key])
+        chosen = np.array([arrays["a0"][0, 2 * e + side], arrays["a1"][0, 2 * e + side]])
+        changed += not np.array_equal(chosen, row["pairs"][row["x"].argmax()])
+    assert changed > 0
+    with torch.no_grad():
+        state = model.trunk(*(torch.from_numpy(arrays[k][0]) for k in OBS_KEYS))
+        lp0, vectors = model.slot0(state, torch.from_numpy(arrays["mask0"][0]))
+        lp1 = model.slot1(state, vectors, torch.from_numpy(arrays["a0"][0]), torch.from_numpy(arrays["mask1"][0]))
+    np.testing.assert_allclose(arrays["logp"][0], lp0.numpy()[np.arange(8), arrays["a0"][0]] +
+                               lp1.numpy()[np.arange(8), arrays["a1"][0]], atol=1e-6)
+
+
+def test_label_only_actors_keep_identical_labels_without_rollout_buffers(tmp_path):
+    from dataclasses import asdict
+    from training.actors import Actors
+    from training.league import SEARCH
+
+    torch.manual_seed(8)
+    model = Model(load_dex(), 32, 1).eval()
+    critic = Model(load_dex(), 48, 2).eval()
+    value_path = tmp_path / "value.pt"
+    torch.save(dict(model=critic.state_dict(), width=48, layers=2), value_path)
+    results = []
+    for label_only in (False, True):
+        out = tmp_path / str(label_only)
+        with Actors(2, 12, [POOL], 3, 1, model, search=asdict(OpponentSearch(iterations=20)), search_labels=out,
+                    search_value=value_path, search_both=True, search_explore=.5, search_fair_labels=True,
+                    label_only=label_only) as actors:
+            assert all(bool(b.arrays) != label_only for b in actors.buffers)
+            actors.set_weights("learner", model.state_dict())
+            actors.set_weights("opponent", model.state_dict())
+            actors.start(0, np.full(2, SEARCH), 0.0)
+            stats = actors.wait()
+        shards = [DistillStream._read(p) for p in sorted(out.glob("labels-*.npz"))]
+        results.append(({k: np.concatenate([s[k] for s in shards]) for k in shards[0] if shards[0][k].ndim}, stats))
+    assert results[0][0] and results[0][0].keys() == results[1][0].keys()
+    for key, expected in results[0][0].items():
+        np.testing.assert_array_equal(results[1][0][key], expected)
+    for key in ("search_decisions", "search_forced", "search_explored", "search_pending", "search_rejected_labels"):
+        assert results[0][1][key] == results[1][1][key]

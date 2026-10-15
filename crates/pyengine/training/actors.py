@@ -168,6 +168,14 @@ def read_weights(flat: np.ndarray, layout: list) -> dict:
             for name, shape, offset in layout}
 
 
+def _actor_entry(*args):
+    import signal
+
+    # The parent handles terminal Ctrl-C and asks every actor to finish its rollout and flush labels.
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    _actor(*args)
+
+
 def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, pools, seed, path, model_config):
     sys.path.insert(0, path)
     import torch
@@ -182,13 +190,16 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
 
     torch.set_num_threads(1)
     R = 2 * n_envs
-    buffers = [SharedArrays(buffer_layout(steps, R, model_config.get("teacher", False)), names)
+    label_only = model_config.get("label_only", False)
+    buffers = [SharedArrays({} if label_only else buffer_layout(steps, R, model_config.get("teacher", False)), names)
                for names in buffer_names]
     weights = SharedArrays({"learner": ((model_config["size"],), np.float32),
                             "opponent": ((model_config["size"],), np.float32)}, weight_names)
     dex = load_dex()
-    learner = Model(dex, model_config["width"], model_config["layers"], joint_features=model_config["joint_features"]).eval()
-    opponent = Model(dex, model_config["width"], model_config["layers"], joint_features=model_config["joint_features"]).eval()
+    architecture = dict(action_features=model_config["action_features"], token_features=model_config["token_features"],
+                        joint_features=model_config["joint_features"])
+    learner = Model(dex, model_config["width"], model_config["layers"], **architecture).eval()
+    opponent = Model(dex, model_config["width"], model_config["layers"], **architecture).eval()
     guards = MoveGuards(**model_config["guards"])
     layout = weight_layout(learner)
     count = end - begin
@@ -217,7 +228,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         searcher = SearchOpponent(str(dex.path), guards, OpponentSearch(**model_config["search"]), seed=seed + 7,
                                   labels=LabelWriter(labels_dir, tag=f"a{begin}-",
                                                      size=model_config.get("search_shard", 256)) if labels_dir else None,
-                                  bench_sets=load_bench_sets(pools), value_model=value_model)
+                                  bench_sets=load_bench_sets(pools), value_model=value_model,
+                                  fair_labels=model_config.get("search_fair_labels", False))
     search_both = bool(model_config.get("search_both", False))
     explore = float(model_config.get("search_explore", 0.0))
     explore_rng = np.random.default_rng([seed, 2])  # its own stream: exploring never moves the sampling stream
@@ -241,9 +253,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         while True:
             command, argument = connection.recv()
             if command == "close":
-                if searcher is not None and searcher.labels is not None:
-                    searcher.close()  # running battles' rows are written as capped (NaN outcome, -1 steps)
-                connection.send(None)
+                capped = sum(len(rows) for rows in searcher.pending.values()) if searcher is not None else 0
+                if searcher is not None:
+                    searcher.close()
+                connection.send(("closed", dict(search_capped_at_close=capped,
+                                                search_written=searcher.labels.written
+                                                if searcher is not None and searcher.labels is not None else 0)))
                 break
             # command == "collect"
             started = time.perf_counter()
@@ -285,11 +300,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             inference = teaching = searching = 0.0
             explored_count = 0
             if searcher is not None:
-                searcher.stats.update(searched=0, forced=0, cells=0, seconds=0.0)
+                searcher.stats.update(searched=0, forced=0, cells=0, seconds=0.0, rejected_labels=0)
                 labels_before = searcher.released
             for t in range(steps):
-                for k in OBS_KEYS:
-                    out[k][t, rows] = getattr(b, k)
+                if not label_only:
+                    for k in OBS_KEYS:
+                        out[k][t, rows] = getattr(b, k)
                 active = result["needs_action"].reshape(-1).copy()
                 train_rows = active & ~opp_rows
                 mask0 = result["mask0"].reshape(-1, N_ACTIONS).copy()
@@ -304,7 +320,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 with torch.no_grad():
                     x = tensors(b)
                     state = learner.trunk(x["ids"], x["floats"], x["field"], x["action_features"], x["token_features"])
-                    value = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
+                    if not label_only:
+                        value = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
                     lp0_t, vectors0 = learner.slot0(state, torch.from_numpy(mask0))
                     lp0 = lp0_t.numpy().copy()
                     if len(opp_index):
@@ -361,11 +378,12 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     out["teacher_a0"][t, rows], out["teacher_a1"][t, rows] = labels
                 actions = np.stack((a0, a1), -1).reshape(count, 2, 2).astype(np.int32)
                 actions[~result["needs_action"]] = -1
-                out["mask0"][t, rows], out["mask1"][t, rows] = mask0, mask1
-                out["a0"][t, rows], out["a1"][t, rows] = a0, a1
-                out["logp"][t, rows] = lp0[np.arange(len(a0)), a0] + lp1[np.arange(len(a1)), a1]
-                out["value"][t, rows] = value
-                out["train"][t, rows] = train_rows
+                if not label_only:
+                    out["mask0"][t, rows], out["mask1"][t, rows] = mask0, mask1
+                    out["a0"][t, rows], out["a1"][t, rows] = a0, a1
+                    out["logp"][t, rows] = lp0[np.arange(len(a0)), a0] + lp1[np.arange(len(a1)), a1]
+                    out["value"][t, rows] = value
+                    out["train"][t, rows] = train_rows
                 result = env.step(actions)
                 if result["illegal"].any():
                     raise RuntimeError("A sampled action violated the exact mask")
@@ -380,8 +398,9 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 # carries across rollouts, so a decayed or zero bonus still settles what was credited.
                 shaped, potential = ko_shaping(potential, b.fainted, np.repeat(done, 2), ko_bonus)
                 reward = reward + shaped
-                out["reward"][t, rows] = reward
-                out["done"][t, rows] = np.repeat(done, 2)
+                if not label_only:
+                    out["reward"][t, rows] = reward
+                    out["done"][t, rows] = np.repeat(done, 2)
                 stats["completed"] += int(done.sum())
                 stats["turns"] += int(result["final_turns"][done].sum())
                 # ---- opponent results (training.league)
@@ -393,10 +412,11 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 results["clean_score"] += np.where(clean, score, 0.0)
                 results["battle_turns"] += np.where(done, result["final_turns"], 0)
                 began_here |= done
-            with torch.no_grad():
-                x = tensors(b)
-                state = learner.trunk(x["ids"], x["floats"], x["field"], x["action_features"], x["token_features"])
-                out["bootstrap"][rows] = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
+            if not label_only:
+                with torch.no_grad():
+                    x = tensors(b)
+                    state = learner.trunk(x["ids"], x["floats"], x["field"], x["action_features"], x["token_features"])
+                    out["bootstrap"][rows] = learner.value(state, x["ids"][partner], x["floats"][partner, 0:6]).numpy()
             stats["seconds"] = time.perf_counter() - started
             stats["inference_seconds"] = inference
             stats["teacher_seconds"] = teaching
@@ -410,6 +430,7 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 stats["search_pending"] = sum(len(rows) for rows in searcher.pending.values())
                 stats["search_written"] = searcher.labels.written if searcher.labels else 0
                 stats["search_explored"] = explored_count
+                stats["search_rejected_labels"] = searcher.stats["rejected_labels"]
             stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
             stats.update(memory_mb())
             connection.send(stats)
@@ -418,9 +439,13 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         connection.send(("error", traceback.format_exc()))
         raise
     finally:
-        for buffer in buffers:
-            buffer.close()
-        weights.close()
+        try:
+            if searcher is not None:
+                searcher.close()  # also preserve buffered / pending labels after an actor exception
+        finally:
+            for buffer in buffers:
+                buffer.close()
+            weights.close()
 
 
 class Actors:
@@ -430,31 +455,39 @@ class Actors:
                  scripted: str = "heuristic", scripted_temperature: float = 0.0, guards: MoveGuards = MoveGuards(),
                  teacher: bool = False, teacher_temperature: float = 0.0, search: dict | None = None,
                  search_labels: Path | None = None, search_value: Path | None = None, search_shard: int = 256,
-                 search_both: bool = False, search_explore: float = 0.0):
+                 search_both: bool = False, search_explore: float = 0.0, search_fair_labels: bool = False,
+                 label_only: bool = False):
         """``teacher``: the buffers hold teacher labels, written in rollouts started with ``teacher=True`` (smart
         player with Gumbel noise ``teacher_temperature``). ``search``: training.search_opponent.OpponentSearch
         fields for SEARCH envs (None: no search opponent); ``search_labels``: directory for its label shards
         (``search_shard`` rows each); ``search_value``: checkpoint for the search's leaf values (None: the learner);
-        ``search_both`` / ``search_explore``: see the module docstring (defaults: side 2 only, no exploration)."""
+        ``search_both`` / ``search_explore``: see the module docstring (defaults: side 2 only, no exploration).
+        ``search_fair_labels`` excludes decisions with nonpublic masks or an incompletely replaced unseen bench
+        from label output, without changing play. shallow_labels.py enables it. ``label_only`` collects search
+        labels and stats without allocating PPO rollout buffers or evaluating unused rollout values."""
+        if label_only and teacher:
+            raise ValueError("label_only does not collect PPO teacher labels")
         self.n_envs, self.steps, self.teacher = n_envs, steps, teacher
-        self.buffers = [SharedArrays(buffer_layout(steps, 2 * n_envs, teacher)) for _ in range(2)]
+        self.buffers = [SharedArrays({} if label_only else buffer_layout(steps, 2 * n_envs, teacher)) for _ in range(2)]
         self.layout = weight_layout(model)
         size = sum(int(np.prod(shape)) for _, shape, _ in self.layout)
         self.weights = SharedArrays({"learner": ((size,), np.float32), "opponent": ((size,), np.float32)})
         self.versions = {"learner": 0, "opponent": 0}
         config = dict(size=size, width=model.width, layers=len(model.blocks), joint_features=model.joint_features,
+                      action_features=model.n_action_features, token_features=model.n_token_features,
                       scripted=scripted, scripted_temperature=scripted_temperature, guards=asdict(guards),
                       teacher=teacher, teacher_temperature=teacher_temperature, search=search,
                       search_labels=None if search_labels is None else str(search_labels),
                       search_value=None if search_value is None else str(search_value), search_shard=search_shard,
-                      search_both=search_both, search_explore=search_explore)
+                      search_both=search_both, search_explore=search_explore, search_fair_labels=search_fair_labels,
+                      label_only=label_only)
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])
         self.connections, self.processes = [], []
         for w in range(workers):
             parent, child = context.Pipe()
-            process = context.Process(target=_actor, daemon=True, args=(
+            process = context.Process(target=_actor_entry, daemon=True, args=(
                 child, [b.names() for b in self.buffers], self.weights.names(), n_envs, steps, int(bounds[w]),
                 int(bounds[w + 1]), pools, seed * 1000 + w, path, config))
             process.start()
@@ -496,7 +529,7 @@ class Actors:
         totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)
         totals["search_seconds"] = max(r["search_seconds"] for r in replies)
         for key in ("search_decisions", "search_forced", "search_cells", "search_labels", "search_unswapped",
-                    "search_pending", "search_written", "search_explored"):
+                    "search_pending", "search_written", "search_explored", "search_rejected_labels"):
             totals[key] = sum(r.get(key, 0) for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
         for key in RESULT_KEYS:
@@ -506,18 +539,33 @@ class Actors:
                 totals["actor_" + key] = max(r[key] for r in replies)
         return totals
 
-    def close(self) -> None:
+    def close(self) -> dict:
+        # Queue every close first. A pending rollout's stats can precede the close acknowledgement.
+        totals = dict(search_capped_at_close=0, search_written=0)
         for connection in self.connections:
             try:
                 connection.send(("close", None))
-                connection.recv()
             except (BrokenPipeError, EOFError, OSError):
                 pass
+        for connection in self.connections:
+            try:
+                while True:
+                    reply = connection.recv()
+                    if isinstance(reply, tuple) and reply[0] == "closed":
+                        for key in totals:
+                            totals[key] += reply[1][key]
+                        break
+            except (BrokenPipeError, EOFError, OSError):
+                pass
+            finally:
+                connection.close()
+        self.pending = False
         for process in self.processes:
             process.join(timeout=5)
         for buffer in self.buffers:
             buffer.close(unlink=True)
         self.weights.close(unlink=True)
+        return totals
 
     def __enter__(self):
         return self

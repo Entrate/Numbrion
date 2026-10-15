@@ -65,7 +65,8 @@ class OpponentSearch:
 class LabelWriter:
     """Search labels as atomic ``labels-<run>-<seq>.npz`` shards (``.npz.tmp`` then rename), ``size`` rows each.
     Every 20th shard is a holdout shard, like search_labels.py's ShardWriter. Rows are grouped by ``teacher`` (the
-    shard's ``teacher`` metadata), so a shard never mixes teachers; ``teacher_minutes`` is the group's oldest."""
+    shard's ``teacher`` metadata), so a shard never mixes teachers; ``teacher_minutes`` is the group's oldest.
+    At most ``size - 1`` rows remain buffered across all teachers after a successful add."""
 
     def __init__(self, out: Path, size: int = 256, tag: str = ""):
         self.out, self.size = Path(out), size
@@ -73,26 +74,31 @@ class LabelWriter:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-%f")
         self.run = f"{stamp}-{tag}{uuid.uuid4().hex[:12]}"
         self.groups: dict[str, tuple[list, list]] = {}  # teacher -> (rows, minutes)
+        self._buffered = 0
         self.sequence = 0
         self.written = 0
 
     @property
     def buffered(self) -> int:
-        return sum(len(rows) for rows, _ in self.groups.values())
+        return self._buffered
 
     def add(self, row: dict, minutes: float, teacher: str = "selfplay-search") -> None:
         rows, times = self.groups.setdefault(teacher, ([], []))
         rows.append(row)
         times.append(minutes)
+        self._buffered += 1
         if len(rows) >= self.size:
             self._write(teacher)
+        # A stream of teachers with fewer than size rows must not retain every teacher forever.
+        while self.buffered >= self.size:
+            self._write(next(iter(self.groups)))
 
     def flush(self) -> None:
         for teacher in list(self.groups):
             self._write(teacher)
 
     def _write(self, teacher: str) -> None:
-        rows, minutes = self.groups.pop(teacher, ([], []))
+        rows, minutes = self.groups.get(teacher, ([], []))
         if not rows:
             return
         arrays = {key: np.stack([row[key] for row in rows]) for key in rows[0]}
@@ -107,6 +113,8 @@ class LabelWriter:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
+        del self.groups[teacher]
+        self._buffered -= len(rows)
         self.written += len(rows)
         self.sequence += 1
 
@@ -136,10 +144,12 @@ class SearchOpponent:
 
     def __init__(self, dex_path: str, guards: MoveGuards, config: OpponentSearch | None = None, seed: int = 0,
                  labels: LabelWriter | None = None, threads: int = 1, bench_sets: tuple | None = None,
-                 value_model=None):
+                 value_model=None, fair_labels: bool = False):
         """``bench_sets``: (packed sets, species keys) from ``load_bench_sets`` to hide the learner's unseen
         Pokemon; None searches the true battle (the learner's bench included). ``value_model``: a fixed Model (any
-        width / depth) for the leaf values; None uses the policy's own value head."""
+        width / depth) for the leaf values; None uses the policy's own value head. ``fair_labels`` excludes labels
+        when exact masks reveal more than the request, or when some unseen bench could not be replaced. The
+        search still plays those positions; the accepted seen-Pokemon leak in its targets remains."""
         import numbrion
 
         self.cfg = config or OpponentSearch()
@@ -149,10 +159,11 @@ class SearchOpponent:
         self.labels = labels
         self.bench_sets = bench_sets
         self.value_model = value_model
-        self.pending: dict[int, list] = {}  # env -> [(row, minutes, teacher, step)] until its battle ends
+        self.fair_labels = fair_labels
+        self.pending: dict[int, list] = {}  # env -> [(row, minutes, teacher, step, side)] until its battle ends
         self.steps: np.ndarray | None = None  # boundaries each env's current battle has passed (see end_step)
         self.released = 0  # rows handed to ``labels`` (finished battles and capped rows)
-        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0, swapped=0, unswapped=0)
+        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0, swapped=0, unswapped=0, rejected_labels=0)
 
     def end_step(self, done: np.ndarray, winner: np.ndarray, aborted: np.ndarray | None = None) -> None:
         """Call after every ``env.step`` (every env, searched or not): counts the boundary and releases the pending
@@ -234,9 +245,25 @@ class SearchOpponent:
         envs_s = np.asarray([envs[i] for i in searched])
         battles = [battles[i] for i in searched]
         own = [own[i] for i in searched]
-        for battle in battles:
-            self.hide_bench(battle, side)
         rows = 2 * envs_s + side
+        label_ok = np.ones(len(battles), dtype=bool)
+        if self.labels is not None and self.fair_labels:
+            from .protocol import request_mask
+
+            for k, (battle, row, masks) in enumerate(zip(battles, rows, own)):
+                public = request_mask(battle.request_json(side))
+                # Exact legality can expose hidden trapping / Imprison, including in normalized priors.
+                public_masks = all(np.array_equal(a, b) for a, b in zip(public, masks))
+                seen = len(set(arrays["foe_match"][row]) - {-1})
+                total = len(battle.teams[1 - side].split("]"))
+                # hidden_team_indices omits unswappable, never-seen BattleStart forms and other unsafe sets.
+                swappable = self.bench_sets is not None and seen + len(battle.hidden_team_indices(side)) == total
+                label_ok[k] = public_masks and swappable
+        for k, battle in enumerate(battles):
+            before = self.stats["unswapped"]
+            self.hide_bench(battle, side)
+            if self.fair_labels and self.stats["unswapped"] != before:
+                label_ok[k] = False
         ours = pair_candidates(model, _take(state, torch.from_numpy(rows)), arrays["guard"][rows], own, cfg.ours,
                                cfg.first_codes, cfg.prior_temperature, self.guards)
         acting = [i for i, e in enumerate(envs_s) if needs_action[e, 1 - side]]
@@ -316,6 +343,9 @@ class SearchOpponent:
             best = int(np.argmax(x[k, :len(pairs)]))
             choices[int(e)] = (int(pairs[best][0]), int(pairs[best][1]))
             if self.labels is not None:
+                if not label_ok[k]:
+                    self.stats["rejected_labels"] += 1
+                    continue
                 step = 0 if self.steps is None else int(self.steps[e])
                 self.pending.setdefault(int(e), []).append(
                     (self._label(arrays, int(rows[k]), own[k], ours[k], x[k], q[k]), minutes, teacher, step, side))

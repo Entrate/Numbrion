@@ -11,16 +11,18 @@ other side's unseen bench. Position variety comes from ``--explore`` (as search_
 searched decision PLAYS a pair sampled from the teacher policy at temperature 1, but its label is still the search's
 strategy. The actors loop ``--steps``-boundary rollouts on the CPU (one torch thread each); nothing is trained.
 
-Each searched decision of either side becomes one row of search_labels.py's format (obs, masks, pairs, x, q, prior, value = x.q,
+Each eligible searched decision of either side becomes one row of search_labels.py's format (obs, masks, pairs, x, q, prior, value = x.q,
 partner_ids / partner_floats / foe_match, outcome and remaining_steps), readable by distill_train.py and
 training.distill. A row is written when its battle ends; at shutdown the rows of battles still running are written as
-capped (NaN outcome, -1 steps: policy targets without a value target). Each actor writes its own
+capped (NaN outcome, -1 steps: policy targets without a value target). Decisions whose exact masks differ from the
+player's request, or whose unseen opponent bench cannot be fully swapped, are excluded (``rejected_labels``).
+Each actor writes its own
 ``labels-<run>-<seq>.npz`` shards (``--shard`` rows, atomic, every 20th a holdout shard) into ``--out``.
 
 Information: each search plays the true battle, so it knows the hidden moves, item, ability, Tera type and stats of
 the opponent's Pokemon it has seen (the unseen bench is swapped for pool sets). See training/search_opponent.py.
 
-Stops at ``--minutes``, ``--labels`` (rows of finished battles), or when ``<out>/STOP`` exists, after the current
+Stops at ``--minutes``, ``--labels`` (rows of finished battles), SIGINT / SIGTERM to the parent, or when ``<out>/STOP`` exists, after the current
 rollout. ``--follow DIR`` reloads the newest teacher of DIR (search_labels.newest_teacher) between rollouts; the
 value checkpoint stays fixed. Runs at ``--nice`` priority (the actors inherit it).
 """
@@ -29,8 +31,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import pickle
+import signal
 import sys
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, fields
 from pathlib import Path
 
@@ -98,6 +103,26 @@ def load_model(path: Path) -> tuple[Model, dict]:
     return Model.from_state(load_dex(), state["model"], state.get("width", 128), state.get("layers", 3)).eval(), state
 
 
+def model_shape(model: Model) -> tuple:
+    return (model.width, len(model.blocks), model.joint_features, model.n_action_features, model.n_token_features)
+
+
+@contextmanager
+def stop_signals():
+    """SIGINT / SIGTERM stop after the active rollout, so actors can save capped rows."""
+    requested = []
+
+    def stop(signum, frame):
+        requested.append(signal.Signals(signum).name)
+
+    previous = {s: signal.signal(s, stop) for s in (signal.SIGINT, signal.SIGTERM)}
+    try:
+        yield requested
+    finally:
+        for s, handler in previous.items():
+            signal.signal(s, handler)
+
+
 def new_shards(out: Path, before: set) -> list[Path]:
     """This run's shards: the ones that were not in ``out`` when it started."""
     return [path for path in out.glob("labels-*.npz") if path.name not in before]
@@ -131,11 +156,11 @@ def cpu_seconds(processes) -> float:
 
 def main(argv=None) -> dict:
     args = parse_args(argv)
-    with output_lock(args.out):
-        return generate(args)
+    with output_lock(args.out), stop_signals() as requested:
+        return generate(args, requested)
 
 
-def generate(args) -> dict:
+def generate(args, requested=None) -> dict:
     if args.nice:
         os.nice(args.nice)
     torch.set_num_threads(1)
@@ -144,11 +169,11 @@ def generate(args) -> dict:
     if teacher is None:
         raise FileNotFoundError(f"no finished teacher in {args.follow}")
     model, state = load_model(teacher.path)
-    shape = (model.width, len(model.blocks), model.joint_features)
+    shape = model_shape(model)
     print(f"Teacher: {teacher.path.name} ({model.width}x{len(model.blocks)}), minutes={teacher.minutes:g}; "
           f"leaf values: {args.value_checkpoint.name if args.value_checkpoint else 'teacher'}; "
           f"search {args.search_config}, both sides, explore {args.explore}", flush=True)
-    totals = dict(rollouts=0, decisions=0, forced=0, explored=0, labels=0, games=0, crashes=0)
+    totals = dict(rollouts=0, decisions=0, forced=0, explored=0, labels=0, games=0, crashes=0, rejected_labels=0)
     started = time.monotonic()
     deadline = started + args.minutes * 60
     last_log, last_labels, last_time, last_cpu = started, 0, started, 0.0
@@ -164,7 +189,8 @@ def generate(args) -> dict:
         recent = (totals["labels"] - last_labels) / max(now - last_time, 1e-6)
         line = dict(minutes=round(elapsed / 60, 2), labels=totals["labels"], pending=totals.get("pending", 0),
                     labels_per_s=round(totals["labels"] / elapsed, 1), recent_labels_per_s=round(recent, 1),
-                    decisions=totals["decisions"], explored=totals["explored"], games=totals["games"], rollouts=totals["rollouts"],
+                    decisions=totals["decisions"], explored=totals["explored"], rejected_labels=totals["rejected_labels"],
+                    games=totals["games"], rollouts=totals["rollouts"], crashes=totals["crashes"],
                     written=totals.get("written", 0), disk_mb=round(size / 2 ** 20, 1),
                     bytes_per_label=round(size / max(totals.get("written", 0), 1)), teacher=teacher.path.name,
                     actor_cores=None if final else round((cpu - last_cpu) / max(now - last_time, 1e-6), 2),
@@ -175,6 +201,8 @@ def generate(args) -> dict:
         last_log, last_labels, last_time, last_cpu = now, totals["labels"], now, cpu
 
     def stopping():
+        if requested:
+            return requested[0]
         if time.monotonic() >= deadline:
             return "minutes"
         if args.labels and totals["labels"] >= args.labels:
@@ -187,7 +215,7 @@ def generate(args) -> dict:
     opponents = np.full(args.envs, SEARCH, dtype=np.int8)
     actors = Actors(args.envs, args.steps, [args.pool], args.seed, args.workers, model, search=args.search_config,
                     search_labels=args.out, search_value=args.value_checkpoint, search_shard=args.shard,
-                    search_both=True, search_explore=args.explore)
+                    search_both=True, search_explore=args.explore, search_fair_labels=True, label_only=True)
     try:
         actors.set_weights("learner", state["model"])
         actors.set_weights("opponent", state["model"])  # unused (no SNAPSHOT envs), but never uninitialised
@@ -196,26 +224,36 @@ def generate(args) -> dict:
             if args.follow:
                 replacement = follow_teacher(args.follow, newest)
                 if replacement is not newest:
-                    newest = replacement  # skipped ones too, so a wrong-shape file is not reloaded every rollout
-                    new_model, new_state = load_model(replacement.path)
-                    if (new_model.width, len(new_model.blocks), new_model.joint_features) != shape:
-                        print(f"Teacher skipped: {replacement.path.name} has another shape than the actors' model",
-                              flush=True)
+                    try:
+                        new_model, new_state = load_model(replacement.path)
+                    except (OSError, EOFError, RuntimeError, ValueError, KeyError, pickle.UnpicklingError) as error:
+                        # Pruning / replacement can race the metadata load. Retry on the next rollout.
+                        print(f"Teacher skipped: {replacement.path.name}: {error}", flush=True)
                     else:
-                        actors.set_weights("learner", new_state["model"])
-                        print(f"Teacher switch: {teacher.path.name} -> {replacement.path.name}, "
-                              f"minutes={replacement.minutes:g}", flush=True)
-                        teacher = replacement
-                    del new_model, new_state
+                        newest = replacement  # valid wrong-shape files need only be inspected once
+                        if model_shape(new_model) != shape:
+                            print(f"Teacher skipped: {replacement.path.name} has another shape than the actors' model",
+                                  flush=True)
+                        else:
+                            actors.set_weights("learner", new_state["model"])
+                            print(f"Teacher switch: {teacher.path.name} -> {replacement.path.name}, "
+                                  f"minutes={replacement.minutes:g}", flush=True)
+                            teacher = replacement
+                        del new_model, new_state
             actors.start(0, opponents, 0.0, minutes=teacher.minutes, label_teacher=teacher.path.name)
             collected = actors.wait()
             totals["rollouts"] += 1
             totals["decisions"] += collected["search_decisions"]
             totals["forced"] += collected["search_forced"]
             totals["explored"] += collected["search_explored"]
+            totals["rejected_labels"] += collected.get("search_rejected_labels", 0)
             totals["labels"] += collected["search_labels"]
             totals["games"] += collected["completed"]
             totals["crashes"] += len(collected["crashes"])
+            if collected["crashes"]:
+                with (args.out / "crashes.jsonl").open("a", encoding="utf-8") as stream:
+                    for crash in collected["crashes"]:
+                        stream.write(json.dumps(crash) + "\n")
             totals["pending"] = collected["search_pending"]
             totals["written"] = collected["search_written"]
             totals["actor_rss_mb"] = collected.get("actor_rss_mb")
@@ -223,12 +261,10 @@ def generate(args) -> dict:
                 status()
         print(f"Stopping ({reason}): writing the buffered rows; running battles' rows as capped", flush=True)
     finally:
-        actors.close()
-    totals["capped_at_close"] = totals.get("pending", 0)
-    totals["written"] = 0
-    for path in new_shards(args.out, before):
-        with np.load(path) as shard:
-            totals["written"] += len(shard["outcome"])
+        closed = actors.close()
+    totals["capped_at_close"] = closed["search_capped_at_close"]
+    totals["pending"] = 0
+    totals["written"] = closed["search_written"]
     status(final=True)
     print("Done: " + json.dumps(totals), flush=True)
     return totals
