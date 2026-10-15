@@ -17,10 +17,25 @@
   #status.ok { background: #e6f6ea; color: #1f6a37; }
   #status.error { background: #fbe9e9; color: #8a2424; }
   #saved { color: #1f6a37; font-size: 12px; margin-left: 6px; }
+  .advisor { border: 1px solid #b9c0d0; background: #f7f8fb; border-radius: 6px; padding: 10px; margin-bottom: 12px; }
+  .advisor .caption { font-size: 11px; color: #687089; }
+  #currentModel { font-size: 14px; font-weight: 700; overflow-wrap: anywhere; margin: 2px 0; }
+  #currentBot { font-size: 12px; color: #687089; overflow-wrap: anywhere; }
+  #searchStatus { display: inline-block; font-weight: 600; font-size: 12px; border-radius: 4px; padding: 2px 6px; margin-top: 7px; background: #e7eaf0; }
+  #searchStatus.ok { background: #e6f6ea; color: #1f6a37; }
+  #searchStatus.error { background: #fbe9e9; color: #8a2424; }
+  #searchDetail { overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
   <h1>Numbrion advisor</h1>
+  <section class="advisor" aria-label="Current model and search" aria-live="polite">
+    <div class="caption">Current model</div>
+    <div id="currentModel">Checking model…</div>
+    <div id="currentBot">Advisor: server default</div>
+    <div id="searchStatus">Search status unknown</div>
+    <div id="searchDetail" class="hint">Checking the API…</div>
+  </section>
   <label class="check"><input type="checkbox" id="enabled"> Enabled</label>
   <label class="check"><input type="checkbox" id="autoAdvise"> Auto-advise every new request</label>
   <label class="check"><input type="checkbox" id="showBotLog"> Show the bot log</label>
@@ -40,9 +55,10 @@
     <button id="reset" class="secondary">Defaults</button>
     <span id="saved"></span>
   </div>
-  <div id="status"></div>
+  <div id="status" role="status" aria-live="polite"></div>
 
   <script src="src/settings.js"></script>
+  <script src="src/advisor-status.js"></script>
   <script src="src/options.js"></script>
 </body>
 </html>

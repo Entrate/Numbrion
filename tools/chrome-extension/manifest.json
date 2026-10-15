@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Numbrion advisor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shows what a Numbrion bot would choose in your Pokemon Showdown battle, and what the local bots chose.",
   "minimum_chrome_version": "111",
   "permissions": ["storage", "scripting"],
@@ -9,6 +9,7 @@
     "http://127.0.0.1/*",
     "http://localhost/*",
     "https://play.pokemonshowdown.com/*",
+    "https://pokemonshowdown.com/*",
     "https://*.psim.us/*",
     "http://*.psim.us/*"
   ],
@@ -46,7 +47,7 @@
         "http://localhost:*/*",
         "http://127.0.0.1:*/*"
       ],
-      "js": ["src/settings.js", "src/protocol.js", "src/panel.js", "src/content.js"],
+      "js": ["src/settings.js", "src/advisor-status.js", "src/protocol.js", "src/panel.js", "src/ladder.js", "src/ladder-panel.js", "src/content.js"],
       "run_at": "document_start"
     }
   ]

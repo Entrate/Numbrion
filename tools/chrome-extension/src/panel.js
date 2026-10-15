@@ -14,11 +14,13 @@
   --text: #333; --muted: #667078; --surface: #f8f9fa; --head: #e9edef; --border: #b4bec4;
   --line: #d6dde1; --best: #edf7e8; --best-border: #87ad77; --best-text: #31552a;
   --button-top: #ddf0d3; --button-bottom: #bedba9; --track: #dce3e6; --link: #285c91;
+  --error-bg: #fff0ee; --error-border: #cf7369; --error-text: #8e3026; --warn-bg: #fff7e5; --warn-text: #78591e;
 }
 :host([data-theme="dark"]) {
   --text: #ddd; --muted: #aaa; --surface: #25292c; --head: #303639; --border: #596269;
   --line: #414a50; --best: #293c28; --best-border: #719461; --best-text: #d7edcd;
   --button-top: #426e34; --button-bottom: #305525; --track: #424a50; --link: #a0c7ef;
+  --error-bg: #432c2a; --error-border: #b76b60; --error-text: #ffb5a9; --warn-bg: #3b3525; --warn-text: #edd08b;
 }
 :host([data-layout="standalone"]) { max-width: 640px; margin: 12px auto; }
 :host([data-layout="sidebar"]) {
@@ -42,6 +44,18 @@
 }
 .iconbtn:hover { border-color: var(--border); }
 .body { padding: 8px 9px; }
+.advisor-status { padding: 7px 9px; border-bottom: 1px solid var(--line); }
+.model-caption { color: var(--muted); font-size: 10px; }
+.model-name { font-weight: 700; overflow-wrap: anywhere; }
+.model-bot { color: var(--muted); font-size: 10px; margin-top: 1px; overflow-wrap: anywhere; }
+.search-state { margin-top: 6px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 4px; }
+.search-state.ok { background: var(--best); color: var(--best-text); border-color: var(--best-border); }
+.search-state.error { background: var(--error-bg); color: var(--error-text); border-color: var(--error-border); border-left-width: 4px; }
+.search-state.warn { background: var(--warn-bg); color: var(--warn-text); }
+.search-heading { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+.search-detail { margin-top: 2px; font-size: 10px; overflow-wrap: anywhere; }
+.collapsed .search-detail, .collapsed .model-caption, .collapsed .model-bot { display: none; }
+.collapsed .advisor-status { border-bottom: 0; }
 .collapsed .body, .collapsed .foot { display: none; }
 .status { display: flex; align-items: center; gap: 6px; color: var(--muted); margin-bottom: 6px; font-size: 11px; }
 .status:last-child { margin-bottom: 0; }
@@ -194,8 +208,9 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       this.collapseBtn = el('button', { class: 'iconbtn', title: 'Collapse', onclick: () => this.setCollapsed(!this.collapsed) });
       this.head = el('div', { class: 'head' }, el('span', { class: 'brand', text: 'Numbrion advisor' }), this.roomEl, this.headerWin, this.collapseBtn);
       this.body = el('div', { class: 'body' });
+      this.advisorStatus = el('div', { class: 'advisor-status', 'aria-label': 'Current model and search' });
       this.foot = el('div', { class: 'foot' });
-      this.root.append(this.head, this.body, this.foot);
+      this.root.append(this.head, this.advisorStatus, this.body, this.foot);
       shadow.append(this.root);
       this.layoutStyle = el('style', { id: HOST_ID + '-layout', text: '.battle-controls[data-numbrion-controls] { max-height: var(--numbrion-controls-height); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }' });
       document.head.append(this.layoutStyle);
@@ -299,6 +314,7 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       this.host.style.display = '';
       this.root.dataset.request = view.status && view.status.right || '';
       this.renderHead(view);
+      this.advisorStatus.replaceChildren(...this.renderAdvisorStatus(view));
       this.body.replaceChildren(...this.renderBody(view));
       this.foot.replaceChildren(...this.renderFoot(view));
       this.mount();
@@ -311,6 +327,19 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       this.roomEl.title = view.header || view.roomid || '';
       this.headerWin.style.display = this.collapsed && view.advice ? '' : 'none';
       this.headerWin.replaceChildren(...(this.collapsed && view.advice ? [winBadge(view.advice.winProbability)] : []));
+    }
+
+    renderAdvisorStatus(view) {
+      const model = view.model || {};
+      const search = view.search || {};
+      return [
+        el('div', { class: 'model-caption', text: 'Current model' }),
+        el('div', { class: 'model-name', text: model.model || 'Model unavailable', title: model.modelTitle || '' }),
+        el('div', { class: 'model-bot', text: 'Advisor: ' + (model.bot || 'Server default') }),
+        el('div', { class: 'search-state ' + (search.kind || 'idle'), role: search.kind === 'error' ? 'alert' : 'status', 'aria-live': search.kind === 'error' ? 'assertive' : 'polite' },
+          el('div', { class: 'search-heading' }, el('span', { class: 'dot ' + (search.kind || '') }), el('span', { text: search.text || 'Search status unknown' })),
+          search.detail ? el('div', { class: 'search-detail', text: search.detail }) : null),
+      ];
     }
 
     disclosure(key, label, children) {

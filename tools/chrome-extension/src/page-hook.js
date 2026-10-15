@@ -135,6 +135,10 @@
   const recentFromClient = []; // [{msg, at}] outgoing: the client's send runs before the socket's
   const sessions = new Set();
   let lastFocus = null;
+  let preferences = null;
+  let formatRestored = false;
+  let nameRestoreAttempted = false;
+  let lastProfile = '';
 
   function post(payload) {
     payload.__numbrion = TAG;
@@ -190,6 +194,11 @@
     if (typeof message !== 'string') return;
     const bar = message.indexOf('|');
     if (bar < 0) return;
+    if (/^\/logout\b/.test(message.slice(bar + 1))) {
+      nameRestoreAttempted = true;
+      if (preferences) preferences.username = '';
+      post({ type: 'profile', username: '', named: false, loggedOut: true });
+    }
     const roomid = message.slice(0, bar);
     if (!isBattleRoomId(roomid) || !BATTLE_COMMAND.test(message.slice(bar + 1).trim())) return;
     const now = Date.now();
@@ -364,7 +373,9 @@
       wrapReceive(preactPS(), 'preact');
       wrapSend(classicApp(), 'classic');
       wrapSend(preactPS(), 'preact');
+      restorePreferences();
       if (sessions.size) {
+        postProfile();
         backfill();
         const focus = activeRoom();
         if (focus !== lastFocus) {
@@ -373,6 +384,52 @@
         }
       }
     } catch (e) { /* ignore */ }
+  }
+
+  function restorePreferences() {
+    if (!preferences || preferences.enabled === false) return;
+    const app = classicApp();
+    if (!app) return;
+    const main = app.rooms && app.rooms[''];
+    if (!formatRestored && main && window.BattleFormats) {
+      const form = main.el && main.el.querySelector('.mainmenu .battleform');
+      const button = form && form.querySelector('button[name="format"]');
+      const format = window.BattleFormats[preferences.format] ? preferences.format : window.BattleFormats.gen9randomdoublesbattle ? 'gen9randomdoublesbattle' : main.curFormat;
+      if (button && window.BattleFormats[format] && typeof main.renderFormats === 'function') {
+        main.curFormat = format;
+        main.curTeamIndex = -1;
+        button.outerHTML = main.renderFormats(format);
+        const team = form.querySelector('button[name="team"]');
+        if (team && typeof main.renderTeams === 'function') team.outerHTML = main.renderTeams(format);
+        formatRestored = true;
+      }
+    }
+    const user = app.user;
+    // Wait for Showdown's cookie-based upkeep to finish first. Use its own signed-assertion flow, never a
+    // stored password or a fabricated login assertion. Explicit logout suppresses restoration.
+    if (!nameRestoreAttempted && user && user.loaded && user.challstr && !app.isDisconnected) {
+      if (user.get('named') || user.get('registered')) nameRestoreAttempted = true;
+      else if (preferences.username && typeof user.rename === 'function') {
+        nameRestoreAttempted = true;
+        user.rename(preferences.username);
+      }
+    }
+  }
+
+  function postProfile(force) {
+    const app = classicApp();
+    const ps = preactPS();
+    const main = app && app.rooms && app.rooms[''];
+    const user = app && app.user;
+    const named = user ? !!user.get('named') : !!(ps && ps.user && ps.user.named);
+    const username = named ? user ? user.get('name') : ps.user.name : '';
+    const selected = main && main.el && main.el.querySelector('.mainmenu .battleform button[name="format"]');
+    const format = formatRestored && main ? selected && selected.value || main.curFormat || preferences.format : '';
+    const profile = { username, named, format, formatName: format && window.BattleFormats && window.BattleFormats[format] ? window.BattleFormats[format].name : '' };
+    const signature = JSON.stringify(profile);
+    if (!force && signature === lastProfile) return;
+    lastProfile = signature;
+    post(Object.assign({ type: 'profile' }, profile));
   }
 
   // Fast polling while the client starts (so its receive hook is in place before it connects), then slower.
@@ -478,6 +535,8 @@
       backfill();
       lastFocus = activeRoom();
       post({ type: 'focus', roomid: lastFocus });
+      restorePreferences();
+      postProfile(true);
     } else if (data.type === 'bye') {
       sessions.delete(data.session);
     } else if (data.type === 'play') {
@@ -498,6 +557,14 @@
     } else if (data.type === 'focus?') {
       lastFocus = activeRoom();
       post({ type: 'focus', roomid: lastFocus });
+    } else if (data.type === 'preferences') {
+      preferences = {
+        username: String(data.username || '').replace(/[|,;\r\n]/g, '').slice(0, 30),
+        format: /^[a-z0-9]+$/.test(data.format || '') ? data.format : 'gen9randomdoublesbattle',
+        enabled: data.enabled !== false,
+      };
+      restorePreferences();
+      postProfile(true);
     }
   });
 })();

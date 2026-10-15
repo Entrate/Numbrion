@@ -12,6 +12,10 @@ server's HTTP API, described in [ADVISOR-API.md](ADVISOR-API.md).
    default, the search budget in ms, the advisor bot and three switches. **Check API** calls `/api/status`.
    The same page opens from the extension's Options entry.
 
+The popup's **Current model** card shows the training run and checkpoint of the selected advisor, plus whether
+search is enabled and its budget. Hover over the model name for the full checkpoint path. Choosing another
+advisor updates the card; an unavailable API shows that the current model cannot be confirmed.
+
 Open the client at `https://localhost.psim.us/`. It connects to `ws://localhost:8000`. The first time, Chrome asks
 whether `localhost.psim.us` may "access apps and services on this device", its local network permission. Allow it.
 Without it Chrome blocks the connection to the local server and the client never logs in. A plain `http://` page
@@ -29,11 +33,42 @@ reload the battle tab if the panel does not come back; the server then resends t
 
 ## Use
 
+### Elo and remembered preferences
+
+The main menu's **Your ladder** card shows the player's official Pokémon Showdown Elo, win/loss record and
+recorded peak. It reads the [official user API](https://github.com/smogon/pokemon-showdown-client/blob/master/WEB-API.md#users-including-ladder-information), independently of the local bot server.
+The format follows the battle selector by default; choose another rated format in the card to inspect it, or
+enter a different Showdown username. **Refresh** checks the official rating again.
+
+**Elo progress** plots locally recorded rating snapshots. Choose all time, 30 days or 7 days, and expand
+**Recent ratings** for the latest values and times. History starts when the extension first observes a rating,
+and is kept separately for each username and format. It stores up to 2,000 snapshots per format; unchanged
+refreshes do not add points. Ratings refresh once a minute and shortly after battles finish. These are official
+ladder ratings: challenges against local Numbrion bots do not change them.
+
+The classic client's username and main-menu format are remembered on this browser for each site. Random Doubles
+is the initial preference; later manual changes are kept. On refresh, the extension lets Showdown restore its
+normal session first, then restores the remembered name through Showdown's normal login flow if needed.
+Passwords and login assertions are never saved by the extension. If Showdown's session has expired, a registered
+name still needs the normal sign-in. An explicit logout clears the remembered username.
+
+After upgrading to version 0.2.0, reload the extension and refresh the Showdown page once between battles so the
+updated page hook can restore the preferences.
+
+### Battle advice
+
 The advisor appears at the top of the room-list sidebar to the right of the active battle, using the client's
 light or dark theme. It stays visible while you scroll the room list underneath. If the sidebar is hidden,
 showing a chat room, or there is not enough width, the advisor appears below the battle's move and switch buttons
 instead. Long analysis scrolls inside the sidebar advisor; in the battle controls, both scroll together. The
 advisor hides when you leave the battle. Collapse it with its header button; it remembers that setting.
+
+The model and search status stay visible above the recommendation, including when the panel is collapsed.
+**Search running** means a search request is in progress; **Search used** confirms the recommendation came from
+search. **Search off** identifies policy advice, and **Search not needed** identifies forced choices. A failed
+search shows a red **Search failed** message with the reason, whether policy advice is available, and how to
+retry. Missing battle history says **Search unavailable** and explains when to reload. Changing the advisor,
+API URL or search budget clears the previous recommendation and refreshes it when auto-advise is enabled.
 
 The green **Recommended play** card highlights both Pokémon's actions, their targets, the estimated chance of
 winning as a **62% win** badge and the **Play recommended** button. The badge stays visible on narrow screens;

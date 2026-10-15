@@ -27,10 +27,18 @@ test('recorded play-server battles replay through the store', { skip: files.leng
     ].sort((a, b) => a.time - b.time || (a.kind === 'in' ? -1 : 1));
     const store = new P.BattleStore();
     let requests = 0;
+    let lastRoom = null;
     for (const event of events) {
       if (event.kind === 'in') {
+        const before = store.get(log.room);
         const r = store.receive(event.text);
         if (r && r.roomid === log.room && r.request) requests++;
+        if (r && r.roomid === log.room) {
+          if (r.deinit) {
+            assert.equal(store.get(log.room), null, file + ': closed room removed');
+            lastRoom = before;
+          } else if (r.room) lastRoom = r.room;
+        }
         continue;
       }
       const room = store.noteOutgoing(event.text, 'bot');
@@ -38,8 +46,8 @@ test('recorded play-server battles replay through the store', { skip: files.leng
       // A bot answers the request it holds: never a newer one than the store's.
       assert.ok(room.sentChoice.rqid <= room.request.rqid, `${file}: sent rqid ${room.sentChoice.rqid} after request ${room.request.rqid}`);
     }
-    const room = store.get(log.room);
-    assert.ok(room, file + ': room kept');
+    const room = store.get(log.room) || lastRoom;
+    assert.ok(room, file + ': battle state captured before the room closed');
     assert.ok(room.complete, file + ': starts at |init|');
     assert.equal(room.lines[0], '|init|battle', file);
     assert.ok(room.lines.every((line) => line && !line.startsWith('|request|') && !line.startsWith('|sentchoice|')), file);

@@ -4,7 +4,41 @@
  * and answers {ok, data} or {ok: false, error, offline}. Fetching from here (with host permissions) avoids the
  * page's CORS and mixed-content rules.
  */
-importScripts('settings.js');
+importScripts('settings.js', 'ladder.js');
+
+const ladderCache = new Map();
+let ladderQueue = Promise.resolve();
+
+async function fetchLadder(username, force) {
+  const userid = NumbrionLadder.userId(username);
+  if (!userid || userid.length > 30) return { ok: false, error: 'Enter your Showdown username' };
+  try {
+    let cached = ladderCache.get(userid);
+    if (!cached || force || Date.now() - cached.at > 60000) {
+      const response = await fetch('https://pokemonshowdown.com/users/' + userid + '.json', {
+        cache: 'no-store', credentials: 'omit', signal: AbortSignal.timeout(15000),
+      });
+      // Unregistered names can have ladder ratings. Showdown returns their valid JSON with status 404.
+      if (!response.ok && response.status !== 404) throw new Error('Showdown ladder returned HTTP ' + response.status);
+      const data = await response.json();
+      cached = { at: Date.now(), username: data.username || username, ratings: NumbrionLadder.ratingsFrom(data) };
+      ladderCache.set(userid, cached);
+    }
+    const stored = await chrome.storage.local.get(NumbrionLadder.HISTORY_KEY);
+    const history = NumbrionLadder.record(stored[NumbrionLadder.HISTORY_KEY], userid, cached.ratings, cached.at);
+    await chrome.storage.local.set({ [NumbrionLadder.HISTORY_KEY]: history });
+    return { ok: true, data: { username: cached.username, ratings: cached.ratings, history: NumbrionLadder.historyFor(history, userid), updatedAt: cached.at } };
+  } catch (error) {
+    return { ok: false, error: error.message || 'Could not reach the official ladder' };
+  }
+}
+
+function ladder(username, force) {
+  // Multiple tabs share one history. Serialize writes so a second tab cannot overwrite a new snapshot.
+  const result = ladderQueue.then(() => fetchLadder(username, force));
+  ladderQueue = result.then(() => {}, () => {});
+  return result;
+}
 
 async function callApi(path, init, timeoutMs) {
   const settings = await NumbrionSettings.load();
@@ -58,6 +92,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'advise') work = advise(message.body);
   else if (message.type === 'botLog') work = callApi('/api/bot-log?room=' + encodeURIComponent(message.room), {}, 8000);
   else if (message.type === 'status') work = callApi('/api/status', {}, 5000);
+  else if (message.type === 'ladder') work = ladder(message.username, message.force === true);
   if (!work) return false;
   work.then(sendResponse, (e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
   return true; // async response

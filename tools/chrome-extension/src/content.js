@@ -11,8 +11,10 @@
   'use strict';
   const P = globalThis.NumbrionProtocol;
   const Settings = globalThis.NumbrionSettings;
+  const AdvisorStatus = globalThis.NumbrionAdvisorStatus;
   const TAG = 'numbrion-advisor-v1';
   const ORIGIN = window.location.origin;
+  const CLIENT_KEY = 'clientPreferencesV1:' + ORIGIN;
   const SETTLE_MS = 150;
   const session = Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -22,6 +24,9 @@
   let hookReady = false;
   let alive = true;
   let apiState = { kind: 'unknown', text: '', checkedAt: 0 };
+  let apiStatus = null;
+  let statusRequest = 0;
+  let statusCheckedAt = 0;
   const advice = new Map(); // roomid -> {rqid, seq, status, result, error, startedAt, finishedAt, roundTripMs}
   const botLogs = new Map(); // roomid -> {entries, error, fetchedAt, inflight, turn, seq}
   const playState = new Map(); // roomid -> {rqid, status, message}
@@ -29,12 +34,23 @@
   let renderQueued = false;
   let tickTimer = null;
   let statusTimer = null;
+  let ladderTimer = null;
+  const ladderRefreshTimers = new Set();
+  let clientPreferences = {};
+  let clientProfile = { username: '', named: false, format: '' };
+  let ladderHistory = {};
+  let ladderState = { userid: '', data: null, loading: false, checkedAt: 0, error: '' };
 
   const panel = new globalThis.NumbrionPanel({
     onPlay: () => playActive(),
     onAdviseNow: () => adviseActive(true),
     onToggle: (key, value) => saveSettings({ [key]: value }),
     onCollapse: (collapsed) => storageSet({ panelCollapsed: collapsed }),
+  });
+  const ladderPanel = new globalThis.NumbrionLadderPanel({
+    onRefresh: () => refreshLadder(true),
+    onUsername: (username) => saveSettings({ ladderUsername: username }),
+    onFormat: (format) => saveSettings({ ladderFormat: format }),
   });
 
   // ------------------------------------------------------------- extension plumbing
@@ -55,8 +71,11 @@
     for (const timer of settleTimers.values()) clearTimeout(timer);
     if (tickTimer) clearInterval(tickTimer);
     if (statusTimer) clearInterval(statusTimer);
+    if (ladderTimer) clearInterval(ladderTimer);
+    for (const timer of ladderRefreshTimers) clearTimeout(timer);
     postToPage({ type: 'bye', session });
     panel.destroy();
+    ladderPanel.destroy();
   }
 
   // One copy per page: the service worker injects this script into open tabs after an install or update, which
@@ -101,18 +120,23 @@
     } catch (e) { /* orphaned */ }
   }
 
-  function afterSettingsChange() {
-    // A new API URL or bot: ask again where the last ask failed.
+  function afterSettingsChange(previous) {
+    const advisorChanged = previous.apiUrl !== settings.apiUrl || previous.bot !== settings.bot || previous.budgetMs !== settings.budgetMs;
+    if (advisorChanged) advice.clear();
+    if (previous.apiUrl !== settings.apiUrl) { apiStatus = null; botLogs.clear(); }
     for (const [roomid, entry] of advice) {
       if (entry.status === 'offline' || entry.status === 'error') advice.delete(roomid);
     }
     apiState = { kind: 'unknown', text: '', checkedAt: 0 };
+    statusCheckedAt = 0;
     if (settings.enabled) {
       checkApi();
       adviseActive(false);
       refreshBotLog(activeRoomId);
     }
     queueRender();
+    sendPreferences();
+    refreshLadder(false);
   }
 
   function postToPage(payload) {
@@ -133,7 +157,10 @@
     }
     switch (data.type) {
       case 'hello-ack':
-        if (data.session === session) hookReady = true;
+        if (data.session === session) { hookReady = true; sendPreferences(); }
+        break;
+      case 'profile':
+        onProfile(data);
         break;
       case 'msg':
         if (data.replayFor && data.replayFor !== session) return;
@@ -159,8 +186,23 @@
 
   function onServerMessage(msg) {
     const result = store.receive(msg);
-    if (!result) return;
+    if (!result) {
+      // Also remember names replayed by an older page hook during an extension upgrade, before the user
+      // refreshes the page to get the new profile messages.
+      if (/(^|\n)\|updateuser\|/.test(msg) && store.user && store.user.named) {
+        const selector = document.querySelector('#room- .mainmenu .battleform button[name="format"]');
+        onProfile({ username: store.user.name, named: true, format: selector && selector.value || '' });
+      }
+      return;
+    }
     const { roomid } = result;
+    if (result.ended && result.room && result.room.mySide) {
+      // Rating writes can arrive a little after the win message. A second check covers that delay.
+      for (const delay of [1000, 5000]) {
+        const timer = setTimeout(() => { ladderRefreshTimers.delete(timer); refreshLadder(true); }, delay);
+        ladderRefreshTimers.add(timer);
+      }
+    }
     if (result.deinit) {
       advice.delete(roomid);
       botLogs.delete(roomid);
@@ -233,7 +275,7 @@
     if (current && current.status === 'thinking' && sameRequest && !force) return;
     const body = P.buildAdviseBody(room, {}, store);
     if (!body) return;
-    const entry = { rqid: room.request.rqid, seq: room.request.seq, status: 'thinking', startedAt: Date.now() };
+    const entry = { rqid: room.request.rqid, seq: room.request.seq, status: 'thinking', startedAt: Date.now(), bot: settings.bot || apiStatus && apiStatus.advisor || '' };
     advice.set(roomid, entry);
     ensureTicking();
     queueRender();
@@ -257,6 +299,7 @@
           entry.result = data;
         }
         apiState = { kind: 'ok', text: 'API online', checkedAt: Date.now() };
+        if (!apiStatus) checkApi();
       } else {
         entry.status = response && response.offline ? 'offline' : 'error';
         entry.error = (response && response.error) || 'no answer';
@@ -298,11 +341,17 @@
 
   async function checkApi() {
     if (!alive || !settings.enabled) return;
+    const id = ++statusRequest;
+    const url = settings.apiUrl;
     const response = await sendToWorker({ type: 'status' });
+    if (!alive || id !== statusRequest || url !== settings.apiUrl) return;
+    statusCheckedAt = Date.now();
     if (response.ok) {
       const d = response.data || {};
+      apiStatus = d;
       apiState = { kind: 'ok', text: 'API online' + (d.advisor ? ' · advisor ' + d.advisor : ''), checkedAt: Date.now() };
     } else {
+      apiStatus = null;
       apiState = { kind: response.offline ? 'offline' : 'error', text: response.error, checkedAt: Date.now() };
     }
     queueRender();
@@ -344,6 +393,62 @@
 
   // ------------------------------------------------------------- view
 
+  function sendPreferences() {
+    const saved = clientPreferences;
+    postToPage({ type: 'preferences', username: saved.username || '', format: saved.format || 'gen9randomdoublesbattle', enabled: settings.enabled });
+  }
+
+  function onProfile(profile) {
+    clientProfile = Object.assign({}, clientProfile, profile);
+    const saved = Object.assign({}, clientPreferences);
+    if (profile.loggedOut) saved.username = '';
+    else if (profile.named && profile.username) saved.username = profile.username;
+    if (/^[a-z0-9]+$/.test(profile.format || '')) saved.format = profile.format;
+    if (JSON.stringify(saved) !== JSON.stringify(clientPreferences)) {
+      clientPreferences = saved;
+      storageSet({ [CLIENT_KEY]: saved });
+    }
+    refreshLadder(false);
+    queueRender();
+  }
+
+  function ladderUsername() {
+    return settings.ladderUsername || clientProfile.named && clientProfile.username || clientPreferences.username || '';
+  }
+
+  function refreshLadder(force) {
+    if (!alive || !settings.enabled) return;
+    const username = ladderUsername();
+    const userid = globalThis.NumbrionLadder.userId(username);
+    if (!userid) { ladderState = { userid: '', data: null, loading: false, checkedAt: 0, error: '' }; queueRender(); return; }
+    if (ladderState.userid !== userid) {
+      const history = globalThis.NumbrionLadder.historyFor(ladderHistory, userid);
+      const ratings = Object.fromEntries(Object.entries(history).filter(([, points]) => points.length).map(([format, points]) => [format, points[points.length - 1]]));
+      ladderState = { userid, data: { username, ratings, history }, loading: false, checkedAt: 0, error: '' };
+    }
+    if (ladderState.loading || !force && Date.now() - ladderState.checkedAt < 60000) return;
+    const state = ladderState;
+    state.loading = true;
+    state.error = '';
+    queueRender();
+    sendToWorker({ type: 'ladder', username, force }).then((response) => {
+      if (ladderState !== state || !alive) return;
+      state.loading = false;
+      state.checkedAt = Date.now();
+      if (response.ok) state.data = response.data;
+      else state.error = response.error || 'Could not load the official ladder';
+      queueRender();
+    });
+  }
+
+  function ladderView() {
+    return {
+      visible: settings.enabled, settings, username: ladderUsername(),
+      format: clientProfile.format || clientPreferences.format || 'gen9randomdoublesbattle',
+      data: ladderState.data, loading: ladderState.loading, error: ladderState.error,
+    };
+  }
+
   function ensureTicking() {
     if (tickTimer) return;
     tickTimer = setInterval(() => {
@@ -364,6 +469,7 @@
       if (!alive) return;
       try {
         panel.render(buildView());
+        ladderPanel.render(ladderView());
       } catch (e) {
         console.warn('[numbrion advisor] render failed', e);
       }
@@ -450,9 +556,17 @@
       play: null,
       sent: null,
       historyNote: null,
+      model: null,
+      search: null,
       botLog: botLogView(roomid),
     };
-    if (room.complete && !room.ended && request && P.isActionable(request) && !store.historyComplete(room)) {
+    const fresh = entry && request && entry.seq === request.seq && entry.rqid === request.rqid;
+    view.model = AdvisorStatus.configuration(apiStatus, settings, fresh && (entry.result && entry.result.bot || entry.bot));
+    if (!apiStatus && (apiState.kind === 'offline' || apiState.kind === 'error')) {
+      view.model.model = 'Unavailable';
+      view.model.modelTitle = 'The API could not confirm the current model.';
+    }
+    if (view.model.searchEnabled !== false && room.complete && !room.ended && request && P.isActionable(request) && !store.historyComplete(room)) {
       // The search replays the user's past choices; the extension only knows those it saw being sent.
       view.historyNote = 'Search needs the battle from its start: reload the tab before turn 1. In this battle the advice falls back to the policy.';
     }
@@ -460,7 +574,6 @@
     const side = room.mySide;
     view.header = (room.turn ? 'T' + room.turn + ' · ' : '') + players + (side ? ' · you: ' + side : '');
 
-    const fresh = entry && request && entry.seq === request.seq && entry.rqid === request.rqid;
     const right = request && request.rqid !== null ? 'rqid ' + request.rqid : '';
     if (room.ended) {
       view.status = { kind: 'idle', text: room.winner ? 'Battle over: ' + room.winner + ' won' : 'Battle over: tie' };
@@ -515,6 +628,18 @@
       const matches = view.advice && room.sentChoice.choice.replace(/\s+/g, ' ') === view.advice.choice.replace(/\s+/g, ' ');
       view.sent = 'Sent: ' + room.sentChoice.choice + (view.advice ? (matches ? ' (the advice)' : ' (differs from the advice)') : '');
     }
+    view.search = AdvisorStatus.searchState(view.model, fresh ? entry : null, {
+      historyNote: view.historyNote,
+      elapsed: fresh && entry.status === 'thinking' ? seconds(Date.now() - entry.startedAt) + ' elapsed' : '',
+      idleText: room.ended ? 'Battle over. No search is running.'
+        : !request || !P.isActionable(request) ? 'No search is running. ' + view.status.text
+        : !settings.autoAdvise && !fresh ? 'Click Advise now to run the advisor for this turn.' : '',
+    });
+    if (apiState.kind === 'offline' || apiState.kind === 'error') {
+      if (!fresh) {
+        view.search = { kind: 'error', text: 'Search unavailable', detail: apiState.text + '. Check the API settings and click Advise now to retry.' };
+      }
+    }
     return view;
   }
 
@@ -522,20 +647,28 @@
 
   async function start() {
     try {
-      const stored = await chrome.storage.local.get([Settings.KEY, 'panelCollapsed']);
+      const stored = await chrome.storage.local.get([Settings.KEY, 'panelCollapsed', CLIENT_KEY, globalThis.NumbrionLadder.HISTORY_KEY]);
       settings = Settings.normalize(stored[Settings.KEY]);
       panel.collapsed = !!stored.panelCollapsed;
+      clientPreferences = stored[CLIENT_KEY] || {};
+      ladderHistory = stored[globalThis.NumbrionLadder.HISTORY_KEY] || {};
     } catch (e) { /* defaults */ }
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local' || !alive) return;
       if (changes[Settings.KEY]) {
+        const previous = settings;
         settings = Settings.normalize(changes[Settings.KEY].newValue);
-        afterSettingsChange();
+        afterSettingsChange(previous);
       }
+      if (changes[globalThis.NumbrionLadder.HISTORY_KEY]) ladderHistory = changes[globalThis.NumbrionLadder.HISTORY_KEY].newValue || {};
+      if (changes[CLIENT_KEY]) clientPreferences = changes[CLIENT_KEY].newValue || {};
     });
     checkApi();
+    sendPreferences();
+    refreshLadder(false);
+    ladderTimer = setInterval(() => refreshLadder(false), 60000);
     statusTimer = setInterval(() => {
-      if (alive && activeRoomId && apiState.kind !== 'ok' && Date.now() - apiState.checkedAt > 10000) checkApi();
+      if (alive && activeRoomId && Date.now() - statusCheckedAt > (apiState.kind === 'ok' ? 30000 : 10000)) checkApi();
     }, 5000);
     queueRender();
   }

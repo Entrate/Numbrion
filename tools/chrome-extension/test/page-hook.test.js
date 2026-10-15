@@ -136,6 +136,46 @@ function sendPlay(page, roomid, choice, rqid, extra) {
   return reply.result;
 }
 
+function preferencePage(named = false) {
+  const page = makePage();
+  const renamed = [];
+  const button = { outerHTML: '' };
+  const team = { outerHTML: '' };
+  const form = { querySelector: (selector) => selector.includes('name="format"') ? button : team };
+  const main = { curFormat: 'gen9randombattle', curTeamIndex: 0, el: { querySelector: () => form },
+    renderFormats: (format) => '<button>' + format + '</button>', renderTeams: (format) => '<button>' + format + ' team</button>' };
+  const user = { loaded: true, challstr: '4|test', get: (key) => key === 'named' ? named : key === 'name' ? 'Alice' : null, rename: (name) => renamed.push(name) };
+  page.context.app = { rooms: { '': main }, user, curRoom: { id: '' }, send: () => {}, receive: () => {} };
+  page.context.BattleFormats = { gen9randomdoublesbattle: { name: '[Gen 9] Random Doubles Battle' }, gen9randombattle: { name: '[Gen 9] Random Battle' } };
+  return { page, renamed, button, team, main };
+}
+
+test('refresh restores doubles and the remembered username through the normal login flow', () => {
+  const { page, renamed, button, main } = preferencePage();
+  page.fromExtension({ type: 'preferences', username: 'Alice', format: 'gen9randomdoublesbattle' });
+  page.tick();
+  page.tick();
+  assert.equal(main.curFormat, 'gen9randomdoublesbattle');
+  assert.match(button.outerHTML, /gen9randomdoublesbattle/);
+  assert.deepEqual(renamed, ['Alice'], 'attempted once, never repeatedly asks for authentication');
+  page.fromExtension({ type: 'hello', session: 'prefs' });
+  main.curFormat = 'gen9randombattle';
+  page.tick();
+  assert.equal(page.posted.filter((p) => p.type === 'profile').at(-1).format, 'gen9randombattle', 'a later manual choice is remembered, not overridden');
+});
+
+test('existing login and explicit logout are respected', () => {
+  const signedIn = preferencePage(true);
+  signedIn.page.fromExtension({ type: 'preferences', username: 'Bob', format: 'gen9randomdoublesbattle' });
+  assert.deepEqual(signedIn.renamed, [], 'does not replace a signed-in account');
+  const loggedOut = preferencePage();
+  loggedOut.page.tick();
+  loggedOut.page.context.app.send('/logout');
+  loggedOut.page.fromExtension({ type: 'preferences', username: 'Alice', format: 'gen9randomdoublesbattle' });
+  assert.deepEqual(loggedOut.renamed, [], 'does not log back in after an explicit logout');
+  assert.ok(loggedOut.page.posted.some((p) => p.type === 'profile' && p.loggedOut));
+});
+
 test('play goes through the classic client and switches its controls to waiting', () => {
   const page = makePage();
   const sent = [];
