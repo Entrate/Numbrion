@@ -328,6 +328,34 @@ def test_adam_skip_flag_leaves_finite_steps_unchanged():
     assert torch.equal(plain.detach(), flagged.detach()) and torch.equal(a.m[0], b.m[0]) and torch.equal(a.v[0], b.v[0])
 
 
+def test_weight_average_is_an_exponential_moving_average_and_resumes():
+    from training.ppo import WeightAverage
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Linear(4, 3), torch.nn.BatchNorm1d(3))  # num_batches_tracked: an integer
+    start = {k: v.clone() for k, v in model.state_dict().items()}
+    average = WeightAverage(model, updates=4)
+    expected = {k: v.clone().float() for k, v in start.items() if v.is_floating_point()}
+    for _ in range(5):
+        with torch.no_grad():
+            for p in model.parameters():
+                p.add_(torch.randn_like(p))
+        model.state_dict()["1.num_batches_tracked"].add_(1)
+        average.update(model)
+        for k, v in model.state_dict().items():
+            if v.is_floating_point():
+                expected[k] = 0.75 * expected[k] + 0.25 * v
+    for k, v in average.state_dict().items():
+        if v.is_floating_point():
+            torch.testing.assert_close(v, expected[k])
+        else:
+            assert torch.equal(v, model.state_dict()[k])  # copied, not averaged
+    resumed = WeightAverage(torch.nn.Sequential(torch.nn.Linear(4, 3), torch.nn.BatchNorm1d(3)), updates=4)
+    resumed.load_state_dict(average.state_dict())
+    for k, v in resumed.state_dict().items():
+        assert torch.equal(v, average.state_dict()[k])
+
+
 def test_expected_max_and_any_ko_over_possible_moves():
     from training.damage import any_ko, expected_max
 

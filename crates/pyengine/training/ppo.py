@@ -175,6 +175,44 @@ def clip_gradients(parameters, max_norm: float) -> torch.Tensor:
     return norm.detach()
 
 
+class WeightAverage:
+    """Exponential moving average of a model's weights, ``avg <- decay * avg + (1 - decay) * w`` after every update
+    (``decay = 1 - 1 / updates``), started from the model's current weights.
+
+    Late in training the PPO snapshots are noisy points around a better policy: on 2026-10-15 the plain average of 28
+    snapshots (about 9 hours) beat every single one of them by 3-5 points head to head. Kept on the model's device;
+    the mixing constants are cached device tensors (DirectML keeps host memory for every op given a Python scalar, see
+    Adam). Integer entries are copied, not averaged."""
+
+    def __init__(self, model: torch.nn.Module, updates: float):
+        if updates < 1:
+            raise ValueError("WeightAverage needs updates >= 1")
+        self.decay = 1.0 - 1.0 / updates
+        self.state = {k: v.detach().clone() for k, v in model.state_dict().items()}
+        self._constants: dict = {}
+
+    @torch.no_grad()
+    def update(self, model: torch.nn.Module) -> None:
+        for key, value in model.state_dict().items():
+            average = self.state[key]
+            if not average.is_floating_point():
+                average.copy_(value)
+                continue
+            constants = (average.device, average.dtype)
+            if constants not in self._constants:
+                self._constants[constants] = tuple(torch.full((), x, device=average.device, dtype=average.dtype)
+                                                   for x in (self.decay, 1.0 - self.decay))
+            keep, mix = self._constants[constants]
+            average.mul_(keep).add_(value * mix)
+
+    def state_dict(self) -> dict:
+        return {k: v.detach().cpu().clone() for k, v in self.state.items()}
+
+    def load_state_dict(self, state: dict) -> None:
+        for key, value in state.items():
+            self.state[key].copy_(value.to(self.state[key].device))
+
+
 class EntropyController:
     """Entropy-bonus coefficient that keeps the policy entropy near a target schedule (an exploration floor).
 

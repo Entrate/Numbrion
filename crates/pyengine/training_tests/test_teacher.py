@@ -269,3 +269,22 @@ def test_ppo_update_imitates_the_labels(rollouts):
     assert "teacher_loss" not in plain
     for (name, a), b in zip(faded_model.state_dict().items(), plain_model.state_dict().values()):
         assert torch.equal(a, b), name
+
+
+def test_critic_warmup_trains_only_the_critic_and_hidden_information_heads(rollouts):
+    from train_selfplay import CRITIC_PREFIXES, ppo_update
+    from training.ppo import Adam
+
+    plain, _, state = rollouts
+    data = plain[0]
+    args = SimpleNamespace(gamma=0.995, lam=0.95, clip=0.2, value_coef=0.5, aux_coef=0.03, tera_entropy_weight=0.0,
+                           max_grad_norm=0.5, epochs=2, minibatch=64, critic_warmup_updates=1)
+    torch.manual_seed(0)
+    model = Model(load_dex(), width=32, layers=1)
+    model.load_state_dict(state)
+    optimizer, rng = Adam(model.parameters(), lr=3e-3), np.random.default_rng(0)
+    ppo_update(model, optimizer, data, args, rng, 0.01, torch.device("cpu"), update=1)
+    changed = {name for name, p in model.state_dict().items() if not torch.equal(p, state[name])}
+    assert changed and all(name.startswith(CRITIC_PREFIXES) for name in changed), changed
+    ppo_update(model, optimizer, data, args, rng, 0.01, torch.device("cpu"), update=2)  # warm-up over: all learn
+    assert not torch.equal(model.state_dict()["blocks.0.qkv.weight"], state["blocks.0.qkv.weight"])

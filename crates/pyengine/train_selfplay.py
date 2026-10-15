@@ -64,12 +64,13 @@ from training.dex import load_dex
 from training.guards import MoveGuards
 from training.league import HEURISTIC, SEARCH, SELF, SNAPSHOT, SnapshotPool, opponent_kinds
 from training.model import Model
-from training.ppo import Adam, EntropyController, clip_gradients, gae, minibatches, tera_choice_entropy
+from training.ppo import Adam, EntropyController, WeightAverage, clip_gradients, gae, minibatches, tera_choice_entropy
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 OBS_KEYS = ("ids", "floats", "field", "foe_match", "action_features", "token_features")
 N_ACTIONS = 47
+CRITIC_PREFIXES = ("value_head.", "partner_proj.", "aux_")  # the weights --critic-warmup-updates trains
 
 
 def upload(arrays: dict, index, device) -> dict:
@@ -221,7 +222,11 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                        teacher_labelled=labelled.astype(np.float32))
     terms_keys = ("policy_loss", "value_loss", "entropy", "tera_entropy", "aux_loss", "kl", "clipfrac",
                   *(("teacher_loss",) if teach else ()))
-    distilling = distill is not None and distill_coef > 0
+    # --critic-warmup-updates: only the critic and the hidden-information heads learn (a model copied by imitation
+    # has untrained ones); every other weight keeps its value, and no distillation rows are drawn (they would be
+    # spent without teaching the policy). The trainer passes the critic heads' own optimizer for these updates.
+    warming = update is not None and update <= getattr(args, "critic_warmup_updates", 0)
+    distilling = distill is not None and distill_coef > 0 and not warming
     stream_batches = None
     if isinstance(distill, DistillStream):
         n_minibatches = args.epochs * sum(1 for _ in minibatches(np.arange(len(selected)), args.minibatch))
@@ -238,6 +243,7 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     teacher_weight = torch.full((), float(teacher_coef), device=device, dtype=dtype) if teach else None
     distill_weight = torch.full((), float(distill_coef), device=device, dtype=dtype) if distilling else None
     loss_fn = compiled_ppo_loss() if getattr(args, "compile", False) else ppo_loss
+    frozen = [p for name, p in model.named_parameters() if not name.startswith(CRITIC_PREFIXES)] if warming else []
 
     def up(array):
         return torch.from_numpy(np.ascontiguousarray(array)).to(device)
@@ -277,6 +283,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
             minibatch_index += 1
             optimizer.zero_grad()
             loss.backward()
+            for p in frozen:
+                p.grad = None  # Adam and the clipping skip parameters without a gradient
             norm = clip_gradients(optimizer.parameters, args.max_grad_norm)
             stats["grad_norm"].append(norm)
             optimizer.step(skip=~torch.isfinite(norm))  # a non-finite gradient leaves the weights as they were
@@ -353,6 +361,9 @@ def parse_args(argv=None):
                         help="change of log(coefficient) per update and nat of entropy error")
     parser.add_argument("--entropy-coef-min", type=float, default=0.001)
     parser.add_argument("--entropy-coef-max", type=float, default=0.05)
+    parser.add_argument("--critic-warmup-updates", type=int, default=0,
+                        help="for the run's first N updates train only the critic and hidden-information heads (for "
+                             "a model copied by imitation, whose heads are untrained)")
     parser.add_argument("--value-coef", type=float, default=0.5)
     parser.add_argument("--aux-coef", type=float, default=0.03)
     parser.add_argument("--max-grad-norm", type=float, default=0.5)
@@ -411,6 +422,10 @@ def parse_args(argv=None):
     parser.add_argument("--pfsp-floor", type=float, default=0.1, help="PFSP: uniform share mixed into the weights")
     parser.add_argument("--pfsp-alpha", type=float, default=0.02, help="PFSP: per-game EMA rate of the learner score")
     parser.add_argument("--snapshot-minutes", type=float, default=5.0)
+    parser.add_argument("--ema-updates", type=float, default=0.0,
+                        help="time constant (in updates) of an exponential moving average of the weights, saved as "
+                             "OUTPUT/ema/mNNN.pt beside every snapshot and as OUTPUT/ema/latest.pt (0: off). Late in a "
+                             "run the average plays better than the raw weights; evaluate those files")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=REPO / "scratch/training/selfplay")
     parser.add_argument("--resume", type=Path)
@@ -450,6 +465,8 @@ def parse_args(argv=None):
         parser.error(f"--search-config: {error}")
     if args.search_labels is None and args.search_fraction > 0:
         args.search_labels = args.distill_stream
+    if args.ema_updates != 0 and not args.ema_updates >= 1:
+        parser.error("--ema-updates must be 0 (off) or at least 1")
     if args.distill_max_resident_rows <= 0 or (args.distill_stream and args.distill_max_resident_rows < args.distill_batch):
         parser.error("--distill-max-resident-rows must be positive and fit --distill-batch for a stream")
     return args
@@ -488,6 +505,9 @@ def main():
             controller.load_state_dict(state["entropy_controller"])
         elapsed_before, update, battles, samples_total = state["elapsed"], state["update"], state["battles"], state["samples"]
         rng.bit_generator.state = state["numpy_rng"]
+    average = WeightAverage(model, args.ema_updates) if args.ema_updates > 0 else None
+    if average is not None and state.get("ema") is not None:
+        average.load_state_dict(state["ema"])  # else it starts from the resumed weights
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "config.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=1))
     n_params = sum(p.numel() for p in model.parameters())
@@ -513,6 +533,7 @@ def main():
     next_snapshot = ((int(elapsed_before // snapshot_seconds) + (1 if elapsed_before else 0)) * snapshot_seconds
                      if math.isfinite(snapshot_seconds) else math.inf)
     loaded = {"snapshot": None}  # id of the snapshot in the actors' opponent weights
+    critic_optimizer = None  # --critic-warmup-updates (a run resumed during the warm-up starts it afresh)
 
     def checkpoint(elapsed):
         save(args.output / "latest.pt", {
@@ -520,7 +541,12 @@ def main():
             "entropy_controller": controller.state_dict() if controller is not None else None, "elapsed": elapsed,
             "update": update, "battles": battles, "samples": samples_total, "numpy_rng": rng.bit_generator.state,
             "width": args.width, "layers": args.layers,
-            **({"distill_stream": distill.state_dict()} if isinstance(distill, DistillStream) else {})})
+            **({"distill_stream": distill.state_dict()} if isinstance(distill, DistillStream) else {}),
+            **({"ema": average.state_dict()} if average is not None else {})})
+        if average is not None:
+            save(args.output / "ema" / "latest.pt", {"model": average.state_dict(), "width": args.width,
+                                                     "layers": args.layers, "minutes": elapsed / 60, "update": update,
+                                                     "ema_updates": args.ema_updates})
         if isinstance(distill, DistillStream):
             distill.archive_used()
 
@@ -558,9 +584,15 @@ def main():
             if (args.output / "STOP").exists() or elapsed >= stop:
                 break
             if elapsed >= next_snapshot:
-                save(args.output / "snapshots" / f"m{int(round(next_snapshot / 60)):03d}.pt",
+                name = f"m{int(round(next_snapshot / 60)):03d}.pt"
+                save(args.output / "snapshots" / name,
                      {"model": cpu_state(model), "width": args.width, "layers": args.layers, "minutes": elapsed / 60,
                       "battles": battles, "update": update})
+                if average is not None:
+                    save(args.output / "ema" / name,
+                         {"model": average.state_dict(), "width": args.width, "layers": args.layers,
+                          "minutes": elapsed / 60, "battles": battles, "update": update,
+                          "ema_updates": args.ema_updates})
                 next_snapshot += args.snapshot_minutes * 60
             # The actors fill the other buffer with the current weights while the GPU trains on this one.
             collected, collected_info = rollout, info
@@ -576,6 +608,14 @@ def main():
             info = launch(actors, 1 - current, elapsed)
             progress = schedule_progress(args, elapsed)
             optimizer.lr = args.lr * (1 - (1 - args.lr_final) * progress)
+            # Critic warm-up: the critic heads step with their own Adam, so the main optimizer's step count (and with
+            # it the bias correction of the policy's fresh moments) starts when the policy starts learning.
+            warming = update + 1 <= args.critic_warmup_updates
+            if warming and critic_optimizer is None:
+                critic_optimizer = Adam([p for name, p in model.named_parameters() if name.startswith(CRITIC_PREFIXES)],
+                                        lr=optimizer.lr)
+            if critic_optimizer is not None:
+                critic_optimizer.lr = optimizer.lr
             if controller is not None:
                 entropy_coef = controller.coef
             else:
@@ -584,9 +624,12 @@ def main():
             distill_coef = distill_coefficient(args, elapsed)
             t1 = time.perf_counter()
             model.train()
-            stats, samples = ppo_update(model, optimizer, actors.buffers[current].arrays, args, rng, entropy_coef, device,
-                                        teacher_coef, distill, distill_coef, elapsed, update=update + 1)
+            stats, samples = ppo_update(model, critic_optimizer if warming else optimizer, actors.buffers[current].arrays,
+                                        args, rng, entropy_coef, device, teacher_coef, distill, distill_coef, elapsed,
+                                        update=update + 1)
             train_seconds = time.perf_counter() - t1
+            if average is not None:
+                average.update(model)
             if controller is not None:
                 controller.update(stats["entropy"], progress)
             behaviour = usage(actors.buffers[current].arrays)  # the actors are filling the other buffer

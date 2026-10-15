@@ -819,6 +819,24 @@ well under the 2.8-3.3 s GPU update, so updates did not get slower (3.31 -> 2.85
 an update has ~10% fewer PPO rows). The learner scored 24.3% against the search opponent over 4564 games. Labels: ~680
 per update, about ten times the Mac label maker's rate.
 
+## Weight averaging and copying into a bigger model (2026-10-14/15, Windows)
+
+`--ema-updates N` keeps an exponential moving average of the weights (decay `1 - 1/N` per update,
+`training.ppo.WeightAverage`), stored in `latest.pt` (restored on resume) and written as `OUTPUT/ema/mNNN.pt` beside
+every snapshot and as `OUTPUT/ema/latest.pt`. Evaluate and deploy the `ema/` files: late in a run the raw snapshots are
+noisy points around a better policy. Measured by hand-averaging snapshots of one run (192x4 m535 copied into 256x6,
+then PPO): every single snapshot after the third hour scored 47-49.5% against m535, the plain average of 28 snapshots
+spanning ~9 hours (~2,700 updates) 53.0% [51.6, 54.5] over 4,000 games, with +3.75 points against smart and +1.95
+against the heuristic (paired). Averages of only the last 4-5 hours were level with m535. An EMA's time constant is
+about half a uniform window's length, so N ~ 1,000-1,500 updates matches that window.
+
+`--critic-warmup-updates N` trains only the value head, `partner_proj` and the hidden-information heads for the
+run's first N updates. It is for a model copied by imitation (`scratch/size-test/kickstart.py`: m535's policy on
+1.9M stored label positions, 101 minutes for 256x6), whose value and hidden-information heads cannot be copied (the
+label shards lack the opponent's team those heads read). Expect ~100 faster-moving updates right after the warm-up:
+Adam's step count kept running, so its second-moment bias correction is too small for the newly trained weights.
+Report: `scratch/reports/size-test/`.
+
 ## Not implemented yet
 
 - Left/right slot-swap augmentation, exploiter agents, R-NaD, and network surgery when the model grows.
