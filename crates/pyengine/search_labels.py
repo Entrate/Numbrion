@@ -262,6 +262,9 @@ def main() -> None:
     source.add_argument("--checkpoint", type=Path)
     source.add_argument("--follow", type=Path, help="directory of trainer checkpoints")
     parser.add_argument("--reload-minutes", type=float, default=20.0)
+    parser.add_argument("--value-checkpoint", type=Path, default=None,
+                        help="the search's leaf values (and so the labels' q/value) from this checkpoint (any size) "
+                             "instead of the teacher's own value head")
     parser.add_argument("--search", default="{}", help="SearchConfig JSON")
     parser.add_argument("--pool", default=str(REPO / "data/teams/train-s42-2000.txt"), help="teams of the games")
     parser.add_argument("--set-pool", default=str(REPO / "data/teams/pool-s1-200k.txt.gz"), help="world builder pool")
@@ -310,7 +313,9 @@ def _generate(args) -> dict:
         if getattr(local, "version", None) != version.version:
             local.bots = [SearchBot(name=f"label{s}", checkpoint=str(version.path), search=search,
                                     pools=[args.set_pool], device=args.device,
-                                    policy_temperature=args.policy_temperature) for s in (0, 1)]
+                                    policy_temperature=args.policy_temperature,
+                                    value_checkpoint=str(args.value_checkpoint) if args.value_checkpoint else None)
+                          for s in (0, 1)]
             local.version = version.version
             for side, bot in enumerate(local.bots):
                 bot.rng = np.random.default_rng([args.seed, threading.get_ident() % (1 << 31), side])
