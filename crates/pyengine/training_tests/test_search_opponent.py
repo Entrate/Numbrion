@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
+import pytest
 import torch
 
 import numbrion as nb
@@ -79,20 +80,25 @@ def test_search_opponent_plays_legal_pairs_and_writes_valid_labels(tmp_path):
         actions[~needs] = -1
         result = env.step(actions)
         assert not result["illegal"].any()
+        opponent.end_step(result["done"], result["winner"], result["aborted"])
         encoder.encode_env(env)
-    opponent.labels.flush()
+    opponent.close()
     assert opponent.stats["searched"] > 50
     assert opponent.stats["swapped"] > 100 and opponent.stats["unswapped"] == 0
     files = sorted(tmp_path.glob("labels-*.npz"))
     assert files and sum(len(np.load(f)["x"]) for f in files) == opponent.labels.written == opponent.stats["searched"]
     for f in files:
         raw = dict(np.load(f))
-        assert float(raw["teacher_minutes"]) == 2.0
+        assert float(raw["teacher_minutes"]) == 2.0 and str(raw["teacher"]) == "selfplay-search"
+        assert {"partner_ids", "partner_floats", "foe_match", "outcome", "remaining_steps"} <= set(raw)
+        DistillStream._inspect(f)
         DistillStream._validate_rows(raw)
     assert DistillData([tmp_path], torch.device("cpu"), pairs=4).size == opponent.labels.written
 
 
-def test_hide_bench_replaces_only_the_unseen_pokemon():
+@pytest.mark.parametrize("side", [1, 0])
+def test_hide_bench_replaces_only_the_unseen_pokemon(side):
+    """``side`` searches: the other side's never-seen Pokemon get pool sets (shallow_labels.py searches both)."""
     env = nb.BatchEnv(4, [str(POOL)], seed=21, threads=1, log=True)
     env.reset()
     rng = np.random.default_rng(0)
@@ -102,11 +108,11 @@ def test_hide_bench_replaces_only_the_unseen_pokemon():
     changed = 0
     for e in range(4):
         battle = env.clone_battle(e)
-        hidden = battle.hidden_team_indices(1)
-        before = battle.teams[0].split("]")
-        opponent.hide_bench(battle)
-        after = battle.teams[0].split("]")
-        assert battle.hidden_team_indices(1) == hidden
+        hidden = battle.hidden_team_indices(side)
+        before = battle.teams[1 - side].split("]")
+        opponent.hide_bench(battle, side)
+        after = battle.teams[1 - side].split("]")
+        assert battle.hidden_team_indices(side) == hidden
         for i in range(6):
             if i in hidden:
                 changed += after[i] != before[i]
@@ -114,6 +120,6 @@ def test_hide_bench_replaces_only_the_unseen_pokemon():
                 assert after[i] == before[i]
         keys = [_base(s.split("|")[0] or s.split("|")[1]) for s in after]
         assert len(set(keys)) == 6
-        shown = [_base(p["details"].split(",")[0]) for p in json.loads(battle.request_json(0))["side"]["pokemon"]]
+        shown = [_base(p["details"].split(",")[0]) for p in json.loads(battle.request_json(1 - side))["side"]["pokemon"]]
         assert sorted(keys) == sorted(shown)  # the request (the learner's view of the copy) has the new bench
     assert changed >= 8

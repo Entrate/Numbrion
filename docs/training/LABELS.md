@@ -42,21 +42,40 @@ full-search shards (48k positions). Strength: compare.py vs m535, policy only, T
 - Evaluation note: with a constant lr, validation loss was too noisy for early stopping (it stopped the large runs
   ~1-2 points early); the cosine schedule with final weights fixed that.
 
-## Next: a label-only generator
+## The label-only generator: shallow_labels.py (2026-10-15, Mac)
 
-The shallow search only runs inside PPO training today (`training/search_opponent.py` in the actors, ~125 labels/s
-on Windows with 20% search games, the actors mostly waiting for the learner). The plan is a driver without PPO:
+`crates/pyengine/shallow_labels.py` runs `training.actors.Actors` with every env a `SEARCH` env and no learning
+step. Both sides of every battle search (`Actors(search_both=True)`) with the teacher's candidates and priors, so one
+battle gives two sides' labels. Each side's search hides the other side's unseen bench with pool sets. With
+probability `--explore` (default 0.25, as in search_labels.py) a side plays a pair sampled from the teacher policy
+at temperature 1 instead of the search's pick. That keeps the positions varied, and the label is still the search's
+strategy. `--value-checkpoint` gives the leaf values from a separate fixed net of any size. Each actor loads it
+once, and it never needs a weight sync. The actors run on the CPU, one torch thread each, at `--nice 10`.
 
-- `shallow_labels.py`: `training.actors.Actors` with every env a `SEARCH` env and no learning step. Both weight slots
-  hold the teacher; side 1 plays the teacher policy (sampled, which also varies the positions), side 2 the shallow
-  search, whose decisions the actors already write as label shards (`search_labels=`). Options: workers, envs,
-  minutes or a label target, low priority, `--follow DIR` to reload the newest teacher between rollouts.
-- CPU only, so the GPU can train a student on the growing set at the same time (`train_labels.py` streams).
-- Disk: about 0.86 KB per label (10M labels ~ 9 GB).
-- Pilot first: labels per second with 1..N workers.
+    .venv/bin/python crates/pyengine/shallow_labels.py --checkpoint scratch/label-student/c128-all.pt \
+        --value-checkpoint scratch/play-runtime/models/distill-run1/m535.pt \
+        --workers 7 --envs 168 --minutes 600 --out scratch/gen1/shallow-labels-c128-m535v
+
+- Rows have search_labels.py's format, so distill_train.py and `training.distill` read them as they are. The
+  partner arrays come from the env's other encoder row, the opponent's own view (`train_selfplay.partner_view`).
+  A row waits until its battle ends. Then `outcome` is +1/-1/0 from the labelled side, and `remaining_steps`
+  counts every boundary of the env up to the terminal transition, forced switches and waits included, as GAE
+  counts them. Rows of battles still running at shutdown, or of a battle an engine panic aborted, are written
+  capped (NaN / -1). They keep their policy target and get no value target.
+- Stop with `--minutes`, `--labels` (finished rows), or `touch <out>/STOP`. Each stops after the current
+  `--steps` rollout. `--follow DIR` reloads the newest teacher of DIR between rollouts, and the value net stays
+  fixed. A status line every `--status-seconds` reports labels/s, pending rows, disk, actor cores and RSS. It also
+  goes to `<out>/status.jsonl`.
+- train_selfplay's `--search-fraction` opponent uses the same code with side 2 only and no exploration. Its labels
+  now carry the value fields too, and its rollouts are bit-identical to before (same buffer hash).
+- Pilot on the M1 Pro (8 cores), c128-all + m535 values, both sides, 7 workers x 24 envs: ~1,180 labels/s, about
+  6.2-6.7 cores busy, ~720 MB RSS per actor, 885 bytes per label. 6 workers (side-2 mode) gave ~1,080 labels/s.
+  The search's top pair differed from the policy's top pair in 34% of rows. Value vs final outcome correlated at
+  0.61 (0.95 within 3 steps of the end, 0.35 at 10-30 steps).
+- 10 hours is about 42M labels and 37 GB. `scratch/gen1/shallow-labels.sh` caps the run at 45M labels.
 - **Fair information:** the shallow search knows the unrevealed moves, item, ability, Tera type and stats of the
-  opponent Pokemon it has seen (the unseen bench is resampled). A `--fair` mode should build those sets from what
-  was seen, as the full search does (~25-35 ms instead of ~4-5 ms per decision); pilot both. See
+  opponent Pokemon it has seen. Only the unseen bench is resampled. A `--fair` mode would build those sets from
+  what was seen, as the full search does, at ~25-35 ms instead of ~4-5 ms per decision. See
   [SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md).
 
 Then: millions of labels -> a fresh student over several passes -> compare vs m535 and the 256x6 average; if it wins,
