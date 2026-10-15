@@ -19,6 +19,7 @@ See [continuous search distillation](DISTILL-LOOP.md) for the Mac label maker, r
 | duplicate evaluation | `evaluate.py` |
 | keep/drop comparison of two checkpoints (fixed seeds, panel, per-pair results) | `compare.py` |
 | scripted "smart" baseline | `training/smart.py` |
+| gradient noise scale and the automatic learning rate | `training/noise.py`, `noise_scale.py`, `lr_harness.py` |
 | tests | `training_tests/test_selfplay.py`, `training_tests/test_smart.py` |
 
 Paths are relative to `crates/pyengine` except the tools and data.
@@ -836,6 +837,132 @@ run's first N updates. It is for a model copied by imitation (`scratch/size-test
 label shards lack the opponent's team those heads read). Expect ~100 faster-moving updates right after the warm-up:
 Adam's step count kept running, so its second-moment bias correction is too small for the newly trained weights.
 Report: `scratch/reports/size-test/`.
+
+## Noise scale and automatic learning rate (2026-10-15, Mac)
+
+Self-play PPO plateaus near m535. The gradient noise scale `B_noise = tr(Sigma) / |G|^2` (McCandlish et al. 2018,
+"An Empirical Model of Large-Batch Training") is the batch size, in trained decisions, at which a gradient's noise
+equals its signal. Measured offline with `noise_scale.py` (80 rollouts each, jackknife errors):
+
+| checkpoint | policy-gradient B_noise | value | full loss |
+|---|---|---|---|
+| 128x3 at 10 min | 34k ± 2.5k | 663 | 6.1k |
+| 128x3 at 60 min | 37k ± 2.7k | 977 | 12k |
+| m535 (192x4, long-trained) | 308k ± 32k | 265 | 8.0k |
+| 256x6 plateau average | 211k ± 28k | 1.9k | 51k |
+
+An optimizer step uses a 1,024-row minibatch (two epochs over a ~7k-row rollout), so at m535 a step is ~0.3% signal.
+The learning rate falls only 1.5-3x over a run while `B_noise` grows ~9x: late training is too "hot", and snapshots
+jitter around a better point (the weight average above). The plan is to lower the step temperature (learning rate
+over batch size) as `B_noise` grows, always with `--ema-updates`. This section is the infrastructure; the settings
+are not tuned yet and every default is off.
+
+**Online estimate** (`--noise-scale`, implied by `--auto-lr`; `training.noise`). Every `--noise-every` (4) updates,
+a probe pass before the update's first step takes the gradient of the unclipped PPO surrogate alone
+(`train_selfplay.policy_surrogate`, the importance-weighted policy gradient; no critic or auxiliary heads) on chunks
+of `--minibatch` trained rows. The value and auxiliary gradients would swamp it: at m535 the full loss's `|G|^2` is
+~40x the policy loss's. With `m` chunk gradients of `b = 1,024` rows (`B = m b`, ~6-7k rows) the update gives
+unbiased estimates of `|G|^2` and `tr(Sigma)` (formulas in `training/noise.py`); both get a bias-corrected EMA over
+`--noise-ema` (50) measurements and are divided: `noise_b` in the metrics, with `noise_g2`, `noise_trace` and
+`noise_measured`. `noise_b_update` is one update's own ratio: at m535 the rollout is ~2% of `B_noise`, so one
+update's `|G|^2` is mostly noise and often negative (`noise_b_update` null); only the smoothed value is usable.
+The probe changes neither the weights nor the trainer's random stream (tested bit for bit), and it is skipped during
+the critic warm-up.
+
+Three things found while building it (2026-10-15, 2-minute continuations of the 10-minute 128x3 snapshot, offline
+`B_noise` 34k-39k, `|G|^2` 0.011-0.013, `tr(Sigma)` 435-440):
+
+- **Measure at the weight average, not the raw weights.** At the raw training weights the signal depends on the
+  learning rate: `|G|^2` was 0.07-0.09 at lr 3e-4 (`noise_b` ~5k) and 0.009-0.012 at lr 3e-5 (`noise_b` 36k-53k,
+  like offline), with the same trace. The weights jitter around the mean point by an amount set by the step size,
+  and the true gradient at a jittered point is larger. A rule fed by that would be a positive feedback loop (a lower
+  lr raises `noise_b`, which lowers the lr). With `--ema-updates` the probe runs on a copy holding the weight
+  average (`--noise-weights average`, the default then): `|G|^2` 0.017-0.021 at lr 3e-4 (`noise_b` 21k-28k) and
+  0.011-0.015 at lr 3e-5 (30k-42k). `--auto-lr` therefore requires `--ema-updates` (or an explicit `--noise-weights
+  raw`). Some coupling remains (~1.4x over a 10x lr change with `--ema-updates 20`; a longer average should leave
+  less).
+- **Chunks keep each env together.** A battle's decisions share its outcome, and self-play puts both sides in the
+  same env, so random-row chunks could understate the noise of the rollout's mean and inflate the one-update
+  `|G|^2`. `env_chunks` orders the trained rows by env and step and cuts equal chunks (one shape for DirectML), so
+  chunks hold whole envs except at the cuts and `tr(Sigma)` is the effective per-row noise of a rollout. At the
+  frozen 10-minute snapshot this made no measurable difference (`noise_scale.py --grouping env`: trace 421, random
+  rows 440, 10 rollouts each), so the design effect is small there; it is kept because it costs nothing.
+- **Pairing two updates' mean gradients does not work.** `G_t . G_{t-1}` came out negative: the update between
+  them stepped along the first rollout's noise, and the true gradient at the new weights points partly back.
+
+Overhead (MPS, M1 Pro, timings noisy: other jobs shared the machine): the probe pass adds ~40% to a measured update
+(`learner_bench.py --noise`, one 6,861-row rollout: 128x3 3.52 s -> 4.86 s, 192x4 5.93 s -> 8.30 s; the probe
+runs eagerly under `--compile`). In the trainer
+(128x3, `--ema-updates 5`, interleaved 45-second runs) measured updates took +1.1-1.2 s and the mean update rose from
+3.49-3.50 s to 3.70-3.82 s: ~8% at the default `--noise-every 4`, ~4% at 8. The weight-average copy is one
+`load_state_dict` per measurement.
+
+**Gradient clipping and Adam.** The estimate uses the raw, unclipped gradient. At m535 one minibatch's policy
+gradient alone has norm ~`sqrt(tr(Sigma) / 1024)` ~ 1.1, above `--max-grad-norm 0.5` (the full loss's is ~1.2), so
+nearly every step clips. With Adam that changes little: clipping scales the whole gradient by one
+number, and `m / sqrt(v)` is nearly scale-free, so the step size per weight is set by the learning rate, while the
+clip mainly reweights minibatches by `1 / norm`. The defaults (0.5, Adam) are unchanged.
+
+**The rule** (`--auto-lr`, `training.noise.LrRule`). After every measured update the factor moves toward
+`clamp((B_ref / noise_b) ** --auto-lr-power, --auto-lr-min, 1)`, by at most a factor `1 + --auto-lr-max-change`
+either way (a non-positive smoothed `|G|^2` counts as `B_noise = inf`, so the target is the floor). `B_ref` is
+`--auto-lr-bref` or the smoothed `noise_b` after `--auto-lr-warmup` measured updates (200 updates at the defaults);
+until then the factor is 1.
+The factor never raises the learning rate above the schedule.
+
+| flag | default | |
+|---|---|---|
+| `--noise-scale` | off | measure and log `noise_b` |
+| `--noise-every` | 4 | measure every K-th update |
+| `--noise-weights` | `average` with `--ema-updates`, else `raw` | weights the probe measures at |
+| `--noise-ema` | 50 | EMA time constant, measured updates |
+| `--auto-lr` | off | the rule (turns on `--noise-scale`; needs `--ema-updates`) |
+| `--auto-lr-mode` | `lr` | `lr`: scale the learning rate; `accumulate`: scale the batch |
+| `--auto-lr-power` | 0.5 | 0.5: Adam's square-root rule; 1: the linear rule (SGD, McCandlish) |
+| `--auto-lr-min` | 0.1 | floor of the factor |
+| `--auto-lr-max-change` | 0.02 | largest relative change per measured update |
+| `--auto-lr-bref` | measured | reference noise scale in rows |
+| `--auto-lr-warmup` | 50 | measured updates before `B_ref` is taken |
+
+Interplay: the learning rate is `--lr` x the linear schedule (`--lr-final` over `--schedule-minutes`) x the factor;
+`--lr-final 1` leaves the rule alone in charge. The factor is applied from the update after the measurement, to the
+critic warm-up's optimizer too. `--auto-lr-mode accumulate` keeps the scheduled learning rate and sums
+`round(1 / factor)` minibatch gradients (their mean) per optimizer step instead (a bigger batch, fewer steps, the
+same compute); the last step of an update takes what is left. A run resumed from `latest.pt` keeps the EMAs, the
+factor and `B_ref` (keys `noise_scale` and `lr_rule`); a given `--auto-lr-bref` overrides the saved one, and a saved
+factor of the other mode is dropped. `--ema-updates` counts PPO updates, not optimizer steps. A run started from a
+long-trained model takes `B_ref` from that model, so its factor starts at 1; give `--auto-lr-bref` (e.g. 37,000, the
+60-minute 128x3 value) to start lower.
+
+Metrics with the rule: `lr` (after the factor), `lr_factor`, `lr_b_ref`, `accumulate`.
+
+**Offline measurement**: `noise_scale.py --checkpoint CKPT --out OUT.json --rollouts 80` (from `crates/pyengine`;
+~6 minutes for 192x4 on the Mac) plays rollouts with the checkpoint frozen and reports `B_noise`, `|G|^2` and
+`tr(Sigma)` with jackknife errors for the policy, value and full losses (the table above). `--grouping env` draws
+the small batches as whole envs, like the trainer's probe (the table used random rows).
+
+**Tuning harness**: `lr_harness.py` continues one checkpoint for `--minutes` under several configurations from the
+same start (default A: `--lr {lr}`, the current schedule; B: `--lr {lr*0.25}` + EMA; C: `--lr {lr*0.1}` + EMA; D:
+`--lr {lr} --auto-lr` + EMA) and scores each run's final (EMA) weights against the start with `compare.py`
+(`DIR/summary.md`). A `latest.pt` resumes with its optimizer, pool and entropy controller; a snapshot such as
+`m535.pt` starts with a fresh Adam and an empty pool. Put the original run's settings (entropy targets, pool,
+teacher or distillation flags) in `--common`. A 192x4 tuning round, one hour per configuration:
+
+```sh
+cd crates/pyengine
+../../.venv/bin/python lr_harness.py --checkpoint /path/to/m535.pt --minutes 60 --out ../../scratch/auto-lr/round1 \
+    --lr 1e-4 --ema 150 --common "--lr-final 1" --compare-args "--h2h-rounds 40 --panel-rounds 20"
+```
+
+The dry run (1-minute runs from the 10-minute 128x3 control snapshot, a few games per matchup) took ~5 minutes, and a
+rerun after deleting `D/` retrained only D and reused the rest (80 s):
+`--minutes 1 --ema 5 --common "--noise-ema 5 --auto-lr-warmup 3" --compare-args "--envs 4 --h2h-rounds 1
+--panel-rounds 1 --temperatures 0.5 --workers 2"`.
+
+Tests: `training_tests/test_noise.py` (the estimator on least squares with a known noise scale; correlated rows bias
+random chunks but not env chunks; the rule's arithmetic and clamping; the update with the flags off bit-identical to
+the trainer before them (commit 643c385); measuring leaves the update unchanged; the probe surrogate equals
+`ppo_loss`'s policy term without the clip; accumulation; a trainer run resumed with the rule's state).
 
 ## Not implemented yet
 
