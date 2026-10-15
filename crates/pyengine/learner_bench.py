@@ -158,6 +158,7 @@ def main():
     args = parser.parse_args()
     # The PPO settings ppo_update reads, at the trainer's defaults.
     args.gamma, args.lam, args.clip, args.value_coef, args.aux_coef, args.max_grad_norm = 0.995, 0.95, 0.2, 0.5, 0.03, 0.5
+    args.tera_entropy_weight = 0.0
     if args.collect:
         collect(args)
     else:
