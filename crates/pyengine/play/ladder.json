@@ -5,11 +5,12 @@
   "credentials": null,
   "bot": {
     "factory": "training.search:SearchBot",
-    "checkpoint": "scratch/training/teacher-s43-4h/snapshots/m240.pt",
+    "checkpoint": "scratch/size-test/best-avg-256x6-m210-m750.pt",
     "search": {"ours": 12, "theirs": 8, "seeds": 2, "max_worlds": 32, "particles": 8, "threads": 4,
                "seed": 20261012},
     "device": "cpu",
     "torch_threads": 4,
+    "cell_ms": 1.0,
     "policy_temperature": 0.5,
     "pools": ["data/teams/pool-s1-200k.txt.gz", "data/teams/pool-s2-200k.txt.gz", "data/teams/pool-s3-200k.txt.gz"]
   },

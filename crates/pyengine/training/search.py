@@ -384,7 +384,7 @@ class SearchBot(Bot):
 
     def __init__(self, name: str = "Numbrion", checkpoint: str = "", search: dict | bool | None = None,
                  pools: list | None = None, device: str = "auto", policy_temperature: float = 0.5,
-                 torch_threads: int | None = None, **_):
+                 torch_threads: int | None = None, cell_ms: float = 0.3, **_):
         self.name = name
         self.dex = load_dex()
         if torch_threads:
@@ -400,7 +400,8 @@ class SearchBot(Bot):
         self._local = threading.local()
         self.rng = np.random.default_rng(self.search.seed if self.search else 0)
         # Running cost estimates for budgeted decisions: ms per simulated cell, and ms per decision outside cells.
-        self.cell_ms, self.fixed_ms = 0.3, 60.0
+        # ``cell_ms`` is the starting guess (0.3 fits 128x3; larger nets cost more until the first decisions measure).
+        self.cell_ms, self.fixed_ms = cell_ms, 60.0
 
     def config_for(self, budget_ms: float | None) -> "SearchConfig":
         """The search config with as many worlds as fit ``budget_ms`` (at least 2, at most ``max_worlds``)."""
