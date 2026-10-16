@@ -102,6 +102,32 @@ is reported as `unknown`, not as a loss; a disconnect never counts as a result.
   what the sampled worlds inferred) and its timing (receipt, queue, compute, pacing, send), refusals, fallbacks,
   timer and rating lines, the end. Written and flushed event by event, compressed when the battle is over.
 
+For diagnostic runs, add `"record": {"dir": "scratch/ladder/records"}` to the config. It is off by default.
+This enables `analysis.search_record` on search decisions, in both the ordinary battle logs and
+`<record.dir>/<run_id>/<room>.jsonl`. The extra files append across restarts and flush every event. A bounded
+background queue keeps disk I/O off the decision thread; capture/write errors and dropped events are logged.
+Each room file contains timestamped raw messages, `request_received` events for every request (including waits),
+dispatched requests, full decision analysis/timing, late decisions, and the result in the `end` event.
+
+`search_record` version 1 preserves matrix order, unlike the sorted analysis summaries:
+
+* `pairs`, `choices`, `prior`, `x`, `q`: our action codes, Showdown choices, solver prior, final strategy and values.
+* `worlds`: equally weighted sampled worlds, each with its opponent `team` (species, moves, item, ability, tera),
+  opponent `pairs`, `choices`, readable `text`, `prior` and final strategy `y`.
+* Each world's `payoffs` is rows = our pairs, columns = opponent pairs, averaged over chance seeds, exactly as
+  passed to the solver. `q` is that matrix times `y`. Values are from our perspective, rounded to six decimals.
+* `sampled_valid` marks originally legal rows; `valid` is the solver mask after refused-choice retry substitution.
+  `counts` gives simulated cells per entry. A zero count distinguishes substituted rows from measured outcomes.
+
+No sampling, model calls or engine steps are added for recording. Policy/forced/fallback decisions retain their
+full analysis but have no search matrix. A deadline fallback's eventual search is saved as `late_decision`.
+
+For a detached runner, optionally set `"stop": {"file": "scratch/ladder/STOP"}` alongside the usual limits.
+Creating that file requests the same graceful stop as one Ctrl-C: cancel matchmaking, finish the current battle
+and collect its rating. Remove it before starting a new run. The supervisor exits when its child finishes.
+`--minutes` still counts from the original run start across supervisor restarts. Idle-sleep prevention is scoped
+to the processes; no persistent power settings are changed.
+
 `scratch/ladder/ladder.sqlite` has the derived tables `runs`, `battles`, `decisions`, `ratings`, `events` and
 `resources` for queries. The JSONL files are the complete record.
 

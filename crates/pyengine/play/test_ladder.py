@@ -870,3 +870,64 @@ def test_a_stale_not_searching_update_does_not_start_a_second_search(tmp_path):
             worker.shutdown()
             store.close()
     asyncio.run(scenario())
+
+
+def test_optional_battle_diagnostics_flush_append_and_failure(tmp_path, caplog):
+    import numpy as np
+    from play.recording import BattleRecorder
+
+    store = make_store(tmp_path)
+    directory = tmp_path / 'records'
+    recorder = BattleRecorder(directory, store.clean)
+    raw = '|request|' + json.dumps(request_body())
+    recorder.emit(ROOM, 'message', {'time': 12.5, 'text': raw})
+    recorder.emit(ROOM, 'request', {'text': json.dumps(request_body())})
+    recorder.emit(ROOM, 'decision', {'analysis': {'x': np.array([.123456789]), 'secret': PASSWORD}})
+    recorder.emit(ROOM, 'end', {'result': {'winner': 'NumbrionLadder'}})
+    recorder.close()
+    path = directory / (ROOM + '.jsonl')
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    assert [r['kind'] for r in rows] == ['message', 'request_received', 'request', 'decision', 'end']
+    assert rows[0]['t'] == 12.5 and rows[0]['text'] == raw
+    assert rows[1]['request'] == request_body()
+    assert rows[3]['analysis'] == {'x': [.123457], 'secret': '[redacted]'}
+    recorder = BattleRecorder(directory)
+    recorder.emit(ROOM, 'closed', {})
+    recorder.close()
+    assert len(path.read_text().splitlines()) == 6
+    broken = tmp_path / 'not-a-directory'
+    broken.write_text('file')
+    recorder = BattleRecorder(broken)
+    recorder.emit(ROOM, 'decision', {})
+    recorder.close()
+    assert 'Battle diagnostic write failed' in caplog.text
+    assert not store.failed.is_set()
+    store.close()
+
+
+def test_recording_is_opt_in_and_configures_search(tmp_path):
+    assert 'record_search' not in config()['bot']
+    cfg = config(record={'dir': str(tmp_path)})
+    assert cfg['bot']['record_search'] is True
+    assert cfg['record']['dir'] == str(tmp_path)
+    with pytest.raises(ladder.ConfigError, match='record needs'):
+        config(record={})
+
+
+def test_stop_file_finishes_current_battle(tmp_path):
+    stop = tmp_path / 'stop'
+    cfg = config(stop={"minutes": None, "games": None, "file": str(stop)})
+    store = make_store(tmp_path, cfg)
+    worker = BotWorker(cfg['bot'], DefaultBot(cfg['account']))
+    try:
+        client = LadderClient(worker, cfg, store)
+        client.games.add(ROOM)
+        client.check_limits()
+        assert not client.stop_requested
+        stop.touch()
+        client.check_limits()
+        assert client.stop_requested and not client.force_stop
+        assert ROOM in client.games
+    finally:
+        worker.shutdown()
+        store.close()

@@ -191,3 +191,36 @@ def test_deadlines_post_the_policy_fallback_and_cut_the_search(bot):
     assert state["checked"] >= 3 and state["out_of_time"] >= 1 and state["fallbacks_sent"] >= 1
     # Sending the fallback instead of the search's choice keeps the worlds alive.
     assert sources.count("search") >= len(sources) - state["out_of_time"] - 1, sources
+
+
+def test_search_diagnostics_match_solver_and_do_not_change_choice(bot):
+    from dataclasses import asdict
+
+    teams = [line.strip() for line in gzip.open(POOL, 'rt') if line.strip()][:2]
+    decisions = []
+    for record in (False, True):
+        frozen = SearchBot(checkpoint=str(bot.checkpoint), search=asdict(bot.search), pools=[str(POOL)],
+                           device='cpu', torch_threads=2, record_search=record)
+        battle = numbrion.Battle((11, 23, 5, 8), p1=teams[0], p2=teams[1], log=True)
+        battle.start()
+        player = frozen.new_player('diagnostic-test')
+        player.feed(battle.drain_player_log(0))
+        player.set_request(battle.request_json(0))
+        decision = player.decide()
+        decisions.append(decision)
+        player.close()
+    plain, recorded = decisions
+    assert plain.choice == recorded.choice
+    assert plain.analysis['candidates'] == recorded.analysis['candidates']
+    assert 'search_record' not in plain.analysis
+    detail = recorded.analysis['search_record']
+    assert len(detail['pairs']) == len(detail['choices']) == len(detail['x']) == len(detail['q'])
+    assert len(detail['worlds']) == recorded.analysis['worlds']
+    for world in detail['worlds']:
+        payoff = np.asarray(world['payoffs'])
+        assert payoff.shape == (len(detail['pairs']), len(world['pairs']))
+        assert len(world['prior']) == len(world['y']) == len(world['text']) == len(world['choices'])
+        assert np.allclose(payoff @ world['y'], world['q'], atol=3e-6)
+        assert len(world['team']) == 6
+        assert all(set(mon) == {'species', 'moves', 'ability', 'item', 'tera'} for mon in world['team'])
+    json.dumps(detail, allow_nan=False)
