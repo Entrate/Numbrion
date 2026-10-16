@@ -1,0 +1,7 @@
+{
+  "name": "1ply",
+  "search": {"ours": 12, "theirs": 8, "seeds": 2, "worlds": 32, "max_worlds": 32, "particles": 8, "threads": 4},
+  "device": "cpu",
+  "torch_threads": 4,
+  "policy_temperature": 0.5
+}
