@@ -39,6 +39,7 @@ from .guards import MoveGuards
 from .model import Model
 from .player import Bot, Decision, Player
 from .protocol import LineNormalizer, choice_text, codes_from_choice, request_mask, team_from_request
+from .search2_types import Depth2Config, Layer1, Stage
 
 N_ACTIONS = 47
 PASS = 46
@@ -67,10 +68,21 @@ class SearchConfig:
     threads: int = 4                # grid threads
     seed: int = 0
     max_worlds: int = 32            # budgeted decisions: budget_ms scales the worlds between 2 and this
+    depth2: Depth2Config | None = None  # the second layer (training/search2.py); None or enabled=False: off
+    # How the second layer picks among its survivors: "anchored" = the layer-1 strategy moved by the layer-2
+    # correction (log x1 + (Q2 - Q1) / anchor; a layer 2 that adds nothing keeps the layer-1 choice), "q" = argmax Q2.
+    depth2_pick: str = "anchored"
 
     @classmethod
     def from_dict(cls, values: dict | None) -> "SearchConfig":
         known = {k: v for k, v in (values or {}).items() if k in cls.__dataclass_fields__}
+        depth2 = known.get("depth2")
+        if depth2 is True:
+            known["depth2"] = Depth2Config(enabled=True)
+        elif depth2 is False:
+            known["depth2"] = None
+        elif isinstance(depth2, dict):
+            known["depth2"] = Depth2Config.from_dict(depth2)
         return cls(**known)
 
 
@@ -389,7 +401,7 @@ class SearchBot(Bot):
     def __init__(self, name: str = "Numbrion", checkpoint: str = "", search: dict | bool | None = None,
                  pools: list | None = None, device: str = "auto", policy_temperature: float = 0.5,
                  torch_threads: int | None = None, cell_ms: float = 0.3, value_checkpoint: str | None = None,
-                 **_):
+                 budget: dict | None = None, **_):
         self.name = name
         self.dex = load_dex()
         if torch_threads:
@@ -407,6 +419,17 @@ class SearchBot(Bot):
         # Running cost estimates for budgeted decisions: ms per simulated cell, and ms per decision outside cells.
         # ``cell_ms`` is the starting guess (0.3 fits 128x3; larger nets cost more until the first decisions measure).
         self.cell_ms, self.fixed_ms = cell_ms, 60.0
+        # Per-unit stage costs of the second layer (ms), for its deadline checks when there is no budget controller.
+        self.depth2_costs: dict = {}
+        # ``budget``: the per-decision time controller (training/search_budget.py; top-level ``budget`` of a bot
+        # config). None: config_for and the deadline alone, as before.
+        self.budget = None
+        if budget is not None:
+            try:
+                from .search_budget import BudgetController
+            except ImportError:  # the controller's branch has not landed: a minimal stand-in
+                from .search_budget_stub import BudgetController
+            self.budget = BudgetController.from_config(budget, self.net.width, self.net.layers, cell_ms)
 
     def config_for(self, budget_ms: float | None) -> "SearchConfig":
         """The search config with as many worlds as fit ``budget_ms`` (at least 2, at most ``max_worlds``)."""
@@ -443,6 +466,10 @@ class SearchBot(Bot):
             import numbrion
 
             local.grid = numbrion.SearchGrid(str(self.dex.path), self.search.threads if self.search else 1)
+        if not hasattr(local, "executor") and self.search is not None and self.search.depth2 is not None:
+            import numbrion
+
+            local.executor = numbrion.GridExecutor(self.search.threads)  # the second layer's expansion
         return local
 
     def warmup(self) -> None:
@@ -451,8 +478,10 @@ class SearchBot(Bot):
             _ = self.pool
             self.resources()
 
-    def new_player(self, room: str) -> Player:
-        return SearchPlayer(self, room)
+    def new_player(self, room: str, seed=None) -> Player:
+        """A player for one battle. With ``seed`` (an int or a sequence of ints) it draws its worlds and chance seeds
+        from its own generator, so fixed-size results do not depend on other players, threads or concurrency."""
+        return SearchPlayer(self, room, seed=seed)
 
     def describe(self) -> dict:
         return dict(name=self.name, checkpoint=str(self.checkpoint), width=self.net.width, layers=self.net.layers,
@@ -466,10 +495,13 @@ class SearchPlayer(Player):
     (training.protocol.team_from_request). ``mask_hint`` = (mask0, joint) may be set by an in-process driver that
     owns the battle, replacing the request-derived mask (debugging only)."""
 
-    def __init__(self, bot: SearchBot, room: str = "", team: str | None = None):
+    def __init__(self, bot: SearchBot, room: str = "", team: str | None = None, seed=None):
         super().__init__()
         self.bot, self.room = bot, room
         self.team = team
+        # Worlds, chance seeds and sampling draw from ``rng``: the player's own generator when seeded, else the
+        # bot's shared one (as before).
+        self.rng = np.random.default_rng(seed) if seed is not None else bot.rng
         self.battle = _Battle(bot.dex)
         self.builder = None
         self.builder_failed = ""
@@ -502,7 +534,7 @@ class SearchPlayer(Player):
         try:
             if team is None:
                 team = team_from_request(request, self.seen)
-            self.builder = WorldBuilder(side, team, self.bot.pool, seed=int(self.bot.rng.integers(1 << 62)),
+            self.builder = WorldBuilder(side, team, self.bot.pool, seed=int(self.rng.integers(1 << 62)),
                                         particles=self.bot.search.particles)
         except Exception as error:  # noqa: BLE001 - search is optional; the policy still plays
             self.builder_failed = f"world builder unavailable: {error}"
@@ -575,19 +607,30 @@ class SearchPlayer(Player):
             a0, a1 = map(int, legal[0])
             self.stats["forced"] += 1
             return self._finish(request, a0, a1, dict(source="policy", note="only one legal choice"), started)
-        cfg = self.bot.config_for(self.budget_ms) if self.bot.search else None
+        plan = None
+        if self.bot.search is not None and self.bot.budget is not None:
+            plan = self.bot.budget.plan(self.bot.search, self.bot.search.depth2, self.budget_ms, self.deadline,
+                                        time.monotonic())
+            cfg = replace(self.bot.search, worlds=int(plan.worlds))
+        else:
+            cfg = self.bot.config_for(self.budget_ms) if self.bot.search else None
         k = cfg.ours if cfg else 1
         first = cfg.first_codes if cfg else 47
+        stages = []
         t_root = time.perf_counter()
         (pairs, prior, full), = self.bot.net.candidates(arrays, np.array([side]), [(mask0, joint)], k=max(k, 1),
                                                        first=first, temperature=self.bot.policy_temperature)
-        self.stats["root_ms"] = self.stats.get("root_ms", 0.0) + (time.perf_counter() - t_root) * 1000
+        root_ms = (time.perf_counter() - t_root) * 1000
+        self.stats["root_ms"] = self.stats.get("root_ms", 0.0) + root_ms
+        stages.append(Stage("root_policy", 1, root_ms))
         policy = self._post_fallback(request, full)
         if cfg is None or self.builder is None:
             return self._policy(request, full, started, note=self.builder_failed or "search off")
+        if cfg.worlds < 1:
+            return self._policy(request, full, started, note="the budget left no time for search")
         t_worlds = time.perf_counter()
         try:
-            worlds = self.builder.worlds(cfg.worlds, int(self.bot.rng.integers(1 << 62)), log=True)
+            worlds = self.builder.worlds(cfg.worlds, int(self.rng.integers(1 << 62)), log=True)
         except RuntimeError as error:
             self.stats["no_worlds"] += 1
             return self._policy(request, full, started, note=f"no world: {str(error)[:120]}")
@@ -595,6 +638,7 @@ class SearchPlayer(Player):
             a0, a1 = map(int, pairs[0])
             return self._finish(request, a0, a1, dict(source="policy", note="one candidate"), started)
         worlds_ms = (time.perf_counter() - t_worlds) * 1000
+        stages.append(Stage("worlds", len(worlds), worlds_ms))
         requested = len(worlds)
         if self.deadline is not None:
             # Keep the worlds whose cells fit the time left (the bot's running cost per cell), or play the policy.
@@ -605,9 +649,10 @@ class SearchPlayer(Player):
                 self.stats["out_of_time"] = self.stats.get("out_of_time", 0) + 1
                 return self._policy(request, full, started, note="out of time after building the worlds")
             worlds = worlds[:fit]
-        result = run_search(self.bot, cfg, self.battle, side, worlds, pairs, full)
+        result = run_search(self.bot, cfg, self.battle, side, worlds, pairs, full, rng=self.rng)
         if result is None:
             return self._policy(request, full, started, note="no candidate is legal in the sampled worlds")
+        stages += result["stages"]
         result["timing"]["worlds_ms"] = round(worlds_ms, 1)
         for key, ms in result["timing"].items():
             self.stats[key] = self.stats.get(key, 0.0) + ms
@@ -616,7 +661,7 @@ class SearchPlayer(Player):
         x, q = result["x"], result["q"]
         self.last_search = dict(side=side, arrays=arrays, mask0=mask0, joint=joint, pairs=pairs, x=x, q=q, full=full)
         if cfg.play == "sample":
-            best = int(self.bot.rng.choice(len(x), p=x / x.sum()))
+            best = int(self.rng.choice(len(x), p=x / x.sum()))
         else:
             best = int(np.argmax(x))
         a0, a1 = map(int, pairs[best])
@@ -636,9 +681,60 @@ class SearchPlayer(Player):
             analysis["observed"], analysis["inferred"] = opponent_knowledge(self.builder.public_state(), worlds, side)
         except Exception as error:  # noqa: BLE001 - analysis only
             analysis["observed"] = {"error": repr(error)[:200]}
+        if cfg.depth2 is not None and cfg.depth2.enabled:
+            chosen = self._depth2(request, cfg, plan, result, best, analysis, stages, started)
+            if chosen != best:
+                best = chosen
+                a0, a1 = map(int, pairs[best])
+                analysis.update(value=round(float(q[best]), 4), win_probability=round(float((q[best] + 1) / 2), 3),
+                                agrees_with_policy=policy["choice"] == self._text(request, a0, a1))
         decision = self._finish(request, a0, a1, analysis, started)
         self.bot.observe_cost(result["timing"], result["cells"], analysis["time_ms"])
+        if self.bot.budget is not None:
+            self.bot.budget.observe(stages, analysis["time_ms"])
         return decision
+
+    def _depth2(self, request, cfg, plan, result, best: int, analysis: dict, stages: list, started) -> int:
+        """The second layer (training/search2.py) after the layer-1 choice ``best``: re-posts the driver fallback as
+        the layer-1 choice, deepens, and returns the pair to play (``best`` when layer 2 is skipped, stopped before
+        its first round, or fails). Adds the ``depth2`` analysis block and appends layer 2's ``stages``."""
+        from .search2 import deepen
+
+        cfg2 = cfg.depth2
+        layer1 = result["layer1"]
+        if self.bot.budget is not None and plan is not None:
+            cfg2 = self.bot.budget.plan_depth2(plan, layer1, time.monotonic())
+            if cfg2 is None or not cfg2.enabled:
+                analysis["depth2"] = dict(skipped="the budget planned no second layer", rounds=0, changed=False)
+                self.stats["depth2_skipped"] = self.stats.get("depth2_skipped", 0) + 1
+                return best
+        # The driver's fallback becomes the layer-1 choice: a second layer that runs late sends it, not the policy's.
+        a0, a1 = map(int, layer1.ours[best])
+        fallback = dict(analysis, note="the layer-1 search choice, sent when the second layer ran out of time",
+                        time_ms=round((time.perf_counter() - started) * 1000, 1))
+        self.fallback = (self.decision_token, Decision(self._text(request, a0, a1), a0, a1, fallback))
+        t = time.perf_counter()
+        try:
+            out = deepen(self.bot, cfg, cfg2, layer1, battle=self.battle, deadline=self.deadline, rng=self.rng,
+                         budget=self.bot.budget, describe=lambda b0, b1: self._text(request, b0, b1),
+                         pick=cfg.depth2_pick, costs=self.bot.depth2_costs)
+        except Exception as error:  # noqa: BLE001 - the layer-1 decision stands
+            analysis["depth2"] = dict(skipped=f"error: {error!r}"[:300], rounds=0, changed=False)
+            self.stats["depth2_errors"] = self.stats.get("depth2_errors", 0) + 1
+            return best
+        self.stats["depth2_ms"] = self.stats.get("depth2_ms", 0.0) + (time.perf_counter() - t) * 1000
+        if out is None:
+            analysis["depth2"] = dict(skipped="nothing to deepen", rounds=0, changed=False)
+            return best
+        stages += out["stages"]
+        analysis["depth2"] = out["analysis"]
+        self.stats["depth2"] = self.stats.get("depth2", 0) + 1
+        self.stats["depth2_cells"] = self.stats.get("depth2_cells", 0) + sum(out["cells"].values())
+        if out["chosen"] is None:
+            self.stats["depth2_skipped"] = self.stats.get("depth2_skipped", 0) + 1
+            return best
+        self.stats["depth2_changed"] = self.stats.get("depth2_changed", 0) + int(out["chosen"] != best)
+        return int(out["chosen"])
 
     def _post_fallback(self, request, full) -> dict:
         """The policy's most likely pair: posted as the driver's fallback for this decision (``fallback``), and kept
@@ -659,7 +755,7 @@ class SearchPlayer(Player):
         else:
             tempered = np.array([full[key][1] for key in keys])
             p = np.exp(tempered - tempered.max())
-            pick = int(self.bot.rng.choice(len(keys), p=p / p.sum()))
+            pick = int(self.rng.choice(len(keys), p=p / p.sum()))
         a0, a1 = keys[pick]
         top = sorted(full.items(), key=lambda kv: -kv[1][0])[:6]
         return self._finish(request, a0, a1, dict(
@@ -743,12 +839,32 @@ def opponent_knowledge(public: dict, worlds: list, side: int) -> tuple[list, dic
     return observed, inferred
 
 
+def grid_values(net: Net, out: dict, side: int) -> np.ndarray:
+    """Leaf values of a ``SearchGrid.run`` result from ``side``'s perspective: the value head from the side that acts
+    at the leaf (ours if we act), negated when it is the opponent's; ended battles +1/-1/0."""
+    n = len(out["ended"])
+    eval_side = out["eval_side"]
+    live = np.flatnonzero(eval_side >= 0)
+    values = np.zeros(n, dtype=np.float32)
+    if len(live):
+        arrays = {key: out[key][live] for key in ("ids", "floats", "field", "token_features")}
+        v = np.clip(net.values(arrays, out["partner_ids"][live], out["partner_floats"][live]), -1.0, 1.0)
+        values[live] = np.where(eval_side[live] == side, v, -v)
+    done = np.asarray(out["ended"], dtype=bool)
+    winner = out["winner"]
+    values[done] = np.where(winner[done] == side, 1.0, np.where(winner[done] < 0, 0.0, -1.0))
+    return values
+
+
 def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, worlds: list, ours: np.ndarray,
-               our_full: dict) -> dict:
-    """Steps 3-6 of the module docstring for one decision; returns the strategy and the analysis pieces."""
+               our_full: dict, rng: np.random.Generator | None = None) -> dict:
+    """Steps 3-6 of the module docstring for one decision; returns the strategy and the analysis pieces, plus
+    ``layer1`` (a ``search2_types.Layer1`` for the second layer), ``ys``, ``worlds`` and ``stages`` (measured
+    ``Stage`` costs). ``rng`` draws the chance seeds (default: the bot's)."""
     net = bot.net
     opp = 1 - side
     timing = {}
+    stages = []
     t0 = time.perf_counter()
     grid = bot.resources().grid
     states = (battle.encoder.snapshot(0), battle.encoder.snapshot(1))
@@ -764,18 +880,22 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
             prior = np.exp(logp - logp.max())
             their[k] = (pairs, prior / prior.sum())
     timing["opponent_ms"] = (time.perf_counter() - t0) * 1000
+    stages.append(Stage("opp_policy", len(acting), timing["opponent_ms"]))
     # Cells: (world, our pair, their pair, seed); one seed per (world, seed index), shared by all pairs.
     t1 = time.perf_counter()
     cells_world, cells_actions, cells_index, seeds = [], [], [], []
     valid = []
-    rng = bot.rng
+    world_seeds = []
+    rng = bot.rng if rng is None else rng
     for k, world in enumerate(worlds):
         world_mask = world.legal_mask(side)[1]
         ok = np.array([bool(world_mask[a, b]) for a, b in ours])
         valid.append(ok)
         opp_pairs = their[k][0] if their[k] is not None else np.full((1, 2), -1, dtype=np.int32)
+        world_seeds.append([])
         for s in range(cfg.seeds):
             seed = rng.integers(0, 1 << 16, size=4)
+            world_seeds[k].append(seed)
             for i, pair in enumerate(ours):
                 if not ok[i]:
                     continue
@@ -793,19 +913,12 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
     out = grid.run(worlds, np.stack(cells_actions), states, side, world=np.asarray(cells_world, dtype=np.int64),
                    seeds=np.stack(seeds).astype(np.int64))
     timing["grid_ms"] = (time.perf_counter() - t1) * 1000
+    stages.append(Stage("grid1", n, timing["grid_ms"]))
     # Leaf values: from the side that acts at the leaf (ours if we act), negated when it is the opponent's.
     t3 = time.perf_counter()
-    eval_side = out["eval_side"]
-    live = np.flatnonzero(eval_side >= 0)
-    values = np.zeros(n, dtype=np.float32)
-    if len(live):
-        arrays = {key: out[key][live] for key in ("ids", "floats", "field", "token_features")}
-        v = np.clip(net.values(arrays, out["partner_ids"][live], out["partner_floats"][live]), -1.0, 1.0)
-        values[live] = np.where(eval_side[live] == side, v, -v)
-    done = out["ended"]
-    winner = out["winner"]
-    values[done] = np.where(winner[done] == side, 1.0, np.where(winner[done] < 0, 0.0, -1.0))
+    values = grid_values(net, out, side)
     timing["value_ms"] = (time.perf_counter() - t3) * 1000
+    stages.append(Stage("value1", int((out["eval_side"] >= 0).sum()), timing["value_ms"]))
     # Payoffs.
     N = len(ours)
     payoffs = []
@@ -821,6 +934,7 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
     # A pair that some worlds forbid (a switch a possible Shadow Tag would block) gets refused there, and we choose
     # again: in those worlds it is worth our best allowed pair (against the opponent's prior). Pairs that no world
     # allows stay invalid and get no weight in solve.
+    legal = [v.copy() for v in valid]  # raw engine legality, before refusal imputation (for the second layer)
     somewhere = np.any(valid, axis=0)
     for k in range(len(worlds)):
         if valid[k].any() and not valid[k][somewhere].all():
@@ -855,4 +969,9 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
     for e in opponent:
         e["prior"], e["weight"] = round(e["prior"], 4), round(e["weight"], 4)
     timing = {k: round(v, 1) for k, v in timing.items()}
-    return dict(x=x, q=q, cells=n, opponent=opponent, timing=timing, payoffs=payoffs, valid=valid)
+    layer1 = Layer1(side=side, worlds=list(worlds), states=states, ours=np.asarray(ours), our_prior=our_prior,
+                    their=[t[0] if t is not None else None for t in their],
+                    their_prior=[t[1] if t is not None else None for t in their], legal=legal, payoffs=payoffs,
+                    x=x, ys=ys, q=q, seeds=[np.asarray(s, dtype=np.int64).reshape(-1, 4) for s in world_seeds])
+    return dict(x=x, q=q, cells=n, opponent=opponent, timing=timing, payoffs=payoffs, valid=valid, ys=ys,
+                worlds=worlds, layer1=layer1, stages=stages)
