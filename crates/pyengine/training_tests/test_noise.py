@@ -343,6 +343,36 @@ def test_policy_surrogate_is_ppo_loss_policy_term_without_the_clip(rollout):
     assert names and not any(n.startswith(train_selfplay.CRITIC_PREFIXES) for n in names)
 
 
+def test_policy_surrogate_without_old_logp_is_the_plain_policy_gradient(rollout):
+    """``old_logp`` None (the probe at the weight average): ratio 1, gradient of ``-mean(weight * log p)``."""
+    import train_selfplay
+    from train_selfplay import N_ACTIONS, OBS_KEYS
+
+    data, state = rollout
+    model = Model(load_dex(), width=32, layers=1)
+    model.load_state_dict(state)
+    rows = np.flatnonzero(data["train"].reshape(-1))[:40]
+    flat = lambda k, *shape: torch.from_numpy(np.ascontiguousarray(data[k].reshape(-1, *shape)[rows]))  # noqa: E731
+    batch = {k: flat(k, *data[k].shape[2:]) for k in OBS_KEYS}
+    a0, a1, mask0, mask1 = flat("a0"), flat("a1"), flat("mask0", N_ACTIONS), flat("mask1", N_ACTIONS)
+    torch.manual_seed(4)
+    weight = torch.randn(len(rows))
+    params = list(model.parameters())
+    surrogate = train_selfplay.policy_surrogate(model, batch, a0, a1, mask0, mask1, None, weight)
+    torch.testing.assert_close(surrogate.detach(), -weight.mean())
+    state_ = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
+    lp0, vectors0 = model.slot0(state_, mask0)
+    lp1 = model.slot1(state_, vectors0, a0, mask1)
+    logp = (lp0 * train_selfplay.onehot(a0)).sum(-1) + (lp1 * train_selfplay.onehot(a1)).sum(-1)
+    expected = torch.autograd.grad(-(weight * logp).mean(), params, allow_unused=True)
+    got = torch.autograd.grad(surrogate, params, allow_unused=True)
+    assert any(g is not None for g in got)
+    for g, e in zip(got, expected):
+        assert (g is None) == (e is None)
+        if g is not None:
+            torch.testing.assert_close(g, e)
+
+
 def test_no_probe_while_only_the_critic_learns(rollout):
     import train_selfplay
 

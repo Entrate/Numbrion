@@ -161,11 +161,14 @@ def ppo_loss(model, batch: dict, partner_ids, partner_floats, a0, a1, mask0, mas
 def policy_surrogate(model, batch: dict, a0, a1, mask0, mask1, old_logp, weight):
     """The unclipped PPO surrogate ``-mean(ratio * advantage)``, whose gradient is the importance-weighted policy
     gradient: ppo_loss's policy term without the clip, and without the critic and auxiliary heads (the noise-scale
-    probe differentiates it)."""
+    probe differentiates it). ``old_logp`` None takes ``model``'s own probabilities as the baseline (ratio 1, the
+    plain policy gradient ``-mean(advantage * grad log p)`` at ``model``'s weights)."""
     state = model.trunk(batch["ids"], batch["floats"], batch["field"], batch["action_features"], batch["token_features"])
     lp0, vectors0 = model.slot0(state, mask0)
     lp1 = model.slot1(state, vectors0, a0, mask1)
     new_logp = (lp0 * onehot(a0)).sum(-1) + (lp1 * onehot(a1)).sum(-1)
+    if old_logp is None:
+        old_logp = new_logp.detach()
     return -((new_logp - old_logp).exp() * weight).mean()
 
 
@@ -220,7 +223,9 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
     With ``noise`` (training.noise.GradientNoise), a probe pass before the first step adds to it the gradients of the
     unclipped PPO surrogate (the importance-weighted policy gradient) on chunks of ``--minibatch`` trained rows that
     keep each env's rows together (training.noise.env_chunks), taken at ``probe_model``'s weights (default:
-    ``model``'s; the trainer passes the weight average); it changes neither the weights nor ``rng``. Not during the
+    ``model``'s; the trainer passes the weight average, and there the probe drops the importance ratio to the
+    rollout policy: a lagging average makes those ratios spread, which inflated the trace and buried the signal);
+    it changes neither the weights nor ``rng``. Not during the
     critic warm-up. ``accumulate`` > 1 sums that many minibatch gradients (their
     mean) per optimizer step, the last step of the update taking what is left (``--auto-lr-mode accumulate``)."""
     steps, R = data["a0"].shape
@@ -319,7 +324,8 @@ def ppo_update(model, optimizer, data: dict, args, rng, entropy_coef: float, dev
                 chunk, index = up(chunk), up(index)
             surrogate = policy_surrogate(probe_model, {k: rows(k, index) for k in OBS_KEYS}, rows("a0", index),
                                          rows("a1", index), rows("mask0", index), rows("mask1", index),
-                                         rows("logp", index), weights[chunk] if resident else up(weights[chunk]))
+                                         rows("logp", index) if probe_model is model else None,
+                                         weights[chunk] if resident else up(weights[chunk]))
             noise.add(torch.autograd.grad(surrogate, probed, allow_unused=True), len(index))
 
     minibatch_index = summed = 0

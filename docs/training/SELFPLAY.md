@@ -880,7 +880,14 @@ Three things found while building it (2026-10-15, 2-minute continuations of the 
   average (`--noise-weights average`, the default then): `|G|^2` 0.017-0.021 at lr 3e-4 (`noise_b` 21k-28k) and
   0.011-0.015 at lr 3e-5 (30k-42k). `--auto-lr` therefore requires `--ema-updates` (or an explicit `--noise-weights
   raw`). Some coupling remains (~1.4x over a 10x lr change with `--ema-updates 20`; a longer average should leave
-  less).
+  less). At the average the probe drops the importance ratio to the rollout policy (ratio 1, the plain policy
+  gradient at the average's own probabilities): with `--ema-updates 150` at lr 1e-4 from m535 (Windows, 2026-10-15)
+  the average lags ~150 updates, the ratios spread, and the ratio probe's trace rose 1.6k -> 3.8k within an hour
+  while the smoothed `|G|^2` fell to zero or below (`noise_b` null). With ratio 1, from the same lagging state, the
+  trace was ~2.1k and `|G|^2` positive; at lr 1e-5 it read trace 1.3k-1.4k and `|G|^2` 0.004 (the frozen offline
+  values). It is a proxy, not an exact on-policy measurement of the average (actions and advantages still come from
+  the raw policy). A checkpoint whose saved noise state came from the ratio probe mixes the two for ~`--noise-ema`
+  measurements.
 - **Chunks keep each env together.** A battle's decisions share its outcome, and self-play puts both sides in the
   same env, so random-row chunks could understate the noise of the rollout's mean and inflate the one-update
   `|G|^2`. `env_chunks` orders the trained rows by env and step and cuts equal chunks (one shape for DirectML), so
