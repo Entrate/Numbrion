@@ -8,9 +8,8 @@ After layer 1 (``run_search``) we have our strategy x, each world's opponent str
    (draw c < layer-1 seeds reuses layer 1's seed of that world). Samples are nested, so a round only adds new ones.
 3. Replies per (world, candidate): the top ``theirs_top`` by y_k, plus ``danger`` replies with the lowest A1 among
    those with y_k >= ``danger_min``, plus (``threat_reply``) the most likely sleep-move reply (Spore, Yawn, ...) with
-   y_k >= ``danger_min`` when none of those uses one (whatever its weight when the move qualifies as a threat:
-   revealed, or in at least ``threat_min_worlds`` of the worlds): one ply cannot see what sleep costs, so A1 rarely
-   marks it.
+   y_k >= ``danger_min`` when none of those uses one: one ply cannot see what sleep costs, so A1 rarely marks it.
+   (Revealed or likely sleep threats reach the layer-1 replies through ``SearchConfig.threat_candidates``.)
 4. Expand (``expand``): every (world, candidate, reply, chance draw) cell is simulated to the next boundary, keeping
    the leaf battles, each side's leaf tracker (root tracker fed with that side's lines), requests, masks and policy
    inputs. Forced replacements are answered by the policy argmax and stepped through (``replacement_steps``), so
@@ -438,9 +437,9 @@ class _Deepen:
 
     def reply_set(self, k: int, i: int) -> list:
         """(j, danger) of the replies deepened in world k for our candidate i: the top ``theirs_top`` by y_k, the
-        ``danger`` lowest-A1 ones with y_k >= danger_min, and with ``threat_reply``: the likeliest reply using a
-        qualifying sleep move (revealed, or in at least threat_min_worlds of the worlds), whatever its weight, else
-        the likeliest other sleep reply with y_k >= danger_min, when none of the chosen replies uses one."""
+        ``danger`` lowest-A1 ones with y_k >= danger_min, and with ``threat_reply``: the likeliest sleep-move reply
+        with y_k >= danger_min, when none of the chosen replies uses one. (A reply below danger_min gets almost no
+        weight in the correction backup, so deepening it would cost time for no effect.)"""
         if (k, i) not in self.replies:
             y = np.asarray(self.l1.ys[k], dtype=float)
             if self.l1.their[k] is None:
@@ -453,11 +452,7 @@ class _Deepen:
                 danger = sorted(rest, key=lambda j: (a1[j], j))[:max(self.cfg2.danger, 0)]
                 out = [(j, False) for j in top] + [(int(j), True) for j in danger]
                 if self.threat_reply:
-                    chosen = [j for j, _ in out]
-                    qualifying = [j for j in range(len(y)) if self.sleep_moves(k, j) & self.qualifying]
-                    if qualifying and not any(j in qualifying for j in chosen):
-                        out.append((max(qualifying, key=lambda j: (y[j], -j)), True))
-                    elif not any(self.sleep_moves(k, j) for j, _ in out):
+                    if not any(self.sleep_moves(k, j) for j, _ in out):
                         sleepy = [j for j in range(len(y)) if y[j] >= self.cfg2.danger_min and self.sleep_moves(k, j)]
                         if sleepy:
                             out.append((max(sleepy, key=lambda j: (y[j], -j)), True))
