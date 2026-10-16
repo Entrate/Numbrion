@@ -123,15 +123,35 @@ class SearchOpponent:
     def feed(self, lines):
         self.player.feed(lines)
 
-    def act(self, battle) -> tuple[int, int]:
-        self.player.set_request(battle.request_json(self.side))
-        if self.engine_mask:
-            self.player.mask_hint = battle.legal_mask(self.side)
-        self.player.budget_ms = self.budget_ms
-        decision = self.player.decide()
+    def choose(self, battle) -> int:
+        return choose_with_retries(self.player, battle, self.side, self.engine_mask, self.budget_ms, self.worlds)
+
+
+def choose_with_retries(player, battle, side: int, engine_mask: bool, budget_ms: float | None, worlds: list) -> int:
+    """A protocol-driven player's choice for ``side``. A rejected choice (e.g. a switch out of an unrevealed Shadow Tag
+    trap: the request said only maybeTrapped) is fed back with the engine's updated request and retried; after three
+    rejections the engine's default choice is made. Returns the number of rejections."""
+    player.set_request(battle.request_json(side))
+    rejected = 0
+    for attempt in range(3):
+        if engine_mask:
+            player.mask_hint = battle.legal_mask(side)
+        player.budget_ms = budget_ms
+        decision = player.decide()
+        if decision is None:
+            break
         if decision.analysis.get("source") == "search":
-            self.worlds.append(decision.analysis["worlds"])
-        return decision.a0, decision.a1
+            worlds.append(decision.analysis["worlds"])
+        try:
+            battle.choose_action(side, decision.a0, decision.a1)
+            return rejected
+        except numbrion.ChoiceError as error:
+            rejected += 1
+            player.rejected(str(error.args[0]))
+            if len(error.args) > 1 and error.args[1]:
+                player.set_request(error.args[1])
+    battle.choose(side, "default")
+    return rejected
 
 
 def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tuple, search_side: int,
@@ -141,7 +161,7 @@ def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tu
     player = bot.new_player(f"eval-{seed}")
     player.team = team1 if search_side == 0 else team2
     opponent = opponent_factory(1 - search_side, team2 if search_side == 0 else team1)
-    rejected = 0
+    rejected = opponent_rejected = 0
     worlds: list[int] = []
     while not battle.ended and battle.turn <= max_turns:
         lines = [battle.drain_player_log(s) for s in (0, 1)]
@@ -150,33 +170,17 @@ def play_game(bot: SearchBot, opponent_factory, team1: str, team2: str, seed: tu
         order = [s for s in (0, 1) if battle.needs_action(s)]
         for side in order:
             if side == search_side:
-                player.set_request(battle.request_json(side))
-                for attempt in range(3):
-                    if engine_mask:
-                        player.mask_hint = battle.legal_mask(side)
-                    player.budget_ms = budget_ms
-                    decision = player.decide()
-                    if decision is None:
-                        break
-                    if decision.analysis.get("source") == "search":
-                        worlds.append(decision.analysis["worlds"])
-                    try:
-                        battle.choose_action(side, decision.a0, decision.a1)
-                        break
-                    except numbrion.ChoiceError as error:
-                        rejected += 1
-                        player.rejected(str(error.args[0]))
-                        if len(error.args) > 1 and error.args[1]:
-                            player.set_request(error.args[1])
-                else:
-                    battle.choose(side, "default")
+                rejected += choose_with_retries(player, battle, side, engine_mask, budget_ms, worlds)
+            elif isinstance(opponent, SearchOpponent):
+                opponent_rejected += opponent.choose(battle)
             else:
                 a0, a1 = opponent.act(battle)
                 battle.choose_action(side, a0, a1)
     # A battle stopped at the turn cap has no result (None): its pair is left out of the score, not counted as a tie.
     score = None if not battle.ended else 0.5 if battle.tie or battle.winner is None else float(battle.winner == search_side)
     opponent_worlds = opponent.worlds if isinstance(opponent, SearchOpponent) else []
-    return dict(score=score, turns=battle.turn, ended=battle.ended, rejected=rejected, stats=dict(player.stats),
+    return dict(score=score, turns=battle.turn, ended=battle.ended, rejected=rejected,
+                opponent_rejected=opponent_rejected, stats=dict(player.stats),
                 search_side=search_side, worlds_count=len(worlds), worlds_mean=float(np.mean(worlds)) if worlds else None,
                 opponent_worlds_count=len(opponent_worlds),
                 opponent_worlds_mean=float(np.mean(opponent_worlds)) if opponent_worlds else None)
