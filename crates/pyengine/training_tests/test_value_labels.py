@@ -179,8 +179,8 @@ def test_old_new_roundtrip_stream_and_value_mask(tmp_path):
         assert value == pytest.approx(float(expected), abs=1e-6)
         for mix in (0, 1):
             target = value_target(batch, mix)
-            torch.testing.assert_close(target, batch['search_value'] if mix == 0 else
-                                       batch['outcome'] * .995 ** batch['remaining_steps'])
+            torch.testing.assert_close(target, batch['search_value'] if mix == 0 else batch['outcome'])
+            torch.testing.assert_close(value_target(batch, 1, 0.995), batch['outcome'] * .995 ** batch['remaining_steps'])
     masked = {k: v.clone() for k, v in batch.items()}
     masked['partner_floats'][~selected] = 9
     masked['outcome'][~selected] = 100

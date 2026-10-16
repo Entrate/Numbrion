@@ -635,12 +635,12 @@ def distill_loss(model, batch: dict, tilt: float = 0.0, *, state: dict | None = 
     return loss, agree
 
 
-def value_target(batch: dict, mix: float = 0.5, gamma: float = 0.995) -> torch.Tensor:
+def value_target(batch: dict, mix: float = 0.5, gamma: float = 1.0) -> torch.Tensor:
     """Monte Carlo terminal return mixed with the teacher's search-root estimate, on PPO's [-1, 1] scale."""
     return mix * batch["outcome"] * gamma ** batch["remaining_steps"] + (1 - mix) * batch["search_value"]
 
 
-def label_losses(model, batch: dict, value_mix: float = 0.5, gamma: float = 0.995):
+def label_losses(model, batch: dict, value_mix: float = 0.5, gamma: float = 1.0):
     """Policy, masked critic MSE and auxiliary loss from one shared trunk pass, plus policy agreement.
 
     Select supervised rows before the oracle forward pass so legacy rows cannot affect either loss or gradient.
