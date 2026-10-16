@@ -60,7 +60,7 @@ class SearchConfig:
     first_codes: int = 47           # slot-a codes expanded when enumerating pairs (47: every legal one)
     prior_temperature: float = 1.0  # our prior (anchor) is the policy at this temperature
     opponent_temperature: float = 1.0
-    anchor: float = 0.05            # KL weight on our prior, in value units ([-1, 1] payoffs)
+    anchor: float = 0.0             # KL weight on our prior, in value units ([-1, 1] payoffs); 0: no nudge toward the policy
     opponent_anchor: float = 0.1    # KL weight on the opponent's prior; 0 = it just plays the prior
     iterations: int = 200
     play: str = "argmax"            # "argmax" of our strategy or "sample" from it

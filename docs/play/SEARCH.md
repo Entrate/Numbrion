@@ -22,8 +22,8 @@ evaluation setting).
    team, which each world supplies. It only ever trained on positions where its side had to act, so a leaf where
    only the opponent must act is scored from the opponent's side and negated. Finished battles score +1, -1 or 0.
 6. **Choice.** The payoffs form a matrix game per world. Our strategy is shared by all worlds, because we don't
-   know which is true; the opponent's is per world. Smoothed fictitious play solves it, with each side anchored to
-   its policy (`anchor` 0.05 for us, `opponent_anchor` 0.1 for them). The bot plays the pair our strategy
+   know which is true; the opponent's is per world. Smoothed fictitious play solves it, with the opponent anchored
+   to its policy (`opponent_anchor` 0.1); our side is not nudged toward our policy (`anchor` 0). The bot plays the pair our strategy
    weights most.
 
 A decision falls back to the policy when no world reproduces what was seen, when no candidate is legal in any
@@ -39,7 +39,7 @@ sampled world, or when there is only one legal choice. The analysis names the re
 | `ours`, `theirs` | 8, 6 | candidate pairs for us, and for the opponent per world |
 | `seeds` | 2 | chance samples per cell |
 | `opponent_temperature` | 1.0 | temperature of the opponent's policy prior |
-| `anchor`, `opponent_anchor` | 0.05, 0.1 | KL weights to each side's prior; `opponent_anchor` 0 makes the opponent just play its prior |
+| `anchor`, `opponent_anchor` | 0, 0.1 | KL weights to each side's prior; `opponent_anchor` 0 makes the opponent just play its prior. `anchor` was 0.05 until 2026-10-16: 0 beat it 61.5% ± 3.5 over 100 pairs (1-ply, ladder sizes, Spark) |
 | `play` | `argmax` | `sample` draws from our strategy instead |
 | `particles` | 8 | world-builder particles |
 | `threads` | 4 | grid threads |

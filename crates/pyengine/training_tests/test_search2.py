@@ -57,8 +57,10 @@ def checkpoint(tmp_path_factory):
 
 def make_bot(checkpoint, **depth2):
     cfg = dict(SMALL, **depth2)
+    # anchor 0.05 (the pre-2026-10-16 default) so the anchored pick and sampled play are exercised; the play default
+    # is now 0 (no nudge toward the policy), covered by the anchor-0 fallback test.
     return SearchBot(checkpoint=str(checkpoint), search={"worlds": 3, "ours": 4, "theirs": 3, "seeds": 1, "threads": 2,
-                                                         "iterations": 60, "depth2": cfg},
+                                                         "iterations": 60, "anchor": 0.05, "depth2": cfg},
                      pools=[str(POOL)], device="cpu")
 
 
