@@ -92,6 +92,10 @@ class Layer1:
     ys: list                        # per world: [M_k] layer-1 opponent strategy
     q: np.ndarray                   # [N] layer-1 values against ys
     seeds: list                     # per world: [S, 4] the layer-1 chance seeds (cells of one world and seed share)
+    # Optional hints for the budget controller (plan_depth2): e.g. {"x_top": float, "q_gap": float,
+    # "ours_left": int, "foes_left": int, "threats": list[str]} (threats = known dangerous foe moves such as sleep
+    # moves, revealed or in most worlds). None: no hints.
+    difficulty: dict | None = None
 
 
 # ---- expansion -----------------------------------------------------------------------------------------------------
@@ -142,3 +146,4 @@ class Plan:
     budget_ms: float                # total target for this decision
     deadline: float | None          # monotonic seconds; never exceeded
     chunk_ms: float = 400.0
+    started: float | None = None    # monotonic seconds when the decision began (request receipt or decide())
