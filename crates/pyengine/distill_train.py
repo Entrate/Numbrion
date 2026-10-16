@@ -124,7 +124,7 @@ class Epochs:
 
 
 @torch.no_grad()
-def score(model, entries, device, pairs=4, batch_size=256, value_mix=0.5, gamma=0.995):
+def score(model, entries, device, pairs=4, batch_size=256, value_mix=0.5, gamma=1.0):
     model.eval()
     n = hits = nv = 0
     ce = cond_ce = squared = target_sum = target_sq = error_sum = error_sq = 0.0
@@ -276,7 +276,9 @@ def parse_args(argv=None):
         sub.add_argument("--adapter", type=int, default=0)
         sub.add_argument("--torch-threads", type=int, default=1)
         sub.add_argument("--value-target-mix", type=float, default=0.5)
-        sub.add_argument("--gamma", type=float, default=0.995)
+        sub.add_argument("--gamma", type=float, default=1.0,
+                         help="per-decision discount of the outcome in the value target (1: pure win/loss; 0.995 was "
+                              "the old PPO-matched default, which made a delayed loss worth more and rewarded stalling)")
     training.add_argument("--output", type=Path, required=True)
     source = training.add_mutually_exclusive_group()
     source.add_argument("--checkpoint", type=Path, help="initialize weights from a model, with a fresh optimizer")
