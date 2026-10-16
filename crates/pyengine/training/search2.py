@@ -8,7 +8,9 @@ After layer 1 (``run_search``) we have our strategy x, each world's opponent str
    (draw c < layer-1 seeds reuses layer 1's seed of that world). Samples are nested, so a round only adds new ones.
 3. Replies per (world, candidate): the top ``theirs_top`` by y_k, plus ``danger`` replies with the lowest A1 among
    those with y_k >= ``danger_min``, plus (``threat_reply``) the most likely sleep-move reply (Spore, Yawn, ...) with
-   y_k >= ``danger_min`` when none of those uses one: one ply cannot see what sleep costs, so A1 rarely marks it.
+   y_k >= ``danger_min`` when none of those uses one (whatever its weight when the move qualifies as a threat:
+   revealed, or in at least ``threat_min_worlds`` of the worlds): one ply cannot see what sleep costs, so A1 rarely
+   marks it.
 4. Expand (``expand``): every (world, candidate, reply, chance draw) cell is simulated to the next boundary, keeping
    the leaf battles, each side's leaf tracker (root tracker fed with that side's lines), requests, masks and policy
    inputs. Forced replacements are answered by the policy argmax and stepped through (``replacement_steps``), so
@@ -19,7 +21,9 @@ After layer 1 (``run_search``) we have our strategy x, each world's opponent str
    observed opponent reply, same chance draw, across worlds): one Bayesian game per group, as at layer 1.
    ``"independent"`` solves each leaf alone. A leaf's value is x2 . q2 (``"mixed"``) or q2 at argmax x2.
 7. Backup: ``"correction"`` Q2[i] = Q1[i] + mean_worlds sum_{j deepened} y_k[j] (V2[k,i,j] - A1[k,i,j]) (the
-   opponent keeps its layer-1 weights); ``"resolve"`` re-solves the reduced game.
+   opponent keeps its layer-1 weights); ``"resolve"`` re-solves the Bayesian game of the deepened worlds over our
+   survivors and all the opponent's replies (deepened ones at V2, the rest at A1), so the opponent's weights answer
+   our candidates (e.g. Spore against a set-up it ignored when we were expected to attack).
 8. Pick: the best survivor of the last finished round, by the score halving also uses. Q2 is clipped to [-1, 1];
    ``pick="anchored"`` (default) scores log(prior[i]) + Q2[i] / anchor, layer 1's KL-anchored best response on the
    deeper values; ``pick="q"`` (or anchor 0) takes argmax Q2.
@@ -334,14 +338,60 @@ def _candidates(bot, leaves: list, s: int, our_side: int, k: int, first: int, te
     return bot.net.candidates(arrays, np.arange(len(leaves)), masks, k=k, first=first, temperature=temperature)
 
 
+LOG_FLOOR = float(np.log(1e-6))  # log-prior of a pair a sibling's policy does not allow, for ranking
+
+
+def common_opponent_sets(tops: list, fulls: list, masks: list, size: int) -> list:
+    """One opponent candidate set for sibling leaves (the same world, opponent reply and chance draw, after different
+    root pairs of ours), so our candidates are compared against the same replies.
+
+    ``tops[l]``: leaf l's own top pairs (most likely first); ``fulls[l]``: its policy, (a0, a1) -> (log-prob at T=1,
+    log-prob at the opponent temperature); ``masks[l]`` [47, 47]: the pairs its opponent may play. The set is the union
+    of the leaves' top pairs ranked by their log-prior averaged over the leaves (LOG_FLOOR where a leaf does not
+    allow a pair), cut to ``size``, plus at most ``size`` more for coverage: every leaf keeps its own most likely pair
+    and at least min(2, its top count) pairs it allows. Returns per leaf (pairs [m, 2] int32, prior [m]): the common
+    pairs that leaf allows, with its own prior renormalised over them."""
+    union = []
+    for top in tops:
+        for pair in top:
+            if pair not in union:
+                union.append(pair)
+
+    def mean_logp(pair):
+        return float(np.mean([full[pair][0] if pair in full else LOG_FLOOR for full in fulls]))
+
+    common = sorted(union, key=lambda pair: (-mean_logp(pair), pair))[:max(size, 1)]
+    extra = 0
+    for top, full, mask in zip(tops, fulls, masks):
+        def covered():
+            usable = sum(1 for pair in common if pair in full and mask[pair])
+            return (not top or top[0] in common) and usable >= min(2, len(top))
+        for pair in top:
+            if covered() or extra >= size:
+                break
+            if pair not in common:
+                common.append(pair)
+                extra += 1
+    out = []
+    for top, full, mask in zip(tops, fulls, masks):
+        pairs = [pair for pair in common if pair in full and mask[pair]] or list(top[:1])
+        logp = np.array([full[pair][1] for pair in pairs], dtype=float)
+        prior = np.exp(logp - logp.max())
+        out.append((np.asarray(pairs, dtype=np.int32).reshape(-1, 2), prior / prior.sum()))
+    return out
+
+
 # ---- the second layer ----------------------------------------------------------------------------------------------
 
 class _Deepen:
     def __init__(self, bot, cfg, cfg2: Depth2Config, layer1: Layer1, clock: StageClock, rng, pick: str,
-                 ours_shown: tuple, describe, threat_reply: bool = False):
+                 ours_shown: tuple, describe, threat_reply: bool = False, revealed: set | None = None):
         self.bot, self.cfg, self.cfg2, self.l1, self.clock, self.rng = bot, cfg, cfg2, layer1, clock, rng
         self.pick, self.ours_shown, self.describe = pick, ours_shown, describe
         self.threat_reply = threat_reply
+        self.common_opponent = bool(getattr(cfg, "depth2_common_opponent", True))
+        self.revealed = set(revealed or ())
+        self._qualifying = None
         self.log_prior = np.log(np.maximum(np.asarray(layer1.our_prior, dtype=float), 1e-300))
         self.requests: dict = {}
         self.side = layer1.side
@@ -367,6 +417,17 @@ class _Deepen:
         self.cells = dict(expand=0, grid2=0)
         self.forced_steps = 0
 
+    @property
+    def qualifying(self) -> set:
+        """Sleep threats that qualify as at layer 1 (search.qualifying_threats)."""
+        if self._qualifying is None:
+            from .search import qualifying_threats
+
+            requests = [self.opp_request(k) if self.l1.their[k] is not None else None for k in range(self.K)]
+            self._qualifying = qualifying_threats(requests, self.revealed,
+                                                  float(getattr(self.cfg, "threat_min_worlds", 0.5)))
+        return self._qualifying
+
     # -- samples
     def seed(self, k: int, c: int) -> np.ndarray:
         if (k, c) not in self.seeds:
@@ -376,7 +437,10 @@ class _Deepen:
         return self.seeds[(k, c)]
 
     def reply_set(self, k: int, i: int) -> list:
-        """(j, danger) of the replies deepened in world k for our candidate i."""
+        """(j, danger) of the replies deepened in world k for our candidate i: the top ``theirs_top`` by y_k, the
+        ``danger`` lowest-A1 ones with y_k >= danger_min, and with ``threat_reply``: the likeliest reply using a
+        qualifying sleep move (revealed, or in at least threat_min_worlds of the worlds), whatever its weight, else
+        the likeliest other sleep reply with y_k >= danger_min, when none of the chosen replies uses one."""
         if (k, i) not in self.replies:
             y = np.asarray(self.l1.ys[k], dtype=float)
             if self.l1.their[k] is None:
@@ -389,9 +453,14 @@ class _Deepen:
                 danger = sorted(rest, key=lambda j: (a1[j], j))[:max(self.cfg2.danger, 0)]
                 out = [(j, False) for j in top] + [(int(j), True) for j in danger]
                 if self.threat_reply:
-                    sleepy = [j for j in range(len(y)) if y[j] >= self.cfg2.danger_min and self.sleep_reply(k, j)]
-                    if sleepy and not any(j in sleepy for j, _ in out):
-                        out.append((max(sleepy, key=lambda j: (y[j], -j)), True))
+                    chosen = [j for j, _ in out]
+                    qualifying = [j for j in range(len(y)) if self.sleep_moves(k, j) & self.qualifying]
+                    if qualifying and not any(j in qualifying for j in chosen):
+                        out.append((max(qualifying, key=lambda j: (y[j], -j)), True))
+                    elif not any(self.sleep_moves(k, j) for j, _ in out):
+                        sleepy = [j for j in range(len(y)) if y[j] >= self.cfg2.danger_min and self.sleep_moves(k, j)]
+                        if sleepy:
+                            out.append((max(sleepy, key=lambda j: (y[j], -j)), True))
             self.replies[(k, i)] = out
         return self.replies[(k, i)]
 
@@ -400,10 +469,17 @@ class _Deepen:
             self.requests[k] = json.loads(self.l1.worlds[k].request_json(self.opp))
         return self.requests[k]
 
-    def sleep_reply(self, k: int, j: int) -> bool:
-        from .search import SLEEP_MOVES, reply_moves
+    def sleep_moves(self, k: int, j: int) -> set:
+        """(species id, move id) of the sleep moves reply j of world k uses."""
+        from .search import SLEEP_MOVES, _move_ids, _species
 
-        return bool(set(reply_moves(self.opp_request(k), self.l1.their[k][j])) & SLEEP_MOVES)
+        request = self.opp_request(k)
+        out = set()
+        for slot, code in enumerate(int(c) for c in self.l1.their[k][j]):
+            ids = _move_ids(request, slot)
+            if 0 <= code < 40 and code // 10 < len(ids) and ids[code // 10] in SLEEP_MOVES:
+                out.add((_species(request, slot), ids[code // 10]))
+        return out
 
     def obs_text(self, k: int, j: int) -> str:
         """What we would see of reply j in world k (move names, targets, switch-ins): the info-group key."""
@@ -490,9 +566,21 @@ class _Deepen:
         found = self.policy_chunks(theirs_rows, self.opp, cfg2.theirs, cfg.opponent_temperature)
         if found is None:
             return False
-        for lf, (pairs, logp, _) in zip(theirs_rows, found):
-            prior = np.exp(logp - logp.max())
-            lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
+        if self.common_opponent:  # siblings (same world, reply and chance draw) share one opponent candidate set
+            siblings: dict = {}
+            for lf, cands in zip(theirs_rows, found):
+                k, _, j, c = lf.key
+                siblings.setdefault((k, j, c), []).append((lf, cands))
+            for members in siblings.values():
+                sets = common_opponent_sets([[tuple(int(v) for v in p) for p in pairs] for _, (pairs, _, _) in members],
+                                            [full for _, (_, _, full) in members],
+                                            [_side_mask(lf, self.opp, self.side) for lf, _ in members], cfg2.theirs)
+                for (lf, _), (pairs, prior) in zip(members, sets):
+                    lf.their, lf.their_prior = pairs, prior
+        else:
+            for lf, (pairs, logp, _) in zip(theirs_rows, found):
+                prior = np.exp(logp - logp.max())
+                lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
         for lf in live:
             if not lf.needs[self.opp]:
                 lf.their, lf.their_prior = np.full((1, 2), -1, dtype=np.int32), np.ones(1)
@@ -739,10 +827,13 @@ class _Deepen:
         l1, cfg = self.l1, self.cfg
         q1 = np.asarray(l1.q, dtype=float)
         if self.cfg2.backup == "resolve":
+            # The reduced Bayesian game of the deepened worlds: our survivors x ALL the opponent's layer-1 replies,
+            # deepened ones at their layer-2 values, the others at their layer-1 payoffs; the opponent re-solves
+            # against our survivors (anchored to its prior), so its weights answer what we may play.
             payoffs, valid, their_priors = [], [], []
             for k in worlds:
                 srcs = [self.source(k, i, survivors) for i in survivors]
-                cols = sorted({j for i, s in zip(survivors, srcs) for j, _ in self.reply_set(k, s)})
+                cols = list(range(len(l1.payoffs[k][0])))
                 a = np.zeros((len(survivors), len(cols)))
                 ok = np.zeros(len(survivors), dtype=bool)
                 for r, (i, s) in enumerate(zip(survivors, srcs)):
@@ -834,21 +925,22 @@ class _Deepen:
 
 def deepen(bot, cfg, cfg2: Depth2Config, layer1: Layer1, battle=None, deadline: float | None = None, rng=None,
            budget=None, describe=None, pick: str | None = None, costs: dict | None = None,
-           threat_reply: bool | None = None) -> dict | None:
+           threat_reply: bool | None = None, revealed: set | None = None) -> dict | None:
     """The second layer for one decision (module docstring). Returns None when there is nothing to deepen, else a
     dict: ``chosen`` (index into ``layer1.ours``, or None to keep layer 1), ``q2`` {index: Q2}, ``cells``,
     ``leaves``, ``stages`` (list of ``Stage``), ``changed``, ``rounds`` completed and ``analysis`` (the compact,
     JSON-serialisable ``depth2`` block). ``describe(a0, a1)`` names a pair for the analysis; ``battle`` (the
     player's ``_Battle``) names our active Pokemon in opponent replies; ``costs`` keeps per-unit stage costs across
     decisions for deadline checks without a budget controller; ``budget`` (a BudgetController) admits every chunk
-    when given; ``pick`` and ``threat_reply`` override ``cfg2.pick`` / ``cfg2.threat_reply``."""
+    when given; ``pick`` and ``threat_reply`` override ``cfg2.pick`` / ``cfg2.threat_reply``; ``revealed``:
+    (species id, move id) of the foe's moves seen so far, for the threat replies."""
     started = time.perf_counter()
     clock = StageClock(budget, deadline, costs)
     ours_shown = ("", "")
     if battle is not None:
         ours_shown = tuple(battle.active.get(("p1", "p2")[layer1.side] + slot, "") for slot in "ab")
     run = _Deepen(bot, cfg, cfg2, layer1, clock, rng if rng is not None else bot.rng, pick or cfg2.pick, ours_shown,
-                  describe, cfg2.threat_reply if threat_reply is None else threat_reply)
+                  describe, cfg2.threat_reply if threat_reply is None else threat_reply, revealed)
     info = run.run()
     chosen = info.get("chosen")
     layer1_choice = info["layer1_choice"]
@@ -904,4 +996,5 @@ def _analysis(run: _Deepen, info: dict, out: dict, clock: StageClock, describe, 
                                            forced_steps=run.forced_steps),
         timing={k: v["ms"] for k, v in clock.totals().items()}, units={k: v["units"] for k, v in clock.totals().items()},
         total_ms=round(total_ms, 1),
-        config=dict(backup=run.cfg2.backup, info=run.cfg2.info, leaf_value=run.cfg2.leaf_value, pick=run.pick))
+        config=dict(backup=run.cfg2.backup, info=run.cfg2.info, leaf_value=run.cfg2.leaf_value, pick=run.pick,
+                    threat_reply=run.threat_reply, common_opponent=run.common_opponent))
