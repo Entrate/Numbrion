@@ -34,6 +34,7 @@ FUSED_GRID = ENCODER and hasattr(_native, "SearchGrid")
 if FUSED_GRID:
     from ._numbrion import TrackerState  # noqa: F401
     from ._numbrion import SearchGrid as _SearchGrid
+FUSED_EXPAND = FUSED_GRID and hasattr(_SearchGrid, "expand")
 from ._numbrion import SEARCH  # noqa: F401  (built with the opt-in `search` feature)
 from ._numbrion import GridExecutor as _GridExecutor
 from .utils import grid_actions, sample_masked, sample_uniform  # noqa: F401
@@ -86,6 +87,8 @@ class SearchGrid:
 
     ``SearchGrid(dex_path, threads=0)``; ``run(roots, actions, trackers, eval_side, ..., allow_live=False)`` and
     ``encode_states(states, requests, lines=None, ...)`` as documented in docs/design/TRAINING-API.md.
+    With ``FUSED_EXPAND``, ``expand(roots, actions, trackers, *, world=None, seeds=None, stop="boundary")``
+    retains leaves and encodes both policy observations, following ``training.search2_types.Expansion``.
     """
 
     def __init__(self, dex_path, threads=0):
@@ -98,6 +101,16 @@ class SearchGrid:
     def run(self, roots, actions, trackers, eval_side, *args, allow_live=False, **kwargs):
         _check_roots("SearchGrid", roots, allow_live)
         return self._grid.run(roots, actions, trackers, eval_side, *args, **kwargs)
+
+    if FUSED_EXPAND:
+        def expand(self, roots, actions, trackers, *, world=None, seeds=None, stop="boundary", allow_live=False):
+            """Step cells and retain live leaves, trackers, requests, policy inputs and both joint masks.
+
+            See ``training.search2_types.Expansion`` for output shapes. ``request_joint`` reads only the
+            request; ``engine_joint`` includes hidden restrictions in the simulated world.
+            """
+            _check_roots("SearchGrid", roots, allow_live)
+            return self._grid.expand(roots, actions, trackers, world=world, seeds=seeds, stop=stop)
 
     def encode_states(self, states, requests, *args, **kwargs):
         return self._grid.encode_states(states, requests, *args, **kwargs)
@@ -121,6 +134,7 @@ del GridExecutor, SearchGrid
 __all__ = [
     "BatchEnv",
     "ENCODER",
+    "FUSED_EXPAND",
     "Battle",
     "ChoiceError",
     "GridExecutor",

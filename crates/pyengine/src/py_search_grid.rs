@@ -3,6 +3,7 @@
 //! "Fused leaf encoding".
 
 use crate::{
+    action::N_ACTIONS,
     py::{Battle, GridArgs, grid_args, grid_err, lock, put_grid_arrays},
     search_grid::{LeafOptions, PARTNER_IDS_PER_ROW, SearchGrid as Grid, StateInput},
 };
@@ -16,7 +17,7 @@ use numpy::{AllowTypeChange, IntoPyArray, PyArray1, PyArrayLikeDyn, PyArrayMetho
 use pyo3::{
     exceptions::{PyRuntimeError, PyValueError},
     prelude::*,
-    types::PyDict,
+    types::{PyDict, PyList},
 };
 use std::{
     path::PathBuf,
@@ -204,6 +205,63 @@ impl SearchGrid {
         if let Some(g) = out.guard {
             d.set_item("guard", guard_array(py, g, n)?)?;
         }
+        Ok(d)
+    }
+
+    /// Retain the next boundary's live battles and both fed observation trackers, with both sides' policy
+    /// inputs and request/engine joint masks. Rows without an action are zero. Ended cells have no battle
+    /// or trackers. Every array and list follows input cell order; simulation and encoding release the GIL.
+    #[pyo3(signature = (roots, actions, trackers, *, world=None, seeds=None, stop="boundary"))]
+    #[allow(clippy::too_many_arguments)]
+    fn expand<'py>(
+        &self,
+        py: Python<'py>,
+        roots: &Bound<'py, PyAny>,
+        actions: PyArrayLikeDyn<'py, i32, AllowTypeChange>,
+        trackers: &Bound<'py, PyAny>,
+        world: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+        seeds: Option<PyArrayLikeDyn<'py, i64, AllowTypeChange>>,
+        stop: &str,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        let start = std::time::Instant::now();
+        let GridArgs { roots, n, actions, world, seeds, stop } = grid_args(roots, actions, world, seeds, stop)?;
+        let pairs = tracker_pairs(trackers, roots.len())?;
+        let refs: Vec<&Battle> = roots.iter().map(|b| b.get()).collect();
+        let mut out = py.detach(|| {
+            let pairs: Vec<[&Tracker; 2]> = pairs.iter().map(|[a, b]| [&**a, &**b]).collect();
+            let mut grid = lock(&self.grid);
+            for (k, r) in refs.iter().enumerate() {
+                grid.stage_root(k, &lock(&r.g))?;
+            }
+            grid.expand_staged(refs.len(), &world, &actions, &seeds, &pairs, stop)
+        }).map_err(grid_err)?;
+        let d = PyDict::new(py);
+        put_grid_arrays(&d, crate::search::GridArrays::from_leaves(&out.leaves, false))?;
+        d.del_item("turn")?;
+        d.del_item("steps")?;
+        d.set_item("requests", PyList::new(py, out.leaves.iter_mut()
+            .map(|l| std::mem::take(&mut l.requests)).map(|[a, b]| (a, b)))?)?;
+        d.set_item("leaves", PyList::new(py, out.leaves.into_iter()
+            .map(|l| l.game.map(|g| Battle { g: Mutex::new(*g) })))?)?;
+        d.set_item("trackers", PyList::new(py, out.trackers.into_iter()
+            .map(|pair| pair.map(|[a, b]| (TrackerState::of(a), TrackerState::of(b)))))?)?;
+        let p = out.policy;
+        let policy = PyDict::new(py);
+        policy.set_item("ids", p.ids.into_pyarray(py).reshape([n, 2, N_TOKENS, N_IDS])?)?;
+        policy.set_item("floats", p.floats.into_pyarray(py).reshape([n, 2, N_TOKENS, N_POKEMON_FLOATS])?)?;
+        policy.set_item("field", p.field.into_pyarray(py).reshape([n, 2, N_FIELD_FLOATS])?)?;
+        policy.set_item("token_features", p.token_features.into_pyarray(py).reshape([n, 2, N_TOKENS, N_TOKEN_FEATURES])?)?;
+        policy.set_item("action_features", p.action_features.unwrap().into_pyarray(py)
+            .reshape([n, 2, 2, N_CODES, N_ACTION_FEATURES])?)?;
+        policy.set_item("guard", PyArray1::from_vec(py, p.guard.unwrap()).reshape([n, 2, 2, 4, 2])?)?;
+        d.set_item("policy", policy)?;
+        for (key, mask) in [("request_joint", out.request_joint), ("engine_joint", out.engine_joint)] {
+            let mask: Vec<bool> = mask.into_iter().map(|v| v != 0).collect();
+            d.set_item(key, mask.into_pyarray(py).reshape([n, 2, N_ACTIONS, N_ACTIONS])?)?;
+        }
+        let timing = PyDict::new(py);
+        timing.set_item("total_ms", start.elapsed().as_secs_f64() * 1000.0)?;
+        d.set_item("timing", timing)?;
         Ok(d)
     }
 

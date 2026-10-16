@@ -17,7 +17,9 @@
 //! the executor's worker battles, so results do not depend on the thread count or the scheduling.
 
 use crate::{
+    action::{N_ACTIONS, PASS, SWITCH_BASE, FORCED_MOVE},
     game::Game,
+    mask::{Req, SideActions},
     search::{GridArrays, GridError, GridExecutor, Leaf, Options, Seeds, Stop},
 };
 use encoder::{
@@ -98,6 +100,15 @@ pub struct StateArrays {
     pub token_features: Vec<f32>,
     pub action_features: Option<Vec<f32>>,
     pub guard: Option<Vec<bool>>,
+}
+
+/// Fused expansion, in input cell order. Policy rows are interleaved `[cell, side, ...]`.
+pub struct ExpansionArrays {
+    pub leaves: Vec<Leaf>,
+    pub trackers: Vec<Option<[Tracker; 2]>>,
+    pub policy: StateArrays,
+    pub request_joint: Vec<u8>,
+    pub engine_joint: Vec<u8>,
 }
 
 /// Per pool thread: the scratch tracker a cell's root state is copied into and the static-feature cache.
@@ -277,6 +288,84 @@ impl SearchGrid {
         Ok(out)
     }
 
+    /// Step to a boundary, retain live games and both observations, and encode policy inputs. Each side's
+    /// tracker is cloned and fed exactly once, even when only its opponent needs to act at this boundary.
+    /// Request masks use only the request; engine masks retain the world's hidden restrictions.
+    #[allow(clippy::too_many_arguments)]
+    pub fn expand_staged(
+        &mut self,
+        n_worlds: usize,
+        world: &[u32],
+        actions: &[i32],
+        seeds: &Seeds,
+        trackers: &[[&Tracker; 2]],
+        stop: Stop,
+    ) -> Result<ExpansionArrays, GridError> {
+        if trackers.len() != 1 && trackers.len() != n_worlds {
+            return Err(GridError::Input(format!("trackers must be one pair or one pair per root ({n_worlds}), got {}", trackers.len())));
+        }
+        for (k, pair) in trackers.iter().enumerate() {
+            for (s, tracker) in pair.iter().enumerate() {
+                if tracker.side != s {
+                    return Err(GridError::Input(format!("trackers[{k}][{s}] tracks side {}, expected side {s}", tracker.side)));
+                }
+            }
+        }
+        let n = actions.len() / 4;
+        let mut out = ExpansionArrays {
+            leaves: Vec::new(),
+            trackers: Vec::new(),
+            policy: StateArrays {
+                ids: vec![0; n * 2 * IDS_PER_ROW],
+                floats: vec![0.0; n * 2 * FLOATS_PER_ROW],
+                field: vec![0.0; n * 2 * FIELD_PER_ROW],
+                token_features: vec![0.0; n * 2 * TOKEN_FEATURES_PER_ROW],
+                action_features: Some(vec![0.0; n * 2 * ACTION_PER_ROW]),
+                guard: Some(vec![false; n * 2 * GUARD_PER_ROW]),
+            },
+            request_joint: vec![0; n * 2 * N_ACTIONS * N_ACTIONS],
+            engine_joint: vec![0; n * 2 * N_ACTIONS * N_ACTIONS],
+        };
+        let p = &mut out.policy;
+        let mut rows = row_slices(&mut p.ids, &mut p.floats, &mut p.field, &mut p.token_features,
+            p.action_features.as_mut(), p.guard.as_mut()).into_iter();
+        let items: Vec<_> = out.request_joint.chunks_mut(2 * N_ACTIONS * N_ACTIONS)
+            .zip(out.engine_joint.chunks_mut(2 * N_ACTIONS * N_ACTIONS))
+            .map(|(request_joint, engine_joint)| ([rows.next().unwrap(), rows.next().unwrap()], request_joint, engine_joint))
+            .collect();
+        // The visitor owns the live leaf copy, so ended cells never allocate a retained game.
+        let opts = Options { stop, requests: true, masks: false, logs: true, keep_leaves: false };
+        let (dex, damage, scratch) = (&*self.dex, &*self.damage, &self.scratch);
+        let cells = self.grid.run_staged_with(n_worlds, world, actions, seeds, &opts, items,
+            |t, i, g, mut leaf, (rows, request_joint, engine_joint)| {
+                if leaf.ended {
+                    return Ok((leaf, None));
+                }
+                let pair = &trackers[if trackers.len() == 1 { 0 } else { world.get(i).copied().unwrap_or(0) as usize }];
+                let sc = &mut *lock_scratch(&scratch[t % scratch.len()]);
+                let mut states = [(*pair[0]).clone(), (*pair[1]).clone()];
+                for (s, row) in rows.into_iter().enumerate() {
+                    states[s].feed(&leaf.logs[s]);
+                    if leaf.needs[s] {
+                        // Parse the actual returned JSON, so masks and inputs use precisely the same request
+                        // as the reference, including maybeTrapped/maybeDisabled omissions.
+                        let request = parse_request(leaf.requests[s].as_deref())
+                            .map_err(|e| GridError::Engine(format!("cell {i} side {s}: {e}")))?;
+                        encode_full(dex, damage, &mut sc.cache, &states[s], &request, row)
+                            .map_err(|e| GridError::Engine(format!("cell {i}: encoding side {s}'s leaf observation: {e}")))?;
+                        let range = s * N_ACTIONS * N_ACTIONS..(s + 1) * N_ACTIONS * N_ACTIONS;
+                        request_actions(&request).write_joint(&mut request_joint[range.clone()]);
+                        g.side_actions(s).write_joint(&mut engine_joint[range]);
+                    }
+                }
+                leaf.logs = Default::default();
+                leaf.game = Some(Box::new(g.fork(true)));
+                Ok((leaf, Some(states)))
+            })?;
+        (out.leaves, out.trackers) = cells.into_iter().unzip();
+        Ok(out)
+    }
+
     /// Encode hypothetical observations (e.g. the opponent's at each world's root): per state, a copy of its tracker
     /// fed with its lines, encoded with its request, plus damage features, exactly as `Encoder::encode_batch` would.
     /// Runs on the pool's threads.
@@ -352,4 +441,155 @@ fn encode_own(dex: &Dex, sc: &mut Scratch, root: &Tracker, lines: &[String], g: 
     sc.tracker.clone_from(root);
     sc.tracker.feed(lines);
     encode_own_tokens(dex, &mut sc.cache, &sc.tracker, &leaf_request(g, side), out)
+}
+
+/// `training.protocol.Options`, using only fields visible in a request. Reuse the engine mask's joint
+/// constraints, but reconstruct the per-slot options and replacement budgets from the request alone.
+fn request_actions(request: &Json<'_>) -> SideActions {
+    if !request.truthy() || request.at("wait").truthy() || request.at("teamPreview").truthy()
+        || request.get("side").is_none()
+        || (request.get("forceSwitch").is_none() && request.get("active").is_none()) {
+        return SideActions::none();
+    }
+    let party = request.at("side").at("pokemon").items();
+    let fainted = |mon: &Json<'_>| mon.at("condition").str_or_empty().ends_with("fnt");
+    let bench = party.iter().enumerate().skip(2)
+        .filter(|(_, mon)| !fainted(mon)).fold(0u64, |set, (i, _)| set | (1 << (SWITCH_BASE + i)));
+    let mut out = SideActions::none();
+    if let Some(flags) = request.get("forceSwitch") {
+        out.req = Req::Switch;
+        let flagged: [bool; 2] = std::array::from_fn(|k| flags.items().get(k).is_some_and(Json::truthy));
+        let count = flagged.iter().filter(|&&f| f).count() as u8;
+        let forced = count.min(bench.count_ones() as u8);
+        out.legal.constraints.forced_switches = forced;
+        out.legal.constraints.forced_passes = count - forced;
+        let dead = party.iter().enumerate().filter(|(_, mon)| fainted(mon))
+            .fold(0u64, |set, (i, _)| set | (1 << (SWITCH_BASE + i)));
+        for k in 0..2 {
+            if !flagged[k] {
+                out.auto[k] = true;
+                out.slot_set[k] = 1 << PASS;
+            } else if party.get(k).is_some_and(|mon| mon.at("reviving").truthy()) {
+                out.revival[k] = true;
+                out.slot_set[k] = dead;
+            } else {
+                out.slot_set[k] = bench | if count > forced { 1 << PASS } else { 0 };
+            }
+        }
+    } else {
+        out.req = Req::Move;
+        let active = request.at("active").items();
+        for k in 0..2 {
+            let mon = party.get(k);
+            let entry = active.get(k);
+            if mon.is_none_or(|mon| fainted(mon) || mon.at("commanding").truthy()) || entry.is_none_or(Json::is_null) {
+                out.auto[k] = true;
+                out.slot_set[k] = 1 << PASS;
+                continue;
+            }
+            let entry = entry.unwrap();
+            let moves = entry.at("moves").items();
+            let moves = &moves[..moves.len().min(4)];
+            let locked = moves.len() == 1 && moves[0].get("pp").is_none();
+            let mut enabled = false;
+            if !locked {
+                for (j, m) in moves.iter().enumerate() {
+                    if m.at("disabled").truthy() || m.get("pp").and_then(Json::as_f64).unwrap_or(1.0) <= 0.0 {
+                        continue;
+                    }
+                    enabled = true;
+                    for loc in -2..=2 {
+                        if request_target(m.at("target").str_or_empty(), loc, k) {
+                            let code = j * 10 + ((loc + 2) * 2) as usize;
+                            out.slot_set[k] |= 1 << code;
+                            if entry.at("canTerastallize").truthy() {
+                                out.slot_set[k] |= 1 << (code + 1);
+                            }
+                        }
+                    }
+                }
+            }
+            if !enabled {
+                out.slot_set[k] |= 1 << FORCED_MOVE;
+            }
+            if !entry.at("trapped").truthy() {
+                out.slot_set[k] |= bench;
+            }
+        }
+    }
+    out
+}
+
+fn request_target(target: &str, loc: i32, position: usize) -> bool {
+    let choosable = matches!(target, "normal" | "any" | "adjacentAlly" | "adjacentAllyOrSelf" | "adjacentFoe");
+    if !choosable { return loc == 0; }
+    if loc == 0 { return false; }
+    let source = -(position as i32 + 1);
+    let is_self = loc == source;
+    let is_foe = loc > 0;
+    let adjacent = if is_foe { (-(3 - loc) - source).abs() <= 1 } else { (loc - source).abs() == 1 };
+    match target {
+        "normal" => adjacent,
+        "adjacentAlly" => adjacent && !is_foe,
+        "adjacentAllyOrSelf" => (adjacent && !is_foe) || is_self,
+        "adjacentFoe" => adjacent && is_foe,
+        "any" => !is_self,
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod expansion_tests {
+    use super::*;
+
+    fn actions(text: &str) -> SideActions {
+        request_actions(&Json::parse(text).unwrap())
+    }
+
+    #[test]
+    fn request_none_and_wait() {
+        for text in ["null", "{}", r#"{"wait":true,"side":{}}"#, r#"{"teamPreview":true,"side":{}}"#] {
+            let a = actions(text);
+            assert_eq!(a.req, Req::None);
+            assert_eq!(a.mask0(), 0);
+        }
+    }
+
+    #[test]
+    fn request_hidden_trap_and_joint_constraints() {
+        let a = actions(r#"{"side":{"pokemon":[{},{},{},{}]},"active":[
+            {"moves":[{"pp":10,"target":"normal"}],"canTerastallize":"Normal","trapped":true},
+            {"moves":[{"pp":10,"target":"adjacentAllyOrSelf"}],"canTerastallize":"Normal","maybeTrapped":true}] }"#);
+        assert_eq!(a.slot_set[0], [0, 1, 6, 7, 8, 9].into_iter().fold(0, |s, c| s | 1 << c));
+        assert_eq!(a.slot_set[1], [0, 1, 2, 3, 42, 43].into_iter().fold(0, |s, c| s | 1 << c));
+        assert!(a.is_legal(6, 42)); // maybeTrapped never removes switches
+        assert!(!a.is_legal(7, 1)); // two Tera choices
+        assert!(a.is_legal(7, 0));
+        let b = actions(r#"{"side":{"pokemon":[{},{},{}]},"active":[{"moves":[]},{"moves":[]}]}"#);
+        assert!(b.is_legal(FORCED_MOVE, 42));
+        assert!(!b.is_legal(42, 42));
+    }
+
+    #[test]
+    fn request_forced_pass_and_revival_budgets() {
+        let a = actions(r#"{"side":{"pokemon":[{"condition":"0 fnt"},{"condition":"0 fnt"},{}]},"forceSwitch":[true,true]}"#);
+        assert!(a.is_legal(42, PASS));
+        assert!(a.is_legal(PASS, 42));
+        assert!(!a.is_legal(PASS, PASS));
+        assert!(!a.is_legal(42, 42));
+        let b = actions(r#"{"side":{"pokemon":[{"reviving":true},{"condition":"0 fnt"},{"condition":"0 fnt"}]},"forceSwitch":[true,false]}"#);
+        assert!(b.is_legal(41, PASS));
+        assert!(b.is_legal(42, PASS));
+        assert!(!b.is_legal(PASS, PASS));
+    }
+
+    #[test]
+    fn request_forced_moves_disabled_and_automatic_passes() {
+        for moves in [r#"[{"target":"normal"}]"#, r#"[{"pp":0}]"#, r#"[{"pp":10,"disabled":true}]"#] {
+            let text = format!(r#"{{"side":{{"pokemon":[{{}},{{"commanding":true}}]}},"active":[{{"moves":{moves},"canTerastallize":"Normal"}},{{}}]}}"#);
+            let a = actions(&text);
+            assert_eq!(a.slot_set, [1 << FORCED_MOVE, 1 << PASS]);
+            assert!(a.is_legal(FORCED_MOVE, PASS));
+        }
+    }
 }
