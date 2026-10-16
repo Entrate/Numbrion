@@ -28,8 +28,9 @@ OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 STATE_SHARED = ("tables",)
 ROW_KEYS = (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior", "q", "value")
 VALUE_KEYS = ("partner_ids", "partner_floats", "outcome", "remaining_steps")
-# ``sleep_forced``: the decision played a sleep-forced pair (shallow_labels.py --sleep-explore); informational only.
-OPTIONAL_ROW_KEYS = (*VALUE_KEYS, "foe_match", "sleep_forced")
+# ``sleep_forced``: the decision played a sleep-forced pair (shallow_labels.py --sleep-explore), informational.
+# ``pre_forced``: the row is at or before its game's last sleep-forced decision; value_target uses its search value only.
+OPTIONAL_ROW_KEYS = (*VALUE_KEYS, "foe_match", "sleep_forced", "pre_forced")
 META_KEYS = ("teacher", "teacher_minutes", "created", "holdout")
 OPTIONAL_META_KEYS = ("sleep_explore",)  # scalar float64, written by sleep-label runs only
 
@@ -89,7 +90,8 @@ class DistillData:
                 search_value=shard["value"].astype(np.float32),
                 value_mask=(np.isfinite(outcome) & (steps >= 0)).astype(np.float32),
                 foe_match=shard.get("foe_match", np.full((n, 6), -1, np.int64)),
-                aux_mask=np.full(n, present and "foe_match" in shard, np.float32)))
+                aux_mask=np.full(n, present and "foe_match" in shard, np.float32),
+                pre_forced=np.asarray(shard["pre_forced"] if "pre_forced" in shard else np.zeros(n), np.float32)))
         out.update({k: np.concatenate([e[k] for e in extras]) for k in extras[0]})
         # Reference losses over the same candidates: the targets' own entropy (the floor) and the labelling policy's
         # cross-entropy (its prior's log-probs of the candidates).
@@ -212,13 +214,13 @@ class DistillStream(DistillData):
                           mask0=(n, N_ACTIONS), mask1=(n, candidates, N_ACTIONS), prior=shape, q=shape, value=(n,))
             shapes.update({k: v for k, v in dict(partner_ids=(n, N_TOKENS, N_IDS),
                           partner_floats=(n, 6, N_POKEMON_FLOATS), outcome=(n,), remaining_steps=(n,),
-                          foe_match=(n, 6), sleep_forced=(n,)).items() if k in optional})
+                          foe_match=(n, 6), sleep_forced=(n,), pre_forced=(n,)).items() if k in optional})
             for key, expected in shapes.items():
                 actual, _, dtype, _ = headers[key]
                 valid_dtype = (dtype == np.dtype("int64") if key in ("ids", "partner_ids", "foe_match") else
                                dtype == np.dtype("int32") if key == "remaining_steps" else
                                dtype.kind == "i" and dtype.itemsize in (2, 4, 8) if key == "pairs" else
-                               dtype == np.dtype("bool") if key in ("mask0", "mask1", "sleep_forced") else
+                               dtype == np.dtype("bool") if key in ("mask0", "mask1", "sleep_forced", "pre_forced") else
                                dtype == np.dtype("float32"))
                 if actual != expected or not valid_dtype:
                     raise ValueError(f"invalid {key} shape or dtype: {actual}, {dtype}")
@@ -641,8 +643,12 @@ def distill_loss(model, batch: dict, tilt: float = 0.0, *, state: dict | None = 
 
 def value_target(batch: dict, mix: float = 0.5, gamma: float = 0.995) -> torch.Tensor:
     """Monte Carlo terminal return mixed with the teacher's search-root estimate, on PPO's [-1, 1] scale. A batch
-    with a per-row ``value_mix`` (distill_train.py label sets) uses it instead of ``mix``."""
+    with a per-row ``value_mix`` (distill_train.py label sets) uses it instead of ``mix``. Rows marked ``pre_forced``
+    (at or before a sleep-forced decision of their game) use the search value only: their outcome reflects the
+    forced intervention, not the position's value under the search."""
     mix = batch.get("value_mix", mix)
+    if "pre_forced" in batch:
+        mix = mix * (1 - batch["pre_forced"])
     return mix * batch["outcome"] * gamma ** batch["remaining_steps"] + (1 - mix) * batch["search_value"]
 
 

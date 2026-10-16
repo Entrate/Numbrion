@@ -3,26 +3,35 @@
     .venv/bin/python tools/sleep_probe.py --checkpoint SPARK.pt --positions 200 --playouts 16 --out scratch/sleep-probe
 
 Positions: self-play games of ``--checkpoint``'s policy (both sides, ``--temperature``) on ``--pool`` teams. In each
-game one boundary is drawn among those where a side S has an active Pokemon X that Spore and Hypnosis could put to
-sleep (training.sleep's effective-target rules, with the opposing user's ability) and the opposing side has an active
+game one boundary is drawn among those where a side S has an active Pokemon X that Hypnosis could put to sleep
+(training.sleep's effective-target rules, with the opposing user's ability) and the opposing side has an active
 Pokemon Y with a move slot it has not used so far.
 
-The engine cannot set a status directly, so the pair of positions is made by playing a sleep move against X with a
-fixed seed. The game is replayed from its start twice with the same seed and choices, Y's unused move slot replaced
-by Spore (copy A) or by Hypnosis (copy B); both replays must reproduce the original players' logs exactly (else the
-position is skipped). At the chosen boundary both copies are reseeded with the same seed and play the same turn: S
-plays one policy sample, Y uses its new move on X, Y's partner plays one policy sample. Spore (100% accuracy) and
-Hypnosis (60%) consume the same accuracy draw, so seeds are tried until Hypnosis misses while Spore puts X to sleep:
-up to that draw the two copies are identical, and at the next boundary X is asleep in A and awake in B. What remains
-different besides the sleep: the PRNG stream after the accuracy draw (Spore's sleep-turn draw) and which move Y
-revealed. S's view of the position is what the head scores; the opponent's own row is its partner input.
+The engine cannot set a status directly, so the pair of positions is made by playing a sleep move against X. The
+game is replayed from its start with the same seed and choices and Y's unused move slot replaced by Hypnosis (60%
+accuracy); the replay must reproduce the original players' logs exactly (else the position is skipped). Both
+branches therefore have the same teams and movesets. At the chosen boundary S plays one policy sample, Y uses
+Hypnosis on X and Y's partner plays one policy sample, the same choices in both branches; the turn is played with
+``--tries`` seeds, and two seeds are paired when the turn's omniscient log is identical up to Y's Hypnosis line (same
+order, damage, crits, boosts, field changes) while Hypnosis hits X in one (branch A, asleep) and misses in the other
+(branch B, awake). Both branches must leave X alive and the battle running. After the roll the seeds differ, so the
+rest of that turn uses other random draws (later damage rolls, secondary effects) besides the genuine consequences of
+the sleep (X cannot act if it moves later); ``post_roll_identical`` says, per position, whether the rest of the turn's
+log matched once the hit / miss and sleep lines are dropped. S's view of the position is what the head scores; the
+opponent's own row is its partner input.
+
+Caveats: playouts use the policy on both sides (``--temperature``), not the search, so the empirical cost is the cost
+under that policy; positions come from policy self-play, one per game, drawn uniformly among eligible boundaries and
+then filtered by whether a matching hit / miss seed pair exists (positions where Y moves after several random events
+match less often, so early movers are over-represented); the seeds themselves are selected on the roll's outcome.
 
 Reported per position (JSONL) and on average with standard errors over positions, all from S's perspective:
 (a) head cost = V(awake, B) - V(asleep, A), the value head's estimate at the next boundary (``--checkpoint``'s head,
 plus every ``--heads`` checkpoint); (b) empirical cost = mean playout result from B - from A, over ``--playouts``
 playouts each with the policy on both sides; playout k of A and of B share the battle seed and the sampling seed.
-Results are +1 / 0 / -1 (``empirical_cost``) and also discounted by ``--gamma`` per boundary
-(``empirical_cost_discounted``, the value head's target scale). Playouts that pass ``--max-turns`` count as ties.
+Results are +1 / 0 / -1 (``empirical_cost``) and also discounted like training's value targets,
+``gamma ** remaining_steps`` with remaining_steps = boundaries to the end - 1 (``empirical_cost_discounted``).
+Playouts that pass ``--max-turns`` count as ties.
 """
 from __future__ import annotations
 
@@ -148,7 +157,7 @@ def play_game(players: Players, sleep: SleepMoves, teams, seed, rng, max_turns: 
     battles = [battle]
     logs = [[], []]
     history, points = [], []
-    spore, hypnosis = (sleep.props[int(sleep.kind[sleep.dex.move_index[m]])] for m in ("spore", "hypnosis"))
+    hypnosis = sleep.props[int(sleep.kind[sleep.dex.move_index["hypnosis"]])]
     while not battle.ended and battle.turn <= max_turns:
         rows = [s for s in (0, 1) if battle.needs_action(s)]
         lines = {s: battle.drain_player_log(s) for s in (0, 1)}
@@ -170,12 +179,11 @@ def play_game(players: Players, sleep: SleepMoves, teams, seed, rng, max_turns: 
                         continue
                     name = mon["ident"].split(": ", 1)[1]
                     free = [m for m, move in enumerate(mon["moves"]) if move not in used.get(name, set())]
-                    if not free:
+                    if not free or "hypnosis" in mon["moves"]:  # (a second Hypnosis slot would be a duplicate)
                         continue
                     ability = int(arrays["ids"][o, i, 2])
                     for j in (0, 1):  # X: S's active in slot j
-                        if all(sleep.effective(arrays["ids"], arrays["floats"], arrays["field"], s, j, props, ability)
-                               for props in (spore, hypnosis)):
+                        if sleep.effective(arrays["ids"], arrays["floats"], arrays["field"], s, j, hypnosis, ability):
                             points.append(dict(boundary=len(history), turn=battle.turn, side=s, target=j, user=i,
                                                user_name=name, slot=free[-1]))
         picks = players.act(rows, battles, rng) if rows else {}
@@ -229,50 +237,80 @@ def replay(teams, seed, history, upto: int, logs, dex):
     return battle, encoder, buffers
 
 
+def roll_outcome(log, y: str, target: str):
+    """(index of Y's Hypnosis line, "hit" / "miss" / None, target ident) in one turn's omniscient log. ``y``: Y's
+    position prefix (``p2a``); ``target``: X's (``p1b``)."""
+    for index, line in enumerate(log):
+        parts = line.split("|")
+        if len(parts) > 4 and parts[1] == "move" and parts[2].startswith(y + ":") and parts[3] == "Hypnosis":
+            victim = parts[4]
+            if not victim.startswith(target + ":"):
+                return index, None, victim
+            for later in log[index + 1:]:
+                bits = later.split("|")
+                if bits[1:4] == ["-status", victim, "slp"] and bits[4:5] == ["[from] move: Hypnosis"]:
+                    return index, "hit", victim
+                if len(bits) > 3 and bits[1] == "-miss" and bits[2].startswith(y + ":") and bits[3] == victim:
+                    return index, "miss", victim
+            return index, None, victim
+    return None, None, None
+
+
+def outcome_free(lines, victim: str):
+    """A turn's lines after the roll without the roll's own outcome lines (the sleep / miss lines and the sleeping
+    target's ``cant``), for the post-roll comparison."""
+    drop = ("|-miss|", f"|-status|{victim}|slp", f"|cant|{victim}|slp")
+    return [line for line in lines if not line.startswith(drop)]
+
+
+def alive(battle, side: int, ident: str) -> bool:
+    name = ident.split(": ", 1)[1]
+    for mon in json.loads(battle.request_json(side) or "{}").get("side", {}).get("pokemon", []):
+        if mon["ident"].split(": ", 1)[1] == name:
+            return not mon["condition"].endswith("fnt")
+    return False
+
+
 def probe_position(model, dex, teams, seed, history, logs, point, rng, tries: int):
-    """The asleep (A) and awake (B) copies of one probe point at their next boundary, or (None, reason)."""
+    """The asleep (A) and awake (B) branches of one probe point at their next boundary, or (None, reason)."""
     s, o, i, j = point["side"], 1 - point["side"], point["user"], point["target"]
-    copies = []
-    for move in ("spore", "hypnosis"):
-        team = replace_move(teams[o], point["user_name"], point["slot"], move)
-        if team is None:
-            return None, "set not found"
-        modified = list(teams)
-        modified[o] = team
-        made = replay(modified, seed, history, point["boundary"], logs, dex)
-        if made is None:
-            return None, "replay differs"
-        copies.append(made)
+    team = replace_move(teams[o], point["user_name"], point["slot"], "hypnosis")
+    if team is None:
+        return None, "set not found"
+    modified = list(teams)
+    modified[o] = team
+    made = replay(modified, seed, history, point["boundary"], logs, dex)
+    if made is None:
+        return None, "replay differs"
+    battle, encoder, buffers = made
     code = point["slot"] * 10 + (3 + j) * 2
-    (battle_a, encoder_a, buffers_a), (battle_b, encoder_b, buffers_b) = copies
-    for battle in (battle_a, battle_b):
-        mask0, joint = battle.legal_mask(o)
-        if not (joint.any(1)[code] if i == 0 else joint.any(0)[code]):
-            return None, "sleep move not legal"
-    # One policy sample for S and for Y's partner, from copy A's views (S's view is the same in both copies).
+    _, joint = battle.legal_mask(o)
+    if not (joint.any(1)[code] if i == 0 else joint.any(0)[code]):
+        return None, "sleep move not legal"
+    # One policy sample for S and for Y's partner: the same choices in both branches.
     players = Players(model, dex, 1, 1.0)
-    players.buffers = buffers_a
-    picks = players.act([s], [battle_a], rng)
-    their = players.act([o], [battle_a], rng, fixed={o: (i, code)})
+    players.buffers = buffers
+    picks = players.act([s], [battle], rng)
+    their = players.act([o], [battle], rng, fixed={o: (i, code)})
+    y, x = f"p{o + 1}{'ab'[i]}", f"p{s + 1}{'ab'[j]}"
+    seen: dict = {}  # log prefix before the roll -> {outcome: (branch, log, roll index)}
     for attempt in range(tries):
-        turn_seed = [int(x) for x in rng.integers(0, 1 << 16, size=4)]
-        trial = []
-        for battle in (battle_a, battle_b):
-            copy = battle.clone()
-            copy.reseed(turn_seed)
-            copy.drain_log()
-            for side, pick in ((s, picks[s]), (o, their[o])):
-                copy.choose_action(side, *pick)
-            trial.append((copy, copy.drain_log()))
-        (a, log_a), (b, log_b) = trial
-        y = f"p{o + 1}{'ab'[i]}"
-        status = [line.split("|") for line in log_a if line.startswith("|-status|")]
-        slept = [parts[2] for parts in status if len(parts) > 4 and parts[3] == "slp"
-                 and parts[4] == "[from] move: Spore" and parts[2].startswith(f"p{s + 1}{'ab'[j]}")]
-        missed = [line for line in log_b if line.startswith("|-miss|") and line.split("|")[2].startswith(y)]
-        if len(slept) == 1 and missed and missed[0].split("|")[3] == slept[0] and not a.ended and not b.ended:
-            return (a, b, encoder_a, encoder_b, slept[0].split(": ", 1)[1], attempt + 1), None
-    return None, "no seed where Spore sleeps and Hypnosis misses"
+        copy = battle.clone()
+        copy.reseed([int(v) for v in rng.integers(0, 1 << 16, size=4)])
+        copy.drain_log()
+        copy.choose_action(s, *picks[s])
+        copy.choose_action(o, *their[o])
+        log = copy.drain_log()
+        index, outcome, victim = roll_outcome(log, y, x)
+        if outcome is None or copy.ended or not alive(copy, s, victim):
+            continue
+        group = seen.setdefault(tuple(log[:index]), {})
+        group.setdefault(outcome, (copy, log, index))
+        if len(group) == 2:
+            (a, log_a, k_a), (b, log_b, k_b) = group["hit"], group["miss"]
+            identical = outcome_free(log_a[k_a + 1:], victim) == outcome_free(log_b[k_b + 1:], victim)
+            return (a, b, encoder, encoder, victim.split(": ", 1)[1], attempt + 1, identical), None
+    return None, "no hit / miss seed pair with the same turn before the roll"
 
 
 def head_values(heads: dict, encoder, battle, side) -> dict:
@@ -316,8 +354,14 @@ def playouts(model, dex, starts, temperature, max_turns, gamma):
     for k, battle in enumerate(battles):
         winner = battle.winner if battle.ended else None
         result = 0.0 if winner is None else 1.0 if winner == sides[k] else -1.0
-        out.append((result, result * gamma ** int(steps[k])))
+        out.append((result, discounted(result, int(steps[k]), gamma)))
     return out
+
+
+def discounted(result: float, boundaries: int, gamma: float) -> float:
+    """``result`` discounted like training's value targets: ``gamma ** remaining_steps``, where a start that ends
+    after ``boundaries`` decision boundaries has remaining_steps = boundaries - 1 (0 for one transition)."""
+    return result * gamma ** max(boundaries - 1, 0)
 
 
 def mean_se(values) -> tuple[float, float]:
@@ -338,7 +382,7 @@ def main(argv=None) -> dict:
     parser.add_argument("--temperature", type=float, default=1.0, help="policy temperature for games and playouts")
     parser.add_argument("--max-turns", type=int, default=300)
     parser.add_argument("--gamma", type=float, default=0.995)
-    parser.add_argument("--tries", type=int, default=16, help="turn seeds tried per position")
+    parser.add_argument("--tries", type=int, default=64, help="turn seeds tried per position")
     parser.add_argument("--max-games", type=int, default=0, help="stop after this many games (0: 5 x positions)")
     parser.add_argument("--chunk", type=int, default=8, help="positions whose playouts run together")
     parser.add_argument("--seed", type=int, default=1)
@@ -352,7 +396,7 @@ def main(argv=None) -> dict:
     heads = {args.checkpoint.stem: model}
     for path in args.heads:
         heads[path.stem if path.stem not in heads else str(path)] = load_model(path, dex)
-    sleep = SleepMoves(dex, ("spore", "hypnosis"))
+    sleep = SleepMoves(dex, ("hypnosis",))
     teams = [line.strip() for line in args.pool.read_text().splitlines() if line.strip()]
     rng = np.random.default_rng(args.seed)
     game_players = Players(model, dex, 1, args.temperature)
@@ -401,12 +445,12 @@ def main(argv=None) -> dict:
         if made is None:
             skipped[reason] = skipped.get(reason, 0) + 1
             continue
-        a, b, encoder_a, encoder_b, slept, attempts = made
+        a, b, encoder_a, encoder_b, slept, attempts, identical = made
         side = point["side"]
         values_a, enc_a = head_values(heads, encoder_a, a, side)
         values_b, enc_b = head_values(heads, encoder_b, b, side)  # enc_*: trackers at the next boundary
         pending.append(dict(game=games, turn=point["turn"], side=side, target=slept, user=point["user_name"],
-                            seed_attempts=attempts,
+                            seed_attempts=attempts, post_roll_identical=identical,
                             head_asleep={k: values_a[k] for k in heads}, head_awake={k: values_b[k] for k in heads},
                             head_cost={k: values_b[k] - values_a[k] for k in heads},
                             a=a, b=b, enc_a=enc_a, enc_b=enc_b))
@@ -421,6 +465,8 @@ def main(argv=None) -> dict:
         summary[f"head_cost[{name}]"] = mean_se(cost)
         summary[f"head_minus_empirical_discounted[{name}]"] = mean_se(
             [r["head_cost"][name] - r["empirical_cost_discounted"] for r in results])
+    summary["post_roll_identical_share"] = (float(np.mean([r["post_roll_identical"] for r in results]))
+                                            if results else None)
     summary["empirical_cost"] = mean_se([r["empirical_cost"] for r in results])
     summary["empirical_cost_discounted"] = mean_se([r["empirical_cost_discounted"] for r in results])
     (args.out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")

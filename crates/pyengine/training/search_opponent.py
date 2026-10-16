@@ -35,7 +35,9 @@ side plays a sleep-forced pair instead of the search's best: that slot uses a sl
 uniformly among the eligible ones), and the partner slot plays its part of the most weighted searched pair (by ``x``)
 that is jointly legal with it, else the policy's most likely pair with the sleep code fixed. The row is still labelled
 with the search's strategy, and carries ``sleep_forced`` (every row does when P > 0; shards also get the scalar
-``sleep_explore``). Its random stream is separate, so P = 0 changes nothing.
+``sleep_explore``). Every row also gets ``pre_forced``: its boundary is at or before the last sleep-forced decision
+(of either side) of its battle, so its game outcome reflects the intervention; training.distill.value_target gives
+those rows the search value only. Its random stream is separate, so P = 0 changes nothing.
 """
 from __future__ import annotations
 
@@ -182,6 +184,7 @@ class SearchOpponent:
         self.sleep_explore = float(sleep_explore)
         self.sleep = None
         self.sleep_forced_envs: set[int] = set()  # envs whose last act() played a sleep-forced pair
+        self.last_forced: dict[int, int] = {}  # env -> boundary of its battle's latest sleep-forced decision
         if self.sleep_explore > 0:
             from .dex import load_dex
 
@@ -210,7 +213,10 @@ class SearchOpponent:
 
     def _release(self, env: int, winner: int | None, steps: int | None) -> None:
         """``winner`` None (capped): NaN outcome and -1 steps; otherwise each row's outcome from its own side."""
+        last_forced = self.last_forced.pop(env, None)
         for row, minutes, teacher, step, side in self.pending.pop(env, []):
+            if self.sleep is not None:  # at or before the battle's last sleep-forced decision (either side)
+                row["pre_forced"] = np.bool_(last_forced is not None and step <= last_forced)
             row["outcome"] = np.float32(np.nan if winner is None else 0.0 if winner < 0 else
                                         1.0 if winner == side else -1.0)
             row["remaining_steps"] = np.int32(-1 if steps is None else steps - step - 1)
@@ -368,6 +374,7 @@ class SearchOpponent:
             if k in sleep:
                 choices[int(e)] = sleep[k]
                 self.sleep_forced_envs.add(int(e))
+                self.last_forced[int(e)] = 0 if self.steps is None else int(self.steps[e])
             else:
                 best = int(np.argmax(x[k, :len(pairs)]))
                 choices[int(e)] = (int(pairs[best][0]), int(pairs[best][1]))

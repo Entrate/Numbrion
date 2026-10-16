@@ -14,8 +14,10 @@ share of its value targets, max_rows (``4M``, ``500k``, ...) keeps a seeded rand
 (and the same share of its held-out shards). Empty fields keep the default (``DIR::0.8``). Each set has its own
 held-out shards; an epoch is the sum of the sets' training rows, and every batch draws its rows from the sets in
 proportion to the weights (multinomial), from per-set shuffled streams that continue across epochs (a set whose
-share exceeds its size repeats rows, a smaller share leaves some unused in an epoch). Held-out scores are reported
-per set, each with its own value mix.
+share exceeds its size repeats rows, a smaller share leaves some unused in an epoch). The streams' positions are
+checkpointed, so ``--resume`` continues with the same rows. Sets may not share shard files (rejected), and no shard
+is both trained on and held out. Held-out scores are reported per set, each with its own value mix. Rows marked
+``pre_forced`` (sleep labels) always take their value target from the search value alone (training.distill).
 """
 from __future__ import annotations
 
@@ -217,51 +219,123 @@ class Epochs:
                 yield to_batch(block, order[begin:begin + batch_size], device)
 
 
-class MixedEpochs:
-    """Label sets interleaved by weight (module docstring): every batch draws a multinomial number of rows from each
-    set's endless shuffled stream (its Epochs blocks, pass after pass), with a per-row ``value_mix`` column. An epoch
-    is the sum of the sets' training rows. Each set may keep ``resident_rows`` rows resident."""
+class SetStream:
+    """One label set's endless shuffled row stream, pass after pass. Everything random derives from ``seed`` and the
+    position, so the position ``(pass, block, cursor)`` is the whole sampling state (``state_dict``) and a resumed
+    run continues the same rows. A pass visits the set's shards in a seeded order, cut into blocks of at least
+    ``buffer_rows`` rows (all rows in one resident block when the set has at most ``resident_rows``), and each block
+    is shuffled. Rows carry ids ``shard index << 32 | row``."""
 
-    def __init__(self, sets, pairs, resident_rows, buffer_rows):
-        self.sets = [s for s in sets if s.weight > 0]
-        self.streams = [Epochs(s.train, pairs, resident_rows, buffer_rows) for s in self.sets]
-        self.rows = sum(stream.rows for stream in self.streams)
-        weights = np.array([s.weight for s in self.sets], dtype=np.float64)
-        self.shares = weights / weights.sum()
-        self.sources = None
-        self.drawn = np.zeros(len(self.sets), dtype=np.int64)  # rows drawn per set (for reports and tests)
+    def __init__(self, entries, pairs, resident_rows, buffer_rows, seed):
+        self.entries, self.pairs, self.buffer_rows, self.seed = entries, pairs, buffer_rows, list(seed)
+        self.rows = sum(info["size"] for _, info in entries)
+        self.resident = None
+        if self.rows <= resident_rows:
+            self.resident = concat([compact(p, i, pairs) for p, i in entries])
+            self.resident_ids = np.concatenate([(np.int64(k) << 32) + np.arange(info["size"], dtype=np.int64)
+                                                for k, (_, info) in enumerate(entries)])
+        self.position = [0, 0, 0]  # pass, block, cursor
+        self._layout = self._block = None
 
-    def _source(self, i, rng):
-        mix = np.float32(self.sets[i].value_mix)
-        while True:
-            for block in self.streams[i].blocks(rng):
-                order = rng.permutation(len(block["weight"]))
-                yield block, order, np.full(len(order), mix, np.float32)
+    def state_dict(self) -> dict:
+        return dict(position=list(self.position))
 
-    def _take(self, i, count, rng):
+    def load_state_dict(self, state: dict) -> None:
+        self.position = [int(x) for x in state["position"]]
+        self._layout = self._block = None
+
+    def _blocks(self, number: int) -> list:
+        """The (shard, begin, end) pieces of every block of pass ``number``."""
+        if self._layout is not None and self._layout[0] == number:
+            return self._layout[1]
+        if self.resident is not None:
+            blocks = [None]
+        else:
+            blocks, pieces, size = [], [], 0
+            for k in np.random.default_rng([*self.seed, number, 0]).permutation(len(self.entries)):
+                total = self.entries[k][1]["size"]
+                for begin in range(0, total, self.buffer_rows):
+                    end = min(begin + self.buffer_rows, total)
+                    pieces.append((int(k), begin, end))
+                    size += end - begin
+                    if size >= self.buffer_rows:
+                        blocks.append(pieces)
+                        pieces, size = [], 0
+            if pieces:
+                blocks.append(pieces)
+        self._layout = (number, blocks)
+        return blocks
+
+    def _load(self, number: int, block: int):
+        if self._block is not None and self._block[0] == (number, block):
+            return self._block[1:]
+        pieces = self._blocks(number)[block]
+        if pieces is None:
+            data, ids = self.resident, self.resident_ids
+        else:
+            data = concat([compact(*self.entries[k], self.pairs, np.arange(b, e)) for k, b, e in pieces])
+            ids = np.concatenate([(np.int64(k) << 32) + np.arange(b, e, dtype=np.int64) for k, b, e in pieces])
+        order = np.random.default_rng([*self.seed, number, block + 1]).permutation(len(ids))
+        self._block = ((number, block), data, ids, order)
+        return data, ids, order
+
+    def take(self, count: int) -> list:
+        """The next ``count`` rows as compact parts, each with its row ids under ``_row``."""
         parts = []
         while count:
-            block, order, mixes, cursor = self.sources[i]
+            number, block, cursor = self.position
+            data, ids, order = self._load(number, block)
             if cursor >= len(order):
-                self.sources[i] = [*next(self.generators[i]), 0]
+                block += 1
+                if block >= len(self._blocks(number)):
+                    number, block = number + 1, 0
+                self.position = [number, block, 0]
                 continue
             index = order[cursor:cursor + count]
-            parts.append({**{k: v[index] for k, v in block.items()}, "value_mix": mixes[:len(index)]})
-            self.sources[i][3] += len(index)
+            parts.append({**{k: v[index] for k, v in data.items()}, "_row": ids[index]})
+            self.position[2] += len(index)
             count -= len(index)
         return parts
 
+
+class MixedEpochs:
+    """Label sets interleaved by weight (module docstring): every batch draws a multinomial number of rows from each
+    set's SetStream (``rng``: the trainer's checkpointed generator), with a per-row ``value_mix`` column. An epoch is
+    the sum of the sets' training rows. ``last_rows``: the row ids of the latest batch (set index << 48 | row id);
+    ``state_dict`` / ``load_state_dict`` carry the streams' positions across a resume."""
+
+    def __init__(self, sets, pairs, resident_rows, buffer_rows, seed=0):
+        self.sets = [s for s in sets if s.weight > 0]
+        self.streams = [SetStream(s.train, pairs, resident_rows, buffer_rows, [seed, i])
+                        for i, s in enumerate(self.sets)]
+        self.rows = sum(stream.rows for stream in self.streams)
+        weights = np.array([s.weight for s in self.sets], dtype=np.float64)
+        self.shares = weights / weights.sum()
+        self.drawn = np.zeros(len(self.sets), dtype=np.int64)  # rows drawn per set (for reports and tests)
+        self.last_rows = None
+
+    def state_dict(self) -> dict:
+        return dict(streams=[stream.state_dict() for stream in self.streams], drawn=self.drawn.tolist())
+
+    def load_state_dict(self, state: dict) -> None:
+        for stream, saved in zip(self.streams, state["streams"], strict=True):
+            stream.load_state_dict(saved)
+        self.drawn = np.asarray(state["drawn"], dtype=np.int64)
+
     def batches(self, rng, batch_size, device):
-        if self.sources is None:  # the streams continue across epochs
-            self.generators = [self._source(i, rng) for i in range(len(self.sets))]
-            self.sources = [[*next(g), 0] for g in self.generators]
         produced = 0
         while produced < self.rows:
             n = min(batch_size, self.rows - produced)
             counts = rng.multinomial(n, self.shares)
-            parts = [part for i, c in enumerate(counts) if c for part in self._take(i, int(c), rng)]
+            parts, rows = [], []
+            for i, c in enumerate(counts):
+                for part in self.streams[i].take(int(c)) if c else ():
+                    rows.append((np.int64(i) << 48) + part.pop("_row"))
+                    part["value_mix"] = np.full(len(rows[-1]), self.sets[i].value_mix, np.float32)
+                    parts.append(part)
             self.drawn += counts
             produced += n
+            self.last_rows = np.concatenate(rows)
             yield to_batch(concat(parts), slice(None), device)
 
 
@@ -333,6 +407,7 @@ def resolve_sets(args, previous):
                              [(Path(p), DistillStream._inspect(Path(p))) for p in s["train"]],
                              [(Path(p), DistillStream._inspect(Path(p))) for p in s["heldout"]])
                     for s in previous["sets"]]
+            check_disjoint(sets)
             return sets, False
         # Keep the split fixed across resumes, even if new shards arrived in a source directory.
         legacy = LabelSet("labels", [], 1.0, args.value_target_mix,
@@ -345,10 +420,33 @@ def resolve_sets(args, previous):
         return sets, True
     if args.heldout:
         raise ValueError("--heldout works with a single plain --labels set; label sets hold out their own shards")
+    reject_overlaps(sets)
     for i, s in enumerate(sets):
         s.train, s.held = split_shards(s.paths, (), args.holdout_every)
         s.train, s.held = cap_rows(s.train, s.held, s.max_rows, args.seed + i)
+    check_disjoint(sets)
     return sets, False
+
+
+def reject_overlaps(sets) -> None:
+    """Label sets must not share shard files (canonical paths): each set splits its own holdouts, so a shared file
+    could be held out by one set and trained by another."""
+    owner = {}
+    for s in sets:
+        for path in files_in(s.paths):
+            identity = path.resolve()
+            if identity in owner and owner[identity] != s.name:
+                raise ValueError(f"label sets {owner[identity]} and {s.name} share shard {identity}; give each shard "
+                                 "to one set only")
+            owner[identity] = s.name
+
+
+def check_disjoint(sets) -> None:
+    """No shard is trained on by any set and held out by any set."""
+    train = {path.resolve() for s in sets for path, _ in s.train}
+    held = {path.resolve() for s in sets for path, _ in s.held}
+    if train & held:
+        raise ValueError(f"shards both trained on and held out: {sorted(map(str, train & held))[:3]}")
 
 
 def score_sets(model, sets, legacy, device, args):
@@ -390,7 +488,9 @@ def train(args):
         stream = Epochs(train_entries, args.pairs, args.resident_rows, args.shuffle_buffer)
         progress_sets = {}
     else:
-        stream = MixedEpochs(sets, args.pairs, args.resident_rows, args.shuffle_buffer)
+        stream = MixedEpochs(sets, args.pairs, args.resident_rows, args.shuffle_buffer, args.seed)
+        if args.resume and "mixed_state" in previous:
+            stream.load_state_dict(previous["mixed_state"])
         progress_sets = dict(sets=[dict(s.describe(), train=[str(p) for p, _ in s.train],
                                         heldout=[str(p) for p, _ in s.held]) for s in sets])
     config = dict(vars(args), device=str(device), adapter_name=adapter, joint_features=model.joint_features,
@@ -438,7 +538,9 @@ def train(args):
             log.write(json.dumps(row) + "\n")
             log.flush()
             save_checkpoint(args.output / "latest.pt", model, optimizer, args,
-                            dict(epoch=epoch, rows_seen=seen, **progress_sets), rng, train_entries, held)
+                            dict(epoch=epoch, rows_seen=seen, **progress_sets,
+                                 **({} if legacy else dict(mixed_state=stream.state_dict()))),
+                            rng, train_entries, held)
     result = dict(epoch=epoch, rows_seen=seen, heldout=metrics, seconds=time.monotonic() - started)
     (args.output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result

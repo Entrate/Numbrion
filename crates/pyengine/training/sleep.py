@@ -19,6 +19,10 @@ labels and the search are unchanged. A target is NOT effective when:
 * its ability is Insomnia, Vital Spirit, Sweet Veil, Comatose, Purifying Salt or Shields Down; Sweet Veil on its
   ally; Flower Veil on it or its ally while it is Grass-type; Leaf Guard in sun (no Utility Umbrella);
 * it holds a Chesto or Lum Berry (it would wake at once);
+* it is or may be transformed (Ditto, Imposter, or it knows Transform): the encoder does not track Transform, so
+  its current typing, ability and item checks are unreliable (an Imposter Ditto copying Breloom is Grass-type);
+* Hydration while rain (or heavy rain) is up, whatever Utility Umbrella or weather suppression says: it would be
+  cured at the end of the turn;
 * status moves: Magic Bounce or Good as Gold; Prankster user against a Dark-type target, against a side with
   Armor Tail / Dazzling / Queenly Majesty, or against a grounded target in Psychic Terrain;
 * powder moves (Spore, Sleep Powder): Grass type (Tera type when terastallized), Overcoat, Safety Goggles;
@@ -93,6 +97,10 @@ class SleepMoves:
         self.grass, self.flying, self.dark, self.ghost, self.normal = (t.get(n, -1) for n in (
             "Grass", "Flying", "Dark", "Ghost", "Normal"))
         self.stellar = t.get("Stellar", -1)
+        self.hydration = _ids(a, ("hydration",))
+        self.imposter = _ids(a, ("imposter",))
+        self.transformers = _ids(dex.species_index, ("ditto",))
+        self.transform_moves = np.array(sorted(_ids(dex.move_index, ("transform",))) or [-1], dtype=np.int64)
 
     def has_sleep_move(self, ids: np.ndarray, rows: np.ndarray) -> np.ndarray:
         """[len(rows)] whether an own active token (0 / 1) of each row knows a sleep move (a cheap prefilter)."""
@@ -105,6 +113,12 @@ class SleepMoves:
         if floats[row, token, PF["terastallized"]] > 0.5 and tera and tera != self.stellar:
             return {tera}
         return {int(ids[row, token, I_TYPE1]), int(ids[row, token, I_TYPE2])} - {0}
+
+    def _may_transform(self, ids, row, token) -> bool:
+        """A target that is or may be transformed: its typing, ability and moves are not what the tokens say (the
+        encoder does not track Transform). Ditto, Imposter (base or current) or a known Transform."""
+        return (int(ids[row, token, I_SPECIES]) in self.transformers or int(ids[row, token, I_ABILITY]) in self.imposter
+                or bool(np.isin(ids[row, token, I_MOVE0:I_MOVE0 + 4], self.transform_moves).any()))
 
     def _grounded(self, ids, floats, field, row, token, types) -> bool:
         item, ability = int(ids[row, token, I_ITEM]), int(ids[row, token, I_ABILITY])
@@ -138,6 +152,10 @@ class SleepMoves:
         if grounded and (field[foe, FF["electricterrain"]] > 0 or field[foe, FF["mistyterrain"]] > 0):
             return False
         if ability in self.immune or ally_ability in self.ally_immune or item in self.berries:
+            return False
+        if self._may_transform(ids, foe, target):
+            return False
+        if ability in self.hydration and field[foe, FF["rain"]] > 0:
             return False
         if self.grass in types and (ability in self.flower_veil or ally_ability in self.flower_veil):
             return False
