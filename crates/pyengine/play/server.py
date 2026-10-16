@@ -3,6 +3,7 @@
     .venv/bin/python crates/pyengine/play/server.py                  # bots of play/bots.json on localhost:8000
     .venv/bin/python crates/pyengine/play/server.py --selfplay 4     # the first two bots play 4 battles, then exit
     .venv/bin/python crates/pyengine/play/server.py --config crates/pyengine/play/bots-test.json   # DefaultBots
+    .venv/bin/python crates/pyengine/play/server.py --config BOT.json --public --no-api   # public server (PLAY.md)
 
 Config (``--config``, default ``crates/pyengine/play/bots.json``)::
 
@@ -43,10 +44,13 @@ REPO = HERE.parents[2]
 from aiohttp import web  # noqa: E402
 
 from play.api import Api  # noqa: E402
+from play.auth import AuthError, load_credentials  # noqa: E402
 from play.client import ShowdownClient  # noqa: E402
-from play.driver import BattleRoom, BotLog, BotWorker, to_id  # noqa: E402
+from play.driver import BattleRoom, BotLog, BotWorker, DecisionTiming, to_id  # noqa: E402
 
 log = logging.getLogger("play")
+
+PUBLIC_SERVER = "wss://sim3.psim.us/showdown/websocket"
 
 
 def load_config(path: Path) -> tuple[list[dict], str | None]:
@@ -160,8 +164,20 @@ async def main(args: argparse.Namespace) -> int:
     workers = {spec["name"]: BotWorker(spec) for spec in specs}
     bot_log = BotLog()
     log_dir = None if args.no_logs else Path(args.log_dir)
-    clients = {spec["name"]: ShowdownClient(workers[spec["name"]], args.server, bot_log, log_dir, args.timer)
-               for spec in specs if spec.get("showdown", True)}
+    accounts = [spec["name"] for spec in specs if spec.get("showdown", True)]
+    credentials = None
+    if args.credentials or args.public:
+        try:
+            credentials = load_credentials(args.credentials)
+        except AuthError as error:
+            raise SystemExit(f"credentials: {error}") from None
+        if [to_id(name) for name in accounts] != [to_id(credentials.username)]:
+            raise SystemExit(f"a registered login needs exactly one Showdown bot, named like the account "
+                             f"{credentials.username!r}; the config has {accounts}")
+    room_options = {"timing": DecisionTiming(deadline_s=args.deadline)} if args.deadline else None
+    clients = {name: ShowdownClient(workers[name], args.server, bot_log, log_dir, args.timer, room_options,
+                                    credentials, args.max_battles)
+               for name in accounts}
     api = Api(workers, advisor, clients, bot_log, args.server, reveal_bot_log=args.reveal_bot_log)
 
     runner = None
@@ -236,11 +252,31 @@ def parse_args(argv=None) -> argparse.Namespace:
                         help="/api/bot-log returns full entries (choices, candidates) while battles run, not only "
                              "after they end; for watching bot-vs-bot battles, never when playing a bot yourself")
     parser.add_argument("--challenge", metavar="USER", help="the first bot challenges USER once logged in")
+    parser.add_argument("--credentials", metavar="JSON",
+                        help="log in to a registered account (play/auth.py; default with --public: "
+                             "~/.numbrion/showdown-credentials.json or NUMBRION_PS_USERNAME/_PASSWORD)")
+    parser.add_argument("--max-battles", type=int, metavar="N",
+                        help="refuse challenges while N battles run (default: no limit)")
+    parser.add_argument("--deadline", type=float, metavar="S",
+                        help="send a decision at most S seconds after its request (the policy's choice if the "
+                             "search is not done; default: no deadline)")
+    parser.add_argument("--public", action="store_true",
+                        help=f"the public server: --server {PUBLIC_SERVER} with a registered login, the timer on, "
+                             f"--max-battles 3 and --deadline 10 unless given")
     parser.add_argument("--selfplay", type=int, default=0, metavar="N",
                         help="the first two bots play N battles against each other, then the server exits")
     parser.add_argument("--battle-timeout", type=float, default=900, help="self-play: seconds per battle")
     parser.add_argument("-v", "--verbose", action="store_true")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.public:
+        if args.server == parser.get_default("server"):
+            args.server = PUBLIC_SERVER
+        args.timer = True  # an opponent who leaves loses on time instead of holding a battle slot forever
+        args.max_battles = args.max_battles or 3
+        args.deadline = args.deadline or 10.0
+        if args.selfplay or args.reveal_bot_log:
+            parser.error("--public does not go with --selfplay or --reveal-bot-log")
+    return args
 
 
 if __name__ == "__main__":

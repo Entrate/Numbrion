@@ -96,6 +96,28 @@ Each bot thinks on its own worker thread, one decision at a time. Other options 
 and `-v`. `--reveal-bot-log` shows the bots' choices and analysis in `/api/bot-log` while battles run. Without
 it they appear only after the battle, so an opponent can't read them. Use it for bot-against-bot battles only.
 
+## Open challenges on the public server
+
+One bot can wait on the public Showdown server (play.pokemonshowdown.com) for challenges from anyone. Give it a
+config of its own with exactly one Showdown bot, named like the account, and run it next to the local server:
+
+```sh
+.venv/bin/python crates/pyengine/play/server.py --config public.json --public --no-api
+```
+
+`--public` connects to `wss://sim3.psim.us/showdown/websocket` and logs in with the credentials of
+`~/.numbrion/showdown-credentials.json` (`{"username": "...", "password": "..."}`, or `NUMBRION_PS_USERNAME` and
+`NUMBRION_PS_PASSWORD`; `--credentials FILE` reads another file). For an unregistered name Showdown accepts any
+password, but then anyone can take the name while the bot is offline. It also:
+
+* turns the battle timer on in every battle, so an opponent who leaves loses on time,
+* accepts at most 3 battles at a time and refuses further challenges with a "try again later" PM
+  (`--max-battles N`),
+* sends every decision within 10 s of its request, the policy's choice if the search is not done (`--deadline S`).
+
+Like on the local server, it accepts only Gen 9 Random Doubles Battle and challenges back whoever PMs it
+"challenge". A refused login is retried after a minute, then up to every 10 minutes.
+
 ## Advisor API and Chrome extension
 
 The Chrome extension lives in `tools/chrome-extension` and is built separately. It calls the API to show what

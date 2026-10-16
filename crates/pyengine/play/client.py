@@ -2,7 +2,8 @@
 
 Protocol notes (pinned server 7332b60e2, ``noguestsecurity = true``):
 
-* Login: after ``|challstr|`` send ``|/trn NAME,0,`` (no token); ``|updateuser| NAME|1|...`` confirms it.
+* Login: after ``|challstr|`` send ``|/trn NAME,0,`` (no token); ``|updateuser| NAME|1|...`` confirms it. With
+  credentials (a registered account on a public server) the token is an assertion from the login server.
 * Challenges arrive as ``|pm| FROM| TO|/challenge FORMAT|TEAMFORMAT|MESSAGE|...``; a bare ``/challenge`` means it
   was cancelled or resolved. Accept with ``|/utm null`` + ``|/accept FROM``, refuse with ``|/reject FROM``.
 * The server joins both players to the battle room (``>battle-...`` + ``|init|battle``) and lists running games
@@ -15,10 +16,13 @@ import asyncio
 import json
 import logging
 import time
+from collections import deque
 from pathlib import Path
 
+import aiohttp
 import websockets
 
+from play.auth import AuthError, Credentials, login_assertion, redact_traffic
 from play.driver import FORMAT, BattleRoom, BotLog, BotWorker, to_id
 
 log = logging.getLogger("play")
@@ -26,13 +30,15 @@ log = logging.getLogger("play")
 FORMAT_NAME = "[Gen 9] Random Doubles Battle"
 HELP = (f"Hi! I play {FORMAT_NAME} only. Challenge me to that format, or PM me \"challenge\" and I will "
         f"challenge you.")
+BUSY = "Sorry, I am playing {n} battles already. Please try again in a few minutes."
 
 
 class ShowdownClient:
     """A bot account on the Showdown server. ``run`` keeps it connected until ``stop``."""
 
     def __init__(self, worker: BotWorker, url: str, bot_log: BotLog, log_dir: Path | None, timer: bool = False,
-                 room_options: dict | None = None):
+                 room_options: dict | None = None, credentials: Credentials | None = None,
+                 max_battles: int | None = None):
         self.worker = worker
         self.name = worker.name
         self.userid = to_id(worker.name)
@@ -41,12 +47,20 @@ class ShowdownClient:
         self.log_dir = log_dir
         self.timer = timer
         self.room_options = dict(room_options or {})  # extra BattleRoom keywords (observer, timing, rating_wait_s)
+        self.credentials = credentials  # None: passwordless login (local server)
+        self.max_battles = max_battles  # None: accept every challenge
+        self.http: aiohttp.ClientSession | None = None
+        self.auth_failures = 0
+        self.login_task: asyncio.Task | None = None
         self.ws = None
         self.send_lock = asyncio.Lock()
         self.logged_in = asyncio.Event()
         self.stopping = False
         self.rooms: dict[str, BattleRoom] = {}
         self.games: set[str] = set()
+        self.pending_challenges: dict[str, float] = {}  # userid -> monotonic expiry
+        self.pm_cooldowns: dict[str, float] = {}
+        self.pm_times: deque[float] = deque()
         self.finished: asyncio.Queue[BattleRoom] = asyncio.Queue()
         self.helped: set[str] = set()
         self.done_rooms: set[str] = set()  # finished battles: never rejoined
@@ -60,13 +74,13 @@ class ShowdownClient:
     async def send(self, text: str) -> None:
         ws = self.ws
         if ws is None:
-            log.warning("%s: not connected, dropped %r", self.name, text)
+            log.warning("%s: not connected, dropped %r", self.name, redact_traffic(text))
             return
         async with self.send_lock:
             try:
                 await ws.send(text)
             except websockets.ConnectionClosed:
-                log.warning("%s: connection closed, dropped %r", self.name, text)
+                log.warning("%s: connection closed, dropped %r", self.name, redact_traffic(text))
 
     # -- connection ------------------------------------------------------------------------------------------
 
@@ -91,22 +105,34 @@ class ShowdownClient:
                     log.warning("%s: connection to %s failed: %s", self.name, self.url, error)
             finally:
                 self.ws = None
+                await self._cancel_login()
                 self.logged_in.clear()
                 self._abandon_rooms()
             if not self.stopping:
-                await asyncio.sleep(backoff)
+                # A refused login waits longer, so a wrong password does not hammer the login server.
+                await asyncio.sleep(max(backoff, min(60.0 * self.auth_failures, 600.0)))
                 backoff = min(backoff * 2, 30.0)
 
     async def stop(self) -> None:
         self.stopping = True
+        await self._cancel_login()
         tasks = [room.task for room in self.rooms.values() if room.task is not None]
         self._abandon_rooms()
         if tasks:
             await asyncio.wait(tasks, timeout=10)
         if self.ws is not None:
             await self.ws.close()
+        if self.http is not None:
+            await self.http.close()
+
+    async def _cancel_login(self) -> None:
+        task, self.login_task = self.login_task, None
+        if task is not None:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
 
     def _abandon_rooms(self) -> None:
+        self.pending_challenges.clear()
         for room in list(self.rooms.values()):
             room.stop()
         # on_end removes them; until their tasks finish they no longer receive messages
@@ -123,7 +149,8 @@ class ShowdownClient:
             return
         for line in message.split("\n"):
             if line.startswith("|challstr|"):
-                asyncio.create_task(self.login(line[len("|challstr|"):]))
+                if not self.stopping and self.ws is not None and (self.login_task is None or self.login_task.done()):
+                    self.login_task = asyncio.create_task(self._login(self.ws, line[len("|challstr|"):]))
             elif line.startswith("|updateuser|"):
                 self._on_updateuser(line)
             elif line.startswith("|nametaken|"):
@@ -135,10 +162,35 @@ class ShowdownClient:
             elif line.startswith("|popup|"):
                 log.warning("%s: popup: %s", self.name, line[len("|popup|"):].replace("||", " "))
 
+    async def _login(self, ws, challstr: str) -> None:
+        if not self.stopping and self.ws is ws:
+            await self.login(challstr)
+
     async def login(self, challstr: str) -> None:
         """Answer the server's challenge string: here a passwordless login (``noguestsecurity`` servers). A registered
-        account overrides this with an assertion from the login server."""
-        await self.send(f"|/trn {self.name},0,")
+        account (``credentials``) logs in with an assertion from the login server."""
+        ws = self.ws
+        if self.stopping or ws is None:
+            return
+        if self.credentials is None:
+            await self.send(f"|/trn {self.name},0,")
+            return
+        if self.http is None:
+            self.http = aiohttp.ClientSession()
+        try:
+            assertion = await login_assertion(self.http, self.credentials.username, self.credentials.password,
+                                              challstr)
+        except AuthError as error:
+            if self.stopping or self.ws is not ws:
+                return
+            self.auth_failures += 1
+            log.error("%s: login failed (%d in a row): %s", self.name, self.auth_failures, error)
+            await ws.close()
+            return
+        if self.stopping or self.ws is not ws:
+            return
+        self.auth_failures = 0
+        await self.send(f"|/trn {self.name},0,{assertion}")
 
     def _on_updateuser(self, line: str) -> None:
         parts = line.split("|")
@@ -179,9 +231,17 @@ class ShowdownClient:
         sender_id = to_id(sender)
         if to_id(receiver) != self.userid or sender_id == self.userid:
             return
-        if text.startswith("/challenge "):
+        if text == "/challenge":
+            self.pending_challenges.pop(sender_id, None)
+        elif text.startswith("/challenge "):
             challenge_format = to_id(text[len("/challenge "):].split("|", 1)[0])
-            if challenge_format == FORMAT:
+            self.busy()  # expire old reservations before checking for a duplicate
+            if challenge_format == FORMAT and sender_id in self.pending_challenges:
+                return
+            if challenge_format == FORMAT and not self._reserve_challenge(sender_id):
+                log.info("%s: busy, rejecting challenge from %s", self.name, sender_id)
+                asyncio.create_task(self._reject_busy(sender_id))
+            elif challenge_format == FORMAT:
                 log.info("%s: accepting %s challenge from %s", self.name, FORMAT, sender_id)
                 asyncio.create_task(self._accept(sender_id))
             else:
@@ -190,20 +250,64 @@ class ShowdownClient:
         elif text.startswith("/"):
             return  # cancelled challenges, /log, /nonotify, /text, /raw ...
         elif "challenge" in text.lower():
-            asyncio.create_task(self.challenge(sender_id))
-        elif sender_id not in self.helped:
+            if not self._allow_pm(sender_id):
+                return
+            if self.busy():
+                asyncio.create_task(self.send(f"|/pm {sender_id}, {BUSY.format(n=self.max_battles)}"))
+            elif self._reserve_challenge(sender_id):
+                asyncio.create_task(self._challenge(sender_id))
+        elif sender_id not in self.helped and self._allow_pm(sender_id):
             self.helped.add(sender_id)
             asyncio.create_task(self.send(f"|/pm {sender_id}, {HELP}"))
 
+    def busy(self) -> bool:
+        """Count running battles and reserved slots for challenges not yet in a room."""
+        now = time.monotonic()
+        self.pending_challenges = {user: expiry for user, expiry in self.pending_challenges.items() if expiry > now}
+        running = (self.games | set(self.rooms)) - self.done_rooms
+        return self.max_battles is not None and len(running) + len(self.pending_challenges) >= self.max_battles
+
+    def _reserve_challenge(self, userid: str) -> bool:
+        if self.stopping or self.busy() or userid in self.pending_challenges:
+            return False
+        self.pending_challenges[userid] = time.monotonic() + 60.0
+        return True
+
+    def _allow_pm(self, userid: str) -> bool:
+        now = time.monotonic()
+        self.pm_cooldowns = {user: expiry for user, expiry in self.pm_cooldowns.items() if expiry > now}
+        while self.pm_times and self.pm_times[0] <= now - 30.0:
+            self.pm_times.popleft()
+        if userid in self.pm_cooldowns or len(self.pm_times) >= 5:
+            return False
+        self.pm_cooldowns[userid] = now + 30.0
+        self.pm_times.append(now)
+        return True
+
+    async def _reject_busy(self, userid: str) -> None:
+        await self.send(f"|/reject {userid}")
+        if self._allow_pm(userid):
+            await self.send(f"|/pm {userid}, {BUSY.format(n=self.max_battles)}")
+
     async def _accept(self, userid: str) -> None:
+        if userid not in self.pending_challenges:
+            return
         await self.send("|/utm null")
         await self.send(f"|/accept {userid}")
 
     async def _reject(self, userid: str, challenge_format: str) -> None:
         await self.send(f"|/reject {userid}")
-        await self.send(f"|/pm {userid}, Sorry, I only play {FORMAT_NAME} ({FORMAT}), not {challenge_format}.")
+        if self._allow_pm(userid):
+            await self.send(f"|/pm {userid}, Sorry, I only play {FORMAT_NAME} ({FORMAT}), not {challenge_format}.")
 
     async def challenge(self, user: str) -> None:
+        userid = to_id(user)
+        if self._reserve_challenge(userid):
+            await self._challenge(userid)
+
+    async def _challenge(self, user: str) -> None:
+        if user not in self.pending_challenges:
+            return
         log.info("%s: challenging %s to %s", self.name, user, FORMAT)
         await self.send("|/utm null")
         await self.send(f"|/challenge {to_id(user)}, {FORMAT}")
@@ -220,6 +324,11 @@ class ShowdownClient:
                 return
             room = self._open_room(roomid, rejoined=roomid in self.rejoining)
             self.rejoining.discard(roomid)
+        for line in rest.splitlines():
+            if line.startswith("|player|"):
+                parts = line.split("|")
+                if len(parts) >= 4 and to_id(parts[3]) != self.userid:
+                    self.pending_challenges.pop(to_id(parts[3]), None)
         room.push(received_at, message)
 
     def _open_room(self, roomid: str, rejoined: bool = False) -> BattleRoom:
@@ -244,6 +353,7 @@ class ShowdownClient:
             del self.rooms[room.room]
         if room.ended:
             self.done_rooms.add(room.room)
+            self.games.discard(room.room)
             self.battles_played += 1
             result = room.result or {}
             outcome = "tie" if result.get("tie") else f"winner {result.get('winner')}"
