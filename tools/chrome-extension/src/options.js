@@ -3,7 +3,7 @@
   'use strict';
   const S = globalThis.NumbrionSettings;
   const $ = (id) => document.getElementById(id);
-  const fields = ['enabled', 'autoAdvise', 'showBotLog', 'apiUrl', 'budgetMs', 'bot'];
+  const fields = ['enabled', 'autoAdvise', 'showBotLog', 'showDepth2', 'apiUrl', 'budgetMs', 'bot'];
   let savedTimer = null;
   let apiStatus = null;
   let statusUrl = '';
@@ -29,6 +29,7 @@
     $('enabled').checked = settings.enabled;
     $('autoAdvise').checked = settings.autoAdvise;
     $('showBotLog').checked = settings.showBotLog;
+    $('showDepth2').checked = settings.showDepth2;
     $('apiUrl').value = settings.apiUrl;
     $('budgetMs').value = settings.budgetMs || '';
     ensureBotOption(settings.bot);
@@ -47,6 +48,7 @@
       enabled: $('enabled').checked,
       autoAdvise: $('autoAdvise').checked,
       showBotLog: $('showBotLog').checked,
+      showDepth2: $('showDepth2').checked,
       apiUrl: $('apiUrl').value,
       budgetMs: $('budgetMs').value,
       bot: $('bot').value,

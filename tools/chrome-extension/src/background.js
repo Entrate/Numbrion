@@ -1,6 +1,6 @@
 /*
  * Service worker: the only part that talks to the advisor API (docs/play/ADVISOR-API.md). Content scripts send
- * {type: "advise" | "botLog" | "status"} messages; the worker adds the API URL, budget and bot from the settings
+ * {type: "advise" | "adviseResult" | "botLog" | "status"} messages; the worker adds the API URL, budget and bot from the settings
  * and answers {ok, data} or {ok: false, error, offline}. Fetching from here (with host permissions) avoids the
  * page's CORS and mixed-content rules.
  */
@@ -90,6 +90,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message !== 'object') return false;
   let work = null;
   if (message.type === 'advise') work = advise(message.body);
+  // The server holds this GET for up to 20 s. Allow another 5 s for transport, then keep the layer-1 pick.
+  else if (message.type === 'adviseResult' && typeof message.adviseId === 'string' && message.adviseId) {
+    work = callApi('/api/advise/' + encodeURIComponent(message.adviseId) + '?timeout=20', {}, 25000);
+  }
   else if (message.type === 'botLog') work = callApi('/api/bot-log?room=' + encodeURIComponent(message.room), {}, 8000);
   else if (message.type === 'status') work = callApi('/api/status', {}, 5000);
   else if (message.type === 'ladder') work = ladder(message.username, message.force === true);

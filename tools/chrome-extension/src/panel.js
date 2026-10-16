@@ -118,6 +118,10 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
 .bar.value > i.pos { background: #6b9b56; } .bar.value > i.neg { background: #be726d; }
 .bar.value::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--muted); }
 .note { margin-top: 6px; color: var(--muted); font-size: 11px; }
+.search-phase { display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 10px; color: var(--muted); }
+.depth2 { margin-top: 7px; border-top: 1px solid var(--line); font-size: 10px; }
+.depth2 .chosen .ctext { font-weight: 700; color: var(--best-text); }
+.depth2-values { display: flex; flex-wrap: wrap; gap: 3px 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .note.history { margin: -2px 0 6px; }
 .log { padding: 4px 0; border-top: 1px solid var(--line); }
 .log .lh { color: var(--muted); font-size: 11px; }
@@ -161,9 +165,9 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
   const pct = (x) => Math.round(clamp01(x) * 100) + '%';
   const signed = (x) => (x >= 0 ? '+' : '') + Number(x).toFixed(2);
 
-  function winBadge(probability) {
+  function winBadge(probability, layer1) {
     const win = Number.isFinite(probability) ? pct(probability) : null;
-    return el('div', { class: 'win', title: win === null ? 'Win probability unavailable for this turn' : 'Estimated chance of winning the battle with the recommended play', 'aria-label': win === null ? 'Win probability unavailable' : 'Estimated win probability: ' + win },
+    return el('div', { class: 'win', title: win === null ? 'Win probability unavailable for this turn' : layer1 ? 'Layer-1 estimate of winning with the final play' : 'Estimated chance of winning the battle with the recommended play', 'aria-label': win === null ? 'Win probability unavailable' : (layer1 ? 'Layer-1 estimated win probability: ' : 'Estimated win probability: ') + win },
       el('span', { class: 'pct', text: win === null ? '—' : win }), el('span', { class: 'label', text: 'win' }));
   }
 
@@ -326,7 +330,7 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       this.roomEl.textContent = text;
       this.roomEl.title = view.header || view.roomid || '';
       this.headerWin.style.display = this.collapsed && view.advice ? '' : 'none';
-      this.headerWin.replaceChildren(...(this.collapsed && view.advice ? [winBadge(view.advice.winProbability)] : []));
+      this.headerWin.replaceChildren(...(this.collapsed && view.advice ? [winBadge(view.advice.winProbability, !!view.advice.depth2)] : []));
     }
 
     renderAdvisorStatus(view) {
@@ -393,11 +397,30 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       if (advice) {
         const best = el('section', { class: 'recommended', 'aria-label': 'Recommended play' });
         best.append(el('div', { class: 'recommendation-head' }, el('span', { class: 'badge', text: 'Recommended play' }),
-          winBadge(advice.winProbability)));
+          winBadge(advice.winProbability, !!advice.depth2)));
         for (const slot of advice.slots || []) {
           best.append(el('div', { class: 'slot' }, el('span', { class: 'mon', text: slot.pokemon || '' }), el('span', { class: 'act', text: (slot.text || '').replace(/\s*->\s*/g, ' → ') })));
         }
         if (!(advice.slots || []).length) best.append(el('div', { class: 'slot' }, el('span', { class: 'act', text: advice.summary || advice.choice || 'No choice available' })));
+        best.append(el('div', { class: 'search-phase', role: 'status', 'aria-live': 'polite' },
+          advice.deepening ? el('span', { class: 'dot busy' }) : null,
+          el('span', { text: advice.depth2 ? advice.depth2.text + (advice.depth2.time ? ' · layer 2 ' + advice.depth2.time : '')
+            : advice.phaseLabel + (advice.deepening ? ' · deepening…' : '') }),
+          advice.depth2Fallback ? el('span', { text: advice.depth2Fallback }) : null));
+        if (advice.depth2 && advice.depth2.skipped) best.append(el('div', { class: 'note', text: advice.depth2.skipped }));
+        if (advice.depth2 && advice.depth2.candidates.length) {
+          const rows = el('section', { class: 'depth2', 'aria-label': 'Layer-2 values' }, el('h4', { text: 'Layer-2 values' }));
+          for (const cand of advice.depth2.candidates) {
+            const values = [];
+            if (cand.weight !== null) values.push('L1 x ' + pct(cand.weight));
+            if (cand.value !== null) values.push('L1 q ' + signed(cand.value));
+            cand.q2.forEach((value, round) => values.push('Q2 r' + (round + 1) + ' ' + (value === null ? '—' : signed(value))));
+            rows.append(el('div', { class: 'cand' + (cand.chosen ? ' chosen' : '') },
+              el('div', { class: 'ctext', text: (cand.chosen ? '✓ ' : '') + String(cand.text || '').replace(/\s*->\s*/g, ' → ') }),
+              el('div', { class: 'depth2-values', title: 'x: layer-1 strategy weight; q: layer-1 value; Q2: layer-2 value per round' }, values.map((text) => el('span', { text })))));
+          }
+          best.append(rows);
+        }
         const play = view.play || {};
         best.append(el('div', { class: 'choice' }, el('button', {
           class: 'play',
@@ -460,6 +483,7 @@ h4 { margin: 9px 0 3px; font-size: 11px; color: var(--muted); }
       return [
         toggle('autoAdvise', 'Auto-advise'),
         toggle('showBotLog', 'Bot log'),
+        toggle('showDepth2', 'Layer-2 values'),
         el('span', { class: 'sp' }),
         el('button', { class: 'link', text: 'Advise now', title: 'Ask the advisor again for the current request', onclick: () => this.cb.onAdviseNow && this.cb.onAdviseNow() }),
       ];

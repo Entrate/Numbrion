@@ -16,6 +16,8 @@
   const ORIGIN = window.location.origin;
   const CLIENT_KEY = 'clientPreferencesV1:' + ORIGIN;
   const SETTLE_MS = 150;
+  const DEPTH2_POLL_MS = 20000; // ADVISOR-API.md: the long-poll timeout, not a short polling interval
+  const DEPTH2_MAX_POLLS = 6; // stop waiting after two minutes of pending responses
   const session = Math.random().toString(36).slice(2) + Date.now().toString(36);
 
   const store = new P.BattleStore();
@@ -67,6 +69,7 @@
   function shutdown() {
     if (!alive) return;
     alive = false;
+    for (const entry of advice.values()) stopDeepening(entry);
     window.removeEventListener('message', onPageMessage);
     for (const timer of settleTimers.values()) clearTimeout(timer);
     if (tickTimer) clearInterval(tickTimer);
@@ -122,7 +125,10 @@
 
   function afterSettingsChange(previous) {
     const advisorChanged = previous.apiUrl !== settings.apiUrl || previous.bot !== settings.bot || previous.budgetMs !== settings.budgetMs;
-    if (advisorChanged) advice.clear();
+    if (advisorChanged || !settings.enabled) {
+      for (const entry of advice.values()) stopDeepening(entry);
+      advice.clear();
+    }
     if (previous.apiUrl !== settings.apiUrl) { apiStatus = null; botLogs.clear(); }
     for (const [roomid, entry] of advice) {
       if (entry.status === 'offline' || entry.status === 'error') advice.delete(roomid);
@@ -170,7 +176,11 @@
         // A battle command the page sent: the user's choices make up the advise "history".
         if (data.replayFor && data.replayFor !== session) return;
         const room = store.noteOutgoing(String(data.data), data.source);
-        if (room) queueRender();
+        if (room) {
+          const entry = advice.get(room.roomid);
+          if (room.sentChoice && entry && room.sentChoice.rqid === entry.rqid) stopDeepening(entry);
+          queueRender();
+        }
         break;
       }
       case 'focus':
@@ -196,6 +206,10 @@
       return;
     }
     const { roomid } = result;
+    if (result.deinit || result.init || result.request || result.ended || result.room && result.room.sentChoice) {
+      stopDeepening(advice.get(roomid));
+      queueRender();
+    }
     if (result.ended && result.room && result.room.mySide) {
       // Rating writes can arrive a little after the win message. A second check covers that delay.
       for (const delay of [1000, 5000]) {
@@ -253,12 +267,65 @@
 
   // ------------------------------------------------------------- advice
 
+  function stopDeepening(entry) {
+    if (!entry) return;
+    // Latch invalidation even if the user later undoes their choice or rejoins the same room/rqid.
+    entry.cancelled = true;
+    entry.deepening = false;
+    clearTimeout(entry.depth2Timer);
+    if (entry.status === 'thinking') entry.status = 'cancelled';
+  }
+
+  function currentAdvice(roomid, entry) {
+    const room = store.get(roomid);
+    return alive && !entry.cancelled && advice.get(roomid) === entry && room && !room.ended && room.request &&
+      room.request.rqid === entry.rqid && room.request.seq === entry.seq &&
+      !(room.sentChoice && room.sentChoice.rqid === entry.rqid);
+  }
+
+  function depth2Fallback(entry, timedOut) {
+    entry.deepening = false;
+    entry.depth2Fallback = timedOut ? 'Layer 2 timed out; keeping 1-turn advice.' : 'Layer 2 unavailable; keeping 1-turn advice.';
+    queueRender();
+  }
+
+  function fetchDepth2(roomid, entry) {
+    if (!currentAdvice(roomid, entry)) return;
+    const started = Date.now();
+    entry.depth2Polls = (entry.depth2Polls || 0) + 1;
+    sendToWorker({ type: 'adviseResult', adviseId: entry.adviseId }).then((response) => {
+      if (!currentAdvice(roomid, entry)) return;
+      if (!response || !response.ok) {
+        depth2Fallback(entry, !!(response && /timed out/i.test(response.error || '')));
+        return;
+      }
+      const data = response.data || {};
+      if (data.superseded || data.room !== roomid || data.rqid !== entry.rqid || data.advise_id !== entry.adviseId) {
+        depth2Fallback(entry, false);
+        return;
+      }
+      if (data.phase === 1 && data.pending === true) {
+        if (entry.depth2Polls >= DEPTH2_MAX_POLLS) { depth2Fallback(entry, true); return; }
+        // A normal pending response arrives after 20 s. Also guard against a server answering it too early.
+        entry.depth2Timer = setTimeout(() => fetchDepth2(roomid, entry), Math.max(0, DEPTH2_POLL_MS - (Date.now() - started)));
+        return;
+      }
+      if (data.phase !== 2 || data.pending !== false || !data.decision) { depth2Fallback(entry, false); return; }
+      entry.result = data;
+      entry.deepening = false;
+      entry.finishedAt = Date.now();
+      entry.roundTripMs = entry.finishedAt - entry.startedAt;
+      queueRender();
+    });
+  }
+
   function adviseActive(force) {
     if (!alive) return;
     const roomid = activeRoomId;
     if (!roomid || !settings.enabled) return;
     const room = store.get(roomid);
     if (!room || !room.request || !P.isActionable(room.request) || room.ended) return;
+    if (room.sentChoice && room.sentChoice.rqid === room.request.rqid) return;
     if (!room.complete) {
       advice.set(roomid, { rqid: room.request.rqid, seq: room.request.seq, status: 'incomplete' });
       queueRender();
@@ -275,28 +342,39 @@
     if (current && current.status === 'thinking' && sameRequest && !force) return;
     const body = P.buildAdviseBody(room, {}, store);
     if (!body) return;
+    stopDeepening(current);
     const entry = { rqid: room.request.rqid, seq: room.request.seq, status: 'thinking', startedAt: Date.now(), bot: settings.bot || apiStatus && apiStatus.advisor || '' };
     advice.set(roomid, entry);
     ensureTicking();
     queueRender();
-    sendToWorker({ type: 'advise', body }).then((response) => {
-      const latest = store.get(roomid);
-      if (advice.get(roomid) !== entry) return; // superseded by a newer ask
-      if (!latest || !latest.request || latest.request.rqid !== entry.rqid || latest.request.seq !== entry.seq) {
-        advice.delete(roomid); // stale: the room moved on to another request
-        queueRender();
-        return;
-      }
+    const ask = async () => {
+      // Discover support before the first POST, including when a battle is focused before status arrives.
+      if (!apiStatus) await checkApi();
+      if (!currentAdvice(roomid, entry)) return null;
+      if (apiStatus && apiStatus.two_phase_advise === true) body.two_phase = true;
+      return sendToWorker({ type: 'advise', body });
+    };
+    ask().then((response) => {
+      if (!currentAdvice(roomid, entry)) return;
       entry.finishedAt = Date.now();
       entry.roundTripMs = entry.finishedAt - entry.startedAt;
       if (response && response.ok) {
         const data = response.data || {};
-        if (data.rqid !== undefined && data.rqid !== null && data.rqid !== entry.rqid) {
+        if (data.superseded) {
+          stopDeepening(entry);
+        } else if ((data.room !== undefined && data.room !== roomid) || (data.rqid !== undefined && data.rqid !== null && data.rqid !== entry.rqid)) {
           entry.status = 'error';
-          entry.error = 'answer for request ' + data.rqid + ', expected ' + entry.rqid;
+          entry.error = 'answer for a different room or request';
         } else {
           entry.status = data.decision ? 'done' : 'nochoice';
           entry.result = data;
+          if (data.pending === true && data.decision) {
+            if (data.phase === 1 && typeof data.advise_id === 'string' && data.advise_id) {
+              entry.adviseId = data.advise_id;
+              entry.deepening = true;
+              fetchDepth2(roomid, entry);
+            } else depth2Fallback(entry, false);
+          }
         }
         apiState = { kind: 'ok', text: 'API online', checkedAt: Date.now() };
         if (!apiStatus) checkApi();
@@ -364,8 +442,9 @@
     const room = store.get(roomid);
     const entry = advice.get(roomid);
     if (!room || !entry || entry.status !== 'done' || !room.request) return;
-    if (room.request.rqid !== entry.rqid) return;
+    if (room.request.rqid !== entry.rqid || room.request.seq !== entry.seq || room.ended || (room.sentChoice && room.sentChoice.rqid === entry.rqid)) return;
     const choice = entry.result.decision.choice;
+    stopDeepening(entry);
     playState.set(roomid, { rqid: entry.rqid, status: 'pending', message: 'Submitting…' });
     postToPage({
       type: 'play',
@@ -383,6 +462,7 @@
   function onPlayResult(data) {
     const roomid = String(data.roomid);
     const result = data.result || {};
+    if (result.ok && advice.get(roomid) && advice.get(roomid).rqid === data.rqid) stopDeepening(advice.get(roomid));
     playState.set(roomid, {
       rqid: data.rqid,
       status: result.ok ? 'sent' : 'failed',
@@ -508,6 +588,19 @@
       weight: num(reply.weight),
     }));
     const summary = slots.map((slot) => slot.text).join(' / ');
+    const depth = analysis.depth2;
+    const depth2 = depth && typeof depth === 'object' ? {
+      text: depth.changed ? 'Changed by layer 2' : depth.rounds > 0 ? 'Confirmed by layer 2' : 'Layer 2 skipped',
+      skipped: depth.skipped || '',
+      time: num(depth.total_ms) === null ? '' : seconds(depth.total_ms),
+      candidates: settings.showDepth2 && Array.isArray(depth.candidates) ? depth.candidates.map((cand) => ({
+        text: (analysis.candidates || []).find((item) => item.choice === cand.choice)?.text || cand.choice,
+        weight: num(cand.x),
+        value: num(cand.q),
+        q2: Array.isArray(cand.q2) ? cand.q2.map(num) : [],
+        chosen: cand.choice === depth.chosen,
+      })) : [],
+    } : null;
     return {
       choice: decision.choice,
       slots,
@@ -517,6 +610,10 @@
       opponent,
       note: analysis.note || '',
       summary,
+      depth2,
+      deepening: !!entry.deepening,
+      depth2Fallback: entry.depth2Fallback || '',
+      phaseLabel: analysis.source === 'search' ? '1-turn search' : analysis.source || 'Advice',
     };
   }
 
@@ -593,6 +690,8 @@
         : { kind: 'idle', text: 'Auto-advise is off: click “Advise now”', right };
     } else if (entry.status === 'thinking') {
       view.status = { kind: 'busy', text: 'Thinking… ' + seconds(Date.now() - entry.startedAt), right };
+    } else if (entry.status === 'cancelled') {
+      view.status = { kind: 'idle', text: 'Advice cancelled for this request', right };
     } else if (entry.status === 'offline') {
       view.status = { kind: 'error', text: entry.error + ' — start the play server or fix the URL in the options', right };
     } else if (entry.status === 'error') {

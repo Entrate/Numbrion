@@ -40,6 +40,9 @@
       return { kind: 'busy', text: config.searchEnabled === false ? 'Evaluating policy' : config.searchEnabled === true ? 'Search running' : 'Advisor running',
         detail: opts.elapsed || 'Waiting for the advisor.' };
     }
+    if (entry && entry.status === 'cancelled') {
+      return { kind: 'idle', text: 'Search stopped', detail: 'Late results for this request will be ignored.' };
+    }
     if (analysis.source === 'search') {
       return { kind: 'ok', text: 'Search used', detail: 'This recommendation includes search.' +
         (Number.isFinite(analysis.time_ms) ? ' ' + Math.round(analysis.time_ms) + ' ms.' : '') };

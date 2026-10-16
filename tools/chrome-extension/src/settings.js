@@ -8,6 +8,7 @@
     enabled: true,
     autoAdvise: true,
     showBotLog: true,
+    showDepth2: true,
     ladderUsername: '', // empty: use the player's current Showdown name
     ladderFormat: '', // empty: follow the main-menu battle format
   };
@@ -22,6 +23,7 @@
     s.enabled = s.enabled !== false;
     s.autoAdvise = s.autoAdvise !== false;
     s.showBotLog = s.showBotLog !== false;
+    s.showDepth2 = s.showDepth2 !== false;
     s.ladderUsername = String(s.ladderUsername || '').replace(/[|,;\r\n]/g, '').trim().slice(0, 30);
     s.ladderFormat = /^[a-z0-9]+$/.test(s.ladderFormat || '') ? s.ladderFormat : '';
     return s;
