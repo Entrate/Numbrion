@@ -6,8 +6,10 @@ import gzip
 import json
 import sqlite3
 import time
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import aiohttp
 import pytest
@@ -27,6 +29,35 @@ from training.player import DefaultBot
 ROOM = "battle-gen9randomdoublesbattle-1"
 PASSWORD = "do-not-record-this-password-492"
 ASSERTION = "do-not-record-this-assertion-539"
+
+
+@pytest.mark.parametrize("interrupted", [False, True])
+def test_keep_awake_macos_starts_and_stops_caffeinate(monkeypatch, interrupted):
+    process = Mock()
+    popen = Mock(return_value=process)
+    monkeypatch.setattr(ladder, "os", SimpleNamespace(name="posix", getpid=lambda: 1234))
+    monkeypatch.setattr(ladder, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(ladder, "subprocess", SimpleNamespace(Popen=popen))
+    with pytest.raises(RuntimeError, match="interrupted") if interrupted else nullcontext():
+        with ladder.KeepAwake():
+            popen.assert_called_once_with(["caffeinate", "-i", "-w", "1234"])
+            process.terminate.assert_not_called()
+            if interrupted:
+                raise RuntimeError("interrupted")
+    process.terminate.assert_called_once_with()
+    process.wait.assert_called_once_with()
+
+
+def test_keep_awake_macos_missing_caffeinate_warns(monkeypatch, caplog):
+    popen = Mock(side_effect=FileNotFoundError("caffeinate missing"))
+    monkeypatch.setattr(ladder, "os", SimpleNamespace(name="posix", getpid=lambda: 1234))
+    monkeypatch.setattr(ladder, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(ladder, "subprocess", SimpleNamespace(Popen=popen))
+    with ladder.KeepAwake():
+        pass
+    popen.assert_called_once_with(["caffeinate", "-i", "-w", "1234"])
+    assert "Could not start caffeinate" in caplog.text
+    assert "WARNING" in caplog.text
 
 
 def config(**updates):
@@ -540,6 +571,7 @@ def test_gzip_reopens_and_appends_without_losing_history(tmp_path):
 def test_supervisor_restart_resume_backoff_and_terminal_codes(tmp_path, monkeypatch, codes, limit, expected_starts):
     import os
 
+    monkeypatch.setattr(supervise, "KeepAwake", nullcontext)
     cfg = tmp_path / "config.json"
     cfg.write_text(json.dumps(config(local=True)))
     commands = []
@@ -572,6 +604,7 @@ def test_supervisor_ctrl_c_is_forwarded_and_never_restarts(tmp_path, monkeypatch
     import os
     import signal
 
+    monkeypatch.setattr(supervise, "KeepAwake", nullcontext)
     cfg = tmp_path / "config.json"
     cfg.write_text(json.dumps(config(local=True)))
     handlers, forwarded, starts = {}, [], []

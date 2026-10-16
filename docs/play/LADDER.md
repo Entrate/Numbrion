@@ -66,7 +66,7 @@ the room opens. Edit the file before a run, never during one.
   a recorder failure, a stuck decision, or three battles in a row with errors or more than two fallbacks), or more
   than 5 restarts in 30 minutes. Without the supervisor, run `ladder.py` with the same arguments; resume a run with
   `ladder.py --resume RUN_ID`.
-* The PC is kept awake while the bot runs.
+* Windows PCs and Macs are kept awake while the bot runs.
 
 Challenges from other users are refused, and the bot sends no messages.
 

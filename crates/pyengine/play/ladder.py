@@ -59,16 +59,31 @@ class ConfigError(ValueError):
 
 
 class KeepAwake:
-    """Set and release Windows' system-sleep request on the main thread."""
+    """Prevent idle sleep on Windows and macOS while the runner is active."""
+
+    def __init__(self):
+        self.caffeinate = None
 
     def __enter__(self):
         if os.name == "nt":
             ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x1)
+        elif sys.platform == "darwin":
+            try:
+                self.caffeinate = subprocess.Popen(["caffeinate", "-i", "-w", str(os.getpid())])
+            except OSError as error:
+                log.warning("Could not start caffeinate; idle sleep is still enabled: %s", error)
         return self
 
     def __exit__(self, *args):
         if os.name == "nt":
             ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
+        if self.caffeinate is not None:
+            try:
+                self.caffeinate.terminate()
+                self.caffeinate.wait()
+            except OSError as error:
+                log.warning("Could not stop caffeinate: %s", error)
+            self.caffeinate = None
 
 
 def absolute_path(value: str | Path) -> Path:
