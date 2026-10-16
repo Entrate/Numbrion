@@ -171,6 +171,15 @@ class BotWorker:
                 spec = {key: value for key, value in self.spec.items() if key not in DRIVER_KEYS}
                 log.info("%s: loading %s", self.name, self.spec["factory"])
                 self.bot = await self.run(load_bot, spec)
+                # Compatibility with SearchBot before its explicit budget constructor lands.
+                # New constructors create the controller themselves; do not replace a learned one.
+                if (spec.get("budget") is not None and getattr(self.bot, "budget", None) is None
+                        and getattr(self.bot, "net", None) is not None):
+                    from training.search_budget import BudgetController
+                    net = self.bot.net
+                    self.bot.budget = BudgetController.from_config(
+                        spec["budget"], getattr(net, "width", 128), getattr(net, "layers", 3),
+                        getattr(self.bot, "cell_ms", 0.3))
             loaded = time.perf_counter()
             what = await self.run(warm_up, self.bot)
             log.info("%s: ready (loaded in %.1f s%s)", self.name, loaded - started,

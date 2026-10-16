@@ -138,6 +138,11 @@ def load_config(path: Path | None, local: bool = False, base: dict | None = None
             or config["rating_wait_s"] < 0):
         raise ConfigError("rating_wait_s must be nonnegative")
     spec = config["bot"]
+    from play.search_config import validate_search_options
+    try:
+        validate_search_options(spec)
+    except (ValueError, TypeError) as error:
+        raise ConfigError(str(error)) from error
     spec["name"] = account
     if spec.get("checkpoint"):
         spec["checkpoint"] = str(absolute_path(spec["checkpoint"]))
