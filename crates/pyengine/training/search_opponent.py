@@ -28,6 +28,16 @@ training targets (docs/design/SEARCH-PREREQUISITES.md) for the seen Pokemon, on 
 cost ~25-35 ms per decision instead of ~4-5. Like any one-world search the targets average per-world best replies
 (strategy fusion) where multi-world search shares one strategy across worlds. Judge them by head-to-head results of
 the trained policy, never by the searcher's own score.
+
+Sleep exploration (``sleep_explore`` P > 0, shallow_labels.py ``--sleep-explore``): on a searched decision where a
+slot of the searching side has a legal sleep move with an effective target (training.sleep), with probability P the
+side plays a sleep-forced pair instead of the search's best: that slot uses a sleep code (slot and code drawn
+uniformly among the eligible ones), and the partner slot plays its part of the most weighted searched pair (by ``x``)
+that is jointly legal with it, else the policy's most likely pair with the sleep code fixed. The row is still labelled
+with the search's strategy, and carries ``sleep_forced`` (every row does when P > 0; shards also get the scalar
+``sleep_explore``). Every row also gets ``pre_forced``: its boundary is at or before the last sleep-forced decision
+(of either side) of its battle, so its game outcome reflects the intervention; training.distill.value_target gives
+those rows the search value only. Its random stream is separate, so P = 0 changes nothing.
 """
 from __future__ import annotations
 
@@ -43,6 +53,7 @@ import torch
 
 from .guards import MoveGuards
 from .search import _take, pair_candidates, solve_batch
+from .sleep import DEFAULT_SLEEP_MOVES, SleepMoves
 
 N_ACTIONS = 47
 LABEL_KEYS = ("ids", "floats", "field", "action_features", "token_features")
@@ -68,8 +79,10 @@ class LabelWriter:
     shard's ``teacher`` metadata), so a shard never mixes teachers; ``teacher_minutes`` is the group's oldest.
     At most ``size - 1`` rows remain buffered across all teachers after a successful add."""
 
-    def __init__(self, out: Path, size: int = 256, tag: str = ""):
+    def __init__(self, out: Path, size: int = 256, tag: str = "", metadata: dict | None = None):
+        """``metadata``: extra scalar arrays written into every shard (``sleep_explore``)."""
         self.out, self.size = Path(out), size
+        self.metadata = dict(metadata or {})
         self.out.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-%f")
         self.run = f"{stamp}-{tag}{uuid.uuid4().hex[:12]}"
@@ -106,6 +119,7 @@ class LabelWriter:
         arrays.update(teacher=np.asarray(teacher), teacher_minutes=np.asarray(min(minutes), np.float64),
                       created=np.asarray(time.time(), np.float64),
                       holdout=np.asarray(self.sequence % 20 == 19, dtype=bool))
+        arrays.update(self.metadata)
         path = self.out / f"labels-{self.run}-{self.sequence:06d}.npz"
         temporary = path.with_suffix(".npz.tmp")
         with temporary.open("wb") as stream:
@@ -144,12 +158,14 @@ class SearchOpponent:
 
     def __init__(self, dex_path: str, guards: MoveGuards, config: OpponentSearch | None = None, seed: int = 0,
                  labels: LabelWriter | None = None, threads: int = 1, bench_sets: tuple | None = None,
-                 value_model=None, fair_labels: bool = False):
+                 value_model=None, fair_labels: bool = False, sleep_explore: float = 0.0,
+                 sleep_moves=DEFAULT_SLEEP_MOVES):
         """``bench_sets``: (packed sets, species keys) from ``load_bench_sets`` to hide the learner's unseen
         Pokemon; None searches the true battle (the learner's bench included). ``value_model``: a fixed Model (any
         width / depth) for the leaf values; None uses the policy's own value head. ``fair_labels`` excludes labels
         when exact masks reveal more than the request, or when some unseen bench could not be replaced. The
-        search still plays those positions; the accepted seen-Pokemon leak in its targets remains."""
+        search still plays those positions; the accepted seen-Pokemon leak in its targets remains.
+        ``sleep_explore`` / ``sleep_moves``: sleep exploration (module docstring)."""
         import numbrion
 
         self.cfg = config or OpponentSearch()
@@ -163,7 +179,17 @@ class SearchOpponent:
         self.pending: dict[int, list] = {}  # env -> [(row, minutes, teacher, step, side)] until its battle ends
         self.steps: np.ndarray | None = None  # boundaries each env's current battle has passed (see end_step)
         self.released = 0  # rows handed to ``labels`` (finished battles and capped rows)
-        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0, swapped=0, unswapped=0, rejected_labels=0)
+        self.stats = dict(searched=0, forced=0, cells=0, seconds=0.0, swapped=0, unswapped=0, rejected_labels=0,
+                          sleep_eligible=0, sleep_forced=0)
+        self.sleep_explore = float(sleep_explore)
+        self.sleep = None
+        self.sleep_forced_envs: set[int] = set()  # envs whose last act() played a sleep-forced pair
+        self.last_forced: dict[int, int] = {}  # env -> boundary of its battle's latest sleep-forced decision
+        if self.sleep_explore > 0:
+            from .dex import load_dex
+
+            self.sleep = SleepMoves(load_dex(), sleep_moves)
+            self.sleep_rng = np.random.default_rng([seed, 5])  # its own stream: never moves the search's
 
     def end_step(self, done: np.ndarray, winner: np.ndarray, aborted: np.ndarray | None = None) -> None:
         """Call after every ``env.step`` (every env, searched or not): counts the boundary and releases the pending
@@ -187,7 +213,10 @@ class SearchOpponent:
 
     def _release(self, env: int, winner: int | None, steps: int | None) -> None:
         """``winner`` None (capped): NaN outcome and -1 steps; otherwise each row's outcome from its own side."""
+        last_forced = self.last_forced.pop(env, None)
         for row, minutes, teacher, step, side in self.pending.pop(env, []):
+            if self.sleep is not None:  # at or before the battle's last sleep-forced decision (either side)
+                row["pre_forced"] = np.bool_(last_forced is not None and step <= last_forced)
             row["outcome"] = np.float32(np.nan if winner is None else 0.0 if winner < 0 else
                                         1.0 if winner == side else -1.0)
             row["remaining_steps"] = np.int32(-1 if steps is None else steps - step - 1)
@@ -229,6 +258,7 @@ class SearchOpponent:
         shards' teacher metadata. Returns {env: (a0, a1)}."""
         started = time.perf_counter()
         cfg = self.cfg
+        self.sleep_forced_envs = set()
         battles = [env.clone_battle(int(e)) for e in envs]
         own = [b.legal_mask(side) for b in battles]
         choices, searched = {}, []
@@ -338,24 +368,77 @@ class SearchOpponent:
                 logp = theirs[k][1].astype(np.float64)  # tempered at 1.0: the log-prior itself
                 their_prior[k, :len(logp)] = np.exp(logp - logp.max())
         x, q = solve_batch(payoffs, our_prior, their_prior, cfg.anchor, cfg.opponent_anchor, cfg.iterations)
+        sleep = self._sleep_pairs(model, state, arrays, rows, own, ours, x) if self.sleep is not None else {}
         for k, e in enumerate(envs_s):
             pairs = ours[k][0]
-            best = int(np.argmax(x[k, :len(pairs)]))
-            choices[int(e)] = (int(pairs[best][0]), int(pairs[best][1]))
+            if k in sleep:
+                choices[int(e)] = sleep[k]
+                self.sleep_forced_envs.add(int(e))
+                self.last_forced[int(e)] = 0 if self.steps is None else int(self.steps[e])
+            else:
+                best = int(np.argmax(x[k, :len(pairs)]))
+                choices[int(e)] = (int(pairs[best][0]), int(pairs[best][1]))
             if self.labels is not None:
                 if not label_ok[k]:
                     self.stats["rejected_labels"] += 1
                     continue
                 step = 0 if self.steps is None else int(self.steps[e])
                 self.pending.setdefault(int(e), []).append(
-                    (self._label(arrays, int(rows[k]), own[k], ours[k], x[k], q[k]), minutes, teacher, step, side))
+                    (self._label(arrays, int(rows[k]), own[k], ours[k], x[k], q[k], k in sleep), minutes, teacher,
+                     step, side))
         self.stats["searched"] += B
         self.stats["cells"] += n
         self.stats["seconds"] += time.perf_counter() - started
         return choices
 
-    def _label(self, arrays: dict, row: int, mask: tuple, candidates: tuple, x: np.ndarray, q: np.ndarray) -> dict:
-        """One search_labels.make_label row for the searched decision at encoder row ``row``."""
+    def _sleep_pairs(self, model, state: dict, arrays: dict, rows: np.ndarray, own: list, ours: list,
+                     x: np.ndarray) -> dict:
+        """{k: sleep-forced pair} for the searched rows ``rows`` that explore sleep (module docstring)."""
+        forced = {}
+        for k in np.flatnonzero(self.sleep.has_sleep_move(arrays["ids"], rows)):
+            k = int(k)
+            options = self.sleep.options(arrays, int(rows[k]), own[k])
+            slots = [s for s in (0, 1) if options[s]]
+            if not slots:
+                continue
+            self.stats["sleep_eligible"] += 1
+            if self.sleep_rng.random() >= self.sleep_explore:
+                continue
+            slot = slots[int(self.sleep_rng.integers(len(slots)))]
+            code = options[slot][int(self.sleep_rng.integers(len(options[slot])))]
+            partner = self._sleep_partner(model, state, arrays, int(rows[k]), own[k], ours[k][0], x[k], slot, code)
+            forced[k] = (code, partner) if slot == 0 else (partner, code)
+            self.stats["sleep_forced"] += 1
+        return forced
+
+    def _sleep_partner(self, model, state: dict, arrays: dict, row: int, masks: tuple, pairs: np.ndarray,
+                       x: np.ndarray, slot: int, code: int) -> int:
+        """The partner slot's code next to sleep code ``code`` in ``slot``: its part of the most weighted searched
+        pair jointly legal with it, else of the policy's most likely pair with ``code`` fixed (guarded masks), else
+        the first legal code."""
+        joint = masks[1]
+        compatible = joint[code] if slot == 0 else joint[:, code]
+        for i in np.argsort(-x[:len(pairs)], kind="stable"):
+            if compatible[int(pairs[i][1 - slot])]:
+                return int(pairs[i][1 - slot])
+        restricted = np.zeros_like(joint)
+        if slot == 0:
+            first = np.zeros(N_ACTIONS, dtype=bool)
+            first[code] = True
+            restricted[code] = compatible
+        else:
+            first = compatible.copy()
+            restricted[:, code] = compatible
+        found = pair_candidates(model, _take(state, torch.tensor([row])), arrays["guard"][[row]], [(first, restricted)],
+                                1, N_ACTIONS, 1.0, self.guards)[0][0]
+        if len(found):
+            return int(found[0][1 - slot])
+        return int(np.flatnonzero(compatible)[0])
+
+    def _label(self, arrays: dict, row: int, mask: tuple, candidates: tuple, x: np.ndarray, q: np.ndarray,
+               sleep_forced: bool = False) -> dict:
+        """One search_labels.make_label row for the searched decision at encoder row ``row`` (plus ``sleep_forced``
+        when sleep exploration is on)."""
         pairs, _, full = candidates
         n = len(pairs)
         guard = arrays["guard"][row:row + 1]
@@ -376,4 +459,6 @@ class SearchOpponent:
                           value=np.float32(float(w @ q[:n])), partner_ids=arrays["ids"][partner].copy(),
                           partner_floats=arrays["floats"][partner, 0:6].copy(),
                           foe_match=arrays["foe_match"][row].copy())
+        if self.sleep is not None:
+            row_arrays["sleep_forced"] = np.bool_(sleep_forced)
         return row_arrays

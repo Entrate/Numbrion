@@ -20,6 +20,10 @@ weights on the env's true battle (training.search_opponent), which can write its
 learner's value head (no weight sync: it never changes). ``search_both``: side 1 of SEARCH envs searches too (each
 side hides the other's unseen bench); ``search_explore``: the share of searched decisions that play the learner's own
 sample at temperature 1 instead (the label is still the search's). shallow_labels.py uses both, with every env SEARCH.
+``search_sleep_explore``: the share of sleep-eligible searched decisions that play a sleep-forced pair
+(training.search_opponent; label: the search's); it takes precedence over ``search_explore`` when both fire. Search
+actors also count sleep onsets of their battles (training.sleep.SleepCounter): ``sleep_onsets`` (inflicted),
+``rest_sleeps`` and ``games_with_sleep`` (finished games with at least one inflicted sleep).
 """
 from __future__ import annotations
 
@@ -219,6 +223,10 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
         from training.search_opponent import LabelWriter, OpponentSearch, SearchOpponent, load_bench_sets
 
         labels_dir = model_config.get("search_labels")
+        sleep_explore = float(model_config.get("search_sleep_explore", 0.0))
+        sleep_metadata = dict(sleep_explore=np.asarray(sleep_explore, np.float64)) if sleep_explore > 0 else None
+        sleep_moves = ({} if model_config.get("search_sleep_moves") is None else
+                       dict(sleep_moves=tuple(model_config["search_sleep_moves"])))
         value_model = None
         if model_config.get("search_value"):
             value_state = torch.load(model_config["search_value"], map_location="cpu", weights_only=False)
@@ -227,14 +235,22 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             del value_state
         searcher = SearchOpponent(str(dex.path), guards, OpponentSearch(**model_config["search"]), seed=seed + 7,
                                   labels=LabelWriter(labels_dir, tag=f"a{begin}-",
-                                                     size=model_config.get("search_shard", 256)) if labels_dir else None,
+                                                     size=model_config.get("search_shard", 256),
+                                                     metadata=sleep_metadata) if labels_dir else None,
                                   bench_sets=load_bench_sets(pools), value_model=value_model,
-                                  fair_labels=model_config.get("search_fair_labels", False))
+                                  fair_labels=model_config.get("search_fair_labels", False),
+                                  sleep_explore=sleep_explore, **sleep_moves)
     search_both = bool(model_config.get("search_both", False))
     explore = float(model_config.get("search_explore", 0.0))
     explore_rng = np.random.default_rng([seed, 2])  # its own stream: exploring never moves the sampling stream
     versions = {"learner": -1, "opponent": -1}
     partner = np.arange(2 * count) ^ 1
+    sleep_counter = None
+    if searcher is not None:
+        from training.sleep import SleepCounter
+
+        sleep_counter = SleepCounter(2 * count)
+        env_slept = np.zeros(count, dtype=bool)  # an inflicted sleep happened in the env's current battle
 
     def observe(result):
         if hasattr(encoder, "encode_env"):
@@ -299,8 +315,10 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
             stats = dict(completed=0, turns=0, guarded=0, crashes=[])
             inference = teaching = searching = 0.0
             explored_count = 0
+            sleep_stats = dict(sleep_onsets=0, rest_sleeps=0, games_with_sleep=0)
             if searcher is not None:
-                searcher.stats.update(searched=0, forced=0, cells=0, seconds=0.0, rejected_labels=0)
+                searcher.stats.update(searched=0, forced=0, cells=0, seconds=0.0, rejected_labels=0, sleep_eligible=0,
+                                      sleep_forced=0)
                 labels_before = searcher.released
             for t in range(steps):
                 if not label_only:
@@ -343,6 +361,9 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                                                      side_rows // 2, result["needs_action"], argument["minutes"],
                                                      argument.get("label_teacher", "selfplay-search"), side=side)
                                 chosen.update({2 * e + side: pair for e, pair in picks.items()})
+                                if explored is not None and searcher.sleep_forced_envs:
+                                    # Sleep forcing takes precedence over exploration: those rows play its pair.
+                                    explored[[2 * e + side for e in searcher.sleep_forced_envs]] = False
                         if explored is not None:  # explored rows keep the learner's sample (label: the search's)
                             explored_count += int(explored[searched_index].sum())
                             searched_index = searched_index[~explored[searched_index]]
@@ -353,6 +374,8 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     mask1 = env.mask_slot1(np.where(active, a0, -1).reshape(count, 2).astype(np.int32)).reshape(-1, N_ACTIONS).copy()
                     mask1[~active] = False
                     mask1[~active, PASS] = True
+                    if explored is not None:  # rows that sleep forcing took over from exploration play no sample
+                        guard_rows = policy_rows | explored
                     mask1[guard_rows], guarded = guards.apply(mask1[guard_rows], b.guard[guard_rows], 1)
                     stats["guarded"] += int((guarded & train_rows[guard_rows]).sum())
                     lp1 = learner.slot1(state, vectors0, torch.from_numpy(a0.astype(np.int64)), torch.from_numpy(mask1)).numpy().copy()
@@ -393,6 +416,14 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                     searcher.end_step(result["done"], result["winner"], result["aborted"])
                 b = observe(result)
                 done = result["done"]
+                if sleep_counter is not None:
+                    onsets, rests = sleep_counter.update(b.floats, b.ids, np.repeat(done, 2))
+                    sleep_stats["sleep_onsets"] += int(onsets.sum())
+                    sleep_stats["rest_sleeps"] += int(rests.sum())
+                    # A finished battle's last turn is not observed (the env already shows the next battle).
+                    sleep_stats["games_with_sleep"] += int((done & env_slept).sum())
+                    env_slept[done] = False
+                    env_slept |= (onsets.reshape(count, 2).sum(1) > 0) & ~done
                 reward = result["reward"].reshape(-1).astype(np.float32)
                 # Potential-based, sums to zero over a battle (training.ppo.ko_shaping); the stored potential
                 # carries across rollouts, so a decayed or zero bonus still settles what was credited.
@@ -431,6 +462,9 @@ def _actor(connection, buffer_names, weight_names, n_envs, steps, begin, end, po
                 stats["search_written"] = searcher.labels.written if searcher.labels else 0
                 stats["search_explored"] = explored_count
                 stats["search_rejected_labels"] = searcher.stats["rejected_labels"]
+                stats["search_sleep_eligible"] = searcher.stats["sleep_eligible"]
+                stats["search_sleep_forced"] = searcher.stats["sleep_forced"]
+                stats.update(sleep_stats)
             stats.update({k: v.tolist() for k, v in results.items()})  # per env, this actor's slice
             stats.update(memory_mb())
             connection.send(stats)
@@ -456,7 +490,7 @@ class Actors:
                  teacher: bool = False, teacher_temperature: float = 0.0, search: dict | None = None,
                  search_labels: Path | None = None, search_value: Path | None = None, search_shard: int = 256,
                  search_both: bool = False, search_explore: float = 0.0, search_fair_labels: bool = False,
-                 label_only: bool = False):
+                 label_only: bool = False, search_sleep_explore: float = 0.0, search_sleep_moves=None):
         """``teacher``: the buffers hold teacher labels, written in rollouts started with ``teacher=True`` (smart
         player with Gumbel noise ``teacher_temperature``). ``search``: training.search_opponent.OpponentSearch
         fields for SEARCH envs (None: no search opponent); ``search_labels``: directory for its label shards
@@ -464,7 +498,9 @@ class Actors:
         ``search_both`` / ``search_explore``: see the module docstring (defaults: side 2 only, no exploration).
         ``search_fair_labels`` excludes decisions with nonpublic masks or an incompletely replaced unseen bench
         from label output, without changing play. shallow_labels.py enables it. ``label_only`` collects search
-        labels and stats without allocating PPO rollout buffers or evaluating unused rollout values."""
+        labels and stats without allocating PPO rollout buffers or evaluating unused rollout values.
+        ``search_sleep_explore`` / ``search_sleep_moves`` (None: training.sleep.DEFAULT_SLEEP_MOVES): sleep
+        exploration of the search's decisions (module docstring)."""
         if label_only and teacher:
             raise ValueError("label_only does not collect PPO teacher labels")
         self.n_envs, self.steps, self.teacher = n_envs, steps, teacher
@@ -480,7 +516,8 @@ class Actors:
                       search_labels=None if search_labels is None else str(search_labels),
                       search_value=None if search_value is None else str(search_value), search_shard=search_shard,
                       search_both=search_both, search_explore=search_explore, search_fair_labels=search_fair_labels,
-                      label_only=label_only)
+                      label_only=label_only, search_sleep_explore=search_sleep_explore,
+                      search_sleep_moves=None if search_sleep_moves is None else list(search_sleep_moves))
         context = mp.get_context("spawn")
         bounds = np.linspace(0, n_envs, workers + 1).astype(int)
         path = str(Path(__file__).resolve().parents[1])
@@ -529,7 +566,8 @@ class Actors:
         totals["teacher_seconds"] = max(r["teacher_seconds"] for r in replies)
         totals["search_seconds"] = max(r["search_seconds"] for r in replies)
         for key in ("search_decisions", "search_forced", "search_cells", "search_labels", "search_unswapped",
-                    "search_pending", "search_written", "search_explored", "search_rejected_labels"):
+                    "search_pending", "search_written", "search_explored", "search_rejected_labels",
+                    "search_sleep_eligible", "search_sleep_forced", "sleep_onsets", "rest_sleeps", "games_with_sleep"):
             totals[key] = sum(r.get(key, 0) for r in replies)
         # Per-env opponent results (actors own consecutive env slices, in order).
         for key in RESULT_KEYS:

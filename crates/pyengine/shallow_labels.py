@@ -11,6 +11,15 @@ other side's unseen bench. Position variety comes from ``--explore`` (as search_
 searched decision PLAYS a pair sampled from the teacher policy at temperature 1, but its label is still the search's
 strategy. The actors loop ``--steps``-boundary rollouts on the CPU (one torch thread each); nothing is trained.
 
+Sleep labels (``--sleep-explore P``, default 0 = off, bit-identical rows): on a searched decision where a slot of the
+acting side has a legal ``--sleep-moves`` move with an effective target (training.sleep documents the checks), with
+probability P that slot plays the sleep move and its partner the search's best compatible part (see
+training.search_opponent). The decision is still labelled with the search's strategy (the forced pair is never a
+policy target); it takes precedence over ``--explore`` when both fire. With P > 0 every row has ``sleep_forced`` and
+every shard the scalar ``sleep_explore`` (readers before this change reject such shards). Status lines count
+``sleep_forced`` / ``sleep_eligible`` decisions, inflicted ``sleep_onsets`` (Rest counted apart), finished
+``games_with_sleep`` and ``sleeps_per_1k_labels``.
+
 Each eligible searched decision of either side becomes one row of search_labels.py's format (obs, masks, pairs, x, q, prior, value = x.q,
 partner_ids / partner_floats / foe_match, outcome and remaining_steps), readable by distill_train.py and
 training.distill. A row is written when its battle ends; at shutdown the rows of battles still running are written as
@@ -52,6 +61,7 @@ from training.dex import load_dex  # noqa: E402
 from training.league import SEARCH  # noqa: E402
 from training.model import Model  # noqa: E402
 from training.search_opponent import OpponentSearch  # noqa: E402
+from training.sleep import DEFAULT_SLEEP_MOVES  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -78,6 +88,10 @@ def parse_args(argv=None):
     parser.add_argument("--search", default="{}", help="other OpponentSearch fields as JSON")
     parser.add_argument("--explore", type=float, default=0.25,
                         help="share of searched decisions that play a teacher sample at temperature 1 (label: the search's)")
+    parser.add_argument("--sleep-explore", type=float, default=0.0,
+                        help="share of sleep-eligible searched decisions that play a sleep move (label: the search's)")
+    parser.add_argument("--sleep-moves", default=",".join(DEFAULT_SLEEP_MOVES),
+                        help="comma-separated move ids that count as sleep moves")
     parser.add_argument("--nice", type=int, default=10, help="added niceness (0: none)")
     parser.add_argument("--status-seconds", type=float, default=45.0)
     args = parser.parse_args(argv)
@@ -93,6 +107,11 @@ def parse_args(argv=None):
         parser.error("--ours is at most 8 (the label width, training.search_opponent.LABEL_PAIRS)")
     if not 0 <= args.explore <= 1:
         parser.error("--explore must be in [0, 1]")
+    if not 0 <= args.sleep_explore <= 1:
+        parser.error("--sleep-explore must be in [0, 1]")
+    args.sleep_move_ids = [m.strip() for m in args.sleep_moves.split(",") if m.strip()]
+    if args.sleep_explore > 0 and not args.sleep_move_ids:
+        parser.error("--sleep-explore needs at least one --sleep-moves id")
     if args.workers < 1 or args.envs < args.workers or args.steps < 1 or args.shard < 1 or not args.minutes > 0:
         parser.error("workers, envs >= workers, steps, shard and minutes must be positive")
     return args
@@ -172,8 +191,10 @@ def generate(args, requested=None) -> dict:
     shape = model_shape(model)
     print(f"Teacher: {teacher.path.name} ({model.width}x{len(model.blocks)}), minutes={teacher.minutes:g}; "
           f"leaf values: {args.value_checkpoint.name if args.value_checkpoint else 'teacher'}; "
-          f"search {args.search_config}, both sides, explore {args.explore}", flush=True)
-    totals = dict(rollouts=0, decisions=0, forced=0, explored=0, labels=0, games=0, crashes=0, rejected_labels=0)
+          f"search {args.search_config}, both sides, explore {args.explore}, sleep explore {args.sleep_explore}",
+          flush=True)
+    totals = dict(rollouts=0, decisions=0, forced=0, explored=0, labels=0, games=0, crashes=0, rejected_labels=0,
+                  sleep_eligible=0, sleep_forced=0, sleep_onsets=0, rest_sleeps=0, games_with_sleep=0)
     started = time.monotonic()
     deadline = started + args.minutes * 60
     last_log, last_labels, last_time, last_cpu = started, 0, started, 0.0
@@ -190,6 +211,10 @@ def generate(args, requested=None) -> dict:
         line = dict(minutes=round(elapsed / 60, 2), labels=totals["labels"], pending=totals.get("pending", 0),
                     labels_per_s=round(totals["labels"] / elapsed, 1), recent_labels_per_s=round(recent, 1),
                     decisions=totals["decisions"], explored=totals["explored"], rejected_labels=totals["rejected_labels"],
+                    sleep_eligible=totals["sleep_eligible"], sleep_forced=totals["sleep_forced"],
+                    sleep_onsets=totals["sleep_onsets"], rest_sleeps=totals["rest_sleeps"],
+                    sleeps_per_1k_labels=round(1000 * totals["sleep_onsets"] / max(totals["labels"], 1), 2),
+                    games_with_sleep=totals["games_with_sleep"],
                     games=totals["games"], rollouts=totals["rollouts"], crashes=totals["crashes"],
                     written=totals.get("written", 0), disk_mb=round(size / 2 ** 20, 1),
                     bytes_per_label=round(size / max(totals.get("written", 0), 1)), teacher=teacher.path.name,
@@ -215,7 +240,8 @@ def generate(args, requested=None) -> dict:
     opponents = np.full(args.envs, SEARCH, dtype=np.int8)
     actors = Actors(args.envs, args.steps, [args.pool], args.seed, args.workers, model, search=args.search_config,
                     search_labels=args.out, search_value=args.value_checkpoint, search_shard=args.shard,
-                    search_both=True, search_explore=args.explore, search_fair_labels=True, label_only=True)
+                    search_both=True, search_explore=args.explore, search_fair_labels=True, label_only=True,
+                    search_sleep_explore=args.sleep_explore, search_sleep_moves=args.sleep_move_ids)
     try:
         actors.set_weights("learner", state["model"])
         actors.set_weights("opponent", state["model"])  # unused (no SNAPSHOT envs), but never uninitialised
@@ -247,6 +273,10 @@ def generate(args, requested=None) -> dict:
             totals["forced"] += collected["search_forced"]
             totals["explored"] += collected["search_explored"]
             totals["rejected_labels"] += collected.get("search_rejected_labels", 0)
+            totals["sleep_eligible"] += collected.get("search_sleep_eligible", 0)
+            totals["sleep_forced"] += collected.get("search_sleep_forced", 0)
+            for key in ("sleep_onsets", "rest_sleeps", "games_with_sleep"):
+                totals[key] += collected.get(key, 0)
             totals["labels"] += collected["search_labels"]
             totals["games"] += collected["completed"]
             totals["crashes"] += len(collected["crashes"])
