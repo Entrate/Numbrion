@@ -41,6 +41,7 @@ import websockets  # noqa: E402
 from play.auth import AuthError, Credentials, load_credentials, login_assertion  # noqa: E402
 from play.client import ShowdownClient  # noqa: E402
 from play.driver import BotLog, BotWorker, DecisionTiming, to_id  # noqa: E402
+from play.recording import BattleRecorder  # noqa: E402
 from play.runstore import RecorderError, RunStore, json_hash, safe_id  # noqa: E402
 
 log = logging.getLogger("play")
@@ -137,6 +138,16 @@ def load_config(path: Path | None, local: bool = False, base: dict | None = None
     if (not isinstance(config["rating_wait_s"], (int, float)) or not math.isfinite(config["rating_wait_s"])
             or config["rating_wait_s"] < 0):
         raise ConfigError("rating_wait_s must be nonnegative")
+    if config["stop"].get("file") is not None:
+        if not isinstance(config["stop"]["file"], str) or not config["stop"]["file"]:
+            raise ConfigError("stop.file must be a nonempty path")
+        config["stop"]["file"] = str(absolute_path(config["stop"]["file"]))
+    recording = config.get("record")
+    if recording is not None:
+        if not isinstance(recording, dict) or not isinstance(recording.get("dir"), str) or not recording["dir"]:
+            raise ConfigError("record needs a nonempty dir")
+        recording["dir"] = str(absolute_path(recording["dir"]))
+        config["bot"]["record_search"] = True
     spec = config["bot"]
     from play.search_config import validate_search_options
     try:
@@ -268,6 +279,8 @@ class LadderClient(ShowdownClient):
                          room_options={"observer": self, "timing": DecisionTiming.from_dict(config["timing"]),
                                        "rating_wait_s": config["rating_wait_s"]})
         self.config, self.store, self.credentials, self.session = config, store, credentials, session
+        self.recorder = (BattleRecorder(Path(config["record"]["dir"]) / store.run_id, store.clean)
+                         if config.get("record") else None)
         self.searching: set[str] = set()
         self.search_started: float | None = None
         self.reconcile_at = float("inf")
@@ -471,6 +484,8 @@ class LadderClient(ShowdownClient):
     def room_event(self, room, kind: str, data: dict) -> None:
         if kind == "decision":
             data = {**data, "battle_clock": getattr(room, "clock", None)}
+        if self.recorder:
+            self.recorder.emit(room.room, kind, data)
         self.store.room_event(room, kind, data)
         summary = self.summaries.setdefault(room.room, {"sources": Counter(), "notes": Counter(), "times": [],
                                                         "end": None, "rating": None, "fallbacks": 0,
@@ -631,6 +646,8 @@ class LadderClient(ShowdownClient):
 
     def check_limits(self) -> None:
         limits = self.config["stop"]
+        if limits.get("file") and Path(limits["file"]).is_file():
+            self.request_stop("stop file")
         if limits.get("minutes") is not None and time.time() - self.store.manifest["started"] >= limits["minutes"] * 60:
             self.request_stop("minutes limit")
         if limits.get("games") is not None and self.finished_count >= limits["games"]:
@@ -868,6 +885,8 @@ async def main(args: argparse.Namespace) -> int:
     finally:
         for sig, handler in old_signals.items():
             signal.signal(sig, handler)
+        if client and client.recorder:
+            client.recorder.close()
         if worker:
             worker.shutdown()
         if store:

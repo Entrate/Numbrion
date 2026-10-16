@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import threading
 import time
 import warnings
@@ -413,8 +414,9 @@ class SearchBot(Bot):
     def __init__(self, name: str = "Numbrion", checkpoint: str = "", search: dict | bool | None = None,
                  pools: list | None = None, device: str = "auto", policy_temperature: float = 0.5,
                  torch_threads: int | None = None, cell_ms: float = 0.3, value_checkpoint: str | None = None,
-                 budget: dict | None = None, **_):
+                 budget: dict | None = None, record_search: bool = False, **_):
         self.name = name
+        self.record_search = record_search
         self.dex = load_dex()
         if torch_threads:
             torch.set_num_threads(torch_threads)
@@ -739,6 +741,11 @@ class SearchPlayer(Player):
                                 agrees_with_policy=policy["choice"] == self._text(request, a0, a1))
         decision = self._finish(request, a0, a1, analysis, started)
         self.bot.observe_cost(result["timing"], result["cells"], analysis["time_ms"])
+        if getattr(self.bot, "record_search", False):
+            try:
+                analysis["search_record"] = search_record(result, worlds, side, request, pairs, self.battle)
+            except Exception:
+                logging.getLogger("play").exception("Search diagnostic capture failed")
         return decision
 
     def _depth2(self, request, cfg, plan, deadline, result, best: int, analysis: dict, started,
@@ -1193,6 +1200,7 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
     # again: in those worlds it is worth our best allowed pair (against the opponent's prior). Pairs that no world
     # allows stay invalid and get no weight in solve.
     legal = [v.copy() for v in valid]  # raw engine legality, before refusal imputation (for the second layer)
+    sampled_valid = legal if getattr(bot, "record_search", False) else None  # the ladder recorder's copy
     somewhere = np.any(valid, axis=0)
     for k in range(len(worlds)):
         if valid[k].any() and not valid[k][somewhere].all():
@@ -1232,4 +1240,41 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
                     their_prior=[t[1] if t is not None else None for t in their], legal=legal, payoffs=payoffs,
                     x=x, ys=ys, q=q, seeds=[np.asarray(s, dtype=np.int64).reshape(-1, 4) for s in world_seeds])
     return dict(x=x, q=q, cells=n, opponent=opponent, timing=timing, payoffs=payoffs, valid=valid, ys=ys,
-                worlds=worlds, layer1=layer1, stages=stages, threat_added=threat_added)
+                worlds=worlds, layer1=layer1, stages=stages, threat_added=threat_added,
+                sampled_valid=sampled_valid, counts=counts, their=their, our_prior=our_prior)
+
+def search_record(result: dict, worlds: list, side: int, request: dict, ours: np.ndarray, battle) -> dict:
+    """Diagnostic snapshot in matrix order. No RNG, model calls, or engine steps.
+
+    payoffs are the matrices passed to solve (including retry values for refused rows).
+    sampled_valid and counts distinguish simulated cells from those substituted rows.
+    q is the solver's final value for each of our candidates; world q = payoff @ y.
+    """
+    def numbers(a):
+        array = np.asarray(a)
+        return (array.round(6) if array.dtype.kind == "f" else array).tolist()
+
+    def choices(req, pairs):
+        return [choice_text(req, int(a), int(b)) for a, b in pairs]
+
+    opp = 1 - side
+    shown = tuple(battle.active.get(("p1", "p2")[side] + slot, "") for slot in "ab")
+    records = []
+    for k, world in enumerate(worlds):
+        their = result["their"][k]
+        pairs = their[0] if their is not None else np.full((1, 2), -1, dtype=np.int32)
+        req = json.loads(world.request_json(opp)) if their is not None else {}
+        texts = [[describe_code(req, slot, int(c), shown) for slot, c in enumerate(pair)]
+                 for pair in pairs] if their is not None else [["no action", "no action"]]
+        y, payoff = result["ys"][k], result["payoffs"][k]
+        records.append(dict(weight=round(1 / len(worlds), 6),
+                            team=_unpack_sets(world.teams[opp]), pairs=numbers(pairs),
+                            choices=choices(req, pairs) if their is not None else ["no action"], text=texts,
+                            prior=numbers(their[1]) if their is not None else [1.0], y=numbers(y),
+                            payoffs=numbers(payoff), q=numbers(payoff @ y),
+                            valid=numbers(result["valid"][k]),
+                            sampled_valid=numbers(result["sampled_valid"][k]),
+                            counts=numbers(result["counts"][k])))
+    return dict(version=1, side=side, pairs=numbers(ours), choices=choices(request, ours),
+                prior=numbers(result["our_prior"]), x=numbers(result["x"]), q=numbers(result["q"]),
+                worlds=records)
