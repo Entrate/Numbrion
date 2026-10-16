@@ -5,6 +5,17 @@
 
 The default is a fresh 128x3, four epochs, Adam at 1e-3 with cosine decay to zero. Each row is used once per epoch.
 Holdouts are whole shards, never sampled training rows. Checkpoints also support train_selfplay.py --resume.
+``--init CHECKPOINT`` (alias ``--checkpoint``) fine-tunes existing weights with a fresh optimizer and schedule.
+
+Label sets: ``--labels DIR[:weight[:value_mix[:max_rows]]] ...``. Plain paths (no suffix) form one set, exactly as
+before (``--value-target-mix`` for its value targets). As soon as one entry has a suffix, every entry is its own
+set: weight (default 1) is its share of the training stream, value_mix (default ``--value-target-mix``) the outcome
+share of its value targets, max_rows (``4M``, ``500k``, ...) keeps a seeded random subset of its training shards
+(and the same share of its held-out shards). Empty fields keep the default (``DIR::0.8``). Each set has its own
+held-out shards; an epoch is the sum of the sets' training rows, and every batch draws its rows from the sets in
+proportion to the weights (multinomial), from per-set shuffled streams that continue across epochs (a set whose
+share exceeds its size repeats rows, a smaller share leaves some unused in an epoch). Held-out scores are reported
+per set, each with its own value mix.
 """
 from __future__ import annotations
 
@@ -12,7 +23,9 @@ import argparse
 import json
 import math
 import os
+import re
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -55,6 +68,87 @@ def split_shards(paths, heldout=(), holdout_every=20):
     if not sum(info["size"] for _, info in train) or not sum(info["size"] for _, info in held):
         raise ValueError("training and held-out splits must contain rows")
     return train, held
+
+
+_SPEC_FIELD = re.compile(r"^(|\d+(\.\d*)?|\.\d+)([kKmM])?$")
+
+
+@dataclass
+class LabelSet:
+    """One ``--labels`` entry (see the module docstring); ``train`` / ``held`` are (path, info) shard entries."""
+    name: str
+    paths: list
+    weight: float = 1.0
+    value_mix: float = 0.5
+    max_rows: int | None = None
+    train: list = field(default_factory=list)
+    held: list = field(default_factory=list)
+
+    def describe(self) -> dict:
+        return dict(name=self.name, paths=[str(p) for p in self.paths], weight=self.weight, value_mix=self.value_mix,
+                    max_rows=self.max_rows, train_rows=sum(i["size"] for _, i in self.train),
+                    train_shards=len(self.train), heldout_shards=len(self.held))
+
+
+def _count(text: str) -> int:
+    scale = {"k": 1_000, "m": 1_000_000}.get(text[-1:].lower(), 1)
+    return int(round(float(text[:-1] if scale > 1 else text) * scale))
+
+
+def parse_label_spec(text: str) -> tuple[Path, list[str]]:
+    """``DIR[:weight[:value_mix[:max_rows]]]`` -> (path, the given fields). An existing path is taken whole, so
+    Windows drive letters and odd directory names still work."""
+    if Path(text).exists():
+        return Path(text), []
+    parts = str(text).split(":")
+    fields = []
+    while len(parts) > 1 and len(fields) < 3 and _SPEC_FIELD.match(parts[-1]):
+        fields.insert(0, parts.pop())
+    return Path(":".join(parts)), fields
+
+
+def label_sets(entries, default_mix: float) -> tuple[list[LabelSet], bool]:
+    """The label sets of ``--labels`` and whether they are the legacy single set (no entry has a suffix)."""
+    specs = [parse_label_spec(str(entry)) for entry in entries]
+    if not any(fields for _, fields in specs):
+        return [LabelSet("labels", [path for path, _ in specs], 1.0, default_mix)], True
+    sets, names = [], set()
+    for path, fields in specs:
+        fields = fields + [""] * (3 - len(fields))
+        name = path.stem if path.suffix == ".npz" else path.name or str(path)
+        base, k = name, 1
+        while name in names:
+            k += 1
+            name = f"{base}-{k}"
+        names.add(name)
+        sets.append(LabelSet(name, [path], float(fields[0]) if fields[0] else 1.0,
+                             float(fields[1]) if fields[1] else default_mix,
+                             _count(fields[2]) if fields[2] else None))
+    for s in sets:
+        if not (math.isfinite(s.weight) and s.weight >= 0 and 0 <= s.value_mix <= 1) or (
+                s.max_rows is not None and s.max_rows < 1):
+            raise ValueError(f"label set {s.name}: weight >= 0, value_mix in [0, 1], max_rows >= 1")
+    if not sum(s.weight for s in sets) > 0:
+        raise ValueError("label set weights must not all be zero")
+    return sets, False
+
+
+def cap_rows(train, held, max_rows, seed):
+    """A seeded random subset of whole training shards with at least ``max_rows`` rows (all of them if fewer), and
+    the same share of the held-out shards (at least one)."""
+    total = sum(info["size"] for _, info in train)
+    if max_rows is None or max_rows >= total:
+        return train, held
+    rng = np.random.default_rng(seed)
+    kept, rows = [], 0
+    for i in rng.permutation(len(train)):
+        if rows >= max_rows:
+            break
+        kept.append(train[i])
+        rows += train[i][1]["size"]
+    count = max(1, math.ceil(len(held) * rows / max(total, 1)))
+    return (sorted(kept, key=lambda e: e[0]),
+            sorted([held[i] for i in rng.permutation(len(held))[:count]], key=lambda e: e[0]))
 
 
 def compact(path, info, pairs=4, rows=None):
@@ -123,6 +217,54 @@ class Epochs:
                 yield to_batch(block, order[begin:begin + batch_size], device)
 
 
+class MixedEpochs:
+    """Label sets interleaved by weight (module docstring): every batch draws a multinomial number of rows from each
+    set's endless shuffled stream (its Epochs blocks, pass after pass), with a per-row ``value_mix`` column. An epoch
+    is the sum of the sets' training rows. Each set may keep ``resident_rows`` rows resident."""
+
+    def __init__(self, sets, pairs, resident_rows, buffer_rows):
+        self.sets = [s for s in sets if s.weight > 0]
+        self.streams = [Epochs(s.train, pairs, resident_rows, buffer_rows) for s in self.sets]
+        self.rows = sum(stream.rows for stream in self.streams)
+        weights = np.array([s.weight for s in self.sets], dtype=np.float64)
+        self.shares = weights / weights.sum()
+        self.sources = None
+        self.drawn = np.zeros(len(self.sets), dtype=np.int64)  # rows drawn per set (for reports and tests)
+
+    def _source(self, i, rng):
+        mix = np.float32(self.sets[i].value_mix)
+        while True:
+            for block in self.streams[i].blocks(rng):
+                order = rng.permutation(len(block["weight"]))
+                yield block, order, np.full(len(order), mix, np.float32)
+
+    def _take(self, i, count, rng):
+        parts = []
+        while count:
+            block, order, mixes, cursor = self.sources[i]
+            if cursor >= len(order):
+                self.sources[i] = [*next(self.generators[i]), 0]
+                continue
+            index = order[cursor:cursor + count]
+            parts.append({**{k: v[index] for k, v in block.items()}, "value_mix": mixes[:len(index)]})
+            self.sources[i][3] += len(index)
+            count -= len(index)
+        return parts
+
+    def batches(self, rng, batch_size, device):
+        if self.sources is None:  # the streams continue across epochs
+            self.generators = [self._source(i, rng) for i in range(len(self.sets))]
+            self.sources = [[*next(g), 0] for g in self.generators]
+        produced = 0
+        while produced < self.rows:
+            n = min(batch_size, self.rows - produced)
+            counts = rng.multinomial(n, self.shares)
+            parts = [part for i, c in enumerate(counts) if c for part in self._take(i, int(c), rng)]
+            self.drawn += counts
+            produced += n
+            yield to_batch(concat(parts), slice(None), device)
+
+
 @torch.no_grad()
 def score(model, entries, device, pairs=4, batch_size=256, value_mix=0.5, gamma=0.995):
     model.eval()
@@ -183,6 +325,39 @@ def save_checkpoint(path, model, optimizer, args, progress, rng, train, held):
     os.replace(temporary, path)
 
 
+def resolve_sets(args, previous):
+    """(label sets, legacy) for a new run, or the saved split of a resumed one."""
+    if args.resume:
+        if "sets" in previous:
+            sets = [LabelSet(s["name"], [Path(p) for p in s["paths"]], s["weight"], s["value_mix"], s.get("max_rows"),
+                             [(Path(p), DistillStream._inspect(Path(p))) for p in s["train"]],
+                             [(Path(p), DistillStream._inspect(Path(p))) for p in s["heldout"]])
+                    for s in previous["sets"]]
+            return sets, False
+        # Keep the split fixed across resumes, even if new shards arrived in a source directory.
+        legacy = LabelSet("labels", [], 1.0, args.value_target_mix,
+                          train=[(Path(p), DistillStream._inspect(Path(p))) for p in previous["train"]],
+                          held=[(Path(p), DistillStream._inspect(Path(p))) for p in previous["heldout"]])
+        return [legacy], True
+    sets, legacy = label_sets(args.labels, args.value_target_mix)
+    if legacy:
+        sets[0].train, sets[0].held = split_shards(sets[0].paths, args.heldout, args.holdout_every)
+        return sets, True
+    if args.heldout:
+        raise ValueError("--heldout works with a single plain --labels set; label sets hold out their own shards")
+    for i, s in enumerate(sets):
+        s.train, s.held = split_shards(s.paths, (), args.holdout_every)
+        s.train, s.held = cap_rows(s.train, s.held, s.max_rows, args.seed + i)
+    return sets, False
+
+
+def score_sets(model, sets, legacy, device, args):
+    """Held-out metrics: the legacy set's own dict, or one dict per label set (each with its value mix)."""
+    if legacy:
+        return score(model, sets[0].held, device, args.pairs, args.batch, args.value_target_mix, args.gamma)
+    return {s.name: score(model, s.held, device, args.pairs, args.batch, s.value_mix, args.gamma) for s in sets}
+
+
 def train(args):
     args.output.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -193,15 +368,13 @@ def train(args):
     previous = state.get("distill_training", {})
     if args.resume:
         if not previous:
-            raise ValueError("--resume needs a distill_train checkpoint; use --checkpoint to initialize from other models")
-        # Keep the split fixed across resumes, even if new shards arrived in a source directory.
-        train_entries = [(Path(p), DistillStream._inspect(Path(p))) for p in previous["train"]]
-        held = [(Path(p), DistillStream._inspect(Path(p))) for p in previous["heldout"]]
+            raise ValueError("--resume needs a distill_train checkpoint; use --init to initialize from other models")
         for key in ("pairs", "batch", "lr", "value_target_mix", "gamma", "value_coef", "aux_coef"):
             if getattr(args, key) != previous["config"][key]:
                 raise ValueError(f"--resume must keep {key}={previous['config'][key]}")
-    else:
-        train_entries, held = split_shards(args.labels, args.heldout, args.holdout_every)
+    sets, legacy = resolve_sets(args, previous)
+    train_entries = [entry for s in sets for entry in s.train]
+    held = [entry for s in sets for entry in s.held]
     dex = load_dex()
     model = (Model.from_state(dex, state["model"], state.get("width", 128), state.get("layers", 3)) if state else
              Model(dex, args.width, args.layers)).to(device)
@@ -213,14 +386,23 @@ def train(args):
         rng.bit_generator.state = previous["numpy_rng"]
         torch.set_rng_state(previous["torch_rng"])
         epoch, seen = previous["epoch"], previous["rows_seen"]
-    stream = Epochs(train_entries, args.pairs, args.resident_rows, args.shuffle_buffer)
+    if legacy:
+        stream = Epochs(train_entries, args.pairs, args.resident_rows, args.shuffle_buffer)
+        progress_sets = {}
+    else:
+        stream = MixedEpochs(sets, args.pairs, args.resident_rows, args.shuffle_buffer)
+        progress_sets = dict(sets=[dict(s.describe(), train=[str(p) for p, _ in s.train],
+                                        heldout=[str(p) for p, _ in s.held]) for s in sets])
     config = dict(vars(args), device=str(device), adapter_name=adapter, joint_features=model.joint_features,
                   train_rows=stream.rows,
                   train_shards=len(train_entries), heldout_shards=len(held),
                   train=[str(p) for p, _ in train_entries], held=[str(p) for p, _ in held])
+    if not legacy:
+        config["sets"] = [s.describe() for s in sets]
+        print("Label sets: " + json.dumps(config["sets"]), flush=True)
     (args.output / "config.json").write_text(json.dumps(config, default=str, indent=2) + "\n")
     started = time.monotonic()
-    metrics = score(model, held, device, args.pairs, args.batch, args.value_target_mix, args.gamma)
+    metrics = score_sets(model, sets, legacy, device, args)
     print(json.dumps(dict(epoch=epoch, heldout=metrics)), flush=True)
     with (args.output / "metrics.jsonl").open("a") as log:
         while epoch < args.epochs:
@@ -245,16 +427,18 @@ def train(args):
                 supervised += counts
                 seen += count
             epoch += 1
-            metrics = score(model, held, device, args.pairs, args.batch, args.value_target_mix, args.gamma)
+            metrics = score_sets(model, sets, legacy, device, args)
             row = dict(epoch=epoch, rows_seen=seen, lr=optimizer.lr,
                        train=dict(zip(("policy_loss", "value_mse", "aux_loss", "agree"),
                                       (totals / np.array([stream.rows, *np.maximum(supervised, 1), stream.rows])).tolist())),
                        heldout=metrics, seconds=time.monotonic() - started)
+            if not legacy:
+                row["train"]["rows_drawn_per_set"] = dict(zip((s.name for s in stream.sets), stream.drawn.tolist()))
             print(json.dumps(row), flush=True)
             log.write(json.dumps(row) + "\n")
             log.flush()
-            save_checkpoint(args.output / "latest.pt", model, optimizer, args, dict(epoch=epoch, rows_seen=seen),
-                            rng, train_entries, held)
+            save_checkpoint(args.output / "latest.pt", model, optimizer, args,
+                            dict(epoch=epoch, rows_seen=seen, **progress_sets), rng, train_entries, held)
     result = dict(epoch=epoch, rows_seen=seen, heldout=metrics, seconds=time.monotonic() - started)
     (args.output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
@@ -267,7 +451,8 @@ def parse_args(argv=None):
     scoring = commands.add_parser("score")
     scoring.add_argument("checkpoint", type=Path)
     for sub in (training, scoring):
-        sub.add_argument("--labels", type=Path, nargs="+", default=[])
+        sub.add_argument("--labels", nargs="+", default=[], metavar="DIR[:weight[:value_mix[:max_rows]]]",
+                         help="label shards or directories; with a suffix, each entry is its own label set")
         sub.add_argument("--heldout", type=Path, nargs="+", default=[])
         sub.add_argument("--holdout-every", type=int, default=20)
         sub.add_argument("--pairs", type=int, default=4)
@@ -279,7 +464,8 @@ def parse_args(argv=None):
         sub.add_argument("--gamma", type=float, default=0.995)
     training.add_argument("--output", type=Path, required=True)
     source = training.add_mutually_exclusive_group()
-    source.add_argument("--checkpoint", type=Path, help="initialize weights from a model, with a fresh optimizer")
+    source.add_argument("--init", "--checkpoint", dest="checkpoint", type=Path,
+                        help="initialize weights from a model (fine-tuning), with a fresh optimizer and schedule")
     source.add_argument("--resume", type=Path, help="continue label training at the last completed epoch")
     training.add_argument("--width", type=int, default=128)
     training.add_argument("--layers", type=int, default=3)
@@ -294,6 +480,10 @@ def parse_args(argv=None):
     if (not 0 <= args.value_target_mix <= 1 or not 0 < args.gamma <= 1 or
             min(args.batch, args.pairs, args.torch_threads) < 1 or args.holdout_every < 2):
         parser.error("invalid mix, gamma, batch, pairs, threads or holdout interval")
+    try:
+        label_sets(args.labels, args.value_target_mix)
+    except ValueError as error:
+        parser.error(str(error))
     if args.command == "train":
         if not args.labels and not args.resume:
             parser.error("train needs --labels or --resume")
@@ -314,7 +504,14 @@ def main():
         device, _ = training_device(args.device, args.adapter)
         model = Model.from_state(load_dex(), state["model"], state.get("width", 128), state.get("layers", 3)).to(device)
         if args.labels:
-            _, held = split_shards(args.labels, args.heldout, args.holdout_every)
+            sets, legacy = label_sets(args.labels, args.value_target_mix)
+            if not legacy:
+                for s in sets:
+                    s.held = split_shards(s.paths, (), args.holdout_every)[1]
+                print(json.dumps({s.name: score(model, s.held, device, args.pairs, args.batch, s.value_mix, args.gamma)
+                                  for s in sets}), flush=True)
+                return
+            _, held = split_shards(sets[0].paths, args.heldout, args.holdout_every)
         else:
             paths = args.heldout or state.get("distill_training", {}).get("heldout", [])
             held = [(p, DistillStream._inspect(p)) for p in files_in(paths)]

@@ -28,8 +28,10 @@ OBS_KEYS = ("ids", "floats", "field", "action_features", "token_features")
 STATE_SHARED = ("tables",)
 ROW_KEYS = (*OBS_KEYS, "x", "pairs", "mask0", "mask1", "prior", "q", "value")
 VALUE_KEYS = ("partner_ids", "partner_floats", "outcome", "remaining_steps")
-OPTIONAL_ROW_KEYS = (*VALUE_KEYS, "foe_match")
+# ``sleep_forced``: the decision played a sleep-forced pair (shallow_labels.py --sleep-explore); informational only.
+OPTIONAL_ROW_KEYS = (*VALUE_KEYS, "foe_match", "sleep_forced")
 META_KEYS = ("teacher", "teacher_minutes", "created", "holdout")
+OPTIONAL_META_KEYS = ("sleep_explore",)  # scalar float64, written by sleep-label runs only
 
 
 def _take(state: dict, index: torch.Tensor) -> dict:
@@ -185,8 +187,8 @@ class DistillStream(DistillData):
         headers, metadata = {}, {}
         with ZipFile(path) as archive:
             members = archive.namelist()
-            if len(members) != len(set(members)) or any(k not in {f"{key}.npy" for key in (*ROW_KEYS, *OPTIONAL_ROW_KEYS, *META_KEYS)}
-                                                       for k in members):
+            allowed = {f"{key}.npy" for key in (*ROW_KEYS, *OPTIONAL_ROW_KEYS, *META_KEYS, *OPTIONAL_META_KEYS)}
+            if len(members) != len(set(members)) or any(k not in allowed for k in members):
                 raise ValueError("unexpected or duplicate shard members")
             optional = {key for key in OPTIONAL_ROW_KEYS if f"{key}.npy" in members}
             if optional.intersection(VALUE_KEYS) and not set(VALUE_KEYS).issubset(optional):
@@ -210,18 +212,20 @@ class DistillStream(DistillData):
                           mask0=(n, N_ACTIONS), mask1=(n, candidates, N_ACTIONS), prior=shape, q=shape, value=(n,))
             shapes.update({k: v for k, v in dict(partner_ids=(n, N_TOKENS, N_IDS),
                           partner_floats=(n, 6, N_POKEMON_FLOATS), outcome=(n,), remaining_steps=(n,),
-                          foe_match=(n, 6)).items() if k in optional})
+                          foe_match=(n, 6), sleep_forced=(n,)).items() if k in optional})
             for key, expected in shapes.items():
                 actual, _, dtype, _ = headers[key]
                 valid_dtype = (dtype == np.dtype("int64") if key in ("ids", "partner_ids", "foe_match") else
                                dtype == np.dtype("int32") if key == "remaining_steps" else
                                dtype.kind == "i" and dtype.itemsize in (2, 4, 8) if key == "pairs" else
-                               dtype == np.dtype("bool") if key in ("mask0", "mask1") else dtype == np.dtype("float32"))
+                               dtype == np.dtype("bool") if key in ("mask0", "mask1", "sleep_forced") else
+                               dtype == np.dtype("float32"))
                 if actual != expected or not valid_dtype:
                     raise ValueError(f"invalid {key} shape or dtype: {actual}, {dtype}")
             present = {key for key in META_KEYS if f"{key}.npy" in members}
             if present and present != set(META_KEYS):
                 raise ValueError("incomplete shard metadata")
+            present |= {key for key in OPTIONAL_META_KEYS if f"{key}.npy" in members}
             for key in present:
                 with archive.open(f"{key}.npy") as stream:
                     shape, _, dtype, _ = DistillStream._header(stream)
@@ -636,7 +640,9 @@ def distill_loss(model, batch: dict, tilt: float = 0.0, *, state: dict | None = 
 
 
 def value_target(batch: dict, mix: float = 0.5, gamma: float = 0.995) -> torch.Tensor:
-    """Monte Carlo terminal return mixed with the teacher's search-root estimate, on PPO's [-1, 1] scale."""
+    """Monte Carlo terminal return mixed with the teacher's search-root estimate, on PPO's [-1, 1] scale. A batch
+    with a per-row ``value_mix`` (distill_train.py label sets) uses it instead of ``mix``."""
+    mix = batch.get("value_mix", mix)
     return mix * batch["outcome"] * gamma ** batch["remaining_steps"] + (1 - mix) * batch["search_value"]
 
 
