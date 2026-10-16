@@ -885,8 +885,8 @@ def test_optional_battle_diagnostics_flush_append_and_failure(tmp_path, caplog):
     recorder.emit(ROOM, 'decision', {'analysis': {'x': np.array([.123456789]), 'secret': PASSWORD}})
     recorder.emit(ROOM, 'end', {'result': {'winner': 'NumbrionLadder'}})
     recorder.close()
-    path = directory / (ROOM + '.jsonl')
-    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    path = directory / (ROOM + '.jsonl.gz')
+    rows = [json.loads(line) for line in gzip.open(path, 'rt', encoding='utf-8').read().splitlines()]
     assert [r['kind'] for r in rows] == ['message', 'request_received', 'request', 'decision', 'end']
     assert rows[0]['t'] == 12.5 and rows[0]['text'] == raw
     assert rows[1]['request'] == request_body()
@@ -894,7 +894,7 @@ def test_optional_battle_diagnostics_flush_append_and_failure(tmp_path, caplog):
     recorder = BattleRecorder(directory)
     recorder.emit(ROOM, 'closed', {})
     recorder.close()
-    assert len(path.read_text().splitlines()) == 6
+    assert len(gzip.open(path, 'rt', encoding='utf-8').read().splitlines()) == 6
     broken = tmp_path / 'not-a-directory'
     broken.write_text('file')
     recorder = BattleRecorder(broken)

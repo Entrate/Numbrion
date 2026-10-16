@@ -104,7 +104,8 @@ is reported as `unknown`, not as a loss; a disconnect never counts as a result.
 
 For diagnostic runs, add `"record": {"dir": "scratch/ladder/records"}` to the config. It is off by default.
 This enables `analysis.search_record` on search decisions, in both the ordinary battle logs and
-`<record.dir>/<run_id>/<room>.jsonl`. The extra files append across restarts and flush every event. A bounded
+`<record.dir>/<run_id>/<room>.jsonl.gz`. Each event closes a complete gzip member, preserving earlier events on a crash. Files append across restarts
+and flush every event. A bounded
 background queue keeps disk I/O off the decision thread; capture/write errors and dropped events are logged.
 Each room file contains timestamped raw messages, `request_received` events for every request (including waits),
 dispatched requests, full decision analysis/timing, late decisions, and the result in the `end` event.

@@ -1,6 +1,7 @@
 """Optional crash-readable battle diagnostics. Disk work never runs on the decision thread."""
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 import math
@@ -69,7 +70,9 @@ class BattleRecorder:
             try:
                 self.directory.mkdir(parents=True, exist_ok=True)
                 payload = self.clean(serializable(event))
-                with (self.directory / (event["room"] + ".jsonl")).open("a", encoding="utf-8", newline="\n") as handle:
+                # A complete gzip member per event: a crash can only truncate the final member.
+                path = self.directory / (event["room"] + ".jsonl.gz")
+                with gzip.open(path, "at", encoding="utf-8", newline="\n", compresslevel=3) as handle:
                     handle.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n")
                     if event["kind"] == "message":
                         for line in event.get("text", "").splitlines():
