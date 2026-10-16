@@ -169,33 +169,83 @@ def test_ablation_variants_run(checkpoint, variant):
     assert not player.stats.get("depth2_errors"), [d.analysis.get("depth2", {}).get("skipped") for d in decisions]
 
 
-def test_layer2_that_adds_nothing_keeps_the_layer1_choice(checkpoint, monkeypatch):
-    """With every leaf valued at its layer-1 payoff (V2 = A1), the corrections vanish and the decision is layer 1's."""
+def test_layer2_that_adds_nothing_picks_the_anchored_best_response_to_layer1_values(checkpoint, monkeypatch):
+    """With every leaf valued at its layer-1 payoff (V2 = A1), the corrections vanish: Q2 = Q1 and the pick is
+    argmax(log prior + Q1 / anchor) over the shortlist (halving never drops it: it ranks by the same score)."""
     def no_op_layer2(self, keys):
         for key in keys:
             k, i, j, _ = key
             self.leaves[key].value = float(self.l1.payoffs[k][i][j])
         return True
 
+    runs = []
+    original = _Deepen.run
+
+    def run(self):
+        info = original(self)
+        runs.append((self, info))
+        return info
+
     monkeypatch.setattr(_Deepen, "layer2", no_op_layer2)
-    bot = make_bot(checkpoint)
-    seen = {}
-
-    def remember(player):
-        seen["player"] = player
-
-    decisions, _ = play(bot, seed=7, decisions=8, hook=remember)
+    monkeypatch.setattr(_Deepen, "run", run)
+    decisions, _ = play(make_bot(checkpoint), seed=7, decisions=8)
     checked = 0
-    for d in decisions:
-        block = d.analysis.get("depth2")
-        if not block or not block["rounds"]:
+    for self, info in runs:
+        if not info["completed"]:
             continue
-        top = max(block["candidates"], key=lambda c: c["x"])
-        assert d.choice == top["choice"] and not block["changed"]
-        for c in block["candidates"]:
-            assert all(v is None or abs(v - c["q"]) < 1e-3 for v in c["q2"])
+        q1 = np.clip(np.asarray(self.l1.q), -1, 1)
+        anchored = {i: np.log(self.l1.our_prior[i]) + q1[i] / self.cfg.anchor for i in info["shortlist"]}
+        assert info["chosen"] == max(anchored, key=anchored.get)
+        for r in info["rounds"]:
+            assert all(abs(r["q2"][i] - q1[i]) < 1e-9 for i in r["survivors"])
         checked += 1
     assert checked >= 2
+    for d in decisions:
+        block = d.analysis.get("depth2")
+        if block and block["rounds"]:
+            assert d.choice == block["chosen"]
+
+
+def run_synthetic(bot, l1, leaf_value, cfg=None, pick="anchored"):
+    """``_Deepen.run`` on a synthetic Layer1 whose leaves get ``leaf_value(k, i, j)`` (no engine work)."""
+    run = _Deepen(bot, cfg or bot.search, Depth2Config(enabled=True, pick=pick), l1, StageClock(),
+                  np.random.default_rng(0), pick, ("", ""), None)
+    run.grow = lambda keys: True
+
+    def layer2(keys):
+        for key in keys:
+            run.leaves[key] = _Leaf(key=key, value=leaf_value(*key[:3]))
+        return True
+
+    run.layer2 = layer2
+    return run.run()
+
+
+def test_a_certain_win_never_loses_to_a_worse_move_with_a_large_correction(bot):
+    """Candidate 0 wins for sure (A1 = V2 = 1, Q1 = Q2 = 1). The others are worse at layer 1 and get large positive
+    corrections (V2 = 0.6 against A1 = -0.5) but stay below 1, and the prior strongly prefers them."""
+    l1 = synthetic_layer1(n_ours=3, n_worlds=2, m=3)
+    l1.payoffs = [np.array([[1.0] * 3, [-0.5] * 3, [-0.5] * 3]) for _ in range(2)]
+    l1.q = np.array([1.0, -0.5, -0.5])
+    l1.x = np.array([0.98, 0.01, 0.01])
+    l1.our_prior = np.array([0.001, 0.9, 0.099])
+    for pick in ("anchored", "q"):
+        info = run_synthetic(bot, l1, lambda k, i, j: 1.0 if i == 0 else 0.6, pick=pick)
+        assert info["completed"] == 2 and info["chosen"] == 0
+        assert info["rounds"][-1]["q2"][0] == 1.0 and abs(info["rounds"][0]["q2"][1] - 0.6) < 1e-9
+    # Corrections are averaged over the deepened worlds only: Q1 + correction is clipped to [-1, 1].
+    l1.q = np.array([0.9, -0.5, -0.5])
+    info = run_synthetic(bot, l1, lambda k, i, j: 1.0 if i == 0 else 0.6)
+    assert all(-1.0 <= v <= 1.0 for r in info["rounds"] for v in r["q2"].values())
+
+
+def test_anchor_zero_falls_back_to_argmax_q2(bot):
+    from dataclasses import replace
+
+    l1 = synthetic_layer1(n_ours=3, n_worlds=2, m=3)
+    l1.our_prior = np.array([0.98, 0.01, 0.01])
+    info = run_synthetic(bot, l1, lambda k, i, j: 0.5 if i == 2 else -0.5, cfg=replace(bot.search, anchor=0.0))
+    assert info["chosen"] == 2
 
 
 def test_refused_chunks_keep_the_layer1_decision_and_post_it_as_the_fallback(checkpoint):
@@ -415,7 +465,7 @@ def test_terminal_leaves_score_win_loss_tie_from_our_side_and_back_up_by_correct
         expected = l1.q[i] + np.mean([sum(l1.ys[k][j] * (v - l1.payoffs[k][i][j]) for j, _ in run.reply_set(k, i))
                                       for k in range(2)])
         assert abs(Q2[i] - expected) < 1e-12
-        assert abs(score[i] - (np.log(l1.x[i]) + (Q2[i] - l1.q[i]) / bot.search.anchor)) < 1e-9
+        assert abs(score[i] - (np.log(l1.our_prior[i]) + np.clip(Q2[i], -1, 1) / bot.search.anchor)) < 1e-9
 
 
 def test_replies_are_the_top_by_weight_plus_the_most_dangerous(bot):
