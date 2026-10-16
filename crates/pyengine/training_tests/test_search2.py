@@ -200,17 +200,22 @@ def test_layer2_that_adds_nothing_keeps_the_layer1_choice(checkpoint, monkeypatc
 
 def test_refused_chunks_keep_the_layer1_decision_and_post_it_as_the_fallback(checkpoint):
     class Refuse:
-        """A budget controller that plans the configured sizes and lets ``allow`` chunks start."""
+        """A budget controller that plans the configured sizes, admits layer 1, and lets ``allow`` layer-2 chunk
+        requests through."""
         def __init__(self, allow):
-            self.allow, self.calls, self.observed = allow, 0, []
+            self.allow, self.calls, self.observed, self.plans = allow, 0, [], []
 
         def plan(self, cfg, cfg2, budget_ms, deadline, now):
-            return Plan(worlds=cfg.worlds, depth2=cfg2, budget_ms=0.0, deadline=deadline)
+            self.plans.append(Plan(worlds=cfg.worlds, depth2=cfg2, budget_ms=0.0, deadline=deadline))
+            return self.plans[-1]
 
         def plan_depth2(self, plan, layer1, now):
+            assert plan is self.plans[-1] and plan.started is not None and layer1.difficulty is not None
             return plan.depth2
 
         def next_chunk_ok(self, stage, units, now, deadline):
+            if stage in ("root_policy", "opp_policy", "grid1", "value1"):
+                return True
             self.calls += 1
             return self.calls <= self.allow
 
@@ -304,12 +309,11 @@ def test_expanded_leaf_observation_equals_feeding_the_lines_to_encode_states(bot
             assert exp.leaves[c] is None and exp.trackers[c] is None
             continue
         for s in (0, 1):
-            if not exp.needs_action[c, s]:
-                assert exp.requests[c][s] is None and not exp.request_joint[c, s].any()
-                assert not exp.policy["ids"][c, s].any()
-                continue
             request = ref["requests"][c][s]
             assert exp.requests[c][s] == request
+            if not exp.needs_action[c, s]:
+                assert not exp.request_joint[c, s].any() and not exp.policy["ids"][c, s].any()
+                continue
             direct = grid.encode_states([states[s]], [request], lines=[list(ref["logs"][c][s])])
             for key in search2.POLICY_KEYS:
                 assert np.array_equal(exp.policy[key][c, s], direct[key][0]), (c, s, key)
@@ -460,3 +464,139 @@ def test_forced_replacement_chains_are_stepped_to_a_move_turn(bot, steps):
             assert leaf.trackers[0].turn == battle.turn + 1
         assert run.layer2([(0, 0, 0, 0)])
         assert leaf.value is not None and -1.0 <= leaf.value <= 1.0
+
+
+# ---- budget integration, layer-1 chunks, threats --------------------------------------------------------------------
+
+class CapClock(StageClock):
+    """Admits chunks of at most ``cap`` units of the given stages, and refuses everything after ``limit`` calls."""
+
+    def __init__(self, cap: dict, limit: int | None = None):
+        super().__init__()
+        self.cap, self.limit, self.calls = cap, limit, 0
+
+    def ok(self, stage, units):
+        self.calls += 1
+        if self.limit is not None and self.calls > self.limit:
+            self.refused = "limit"
+            return False
+        return units <= self.cap.get(stage, 10 ** 9)
+
+
+def layer1_inputs(bot):
+    from training.search import run_search
+
+    pool = teams()
+    battle = numbrion.Battle((2, 7, 1, 8), p1=pool[6], p2=pool[7], log=True)
+    battle.start()
+    player = bot.new_player("c", seed=4)
+    player.feed(battle.drain_player_log(0))
+    player.set_request(battle.request_json(0))
+    request = json.loads(player.request_json)
+    player._sync(request, 0)
+    mask0, joint = P.request_mask(request)
+    (pairs, _, full), = bot.net.candidates(player.battle.arrays(), np.array([0]), [(mask0, joint)], k=4, first=47,
+                                           temperature=0.5)
+    worlds = player.builder.worlds(4, 3, log=True)
+    return run_search, player, worlds, pairs, full
+
+
+def test_layer1_runs_in_admitted_chunks_of_whole_worlds(bot):
+    run_search, player, worlds, pairs, full = layer1_inputs(bot)
+    whole = run_search(bot, bot.search, player.battle, 0, worlds, pairs, full, rng=np.random.default_rng(0))
+    per_world = len(pairs) * bot.search.theirs * bot.search.seeds
+    clock = CapClock({"grid1": per_world, "value1": per_world})
+    split = run_search(bot, bot.search, player.battle, 0, worlds, pairs, full, rng=np.random.default_rng(0),
+                       clock=clock)
+    # The same cells; the value net's float rounding may differ with the batch size (the solver amplifies it in x).
+    assert len(split["worlds"]) == len(whole["worlds"]) == len(worlds)
+    for a, b in zip(whole["payoffs"], split["payoffs"]):
+        assert np.allclose(a, b, atol=1e-5)
+    assert np.allclose(whole["x"], split["x"], atol=1e-2)
+    grid_calls = [s for s in clock.stages if s.name == "grid1"]
+    assert len(grid_calls) == len(worlds) and all(s.units <= per_world for s in grid_calls)
+    # A clock that stops admitting after a few calls: the worlds already searched are kept, the rest dropped.
+    clock = CapClock({"grid1": per_world, "value1": per_world}, limit=12)
+    cut = run_search(bot, bot.search, player.battle, 0, worlds, pairs, full, rng=np.random.default_rng(0),
+                     clock=clock)
+    kept = len(cut["worlds"])
+    assert 1 <= kept < len(worlds)
+    l1 = cut["layer1"]
+    assert len(l1.worlds) == len(l1.payoffs) == len(l1.ys) == len(l1.seeds) == len(l1.legal) == kept
+    refuse_all = CapClock({}, limit=0)
+    assert run_search(bot, bot.search, player.battle, 0, worlds, pairs, full, clock=refuse_all) == {"out_of_time": True}
+
+
+def test_value_batches_are_gated_and_recorded(bot):
+    from training.search import VALUE_BATCH, grid_values
+
+    n = VALUE_BATCH + 5
+    out = dict(ended=np.zeros(n, bool), winner=np.full(n, -1, np.int8), eval_side=np.zeros(n, np.int64))
+    calls, record = [], []
+
+    class Net:
+        def values(self, arrays, partner_ids, partner_floats):
+            calls.append(len(arrays["field"]))
+            return np.full(len(arrays["field"]), 0.25, np.float32)
+
+    for key in ("ids", "floats", "field", "token_features", "partner_ids", "partner_floats"):
+        out[key] = np.zeros((n, 1), np.float32)
+    v = grid_values(Net(), out, 0, gate=lambda stage, rows: True, record=lambda *a: record.append(a))
+    assert calls == [VALUE_BATCH, 5] and [r[1] for r in record] == [VALUE_BATCH, 5] and np.allclose(v, 0.25)
+    assert grid_values(Net(), out, 0, gate=lambda stage, rows: rows < 100) is None
+
+
+def sleep_battle():
+    ours = [mon("Pikachu", ["fakeout", "protect", "thunderbolt", "volttackle"], "Lightning Rod"),
+            mon("Raichu", ["protect", "thunderbolt", "nastyplot", "encore"], "Lightning Rod", "F")] + FILLER
+    theirs = [mon("Amoonguss", ["spore", "protect", "ragepowder", "gigadrain"], "Regenerator", "F"),
+              mon("Indeedee", ["protect", "helpinghand", "shadowball", "yawn"], "Psychic Surge", "F")] + FILLER
+    battle = numbrion.Battle((1, 2, 3, 4), "]".join(ours), "]".join(theirs), log=True)
+    battle.start()
+    return battle
+
+
+def test_sleep_threats_are_flagged_and_deepened(bot):
+    from training.search import layer1_difficulty
+
+    battle = sleep_battle()
+    joint = battle.legal_mask(1)[1]
+    spore = next(tuple(int(v) for v in p) for p in np.argwhere(joint) if p[0] < 10 and 10 <= p[1] < 20)  # Spore, Protect
+    plain = [tuple(int(v) for v in p) for p in np.argwhere(joint) if 20 <= p[0] < 40 and 20 <= p[1] < 30][:3]
+    l1 = synthetic_layer1(n_ours=2, n_worlds=1, m=4)
+    l1.worlds, l1.side = [battle], 0
+    l1.their = [np.array(plain + [spore], dtype=np.int32)]
+    l1.ys = [np.array([0.5, 0.3, 0.12, 0.08])]
+    l1.payoffs = [np.array([[0.0, 0.1, -0.5, 0.2], [0.0, 0.1, -0.5, 0.2]])]
+    request = json.loads(battle.request_json(0))
+    hints = layer1_difficulty(l1, request)
+    assert hints["known_threat"] and hints["threats"] == {"spore": 0.08} and hints["remaining"] == 6
+    assert hints["ours_left"] == 6 and not hints["forced"]
+    l1.ys = [np.array([0.5, 0.3, 0.19, 0.01])]
+    assert not layer1_difficulty(l1, request)["known_threat"]
+    l1.ys = [np.array([0.5, 0.3, 0.12, 0.08])]
+    cfg2 = Depth2Config(enabled=True, theirs_top=2, danger=1)
+    run = _Deepen(bot, bot.search, cfg2, l1, StageClock(), np.random.default_rng(0), "anchored", ("", ""), None,
+                  threat_reply=True)
+    assert run.reply_set(0, 0) == [(0, False), (1, False), (2, True), (3, True)]  # top 2, danger, sleep
+    off = _Deepen(bot, bot.search, cfg2, l1, StageClock(), np.random.default_rng(0), "anchored", ("", ""), None)
+    assert off.reply_set(0, 0) == [(0, False), (1, False), (2, True)]
+
+
+@pytest.mark.parametrize("budget", [dict(mode="fixed"), dict(mode="adaptive", target_ms=1500, max_ms=4000)])
+def test_the_budget_controller_plans_both_layers(checkpoint, budget):
+    bot = SearchBot(checkpoint=str(checkpoint), search={"worlds": 3, "ours": 4, "theirs": 3, "seeds": 1, "threads": 2,
+                                                        "iterations": 60, "max_worlds": 4, "depth2": SMALL},
+                    pools=[str(POOL)], device="cpu", budget=budget)
+    from training.search_budget import BudgetController
+
+    assert isinstance(bot.budget, BudgetController)
+    decisions, player = play(bot, seed=6, decisions=5,
+                             hook=lambda p: setattr(p, "deadline", time.monotonic() + 30.0))
+    assert decisions and not player.stats.get("depth2_errors")
+    assert bot.budget.decisions == len([d for d in decisions if d.analysis.get("note") != "only one legal choice"])
+    stats = bot.budget.stats()["stages"]
+    assert stats["grid1"]["samples"] > 0 and stats["value1"]["samples"] > 0
+    if budget["mode"] == "fixed":
+        assert any(d.analysis.get("depth2", {}).get("rounds") == 2 for d in decisions)
+        assert stats["grid2"]["samples"] > 0 and stats["expand"]["samples"] > 0

@@ -7,7 +7,8 @@ After layer 1 (``run_search``) we have our strategy x, each world's opponent str
    deepens them on the first ``worlds`` of a fixed random order of the layer-1 worlds, with ``chance`` draws each
    (draw c < layer-1 seeds reuses layer 1's seed of that world). Samples are nested, so a round only adds new ones.
 3. Replies per (world, candidate): the top ``theirs_top`` by y_k, plus ``danger`` replies with the lowest A1 among
-   those with y_k >= ``danger_min``.
+   those with y_k >= ``danger_min``, plus (``threat_reply``) the most likely sleep-move reply (Spore, Yawn, ...) with
+   y_k >= ``danger_min`` when none of those uses one: one ply cannot see what sleep costs, so A1 rarely marks it.
 4. Expand (``expand``): every (world, candidate, reply, chance draw) cell is simulated to the next boundary, keeping
    the leaf battles, each side's leaf tracker (root tracker fed with that side's lines), requests, masks and policy
    inputs. Forced replacements are answered by the policy argmax and stepped through (``replacement_steps``), so
@@ -84,15 +85,28 @@ class StageClock:
             self.refused = f"{stage} ({int(units)} units) refused by the {'budget' if self.budget else 'deadline'}"
         return ok
 
-    @contextlib.contextmanager
-    def stage(self, name: str, units: int):
-        t = time.perf_counter()
-        yield
-        ms = (time.perf_counter() - t) * 1000.0
+    def admit(self, names: tuple, units: int) -> int:
+        """The largest chunk (``units``, halved until admitted) that every stage of ``names`` may start now; 0 if
+        not even one unit may."""
+        n = int(units)
+        while n >= 1:
+            if all(self.ok(name, n) for name in names):
+                self.refused = None
+                return n
+            n //= 2
+        return 0
+
+    def record(self, name: str, units: int, ms: float) -> None:
         self.stages.append(Stage(name, int(units), ms))
         if units > 0:
             per = ms / units
             self.costs[name] = per if name not in self.costs else self.costs[name] + 0.2 * (per - self.costs[name])
+
+    @contextlib.contextmanager
+    def stage(self, name: str, units: int):
+        t = time.perf_counter()
+        yield
+        self.record(name, units, (time.perf_counter() - t) * 1000.0)
 
     def totals(self) -> dict:
         out: dict = {}
@@ -118,17 +132,31 @@ def expand(bot, worlds, actions, world_idx=None, seeds=None, states=None, side: 
     (``search2_types.Expansion``). ``worlds``: root battles (log=True); ``actions`` [n, 2, 2]; ``world_idx`` [n]
     (default 0); ``seeds`` None (each root's PRNG state), [4] or [n, 4]; ``states``: the root trackers, one
     (side 0, side 1) pair for all roots or one per root. ``side`` is the searching side (it does not change the
-    result; kept for the Rust path's signature). Python path: GridExecutor + TrackerState.feed + encode_states."""
+    result; kept for the interface). Uses the fused ``SearchGrid.expand`` when the extension has it
+    (``numbrion.FUSED_EXPAND``), else this Python reference: GridExecutor + TrackerState.feed + encode_states.
+    ``requests`` are the engine's request JSON of both sides as GridExecutor returns them; the policy rows and
+    ``request_joint`` of a side that needs no action are zero."""
+    import numbrion
+
     del side
     local = bot.resources()
     actions = np.asarray(actions, dtype=np.int32).reshape(-1, 2, 2)
     n = len(actions)
     world_idx = np.zeros(n, dtype=np.int64) if world_idx is None else np.asarray(world_idx, dtype=np.int64)
+    seeds = None if seeds is None else np.asarray(seeds, dtype=np.int64)
+    pairs = _tracker_pairs(states, len(worlds))
     timing = {}
     t0 = time.perf_counter()
+    if getattr(numbrion, "FUSED_EXPAND", False) and hasattr(local.grid, "expand"):
+        out = local.grid.expand(list(worlds), actions, [list(p) for p in pairs], world=world_idx, seeds=seeds)
+        timing["fused_ms"] = round((time.perf_counter() - t0) * 1000, 2)
+        fields = {k: out[k] for k in Expansion.__dataclass_fields__ if k in out and k != "timing"}
+        fields["trackers"] = [None if t is None else tuple(t) for t in fields["trackers"]]
+        fields["requests"] = [tuple(r) for r in fields["requests"]]
+        return Expansion(**fields, timing=timing)
     kwargs = dict(world=world_idx, keep_leaves=True, logs=True, requests=True)
     if seeds is not None:
-        kwargs["seeds"] = np.asarray(seeds, dtype=np.int64)
+        kwargs["seeds"] = seeds
     out = local.executor.run(list(worlds), actions, **kwargs)
     timing["grid_ms"] = (time.perf_counter() - t0) * 1000
     t1 = time.perf_counter()
@@ -136,8 +164,8 @@ def expand(bot, worlds, actions, world_idx=None, seeds=None, states=None, side: 
     winner = np.asarray(out["winner"], dtype=np.int8)
     needs = np.asarray(out["needs_action"], dtype=bool).reshape(n, 2)
     kind = np.asarray(out["request_kind"], dtype=np.uint8).reshape(n, 2)
-    pairs = _tracker_pairs(states, len(worlds))
-    leaves, trackers, requests = [], [], []
+    leaves, trackers = [], []
+    requests = [tuple(r) for r in out["requests"]]
     request_joint = np.zeros((n, 2, N_ACTIONS, N_ACTIONS), dtype=bool)
     engine_joint = np.zeros((n, 2, N_ACTIONS, N_ACTIONS), dtype=bool)
     rows = []
@@ -145,19 +173,16 @@ def expand(bot, worlds, actions, world_idx=None, seeds=None, states=None, side: 
         if ended[c]:
             leaves.append(None)
             trackers.append(None)
-            requests.append((None, None))
             continue
         root = pairs[int(world_idx[c])]
         logs = out["logs"][c]
         trackers.append((root[0].feed(list(logs[0])), root[1].feed(list(logs[1]))))
         leaf = out["leaves"][c]
         leaves.append(leaf)
-        req = tuple(out["requests"][c][s] if needs[c, s] else None for s in (0, 1))
-        requests.append(req)
         for s in (0, 1):
+            engine_joint[c, s] = leaf.legal_mask(s)[1]
             if needs[c, s]:
-                request_joint[c, s] = request_mask(req[s])[1]
-                engine_joint[c, s] = leaf.legal_mask(s)[1]
+                request_joint[c, s] = request_mask(requests[c][s])[1]
                 rows.append((c, s))
     timing["feed_ms"] = (time.perf_counter() - t1) * 1000
     t2 = time.perf_counter()
@@ -313,9 +338,11 @@ def _candidates(bot, leaves: list, s: int, our_side: int, k: int, first: int, te
 
 class _Deepen:
     def __init__(self, bot, cfg, cfg2: Depth2Config, layer1: Layer1, clock: StageClock, rng, pick: str,
-                 ours_shown: tuple, describe):
+                 ours_shown: tuple, describe, threat_reply: bool = False):
         self.bot, self.cfg, self.cfg2, self.l1, self.clock, self.rng = bot, cfg, cfg2, layer1, clock, rng
         self.pick, self.ours_shown, self.describe = pick, ours_shown, describe
+        self.threat_reply = threat_reply
+        self.requests: dict = {}
         self.side = layer1.side
         self.opp = 1 - layer1.side
         n_worlds = len(layer1.worlds)
@@ -360,8 +387,22 @@ class _Deepen:
                 a1 = self.l1.payoffs[k][i]
                 danger = sorted(rest, key=lambda j: (a1[j], j))[:max(self.cfg2.danger, 0)]
                 out = [(j, False) for j in top] + [(int(j), True) for j in danger]
+                if self.threat_reply:
+                    sleepy = [j for j in range(len(y)) if y[j] >= self.cfg2.danger_min and self.sleep_reply(k, j)]
+                    if sleepy and not any(j in sleepy for j, _ in out):
+                        out.append((max(sleepy, key=lambda j: (y[j], -j)), True))
             self.replies[(k, i)] = out
         return self.replies[(k, i)]
+
+    def opp_request(self, k: int) -> dict:
+        if k not in self.requests:
+            self.requests[k] = json.loads(self.l1.worlds[k].request_json(self.opp))
+        return self.requests[k]
+
+    def sleep_reply(self, k: int, j: int) -> bool:
+        from .search import SLEEP_MOVES, reply_moves
+
+        return bool(set(reply_moves(self.opp_request(k), self.l1.their[k][j])) & SLEEP_MOVES)
 
     def obs_text(self, k: int, j: int) -> str:
         """What we would see of reply j in world k (move names, targets, switch-ins): the info-group key."""
@@ -371,7 +412,7 @@ class _Deepen:
             if self.l1.their[k] is None:
                 text = "none"
             else:
-                request = json.loads(self.l1.worlds[k].request_json(self.opp))
+                request = self.opp_request(k)
                 names = [p["details"].split(",")[0] for p in request.get("side", {}).get("pokemon", [])[:2]]
                 codes = [int(c) for c in self.l1.their[k][j]]
                 parts = [f"{names[s]}: {describe_code(request, s, c, self.ours_shown)}" for s, c in enumerate(codes)
@@ -381,25 +422,53 @@ class _Deepen:
         return self.obs[(k, j)]
 
     # -- stages
+    def expand_chunks(self, roots, actions, world_idx, seeds, states) -> list | None:
+        """``expand`` in admitted chunks: [(Expansion, first cell)], or None when a chunk was refused."""
+        out, begin, n = [], 0, len(actions)
+        while begin < n:
+            size = self.clock.admit(("expand",), n - begin)
+            if size == 0:
+                return None
+            part = slice(begin, begin + size)
+            with self.clock.stage("expand", size):
+                exp = expand(self.bot, roots, actions[part], world_idx[part],
+                             None if seeds is None else seeds[part], states, self.side)
+            out.append((exp, begin))
+            self.cells["expand"] += size
+            begin += size
+        return out
+
+    def policy_chunks(self, leaves: list, s: int, k: int, temperature: float) -> list | None:
+        """``_candidates`` for side ``s`` of ``leaves`` in admitted network batches; None when one was refused."""
+        found, begin = [], 0
+        while begin < len(leaves):
+            size = self.clock.admit(("leaf_policy",), len(leaves) - begin)
+            if size == 0:
+                return None
+            with self.clock.stage("leaf_policy", size):
+                found += _candidates(self.bot, leaves[begin:begin + size], s, self.side, k, self.cfg.first_codes,
+                                     temperature)
+            begin += size
+        return found
+
     def grow(self, keys: list) -> bool:
         """Expand the new leaves ``keys``, step forced replacements, run both sides' leaf policies."""
         l1 = self.l1
         if keys:
-            if not self.clock.ok("expand", len(keys)):
-                return False
             actions = np.full((len(keys), 2, 2), -1, dtype=np.int32)
             for n, (k, i, j, c) in enumerate(keys):
                 actions[n, self.side] = l1.ours[i]
                 if l1.their[k] is not None:
                     actions[n, self.opp] = l1.their[k][j]
-            with self.clock.stage("expand", len(keys)):
-                exp = expand(self.bot, l1.worlds, actions, np.array([k for k, _, _, _ in keys]),
-                             np.stack([self.seed(k, c) for k, _, _, c in keys]), l1.states, self.side)
-            self.cells["expand"] += len(keys)
-            for n, key in enumerate(keys):
-                leaf = _Leaf(key=key)
-                _set_from(leaf, exp, n, self.side)
-                self.leaves[key] = leaf
+            parts = self.expand_chunks(l1.worlds, actions, np.array([k for k, _, _, _ in keys]),
+                                       np.stack([self.seed(k, c) for k, _, _, c in keys]), l1.states)
+            if parts is None:
+                return False
+            for exp, begin in parts:
+                for c in range(len(exp.ended)):
+                    leaf = _Leaf(key=keys[begin + c])
+                    _set_from(leaf, exp, c, self.side)
+                    self.leaves[leaf.key] = leaf
         new = [self.leaves[k] for k in keys]
         for _ in range(max(self.cfg2.replacement_steps, 0)):
             forced = [lf for lf in new if _forced(lf)]
@@ -408,25 +477,21 @@ class _Deepen:
             if not self.step(forced):
                 return False
         live = [lf for lf in new if not lf.ended]
-        if not live:
-            return True
-        ours_rows = [lf for lf in live if lf.needs[self.side]]
-        theirs_rows = [lf for lf in live if lf.needs[self.opp]]
-        units = len(ours_rows) + len(theirs_rows)
-        if not self.clock.ok("leaf_policy", units):
-            return False
         cfg, cfg2 = self.cfg, self.cfg2
-        with self.clock.stage("leaf_policy", units):
-            found = _candidates(self.bot, ours_rows, self.side, self.side, cfg2.ours, cfg.first_codes,
-                                self.bot.policy_temperature)
-            for lf, (pairs, _, full) in zip(ours_rows, found):
-                lf.ours = [tuple(int(v) for v in p) for p in pairs]
-                lf.full = full
-            found = _candidates(self.bot, theirs_rows, self.opp, self.side, cfg2.theirs, cfg.first_codes,
-                                cfg.opponent_temperature)
-            for lf, (pairs, logp, _) in zip(theirs_rows, found):
-                prior = np.exp(logp - logp.max())
-                lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
+        ours_rows = [lf for lf in live if lf.needs[self.side]]
+        found = self.policy_chunks(ours_rows, self.side, cfg2.ours, self.bot.policy_temperature)
+        if found is None:
+            return False
+        for lf, (pairs, _, full) in zip(ours_rows, found):
+            lf.ours = [tuple(int(v) for v in p) for p in pairs]
+            lf.full = full
+        theirs_rows = [lf for lf in live if lf.needs[self.opp]]
+        found = self.policy_chunks(theirs_rows, self.opp, cfg2.theirs, cfg.opponent_temperature)
+        if found is None:
+            return False
+        for lf, (pairs, logp, _) in zip(theirs_rows, found):
+            prior = np.exp(logp - logp.max())
+            lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
         for lf in live:
             if not lf.needs[self.opp]:
                 lf.their, lf.their_prior = np.full((1, 2), -1, dtype=np.int32), np.ones(1)
@@ -437,31 +502,28 @@ class _Deepen:
 
     def step(self, forced: list) -> bool:
         """Answer the forced replacements of ``forced`` leaves with each side's policy argmax and step on."""
-        rows = {s: [lf for lf in forced if lf.needs[s]] for s in (0, 1)}
-        units = len(rows[0]) + len(rows[1])
-        if not self.clock.ok("leaf_policy", units) or not self.clock.ok("expand", len(forced)):
-            return False
         actions = np.full((len(forced), 2, 2), -1, dtype=np.int32)
-        with self.clock.stage("leaf_policy", units):
-            for s in (0, 1):
-                found = _candidates(self.bot, rows[s], s, self.side, 1, self.cfg.first_codes, 1.0)
-                pick = {id(lf): pairs[0] for lf, (pairs, _, _) in zip(rows[s], found) if len(pairs)}
-                for n, lf in enumerate(forced):
-                    if lf.needs[s]:
-                        pair = pick.get(id(lf))
-                        if pair is None:  # nothing in the policy mask: the engine's first legal pair
-                            pair = np.argwhere(lf.engine_joint[s])[0]
-                        if not lf.engine_joint[s][pair[0], pair[1]]:
-                            pair = np.argwhere(lf.engine_joint[s])[0]
-                        actions[n, s] = pair
-        with self.clock.stage("expand", len(forced)):
-            exp = expand(self.bot, [lf.battle for lf in forced], actions, np.arange(len(forced)), None,
-                         [lf.trackers for lf in forced], self.side)
-        self.cells["expand"] += len(forced)
+        for s in (0, 1):
+            rows = [n for n, lf in enumerate(forced) if lf.needs[s]]
+            found = self.policy_chunks([forced[n] for n in rows], s, 1, 1.0)
+            if found is None:
+                return False
+            for n, (pairs, _, _) in zip(rows, found):
+                engine = forced[n].engine_joint[s]
+                pair = pairs[0] if len(pairs) else None
+                if pair is None or not engine[pair[0], pair[1]]:  # nothing allowed by the policy mask: engine's first
+                    pair = np.argwhere(engine)[0]
+                actions[n, s] = pair
+        parts = self.expand_chunks([lf.battle for lf in forced], actions, np.arange(len(forced)), None,
+                                   [lf.trackers for lf in forced])
+        if parts is None:
+            return False
         self.forced_steps += len(forced)
-        for n, lf in enumerate(forced):
-            _set_from(lf, exp, n, self.side)
-            lf.steps += 1
+        for exp, begin in parts:
+            for c in range(len(exp.ended)):
+                lf = forced[begin + c]
+                _set_from(lf, exp, c, self.side)
+                lf.steps += 1
         return True
 
     def groups(self, keys: list) -> dict:
@@ -528,13 +590,17 @@ class _Deepen:
                         needed.append((lf, p))
         if not self.run_cells(needed):
             return False
-        if not self.clock.ok("solve2", len(plan)):
+        if not self.clock.ok("solve2", len(plan)):  # one uninterruptible solve of every group
             return False
         with self.clock.stage("solve2", len(plan)):
             self.solve(plan)
         return True
 
     def run_cells(self, needed: list) -> bool:
+        """Layer-2 cells for the (leaf, our pair) rows ``needed``: every opponent candidate x ``seeds`` chance seeds
+        of the leaf, in admitted grid calls (at most GRID2_CHUNK_CELLS) and value batches."""
+        from .search import grid_values
+
         if not needed:
             return True
         seeds2 = max(self.cfg2.seeds, 1)
@@ -544,10 +610,13 @@ class _Deepen:
                 for s in range(seeds2):
                     cells.append((n, lf, j, s))
         sums = [np.zeros(len(lf.their)) for lf, _ in needed]
-        for begin in range(0, len(cells), GRID2_CHUNK_CELLS):
-            chunk = cells[begin:begin + GRID2_CHUNK_CELLS]
-            if not (self.clock.ok("grid2", len(chunk)) and self.clock.ok("value2", len(chunk))):
+        grid = self.bot.resources().grid
+        begin = 0
+        while begin < len(cells):
+            size = self.clock.admit(("grid2", "value2"), min(GRID2_CHUNK_CELLS, len(cells) - begin))
+            if size == 0:
                 return False
+            chunk = cells[begin:begin + size]
             roots, index = [], {}
             for _, lf, _, _ in chunk:
                 if id(lf) not in index:
@@ -563,17 +632,17 @@ class _Deepen:
                 actions[m, self.opp] = lf.their[j]
                 world[m] = index[id(lf)]
                 seeds[m] = lf.seeds2[s]
-            grid = self.bot.resources().grid
             with self.clock.stage("grid2", len(chunk)):
                 out = grid.run([lf.battle for lf in roots], actions, [lf.trackers for lf in roots], self.side,
                                world=world, seeds=seeds)
-            with self.clock.stage("value2", int((out["eval_side"] >= 0).sum())):
-                from .search import grid_values
-
-                values = grid_values(self.bot.net, out, self.side)
+            values = grid_values(self.bot.net, out, self.side, gate=self.clock.ok, record=self.clock.record,
+                                 stage="value2")
+            if values is None:
+                return False
             self.cells["grid2"] += len(chunk)
             for (n, lf, j, s), v in zip(chunk, values):
                 sums[n][j] += v
+            begin += size
         for n, (lf, pair) in enumerate(needed):
             lf.rows[pair] = sums[n] / seeds2
         return True
@@ -734,7 +803,6 @@ class _Deepen:
         score = {i: (float(logx[i]) if self.pick == "anchored" and self.cfg.anchor > 0 else float(q1[i]))
                  for i in shortlist}
         survivors = list(shortlist)
-        q2_by_round = []
         for r, rnd in enumerate(cfg2.rounds):
             if r > 0 or rnd.keep < cfg2.shortlist:
                 ranked = sorted(survivors, key=lambda i: (-score[i], survivors.index(i)))
@@ -749,11 +817,9 @@ class _Deepen:
                 break
             Q2, new_score = self.backup(survivors, worlds, chance)
             score.update(new_score)
-            q2_by_round.append(Q2)
             info["rounds"].append(dict(survivors=list(survivors), worlds=len(worlds), chance=chance,
                                        leaves=len(keys), q2=Q2, score={i: new_score[i] for i in survivors}))
             info["completed"] = r + 1
-            info["final"] = list(survivors)
         if info["completed"]:
             last = info["rounds"][-1]
             info["chosen"] = max(last["survivors"], key=lambda i: (last["score"][i], -last["survivors"].index(i)))
@@ -761,19 +827,22 @@ class _Deepen:
 
 
 def deepen(bot, cfg, cfg2: Depth2Config, layer1: Layer1, battle=None, deadline: float | None = None, rng=None,
-           budget=None, describe=None, pick: str = "anchored", costs: dict | None = None) -> dict | None:
+           budget=None, describe=None, pick: str = "anchored", costs: dict | None = None,
+           threat_reply: bool = True) -> dict | None:
     """The second layer for one decision (module docstring). Returns None when there is nothing to deepen, else a
     dict: ``chosen`` (index into ``layer1.ours``, or None to keep layer 1), ``q2`` {index: Q2}, ``cells``,
     ``leaves``, ``stages`` (list of ``Stage``), ``changed``, ``rounds`` completed and ``analysis`` (the compact,
     JSON-serialisable ``depth2`` block). ``describe(a0, a1)`` names a pair for the analysis; ``battle`` (the
     player's ``_Battle``) names our active Pokemon in opponent replies; ``costs`` keeps per-unit stage costs across
-    decisions for deadline checks without a budget controller."""
+    decisions for deadline checks without a budget controller; ``budget`` (a BudgetController) admits every chunk
+    when given; ``threat_reply`` also deepens the opponent's likeliest sleep-move reply (module docstring, 3)."""
     started = time.perf_counter()
     clock = StageClock(budget, deadline, costs)
     ours_shown = ("", "")
     if battle is not None:
         ours_shown = tuple(battle.active.get(("p1", "p2")[layer1.side] + slot, "") for slot in "ab")
-    run = _Deepen(bot, cfg, cfg2, layer1, clock, rng if rng is not None else bot.rng, pick, ours_shown, describe)
+    run = _Deepen(bot, cfg, cfg2, layer1, clock, rng if rng is not None else bot.rng, pick, ours_shown, describe,
+                  threat_reply)
     info = run.run()
     chosen = info.get("chosen")
     layer1_choice = info["layer1_choice"]
