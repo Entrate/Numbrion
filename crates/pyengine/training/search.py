@@ -69,12 +69,6 @@ class SearchConfig:
     seed: int = 0
     max_worlds: int = 32            # budgeted decisions: budget_ms scales the worlds between 2 and this
     depth2: Depth2Config | None = None  # the second layer (training/search2.py); None or enabled=False: off
-    # How the second layer picks among its survivors: "anchored" = the layer-1 strategy moved by the layer-2
-    # correction (log x1 + (Q2 - Q1) / anchor; a layer 2 that adds nothing keeps the layer-1 choice), "q" = argmax Q2.
-    depth2_pick: str = "anchored"
-    # Also deepen, per (world, candidate), the opponent's most likely sleep-move reply (Spore, Yawn, ...; weight at
-    # least depth2.danger_min) when the top and danger replies hold none.
-    depth2_threat_reply: bool = True
 
     @classmethod
     def from_dict(cls, values: dict | None) -> "SearchConfig":
@@ -745,7 +739,7 @@ class SearchPlayer(Player):
         try:
             out = deepen(self.bot, cfg, cfg2, layer1, battle=self.battle, deadline=deadline, rng=self.rng,
                          budget=self.bot.budget, describe=lambda b0, b1: self._text(request, b0, b1),
-                         pick=cfg.depth2_pick, costs=self.bot.depth2_costs, threat_reply=cfg.depth2_threat_reply)
+                         costs=self.bot.depth2_costs)
         except Exception as error:  # noqa: BLE001 - the layer-1 decision stands
             analysis["depth2"] = dict(skipped=f"error: {error!r}"[:300], rounds=0, changed=False)
             self.stats["depth2_errors"] = self.stats.get("depth2_errors", 0) + 1

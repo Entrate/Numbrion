@@ -20,9 +20,9 @@ After layer 1 (``run_search``) we have our strategy x, each world's opponent str
    ``"independent"`` solves each leaf alone. A leaf's value is x2 . q2 (``"mixed"``) or q2 at argmax x2.
 7. Backup: ``"correction"`` Q2[i] = Q1[i] + mean_worlds sum_{j deepened} y_k[j] (V2[k,i,j] - A1[k,i,j]) (the
    opponent keeps its layer-1 weights); ``"resolve"`` re-solves the reduced game.
-8. Pick: the best survivor of the last finished round. With ``pick="anchored"`` (default) the score is the layer-1
-   strategy moved by the correction, log x1[i] + (Q2[i] - Q1[i]) / anchor, so a layer 2 that adds nothing keeps the
-   layer-1 choice; ``pick="q"`` takes argmax Q2.
+8. Pick: the best survivor of the last finished round, by the score halving also uses. Q2 is clipped to [-1, 1];
+   ``pick="anchored"`` (default) scores log(prior[i]) + Q2[i] / anchor, layer 1's KL-anchored best response on the
+   deeper values; ``pick="q"`` (or anchor 0) takes argmax Q2.
 
 Work runs in bounded chunks (a grid call, a network batch, a solve); ``StageClock`` refuses a chunk whose predicted
 cost would pass the deadline, and the result of the last finished round is used (none: keep layer 1).
@@ -342,6 +342,7 @@ class _Deepen:
         self.bot, self.cfg, self.cfg2, self.l1, self.clock, self.rng = bot, cfg, cfg2, layer1, clock, rng
         self.pick, self.ours_shown, self.describe = pick, ours_shown, describe
         self.threat_reply = threat_reply
+        self.log_prior = np.log(np.maximum(np.asarray(layer1.our_prior, dtype=float), 1e-300))
         self.requests: dict = {}
         self.side = layer1.side
         self.opp = 1 - layer1.side
@@ -737,7 +738,6 @@ class _Deepen:
         """(Q2 by candidate, pick score by candidate)."""
         l1, cfg = self.l1, self.cfg
         q1 = np.asarray(l1.q, dtype=float)
-        logx = np.log(np.maximum(np.asarray(l1.x, dtype=float), 1e-12))
         if self.cfg2.backup == "resolve":
             payoffs, valid, their_priors = [], [], []
             for k in worlds:
@@ -758,12 +758,10 @@ class _Deepen:
             from .search import solve
 
             our_prior = np.asarray(l1.our_prior, dtype=float)[survivors]
-            x2, _, q2 = solve(payoffs, valid, np.ones(len(worlds)), our_prior / our_prior.sum(), their_priors,
-                              cfg.anchor, cfg.opponent_anchor, cfg.iterations)
-            Q2 = {i: float(q2[r]) for r, i in enumerate(survivors)}
-            score = ({i: float(np.log(max(x2[r], 1e-12))) for r, i in enumerate(survivors)}
-                     if self.pick == "anchored" and cfg.anchor > 0 else dict(Q2))
-            return Q2, score
+            _, _, q2 = solve(payoffs, valid, np.ones(len(worlds)), our_prior / our_prior.sum(), their_priors,
+                             cfg.anchor, cfg.opponent_anchor, cfg.iterations)
+            Q2 = {i: float(np.clip(q2[r], -1.0, 1.0)) for r, i in enumerate(survivors)}
+            return Q2, {i: self.score(i, Q2[i]) for i in survivors}
         Q2, score = {}, {}
         for i in survivors:
             terms = []
@@ -779,9 +777,19 @@ class _Deepen:
                 if any_:
                     terms.append(term)
             delta = float(np.mean(terms)) if terms else 0.0
-            Q2[i] = float(q1[i]) + delta
-            score[i] = (float(logx[i]) + delta / cfg.anchor) if self.pick == "anchored" and cfg.anchor > 0 else Q2[i]
+            # The correction is averaged over the deepened worlds only, so Q1 + delta can leave [-1, 1].
+            Q2[i] = float(np.clip(q1[i] + delta, -1.0, 1.0))
+            score[i] = self.score(i, Q2[i])
         return Q2, score
+
+    def score(self, i: int, value: float) -> float:
+        """The pick and halving score of candidate i with value ``value`` (clipped to [-1, 1]): ``"anchored"`` =
+        log(prior[i]) + value / anchor, the KL-anchored best response layer 1 makes (layer 1's prior and anchor);
+        ``"q"`` (or anchor 0) = the value."""
+        value = float(np.clip(value, -1.0, 1.0))
+        if self.pick == "anchored" and self.cfg.anchor > 0:
+            return float(self.log_prior[i]) + value / self.cfg.anchor
+        return value
 
     # -- driver
     def run(self) -> dict:
@@ -799,9 +807,7 @@ class _Deepen:
         if len(shortlist) < 2:
             info["skipped"] = "one candidate"
             return info
-        logx = np.log(np.maximum(x1, 1e-12))
-        score = {i: (float(logx[i]) if self.pick == "anchored" and self.cfg.anchor > 0 else float(q1[i]))
-                 for i in shortlist}
+        score = {i: self.score(i, q1[i]) for i in shortlist}
         survivors = list(shortlist)
         for r, rnd in enumerate(cfg2.rounds):
             if r > 0 or rnd.keep < cfg2.shortlist:
@@ -827,22 +833,22 @@ class _Deepen:
 
 
 def deepen(bot, cfg, cfg2: Depth2Config, layer1: Layer1, battle=None, deadline: float | None = None, rng=None,
-           budget=None, describe=None, pick: str = "anchored", costs: dict | None = None,
-           threat_reply: bool = True) -> dict | None:
+           budget=None, describe=None, pick: str | None = None, costs: dict | None = None,
+           threat_reply: bool | None = None) -> dict | None:
     """The second layer for one decision (module docstring). Returns None when there is nothing to deepen, else a
     dict: ``chosen`` (index into ``layer1.ours``, or None to keep layer 1), ``q2`` {index: Q2}, ``cells``,
     ``leaves``, ``stages`` (list of ``Stage``), ``changed``, ``rounds`` completed and ``analysis`` (the compact,
     JSON-serialisable ``depth2`` block). ``describe(a0, a1)`` names a pair for the analysis; ``battle`` (the
     player's ``_Battle``) names our active Pokemon in opponent replies; ``costs`` keeps per-unit stage costs across
     decisions for deadline checks without a budget controller; ``budget`` (a BudgetController) admits every chunk
-    when given; ``threat_reply`` also deepens the opponent's likeliest sleep-move reply (module docstring, 3)."""
+    when given; ``pick`` and ``threat_reply`` override ``cfg2.pick`` / ``cfg2.threat_reply``."""
     started = time.perf_counter()
     clock = StageClock(budget, deadline, costs)
     ours_shown = ("", "")
     if battle is not None:
         ours_shown = tuple(battle.active.get(("p1", "p2")[layer1.side] + slot, "") for slot in "ab")
-    run = _Deepen(bot, cfg, cfg2, layer1, clock, rng if rng is not None else bot.rng, pick, ours_shown, describe,
-                  threat_reply)
+    run = _Deepen(bot, cfg, cfg2, layer1, clock, rng if rng is not None else bot.rng, pick or cfg2.pick, ours_shown,
+                  describe, cfg2.threat_reply if threat_reply is None else threat_reply)
     info = run.run()
     chosen = info.get("chosen")
     layer1_choice = info["layer1_choice"]
@@ -861,7 +867,8 @@ def _analysis(run: _Deepen, info: dict, out: dict, clock: StageClock, describe, 
     for i in info["shortlist"]:
         a0, a1 = (int(v) for v in l1.ours[i])
         q2 = [round(float(r["q2"][i]), 4) if i in r["q2"] else None for r in info["rounds"]]
-        candidates.append(dict(choice=name(a0, a1), x=round(float(l1.x[i]), 4), q=round(float(l1.q[i]), 4),
+        candidates.append(dict(choice=name(a0, a1), x=round(float(l1.x[i]), 4),
+                               prior=round(float(l1.our_prior[i]), 6), q=round(float(l1.q[i]), 4),
                                q2=q2, score=[round(float(r["score"][i]), 3) if i in r["score"] else None
                                              for r in info["rounds"]]))
     # Replies deepened per candidate (merged over worlds by what we would see), with their layer-1 weights.
