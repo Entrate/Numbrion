@@ -12,8 +12,11 @@ Two-phase advice (``"two_phase": true``, docs/play/ADVISOR-API.md): every advise
 task that holds the room's lock while the worker decides. The player's layer-1 decision comes from the worker
 thread through ``PhaseHooks.on_layer1`` (``loop.call_soon_threadsafe``); the POST answers with it (phase 1) or with
 the final decision, whichever exists first, and ``GET /api/advise/<id>`` long-polls the final one. A newer call for
-the same (bot, room) supersedes the room's earlier jobs: their ``PhaseHooks.cancel`` stops a running second layer
-before its next chunk, and their results are never served to a two-phase client.
+the same (bot, room) supersedes the room's earlier jobs: queued ones are answered 409 at once; a running two-phase
+job's ``PhaseHooks.cancel`` stops its second layer before its next chunk, and its result is never served. A running
+single-phase job gets no hooks and runs to completion, as before. At most ``MAX_ACTIVE_JOBS`` calls run or wait
+(429 beyond); finished two-phase results are kept ``JOB_TTL_SECONDS`` (pruned on completion, on new calls, every
+``PRUNE_INTERVAL_S`` and on lookup), at most ``MAX_JOBS`` jobs in all.
 
 ``/api/bot-log`` returns redacted entries while the room's battle runs (play.driver.redact: no choice, no analysis
 built from the bot's own request), full ones after it ended, or always full with ``--reveal-bot-log``.
@@ -45,7 +48,9 @@ CORS = {
 MAX_ADVISE_ROOMS = 32
 ADVISE_ROOM_IDLE_SECONDS = 3 * 3600
 JOB_TTL_SECONDS = 300  # a finished two-phase result stays fetchable this long
-MAX_JOBS = 256
+MAX_JOBS = 256  # jobs kept (running, queued and finished two-phase ones); the oldest finished go first
+MAX_ACTIVE_JOBS = 64  # running or queued advise calls; more are refused with 429
+PRUNE_INTERVAL_S = 30.0
 POLL_DEFAULT_S, POLL_MAX_S = 20.0, 60.0
 SUPERSEDED = "superseded by a newer request for this room"
 
@@ -61,9 +66,13 @@ def fail(error: str, status: int = 400) -> web.Response:
 class AdviseJob:
     """One ``POST /api/advise`` call: its phase-1 (layer-1) decision and its final result, set on the event loop."""
 
-    def __init__(self, room: str, bot: str, rqid, seq: int, received: float):
+    def __init__(self, room: str, bot: str, rqid, seq: int, received: float, phased: bool = False,
+                 on_finish=None):
         self.id = secrets.token_hex(8)
         self.room, self.bot, self.rqid, self.seq, self.received = room, bot, rqid, seq, received
+        self.phased = phased  # a two-phase call: its second layer may be cancelled, its result fetched by id
+        self.on_finish = on_finish
+        self.started = False  # holds the room and is deciding (not queued)
         self.hooks = PhaseHooks()
         self.phase1: dict | None = None  # decision_json of the layer-1 decision
         self.phase1_ms: float | None = None
@@ -80,8 +89,16 @@ class AdviseJob:
         return round((at - self.received) * 1000, 1)
 
     def supersede(self) -> None:
+        """A newer call for the same room came. Queued: answered 409 now (the task stops waiting for the room).
+        Running: a two-phase call's second layer stops at its next chunk; a single-phase call runs to the end, as
+        before two-phase advice existed."""
         self.superseded = True
-        self.hooks.cancel.set()
+        if self.phased:
+            self.hooks.cancel.set()
+        if not self.started and not self.done.is_set():
+            self.finish(409, {"ok": False, "error": SUPERSEDED, "room": self.room, "rqid": self.rqid})
+            if self.task is not None:
+                self.task.cancel()
         self.wake.set()
 
     def publish_phase1(self, decision: dict, at: float) -> None:
@@ -97,6 +114,11 @@ class AdviseJob:
         self.done.set()
         self.published.set()
         self.wake.set()
+        if self.on_finish is not None:
+            self.on_finish(self)
+
+    def expired(self, now: float) -> bool:
+        return self.finished_at is not None and now - self.finished_at > JOB_TTL_SECONDS
 
     def head(self) -> dict:
         return {"room": self.room, "rqid": self.rqid, "bot": self.bot, "advise_id": self.id}
@@ -136,7 +158,20 @@ class Api:
         app.router.add_get("/api/bot-log", self.bot_log_handler)
         app.router.add_post("/api/challenge", self.challenge)
         app.router.add_route("OPTIONS", "/{tail:.*}", options)
+        app.cleanup_ctx.append(self._janitor)
         return app
+
+    async def _janitor(self, app: web.Application):
+        """Prune expired advise jobs every PRUNE_INTERVAL_S while the app runs."""
+        async def loop():
+            while True:
+                await asyncio.sleep(PRUNE_INTERVAL_S)
+                self._prune_jobs()
+
+        task = asyncio.create_task(loop())
+        yield
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
 
     # -- status ---------------------------------------------------------------------------------------------
 
@@ -215,20 +250,23 @@ class Api:
         if state is None:
             self._evict()
             state = self.advise_rooms[key] = AdviseRoom(worker.bot, room)
+        # Admission: queued calls of this room are about to be released; everything else that is not done counts.
+        active = sum(1 for old in self.jobs.values()
+                     if not old.done.is_set() and not ((old.bot, old.room) == key and not old.started))
+        if active >= MAX_ACTIVE_JOBS:
+            return fail(f"too many advise requests in progress ({active}); try again later", 429)
         state.seq += 1
-        for old in self.jobs.values():
+        for old in list(self.jobs.values()):
             if (old.bot, old.room) == key and not old.superseded:
                 old.supersede()
-        self._prune_jobs()
-        job = AdviseJob(room, worker.name, rqid, state.seq, received)
+        self._prune_jobs(room_for=1)
+        job = AdviseJob(room, worker.name, rqid, state.seq, received, phased, self._job_finished)
         self.jobs[job.id] = job
         job.task = asyncio.create_task(self._run_job(worker, state, job, lines, request_text, history, budget_ms,
                                                      phased))
         if not phased:
             await job.done.wait()
             status, data = job.result
-            if status == 200 and job.superseded:
-                data = dict(data, superseded=True)
             return reply(data, status)
         await job.published.wait()
         if job.done.is_set():
@@ -244,11 +282,13 @@ class Api:
         try:
             async with state.lock:
                 state.used = time.monotonic()
-                if state.seq != job.seq:
+                if state.seq != job.seq or job.done.is_set():
                     job.finish(409, {"ok": False, "error": SUPERSEDED, "room": job.room, "rqid": job.rqid})
                     return
-                hooks = job.hooks
+                job.started = True
+                hooks = None  # single phase: no hooks, the search always runs to completion (as before)
                 if phased:
+                    hooks = job.hooks
                     loop = asyncio.get_running_loop()
 
                     def on_layer1(decision) -> None:  # the worker thread, mid-decide
@@ -282,7 +322,10 @@ class Api:
     async def advise_poll(self, request: web.Request) -> web.Response:
         """``GET /api/advise/<id>?timeout=S``: the final decision of a two-phase request (long-poll)."""
         job = self.jobs.get(request.match_info["id"])
-        if job is None:
+        if job is not None and job.expired(time.monotonic()):
+            del self.jobs[job.id]
+            job = None
+        if job is None or not job.phased:
             return fail("unknown or expired advise id", 404)
         try:
             timeout = float(request.query.get("timeout", POLL_DEFAULT_S))
@@ -300,11 +343,17 @@ class Api:
             return reply({"ok": True, **job.head(), "phase": 1, "pending": True})
         return job.final_reply()
 
-    def _prune_jobs(self) -> None:
-        """Drop finished jobs older than JOB_TTL_SECONDS, and the oldest finished ones beyond MAX_JOBS."""
+    def _job_finished(self, job: AdviseJob) -> None:
+        if not job.phased:  # nobody can fetch a single-phase result by id
+            self.jobs.pop(job.id, None)
+        self._prune_jobs()
+
+    def _prune_jobs(self, room_for: int = 0) -> None:
+        """Drop finished jobs older than JOB_TTL_SECONDS, and the oldest finished ones beyond MAX_JOBS (keeping
+        ``room_for`` free places). Running and queued jobs stay (MAX_ACTIVE_JOBS bounds them)."""
         now = time.monotonic()
         finished = sorted((job.finished_at, job.id) for job in self.jobs.values() if job.finished_at is not None)
-        excess = len(self.jobs) - MAX_JOBS + 1
+        excess = len(self.jobs) + room_for - MAX_JOBS
         for at, job_id in finished:
             if now - at > JOB_TTL_SECONDS or excess > 0:
                 del self.jobs[job_id]
@@ -325,8 +374,8 @@ class Api:
             asyncio.create_task(self.workers[key[0]].run(state.close))
 
     async def close(self) -> None:
-        for job in self.jobs.values():
-            job.supersede()  # running second layers stop at their next chunk
+        for job in list(self.jobs.values()):
+            job.supersede()  # queued calls are answered, running second layers stop at their next chunk
         for (name, _), state in list(self.advise_rooms.items()):
             try:
                 await self.workers[name].run(state.close)

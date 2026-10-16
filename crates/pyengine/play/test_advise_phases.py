@@ -271,19 +271,126 @@ def test_a_request_waiting_for_the_room_is_superseded_with_409():
     run(go())
 
 
-def test_a_running_single_phase_request_superseded_returns_its_result_marked():
+def test_a_running_single_phase_request_is_never_cut_short():
+    """Old clients: a newer call for the room waits for a running single-phase call, which runs to completion and
+    answers exactly as before (no cancel hook, no extra keys)."""
     async def go():
         bot = PhasedBot()
         api, client, workers = await serve({"Phased": bot})
         try:
             first = asyncio.ensure_future(client.post("/api/advise", json=body(2)))
             await asyncio.sleep(0.1)
-            second = await (await client.post("/api/advise", json=body(3, 8, two_phase=True))).json()
-            assert second["phase"] == 1
-            data = await (await first).json()
-            assert data["ok"] and data["superseded"] is True
-            assert data["decision"]["analysis"]["depth2"]["skipped"] == "cancelled"
+            second = asyncio.ensure_future(client.post("/api/advise", json=body(3, 8, two_phase=True)))
+            await asyncio.sleep(0.3)
+            assert not first.done() and not second.done(), "the single-phase search was cut short"
             bot.release.set()
+            response = await first
+            data = await response.json()
+            assert response.status == 200 and set(data) == {"ok", "room", "rqid", "bot", "decision", "replay"}
+            assert data["decision"]["analysis"]["depth2"]["skipped"] is None
+            assert (await (await second).json())["rqid"] == 3
+        finally:
+            await stop(api, client, workers)
+
+    run(go())
+
+
+def test_a_superseded_queued_request_is_released_at_once():
+    async def go():
+        bot = PhasedBot()
+        bot.cancellable = False  # the running decision holds the room until released
+        api, client, workers = await serve({"Phased": bot})
+        try:
+            await client.post("/api/advise", json=body(2, two_phase=True))
+            queued = asyncio.ensure_future(client.post("/api/advise", json=body(3, 8, two_phase=True)))
+            await asyncio.sleep(0.05)
+            newest = asyncio.ensure_future(client.post("/api/advise", json=body(4, 10, two_phase=True)))
+            response = await asyncio.wait_for(queued, 1.0)  # long before the running decision ends
+            assert response.status == 409 and (await response.json())["superseded"] is True
+            assert not newest.done()
+            active = [job for job in api.jobs.values() if not job.done.is_set()]
+            assert len(active) == 2  # the running one and the newest
+            bot.release.set()
+            assert (await (await newest).json())["rqid"] == 4
+        finally:
+            await stop(api, client, workers)
+
+    run(go())
+
+
+def test_a_burst_beyond_the_active_cap_is_refused_and_the_registry_stays_bounded(monkeypatch):
+    import play.api as api_module
+
+    monkeypatch.setattr(api_module, "MAX_ACTIVE_JOBS", 3)
+    monkeypatch.setattr(api_module, "MAX_JOBS", 5)
+
+    async def go():
+        bot = PhasedBot()
+        bot.cancellable = False
+        api, client, workers = await serve({"Phased": bot})
+        try:
+            calls = [asyncio.ensure_future(client.post("/api/advise", json=dict(body(2), room=f"battle-{i}",
+                                                                                     two_phase=True)))
+                     for i in range(3)]
+            await asyncio.sleep(0.2)
+            response = await client.post("/api/advise", json=dict(body(2), room="battle-9", two_phase=True))
+            assert response.status == 429 and "too many" in (await response.json())["error"]
+            response = await client.post("/api/advise", json=dict(body(2), room="battle-9"))  # single phase too
+            assert response.status == 429
+            assert len(api.jobs) == 3
+            bot.release.set()
+            ids = [(await (await call).json())["advise_id"] for call in calls]
+            for advise_id in ids:
+                await client.get(f"/api/advise/{advise_id}")
+            # Many more finished calls: never more than MAX_JOBS kept, single-phase ones not at all.
+            for i in range(8):
+                await client.post("/api/advise", json=dict(body(2), room=f"battle-x{i}", two_phase=True))
+                await client.post("/api/advise", json=dict(body(2), room=f"battle-y{i}"))
+                assert len(api.jobs) <= 5
+            assert all(job.phased for job in api.jobs.values())
+        finally:
+            await stop(api, client, workers)
+
+    run(go())
+
+
+def test_finished_results_expire_on_lookup_and_by_the_periodic_cleanup(monkeypatch):
+    import play.api as api_module
+
+    monkeypatch.setattr(api_module, "JOB_TTL_SECONDS", 0.2)
+    monkeypatch.setattr(api_module, "PRUNE_INTERVAL_S", 0.05)
+
+    async def go():
+        api, client, workers = await serve({"Plain": PlainBot()})
+        try:
+            first = await (await client.post("/api/advise", json=body(2, two_phase=True))).json()
+            assert (await client.get(f"/api/advise/{first['advise_id']}")).status == 200
+            second = await (await client.post("/api/advise", json=dict(body(2), room="battle-2",
+                                                                       two_phase=True))).json()
+            await asyncio.sleep(0.4)
+            assert second["advise_id"] not in api.jobs  # the periodic cleanup, without any request
+            response = await client.get(f"/api/advise/{first['advise_id']}")
+            assert response.status == 404
+        finally:
+            await stop(api, client, workers)
+
+    run(go())
+
+
+def test_an_expired_result_is_404_even_before_the_cleanup_runs(monkeypatch):
+    import play.api as api_module
+
+    monkeypatch.setattr(api_module, "JOB_TTL_SECONDS", 0.1)
+    monkeypatch.setattr(api_module, "PRUNE_INTERVAL_S", 3600)
+
+    async def go():
+        api, client, workers = await serve({"Plain": PlainBot()})
+        try:
+            data = await (await client.post("/api/advise", json=body(2, two_phase=True))).json()
+            await asyncio.sleep(0.2)
+            assert data["advise_id"] in api.jobs
+            assert (await client.get(f"/api/advise/{data['advise_id']}")).status == 404
+            assert data["advise_id"] not in api.jobs
         finally:
             await stop(api, client, workers)
 

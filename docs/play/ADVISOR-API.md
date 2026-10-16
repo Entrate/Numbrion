@@ -139,7 +139,7 @@ phase 1). `elapsed_ms` counts from the POST until the final decision was ready.
 |---|---|
 | `layer1_choice` | the layer-1 pick (the phase-1 `decision.choice`) |
 | `chosen` | the layer-2 pick as choice text, or `null` when layer 2 completed no round (layer 1 stands) |
-| `changed` | true when the final choice differs from `layer1_choice` |
+| `changed` | true when the final choice differs from `layer1_choice` (also when layer 1 samples its pick, `search.play: "sample"`) |
 | `skipped` | why layer 2 did not run or stopped early (`"the budget planned no second layer"`, `"nothing to deepen"`, `"cancelled"` (superseded by a newer request), `"error: ..."`, a refused stage), else `null` |
 | `rounds`, `rounds_planned` | halving rounds completed / planned |
 | `candidates` | the deepened shortlist, one entry per candidate: `{"choice", "x", "prior", "q", "q2", "score"}`. `x` = layer-1 weight, `q` = layer-1 value, `q2` = list of layer-2 values per round (`null` for a round the candidate did not survive into; the last non-null one is the most refined), `score` = per-round score used for halving |
@@ -162,17 +162,28 @@ Long-poll for the final decision of a two-phase request. `timeout` defaults to 2
 | 404 | `{"ok": false, "error": "unknown or expired advise id"}` | never existed, or finished more than 5 minutes ago |
 | 500 | `{"ok": false, "error": "..."}` | the decision failed |
 
-The server keeps a finished result for 5 minutes. It can be fetched more than once.
+The server keeps a finished result for 5 minutes. It can be fetched more than once. It keeps at most 256 jobs
+in all; under a flood the oldest finished results go first.
 
 ### Stale and cancelled requests
 
 A newer `POST /api/advise` for the same (bot, room) supersedes every earlier request of that room:
 
-* An earlier request still waiting for the room gets 409 (as before), whether or not it asked for two phases.
-* An earlier request that is running is cancelled cooperatively: its layer 2 stops before its next chunk (a
-  few hundred ms at most). Layer 1 is never interrupted. Its result is not cached; its
+* An earlier request still waiting for the room gets 409 at once (as before, but without waiting for the
+  room), whether or not it asked for two phases.
+* An earlier **two-phase** request that is running is cancelled cooperatively: its layer 2 stops before its next
+  chunk (a few hundred ms at most). Layer 1 is never interrupted. Its result is not cached; its
   `GET /api/advise/<id>` answers 409. A two-phase POST that was superseded before its phase 1 was ready gets 409.
+* An earlier **single-phase** request that is running is never cancelled: it runs to completion and answers as
+  before.
 * The newer request waits for the room (one decision at a time per bot) and then runs normally.
+
+### Load limits
+
+At most 64 advise requests run or wait at a time (all bots and rooms; a request that is about to supersede the
+waiting ones of its room does not count them). Beyond that `POST /api/advise` answers
+`429 {"ok": false, "error": "too many advise requests in progress (64); try again later"}`, with or without
+`two_phase`.
 
 The server only knows about rooms, not about which request the client shows. Clients must still drop any
 answer whose `rqid` (and their own request sequence) is no longer the room's current request, and must never
@@ -182,8 +193,7 @@ let a phase-2 answer overwrite the display of a newer request.
 
 Unchanged: the POST waits for the final decision and returns the original body (`ok`, `room`, `rqid`, `bot`,
 `decision`, `replay`), with no `phase`, `pending` or `advise_id`. For a two-ply bot that is the layer-2 decision,
-including `analysis.depth2`. A running request superseded by a newer one still returns its (cut-short) result,
-with `"superseded": true` added.
+including `analysis.depth2`. Its search is never cut short: a newer request for the same room waits for it.
 
 ## `GET /api/bot-log?room=<roomid>`
 

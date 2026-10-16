@@ -798,6 +798,9 @@ class SearchPlayer(Player):
             return best
         self._decision_stages.extend(out["stages"])
         analysis["depth2"] = dict(base, **out["analysis"])
+        # ``changed`` against the layer-1 pick actually played/published (``best``): deepen compares with argmax(x),
+        # which differs from ``best`` when layer 1 samples (``play: "sample"``).
+        analysis["depth2"]["changed"] = out["chosen"] is not None and int(out["chosen"]) != best
         analysis["depth2"]["difficulty"] = layer1.difficulty
         self.stats["depth2"] = self.stats.get("depth2", 0) + 1
         self.stats["depth2_cells"] = self.stats.get("depth2_cells", 0) + sum(out["cells"].values())
