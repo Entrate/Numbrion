@@ -529,6 +529,12 @@ class SearchPlayer(Player):
         self.deadline: float | None = None
         self.decision_token = None
         self.fallback: tuple | None = None
+        # Set by the advisor API (play.api, two-phase advice) for one decide: ``on_layer1(Decision)`` is called on the
+        # deciding thread with the layer-1 decision once a second layer is about to run; ``cancel_depth2()`` returning
+        # True stops the second layer before its next chunk (the request was superseded).
+        self.on_layer1 = None
+        self.cancel_depth2 = None
+        self.depth2_cancelled = False
         self.decisions = 0
         self.stats = dict(search=0, policy=0, forced=0, no_worlds=0)
         # The last decision's search (None if the policy decided): what search_labels.py stores for distillation.
@@ -610,6 +616,7 @@ class SearchPlayer(Player):
         started = time.perf_counter()
         started_mono = time.monotonic()
         self._decision_plan, self._decision_stages = None, []
+        self.depth2_cancelled = False
         self._sync(request, side)
         self.stats["sync_ms"] = self.stats.get("sync_ms", 0.0) + (time.perf_counter() - started) * 1000
         mask0, joint = self._mask(request)
@@ -751,31 +758,46 @@ class SearchPlayer(Player):
         layer1.difficulty = layer1_difficulty(layer1, request, public)
         # The driver's fallback becomes the layer-1 choice: a second layer that runs late sends it, not the policy's.
         a0, a1 = map(int, layer1.ours[best])
-        fallback = dict(analysis, note="the layer-1 search choice, sent when the second layer ran out of time",
-                        time_ms=round((time.perf_counter() - started) * 1000, 1))
-        self.fallback = (self.decision_token, Decision(self._text(request, a0, a1), a0, a1, fallback))
+        layer1_text = self._text(request, a0, a1)
+        layer1_ms = round((time.perf_counter() - started) * 1000, 1)
+        shown = dict(analysis, time_ms=layer1_ms, slots=self._slots(request, a0, a1))
+        fallback = dict(shown, note="the layer-1 search choice, sent when the second layer ran out of time")
+        self.fallback = (self.decision_token, Decision(layer1_text, a0, a1, fallback))
+        base = dict(layer1_choice=layer1_text)
         if self.bot.budget is not None and plan is not None:
             cfg2 = self.bot.budget.plan_depth2(plan, layer1, time.monotonic())
             if cfg2 is None or not cfg2.enabled:
-                analysis["depth2"] = dict(skipped="the budget planned no second layer", rounds=0, changed=False,
-                                          difficulty=layer1.difficulty)
+                analysis["depth2"] = dict(base, skipped="the budget planned no second layer", rounds=0,
+                                          changed=False, difficulty=layer1.difficulty)
                 self.stats["depth2_skipped"] = self.stats.get("depth2_skipped", 0) + 1
                 return best
+        cancel = self.cancel_depth2
+        if cancel is not None and cancel():
+            self.depth2_cancelled = True
+            analysis["depth2"] = dict(base, skipped="cancelled", rounds=0, changed=False)
+            return best
+        if self.on_layer1 is not None:  # two-phase advice: the layer-1 pick, before the second layer starts
+            try:
+                self.on_layer1(Decision(layer1_text, a0, a1, shown))
+            except Exception:  # noqa: BLE001 - the listener must not break the decision
+                pass
         t = time.perf_counter()
         try:
             out = deepen(self.bot, cfg, cfg2, layer1, battle=self.battle, deadline=deadline, rng=self.rng,
                          budget=self.bot.budget, describe=lambda b0, b1: self._text(request, b0, b1),
-                         costs=self.bot.depth2_costs, revealed=revealed)
+                         costs=self.bot.depth2_costs, revealed=revealed, cancel=cancel)
         except Exception as error:  # noqa: BLE001 - the layer-1 decision stands
-            analysis["depth2"] = dict(skipped=f"error: {error!r}"[:300], rounds=0, changed=False)
+            analysis["depth2"] = dict(base, skipped=f"error: {error!r}"[:300], rounds=0, changed=False)
             self.stats["depth2_errors"] = self.stats.get("depth2_errors", 0) + 1
             return best
         self.stats["depth2_ms"] = self.stats.get("depth2_ms", 0.0) + (time.perf_counter() - t) * 1000
+        if cancel is not None and cancel():
+            self.depth2_cancelled = True
         if out is None:
-            analysis["depth2"] = dict(skipped="nothing to deepen", rounds=0, changed=False)
+            analysis["depth2"] = dict(base, skipped="nothing to deepen", rounds=0, changed=False)
             return best
         self._decision_stages.extend(out["stages"])
-        analysis["depth2"] = out["analysis"]
+        analysis["depth2"] = dict(base, **out["analysis"])
         analysis["depth2"]["difficulty"] = layer1.difficulty
         self.stats["depth2"] = self.stats.get("depth2", 0) + 1
         self.stats["depth2_cells"] = self.stats.get("depth2_cells", 0) + sum(out["cells"].values())
@@ -823,17 +845,22 @@ class SearchPlayer(Player):
         foes = self._foes()
         return f"{describe_code(request, 0, a0, foes)}; {describe_code(request, 1, a1, foes)}"
 
+    def _slots(self, request, a0, a1) -> list[dict]:
+        names = [p["details"].split(",")[0] for p in request.get("side", {}).get("pokemon", [])[:2]]
+        foes = self._foes()
+        return [dict(pokemon=names[i] if i < len(names) else "", text=describe_code(request, i, c, foes), code=int(c))
+                for i, c in enumerate((a0, a1))]
+
     def _finish(self, request, a0, a1, analysis, started) -> Decision:
         analysis["time_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.stats["total_ms"] = self.stats.get("total_ms", 0.0) + analysis["time_ms"]
         if self.bot.budget is not None and self._decision_plan is not None:
             # Once per planned decision (policy fallbacks included), with one Stage per network batch or grid call.
-            self.bot.budget.observe(list(self._decision_stages), analysis["time_ms"])
+            # A cancelled second layer is not a decision's natural length: it would skew the time feedback.
+            if not self.depth2_cancelled:
+                self.bot.budget.observe(list(self._decision_stages), analysis["time_ms"])
             self._decision_plan = None
-        names = [p["details"].split(",")[0] for p in request.get("side", {}).get("pokemon", [])[:2]]
-        foes = self._foes()
-        analysis["slots"] = [dict(pokemon=names[i] if i < len(names) else "",
-                                  text=describe_code(request, i, c, foes), code=int(c)) for i, c in enumerate((a0, a1))]
+        analysis["slots"] = self._slots(request, a0, a1)
         choice = self._text(request, a0, a1)
         self.pending_choice = choice
         self.pending_decided = True

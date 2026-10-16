@@ -129,6 +129,23 @@ The advisor searches only when the extension sends `history`, the room's past re
 search needs your past choices to sample the opponent's team. Without `history` the advice comes from the policy
 after the first turn.
 
+### Two-ply advisor
+
+A bot with `search.depth2` runs a second search layer after the one-turn search (`docs/design/SEARCH2-PLAN.md`).
+`crates/pyengine/play/bots-search2-example.json` has the entry for Spark with it, "Numbrion Spark 2-ply":
+`"search": {"depth2": {"enabled": true}}` plus a top-level `"budget": {"target_ms": 3000, "max_ms": 5500,
+"mode": "adaptive"}` (`training/search_budget.py`, `docs/design/SEARCH2-BUDGET.md`). The budget sizes both layers so
+that a decision takes about 3 s on average and never more than 5.5 s from the start of the decision. The advisor
+gives the player no other deadline. A `budget_ms` in the request (the extension's "Search budget" option)
+replaces `target_ms` for that decision, so leave that option empty for this bot.
+
+The extension asks with `"two_phase": true` (ADVISOR-API.md, "Two-phase advice"): it shows the one-turn pick as
+soon as layer 1 is done and updates it when layer 2 finishes. Measured on this Mac with Spark (34 decisions from
+local battles): layer 1 answers in about 0.4 s (median; it samples up to 32 worlds where the one-ply Spark
+advisor samples 4 and answers in about 0.07 s), and the final decision comes after 2 to 3 s (mean 2.1 to 2.7 s,
+max 4.4 s). Adding `"max_worlds": 8` to `search` brings layer 1 down to about 0.13 s, with a smaller layer 2.
+An extension that does not send `two_phase` gets the final decision in one answer.
+
 ## Logs and testing
 
 * The server saves every battle of every bot to `scratch/showdown-logs/<room>-<bot>.json`. A file holds the raw

@@ -16,14 +16,20 @@ The user's real choice then comes with ``set_request`` + ``record_choice``, as a
 ``decide`` returned None (a ``wait`` request) there is nothing to drop, and ``rejected`` would also drop the user's
 previous choice, which such a player still holds until its next update.
 
+Two-phase advice (``PhaseHooks``): a player that supports it (SearchPlayer with a second layer) gets
+``on_layer1`` and ``cancel_depth2`` for the one ``decide``; ``on_layer1`` runs on the worker thread with the
+layer-1 decision. A decision whose second layer was cancelled (the player's ``depth2_cancelled``) is not cached.
+
 The methods run on the bot's worker thread, one call per room at a time (the API holds the room's lock).
 """
 from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 from dataclasses import dataclass, field
+from typing import Callable
 
 from training.player import Bot, Decision
 
@@ -77,6 +83,16 @@ def parse_history(raw, n_lines: int, request_text: str | None) -> list[Entry]:
 
 
 @dataclass
+class PhaseHooks:
+    """One advise call's link to a two-phase player: the layer-1 listener and the cancel flag (thread-safe)."""
+    on_layer1: Callable[[Decision], None] | None = None
+    cancel: threading.Event = field(default_factory=threading.Event)
+
+    def cancelled(self) -> bool:
+        return self.cancel.is_set()
+
+
+@dataclass
 class AdviseRoom:
     bot: Bot
     room: str
@@ -113,13 +129,25 @@ class AdviseRoom:
         self.fed = list(lines[:index])
         return index - n
 
-    def _decide(self, request: str, budget_ms) -> Decision | None:
+    def _decide(self, request: str, budget_ms, hooks: PhaseHooks | None = None) -> Decision | None:
         if budget_ms is not None and hasattr(self.player, "budget_ms"):
             self.player.budget_ms = budget_ms
         self.player.set_request(request)
-        decision = self.player.decide()
+        player = self.player
+        hooked = hooks is not None and hasattr(player, "on_layer1")
+        if hooked:
+            player.on_layer1, player.cancel_depth2 = hooks.on_layer1, hooks.cancel.is_set
+        try:
+            decision = player.decide()
+        finally:
+            if hooked:
+                player.on_layer1 = player.cancel_depth2 = None
         self.suggested = decision is not None
         return decision
+
+    def _cacheable(self, key, decision):
+        """The answer to cache: none when the player's second layer was cancelled (cut short)."""
+        return None if getattr(self.player, "depth2_cancelled", False) else (key, decision)
 
     def _drop_suggestion(self, reason: str) -> None:
         if self.suggested:
@@ -129,7 +157,8 @@ class AdviseRoom:
 
     # -- without history ------------------------------------------------------------------------------------------
 
-    def advise_lines(self, lines: list[str], request: str | None, budget_ms=None) -> tuple[Decision | None, dict]:
+    def advise_lines(self, lines: list[str], request: str | None, budget_ms=None,
+                     hooks: PhaseHooks | None = None) -> tuple[Decision | None, dict]:
         n = len(self.fed)
         rebuild = self.player is None or self.mode != "lines" or len(lines) < n or lines[:n] != self.fed
         key = ("lines", request, budget_ms)
@@ -142,9 +171,9 @@ class AdviseRoom:
         fed = self._feed_to(lines, len(lines))
         decision = None
         if request is not None:
-            decision = self._decide(request, budget_ms)
+            decision = self._decide(request, budget_ms, hooks)
             self.current = ("lines",)
-        self.cached = (key, decision)
+        self.cached = self._cacheable(key, decision)
         return decision, {"rebuilt": rebuild, "fed": fed}
 
     # -- with history ---------------------------------------------------------------------------------------------
@@ -169,7 +198,8 @@ class AdviseRoom:
             position = entry.index
         return ""
 
-    def advise_history(self, lines: list[str], history: list[Entry], budget_ms=None) -> tuple[Decision | None, dict]:
+    def advise_history(self, lines: list[str], history: list[Entry], budget_ms=None,
+                       hooks: PhaseHooks | None = None) -> tuple[Decision | None, dict]:
         earlier, last = history[:-1], history[-1]
         reason = self._rebuild_reason(lines, earlier, last)
         key = ("history", last.boundary(), budget_ms)
@@ -196,8 +226,8 @@ class AdviseRoom:
         self._feed_to(lines, last.index)
         decision = None
         if last.request is not None:
-            decision = self._decide(last.request, budget_ms)
+            decision = self._decide(last.request, budget_ms, hooks)
         self.current = last.boundary()
-        self.cached = (key, decision)
+        self.cached = self._cacheable(key, decision)
         return decision, {"rebuilt": bool(reason), "reason": reason or None, "replayed": replayed,
                           "skipped": len(earlier) - replayed}
