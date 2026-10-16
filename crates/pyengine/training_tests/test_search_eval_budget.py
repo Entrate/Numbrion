@@ -95,7 +95,7 @@ def test_cli_budget_defaults_and_override(monkeypatch, tmp_path, flags, expected
         return SimpleNamespace(net=None, dex=SimpleNamespace(path="unused"),
                                new_player=lambda name: SimpleNamespace(), describe=lambda: {})
 
-    def play_game(bot, factory, t1, t2, seed, side, engine_mask, *, budget_ms):
+    def play_game(bot, factory, t1, t2, seed, side, engine_mask, *, budget_ms, **kwargs):  # kwargs: seeds, cap
         opponent = factory(1 - side, t2)
         calls.append((budget_ms, opponent.budget_ms))
         return game(1, 4, 1, 6)

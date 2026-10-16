@@ -1,0 +1,11 @@
+{
+  "name": "2ply",
+  "search": {"ours": 12, "theirs": 8, "seeds": 2, "worlds": 32, "max_worlds": 32, "particles": 8, "threads": 4,
+             "depth2": {"enabled": true, "shortlist": 4,
+                        "rounds": [{"keep": 4, "worlds": 4, "chance": 1}, {"keep": 2, "worlds": 8, "chance": 2}],
+                        "theirs_top": 2, "danger": 1, "danger_min": 0.02, "ours": 8, "theirs": 6, "seeds": 2,
+                        "replacement_steps": 2, "backup": "correction", "info": "shared", "leaf_value": "mixed"}},
+  "device": "cpu",
+  "torch_threads": 4,
+  "policy_temperature": 0.5
+}

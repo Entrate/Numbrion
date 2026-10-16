@@ -1,0 +1,11 @@
+{
+  "name": "1ply-ladder",
+  "search": {"ours": 12, "theirs": 8, "seeds": 2, "max_worlds": 32, "particles": 8, "threads": 4},
+  "budget_ms": 3000,
+  "deadline_s": 6.0,
+  "reserve_s": 0.5,
+  "device": "cpu",
+  "torch_threads": 4,
+  "cell_ms": 0.3,
+  "policy_temperature": 0.5
+}
