@@ -134,6 +134,11 @@ to the processes; no persistent power settings are changed.
 
 ## Report
 
+For sleep exposure and endgame stalling diagnostics from `record.dir`, use
+[`tools/ladder_diag.py`](../../crates/pyengine/tools/ladder_diag.py). See
+[LADDER_DIAG.md](LADDER_DIAG.md) for classification rules, commands, recorder gaps,
+and the partial 2026-10-16 run findings.
+
 ```powershell
 .venv\Scripts\python.exe crates\pyengine\play\ladder_report.py --run RUN_ID          # also writes report.md
 .venv\Scripts\python.exe crates\pyengine\play\ladder_report.py --all
