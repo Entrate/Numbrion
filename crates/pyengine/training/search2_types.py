@@ -59,6 +59,13 @@ class Depth2Config:
     info: str = "shared"
     # Layer-2 leaf value: "mixed" = x2 . q2, "argmax" = q2[argmax x2].
     leaf_value: str = "mixed"
+    # Final pick (and halving score) among the deepened candidates, with Q2 clipped to [-1, 1]:
+    # "anchored": argmax of log(prior[i]) + Q2[i] / anchor, the same KL-anchored best response layer 1 makes, on the
+    # deeper values (prior = layer 1's our_prior, anchor = SearchConfig.anchor); "q": argmax Q2.
+    pick: str = "anchored"
+    # Also deepen, per (world, candidate), the likeliest opponent reply that uses a sleep move (y >= danger_min)
+    # when none of the chosen replies does: one ply cannot see what sleep costs, so A1 rarely ranks it as a danger.
+    threat_reply: bool = True
 
     @classmethod
     def from_dict(cls, values: dict | None) -> "Depth2Config":
