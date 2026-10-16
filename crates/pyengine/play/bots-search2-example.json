@@ -1,0 +1,25 @@
+{
+  "_comment": "Two-ply advisor bot (two-phase advice, docs/play/ADVISOR-API.md). Merge the entry of 'bots' into the live bots.json; paths are this Mac's. search.depth2 turns on the second layer with its default sizes (training/search2_types.py Depth2Config); budget is the per-decision time controller (training/search_budget.py): about 3 s per decision on average, never more than 5.5 s from the start of the decision.",
+  "advisor": "Numbrion Spark 2-ply",
+  "bots": [
+    {
+      "name": "Numbrion Spark 2-ply",
+      "factory": "training.search:SearchBot",
+      "showdown": false,
+      "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/scratch/play-runtime/models/gen1/numbrion-spark.pt",
+      "search": {
+        "depth2": {"enabled": true}
+      },
+      "budget": {
+        "target_ms": 3000,
+        "max_ms": 5500,
+        "mode": "adaptive"
+      },
+      "device": "auto",
+      "torch_threads": 4,
+      "pools": [
+        "/Users/aminaliu/.t3/worktrees/numbrion-mac/t3code-c1f8987c/data/teams/pool-s1-200k.txt.gz"
+      ]
+    }
+  ]
+}

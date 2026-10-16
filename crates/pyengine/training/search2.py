@@ -65,8 +65,9 @@ class StageClock:
     sizes). Without a controller but with a deadline, a running per-unit cost (``costs``, ms per unit by stage, kept
     by the caller across decisions) predicts the chunk conservatively."""
 
-    def __init__(self, budget=None, deadline: float | None = None, costs: dict | None = None):
+    def __init__(self, budget=None, deadline: float | None = None, costs: dict | None = None, cancel=None):
         self.budget, self.deadline = budget, deadline
+        self.cancel = cancel  # optional callable: True refuses every further chunk (the caller gave up)
         self.costs = costs if costs is not None else {}
         self.stages: list[Stage] = []
         self.refused: str | None = None
@@ -77,6 +78,9 @@ class StageClock:
     def ok(self, stage: str, units: int) -> bool:
         if units <= 0:
             return True
+        if self.cancel is not None and self.cancel():
+            self.refused = "cancelled"
+            return False
         now = time.monotonic()
         if self.budget is not None:
             ok = bool(self.budget.next_chunk_ok(stage, int(units), now, self.deadline))
@@ -920,7 +924,7 @@ class _Deepen:
 
 def deepen(bot, cfg, cfg2: Depth2Config, layer1: Layer1, battle=None, deadline: float | None = None, rng=None,
            budget=None, describe=None, pick: str | None = None, costs: dict | None = None,
-           threat_reply: bool | None = None, revealed: set | None = None) -> dict | None:
+           threat_reply: bool | None = None, revealed: set | None = None, cancel=None) -> dict | None:
     """The second layer for one decision (module docstring). Returns None when there is nothing to deepen, else a
     dict: ``chosen`` (index into ``layer1.ours``, or None to keep layer 1), ``q2`` {index: Q2}, ``cells``,
     ``leaves``, ``stages`` (list of ``Stage``), ``changed``, ``rounds`` completed and ``analysis`` (the compact,
@@ -928,9 +932,10 @@ def deepen(bot, cfg, cfg2: Depth2Config, layer1: Layer1, battle=None, deadline: 
     player's ``_Battle``) names our active Pokemon in opponent replies; ``costs`` keeps per-unit stage costs across
     decisions for deadline checks without a budget controller; ``budget`` (a BudgetController) admits every chunk
     when given; ``pick`` and ``threat_reply`` override ``cfg2.pick`` / ``cfg2.threat_reply``; ``revealed``:
-    (species id, move id) of the foe's moves seen so far, for the threat replies."""
+    (species id, move id) of the foe's moves seen so far, for the threat replies; ``cancel`` (a callable) stops it
+    before the next chunk once it returns True, like a deadline."""
     started = time.perf_counter()
-    clock = StageClock(budget, deadline, costs)
+    clock = StageClock(budget, deadline, costs, cancel)
     ours_shown = ("", "")
     if battle is not None:
         ours_shown = tuple(battle.active.get(("p1", "p2")[layer1.side] + slot, "") for slot in "ab")

@@ -140,12 +140,11 @@ phase 1). `elapsed_ms` counts from the POST until the final decision was ready.
 | `layer1_choice` | the layer-1 pick (the phase-1 `decision.choice`) |
 | `chosen` | the layer-2 pick as choice text, or `null` when layer 2 completed no round (layer 1 stands) |
 | `changed` | true when the final choice differs from `layer1_choice` |
-| `skipped` | why layer 2 did not run or stopped early (`"the budget planned no second layer"`, `"nothing to deepen"`, `"cancelled: superseded by a newer request"`, `"error: ..."`, a refused stage), else `null` |
+| `skipped` | why layer 2 did not run or stopped early (`"the budget planned no second layer"`, `"nothing to deepen"`, `"cancelled"` (superseded by a newer request), `"error: ..."`, a refused stage), else `null` |
 | `rounds`, `rounds_planned` | halving rounds completed / planned |
 | `candidates` | the deepened shortlist, one entry per candidate: `{"choice", "x", "prior", "q", "q2", "score"}`. `x` = layer-1 weight, `q` = layer-1 value, `q2` = list of layer-2 values per round (`null` for a round the candidate did not survive into; the last non-null one is the most refined), `score` = per-round score used for halving |
 | `replies` | per shortlisted candidate (same order), the opponent replies deepened: `{"text", "weight", "worlds", "danger"}` |
 | `total_ms` | layer-2 wall time (ms) |
-| `layer1_ms` | decision time when layer 1 finished (ms from the start of `decide`) |
 | `timing`, `units`, `cells`, `leaves`, `sizes`, `config`, `difficulty` | layer-2 diagnostics |
 
 When layer 2 is skipped the block is short: `{"skipped": "...", "rounds": 0, "changed": false, ...}`.
