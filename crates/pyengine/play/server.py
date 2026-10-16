@@ -66,6 +66,11 @@ def load_config(path: Path) -> tuple[list[dict], str | None]:
             raise SystemExit(f"{path}: every bot needs a name and a factory: {spec}")
         if to_id(spec["name"]) in names:
             raise SystemExit(f"{path}: duplicate bot name {spec['name']!r}")
+        from play.search_config import validate_search_options
+        try:
+            validate_search_options(spec)
+        except (ValueError, TypeError) as error:
+            raise SystemExit(f"{path}: {error}") from error
         names.add(to_id(spec["name"]))
         if spec.get("showdown", True) and len(spec["name"]) > 18:
             raise SystemExit(f"{path}: Showdown names have at most 18 characters: {spec['name']!r}")

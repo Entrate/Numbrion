@@ -1,0 +1,608 @@
+{
+  "date": "2026-10-16",
+  "notes": "CPU, 4 torch/grid threads, six move-turn positions per checkpoint, 2/8/32 worlds, 12x8 pairs, 2 seeds, first searched decision excluded. Value stage is measured per concrete batch of at most 2048 rows. Short shared-machine calibration, not a latency certification.",
+  "simulations": [
+    {
+      "bounded": true,
+      "decisions": 10000,
+      "mean_ms": 3001.394717863806,
+      "max_ms": 4274.124978415784,
+      "overruns": 0,
+      "bound_violations": 0,
+      "spikes": 3775,
+      "scale": 1.0463587895074282
+    },
+    {
+      "bounded": false,
+      "decisions": 1000,
+      "mean_ms": 87.82590979475869,
+      "max_ms": 6146.534073018902,
+      "overruns": 1,
+      "bound_violations": 1,
+      "spikes": 13,
+      "scale": 2.0
+    }
+  ],
+  "models": [
+    {
+      "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/scratch/play-runtime/models/gen1/numbrion-spark.pt",
+      "width": 128,
+      "layers": 3,
+      "device": "cpu",
+      "threads": 4,
+      "warmup_excluded": {
+        "turn": 1,
+        "worlds": 2,
+        "total_ms": 58.31,
+        "stages": [
+          {
+            "name": "root_policy",
+            "units": 1,
+            "ms": 5.2903329487890005
+          },
+          {
+            "name": "worlds",
+            "units": 2,
+            "ms": 1.0
+          },
+          {
+            "name": "opp_policy",
+            "units": 2,
+            "ms": 5.5
+          },
+          {
+            "name": "grid1",
+            "units": 384,
+            "ms": 8.0
+          },
+          {
+            "name": "value1",
+            "units": 384,
+            "ms": 30.30604205559939
+          }
+        ]
+      },
+      "positions": [
+        {
+          "turn": 2,
+          "worlds": 8,
+          "total_ms": 214.25,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.2857080223038793
+            },
+            {
+              "name": "worlds",
+              "units": 8,
+              "ms": 9.1
+            },
+            {
+              "name": "opp_policy",
+              "units": 8,
+              "ms": 11.9
+            },
+            {
+              "name": "grid1",
+              "units": 1536,
+              "ms": 23.1
+            },
+            {
+              "name": "value1",
+              "units": 1536,
+              "ms": 144.41504096612334
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "worlds": 32,
+          "total_ms": 640.24,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.2977500231936574
+            },
+            {
+              "name": "worlds",
+              "units": 32,
+              "ms": 3.1
+            },
+            {
+              "name": "opp_policy",
+              "units": 32,
+              "ms": 38.2
+            },
+            {
+              "name": "grid1",
+              "units": 6144,
+              "ms": 111.8
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 181.6416250076145
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 109.34420907869935
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 109.89083303138614
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "worlds": 2,
+          "total_ms": 73.42,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.614499932155013
+            },
+            {
+              "name": "worlds",
+              "units": 2,
+              "ms": 13.7
+            },
+            {
+              "name": "opp_policy",
+              "units": 2,
+              "ms": 5.4
+            },
+            {
+              "name": "grid1",
+              "units": 384,
+              "ms": 6.9
+            },
+            {
+              "name": "value1",
+              "units": 384,
+              "ms": 36.12833307124674
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "worlds": 8,
+          "total_ms": 168.27,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 4.656957928091288
+            },
+            {
+              "name": "worlds",
+              "units": 8,
+              "ms": 11.1
+            },
+            {
+              "name": "opp_policy",
+              "units": 8,
+              "ms": 15.5
+            },
+            {
+              "name": "grid1",
+              "units": 1536,
+              "ms": 27.9
+            },
+            {
+              "name": "value1",
+              "units": 1536,
+              "ms": 87.85629097837955
+            }
+          ]
+        },
+        {
+          "turn": 6,
+          "worlds": 32,
+          "total_ms": 543.25,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.501624916680157
+            },
+            {
+              "name": "worlds",
+              "units": 32,
+              "ms": 4.0
+            },
+            {
+              "name": "opp_policy",
+              "units": 32,
+              "ms": 27.7
+            },
+            {
+              "name": "grid1",
+              "units": 6144,
+              "ms": 99.3
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 115.10887497570366
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 106.96058394387364
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 105.68820801563561
+            }
+          ]
+        },
+        {
+          "turn": 7,
+          "worlds": 2,
+          "total_ms": 48.03,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.1590829603374004
+            },
+            {
+              "name": "worlds",
+              "units": 2,
+              "ms": 0.7
+            },
+            {
+              "name": "opp_policy",
+              "units": 2,
+              "ms": 4.3
+            },
+            {
+              "name": "grid1",
+              "units": 384,
+              "ms": 6.6
+            },
+            {
+              "name": "value1",
+              "units": 384,
+              "ms": 25.522458949126303
+            }
+          ]
+        }
+      ],
+      "suggested_priors": {
+        "worlds": {
+          "fixed_ms": 6.95,
+          "unit_ms": 0.0
+        },
+        "root_policy": {
+          "fixed_ms": 3.58594,
+          "unit_ms": 0.0
+        },
+        "opp_policy": {
+          "fixed_ms": 4.59167,
+          "unit_ms": 0.898214
+        },
+        "grid1": {
+          "fixed_ms": 0.0,
+          "unit_ms": 0.017147
+        },
+        "value1": {
+          "fixed_ms": 15.77198,
+          "unit_ms": 0.053623
+        }
+      },
+      "stage_mean_ms": {
+        "worlds": 6.95,
+        "root_policy": 3.59,
+        "opp_policy": 17.17,
+        "grid1": 45.93,
+        "value1": 102.26
+      },
+      "stage_decision_mean_ms": {
+        "worlds": 6.95,
+        "root_policy": 3.59,
+        "opp_policy": 17.17,
+        "grid1": 45.93,
+        "value1": 170.43
+      },
+      "mean_total_ms": 281.24
+    },
+    {
+      "checkpoint": "/Users/aminaliu/.t3/projects/numbrion-mac/scratch/play-runtime/models/distill-run1/m535.pt",
+      "width": 192,
+      "layers": 4,
+      "device": "cpu",
+      "threads": 4,
+      "warmup_excluded": {
+        "turn": 1,
+        "worlds": 2,
+        "total_ms": 87.6,
+        "stages": [
+          {
+            "name": "root_policy",
+            "units": 1,
+            "ms": 6.336708087474108
+          },
+          {
+            "name": "worlds",
+            "units": 2,
+            "ms": 1.1
+          },
+          {
+            "name": "opp_policy",
+            "units": 2,
+            "ms": 6.8
+          },
+          {
+            "name": "grid1",
+            "units": 384,
+            "ms": 8.2
+          },
+          {
+            "name": "value1",
+            "units": 384,
+            "ms": 55.12058304157108
+          }
+        ]
+      },
+      "positions": [
+        {
+          "turn": 2,
+          "worlds": 8,
+          "total_ms": 292.12,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.897833055816591
+            },
+            {
+              "name": "worlds",
+              "units": 8,
+              "ms": 9.3
+            },
+            {
+              "name": "opp_policy",
+              "units": 8,
+              "ms": 15.3
+            },
+            {
+              "name": "grid1",
+              "units": 1536,
+              "ms": 25.7
+            },
+            {
+              "name": "value1",
+              "units": 1536,
+              "ms": 216.03037498425692
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "worlds": 32,
+          "total_ms": 861.03,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 4.086624947376549
+            },
+            {
+              "name": "worlds",
+              "units": 32,
+              "ms": 3.2
+            },
+            {
+              "name": "opp_policy",
+              "units": 32,
+              "ms": 40.9
+            },
+            {
+              "name": "grid1",
+              "units": 6144,
+              "ms": 118.9
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 266.6661669500172
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 168.8714160118252
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 180.1699170609936
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "worlds": 2,
+          "total_ms": 76.62,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 4.183207987807691
+            },
+            {
+              "name": "worlds",
+              "units": 2,
+              "ms": 14.9
+            },
+            {
+              "name": "opp_policy",
+              "units": 2,
+              "ms": 4.9
+            },
+            {
+              "name": "grid1",
+              "units": 384,
+              "ms": 6.4
+            },
+            {
+              "name": "value1",
+              "units": 384,
+              "ms": 38.30141597427428
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "worlds": 8,
+          "total_ms": 234.7,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 4.353458061814308
+            },
+            {
+              "name": "worlds",
+              "units": 8,
+              "ms": 11.6
+            },
+            {
+              "name": "opp_policy",
+              "units": 8,
+              "ms": 14.2
+            },
+            {
+              "name": "grid1",
+              "units": 1536,
+              "ms": 29.0
+            },
+            {
+              "name": "value1",
+              "units": 1536,
+              "ms": 151.92716603633016
+            }
+          ]
+        },
+        {
+          "turn": 6,
+          "worlds": 32,
+          "total_ms": 775.15,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 4.050832940265536
+            },
+            {
+              "name": "worlds",
+              "units": 32,
+              "ms": 2.7
+            },
+            {
+              "name": "opp_policy",
+              "units": 32,
+              "ms": 31.5
+            },
+            {
+              "name": "grid1",
+              "units": 6144,
+              "ms": 98.9
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 190.5685409437865
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 195.4368749866262
+            },
+            {
+              "name": "value1",
+              "units": 2048,
+              "ms": 175.1179159618914
+            }
+          ]
+        },
+        {
+          "turn": 7,
+          "worlds": 2,
+          "total_ms": 56.93,
+          "stages": [
+            {
+              "name": "root_policy",
+              "units": 1,
+              "ms": 3.216415992937982
+            },
+            {
+              "name": "worlds",
+              "units": 2,
+              "ms": 0.4
+            },
+            {
+              "name": "opp_policy",
+              "units": 2,
+              "ms": 4.4
+            },
+            {
+              "name": "grid1",
+              "units": 384,
+              "ms": 6.4
+            },
+            {
+              "name": "value1",
+              "units": 384,
+              "ms": 35.66712501924485
+            }
+          ]
+        }
+      ],
+      "suggested_priors": {
+        "worlds": {
+          "fixed_ms": 7.01667,
+          "unit_ms": 0.0
+        },
+        "root_policy": {
+          "fixed_ms": 3.96473,
+          "unit_ms": 0.0
+        },
+        "opp_policy": {
+          "fixed_ms": 4.44167,
+          "unit_ms": 1.006548
+        },
+        "grid1": {
+          "fixed_ms": 0.0,
+          "unit_ms": 0.017726
+        },
+        "value1": {
+          "fixed_ms": 9.80636,
+          "unit_ms": 0.094289
+        }
+      },
+      "stage_mean_ms": {
+        "worlds": 7.02,
+        "root_policy": 3.96,
+        "opp_policy": 18.53,
+        "grid1": 47.55,
+        "value1": 161.88
+      },
+      "stage_decision_mean_ms": {
+        "worlds": 7.02,
+        "root_policy": 3.96,
+        "opp_policy": 18.53,
+        "grid1": 47.55,
+        "value1": 269.79
+      },
+      "mean_total_ms": 382.76
+    }
+  ]
+}
