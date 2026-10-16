@@ -679,7 +679,7 @@ class SearchPlayer(Player):
                 return self._policy(request, full, started, note="out of time after building the worlds")
             worlds = worlds[:fit]
         revealed = set()
-        if cfg.threats_on():
+        if cfg.threats_on() or (cfg.depth2 is not None and cfg.depth2.enabled):
             try:
                 foe = self.builder.public_state()["sides"][1 - side]["mons"]
                 revealed = {(_id(m["species"]), _id(mv)) for m in foe for mv in m.get("moves", [])}
@@ -724,7 +724,7 @@ class SearchPlayer(Player):
         except Exception as error:  # noqa: BLE001 - analysis only
             analysis["observed"] = {"error": repr(error)[:200]}
         if cfg.depth2 is not None and cfg.depth2.enabled:
-            chosen = self._depth2(request, cfg, plan, deadline, result, best, analysis, started)
+            chosen = self._depth2(request, cfg, plan, deadline, result, best, analysis, started, revealed)
             if chosen != best:
                 best = chosen
                 a0, a1 = map(int, pairs[best])
@@ -734,7 +734,8 @@ class SearchPlayer(Player):
         self.bot.observe_cost(result["timing"], result["cells"], analysis["time_ms"])
         return decision
 
-    def _depth2(self, request, cfg, plan, deadline, result, best: int, analysis: dict, started) -> int:
+    def _depth2(self, request, cfg, plan, deadline, result, best: int, analysis: dict, started,
+                revealed: set | None = None) -> int:
         """The second layer (training/search2.py) after the layer-1 choice ``best``: re-posts the driver fallback as
         the layer-1 choice, sizes layer 2 (the budget controller's plan_depth2, if any), deepens, and returns the pair
         to play (``best`` when layer 2 is skipped, stopped before its first round, or fails). Adds the ``depth2``
@@ -764,7 +765,7 @@ class SearchPlayer(Player):
         try:
             out = deepen(self.bot, cfg, cfg2, layer1, battle=self.battle, deadline=deadline, rng=self.rng,
                          budget=self.bot.budget, describe=lambda b0, b1: self._text(request, b0, b1),
-                         costs=self.bot.depth2_costs)
+                         costs=self.bot.depth2_costs, revealed=revealed)
         except Exception as error:  # noqa: BLE001 - the layer-1 decision stands
             analysis["depth2"] = dict(skipped=f"error: {error!r}"[:300], rounds=0, changed=False)
             self.stats["depth2_errors"] = self.stats.get("depth2_errors", 0) + 1

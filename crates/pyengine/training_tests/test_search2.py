@@ -206,9 +206,9 @@ def test_layer2_that_adds_nothing_picks_the_anchored_best_response_to_layer1_val
             assert d.choice == block["chosen"]
 
 
-def run_synthetic(bot, l1, leaf_value, cfg=None, pick="anchored"):
+def run_synthetic(bot, l1, leaf_value, cfg=None, pick="anchored", **depth2):
     """``_Deepen.run`` on a synthetic Layer1 whose leaves get ``leaf_value(k, i, j)`` (no engine work)."""
-    run = _Deepen(bot, cfg or bot.search, Depth2Config(enabled=True, pick=pick), l1, StageClock(),
+    run = _Deepen(bot, cfg or bot.search, Depth2Config(enabled=True, pick=pick, **depth2), l1, StageClock(),
                   np.random.default_rng(0), pick, ("", ""), None)
     run.grow = lambda keys: True
 
@@ -780,3 +780,74 @@ def test_sibling_leaves_share_their_opponent_candidates(checkpoint, monkeypatch)
 
 def _side_mask_key(lf, dp):
     return search2._side_mask(lf, dp.opp, dp.side).tobytes()
+
+
+def counter_layer1(n_replies=2):
+    """Two candidates, equal priors. 0 is safe (0 against everything); 1 sets up: worth +0.5 a turn later if the
+    opponent keeps doing what layer 1 expected (reply 0, y = 0.99), -0.8 if it counters (reply 1, layer-1 weight
+    0.01, prior 0.3). At one ply the set-up looks slightly worse."""
+    l1 = synthetic_layer1(n_ours=2, n_worlds=1, m=n_replies)
+    l1.our_prior, l1.x = np.array([0.5, 0.5]), np.array([0.5, 0.5])
+    row = [0.0, -0.2] + [0.0] * (n_replies - 2)
+    l1.payoffs = [np.array([[0.0] * n_replies, row])]
+    l1.ys = [np.array([0.99, 0.01] + [0.0] * (n_replies - 2))]
+    l1.ys[0] = l1.ys[0] / l1.ys[0].sum()
+    prior = np.array([0.7, 0.3] + [0.05] * (n_replies - 2))
+    l1.their_prior = [prior / prior.sum()]
+    l1.q = np.array([a @ l1.ys[0] for a in l1.payoffs[0]])
+    return l1
+
+
+def test_resolve_lets_the_opponent_counter_what_correction_assumes_it_will_not(bot):
+    l1 = counter_layer1()
+
+    def value(k, i, j):
+        return 0.0 if i == 0 else (0.5 if j == 0 else -0.8)
+
+    fixed = run_synthetic(bot, l1, value, theirs_top=2, danger=0, threat_reply=False)
+    resolved = run_synthetic(bot, l1, value, theirs_top=2, danger=0, threat_reply=False, backup="resolve")
+    assert fixed["chosen"] == 1 and fixed["rounds"][-1]["q2"][1] > 0.4  # correction: the opponent keeps y
+    assert resolved["chosen"] == 0  # resolve: the opponent answers the set-up with the counter
+    assert resolved["rounds"][-1]["q2"][1] < resolved["rounds"][-1]["q2"][0]
+
+
+def test_resolve_keeps_undeepened_replies_at_their_layer1_values(bot):
+    """Only reply 0 is deepened; the counter (reply 1) stays in the re-solved game at its layer-1 payoff (-0.9 for
+    the set-up), so the opponent can still use it."""
+    l1 = counter_layer1(n_replies=3)
+    l1.payoffs = [np.array([[0.0, 0.0, 0.0], [0.0, -0.9, 0.0]])]
+    l1.q = np.array([a @ l1.ys[0] for a in l1.payoffs[0]])
+
+    def value(k, i, j):
+        assert j == 0  # nothing else is deepened
+        return 0.0 if i == 0 else 0.5
+
+    resolved = run_synthetic(bot, l1, value, theirs_top=1, danger=0, threat_reply=False, backup="resolve")
+    assert resolved["chosen"] == 0 and resolved["rounds"][-1]["q2"][1] < 0.0
+
+
+def test_qualifying_sleep_replies_are_deepened_whatever_their_weight(bot):
+    from dataclasses import replace
+
+    battle = sleep_battle()
+    joint = battle.legal_mask(1)[1]
+    spore = next(tuple(int(v) for v in p) for p in np.argwhere(joint) if p[0] < 10 and 10 <= p[1] < 20)
+    plain = [tuple(int(v) for v in p) for p in np.argwhere(joint) if 20 <= p[0] < 40 and 20 <= p[1] < 30][:3]
+    l1 = synthetic_layer1(n_ours=2, n_worlds=1, m=4)
+    l1.worlds, l1.side = [battle], 0
+    l1.their = [np.array(plain + [spore], dtype=np.int32)]
+    l1.ys = [np.array([0.6, 0.3, 0.0995, 0.0005])]  # Spore far below danger_min
+    l1.payoffs = [np.array([[0.0, 0.1, -0.5, 0.2], [0.0, 0.1, -0.5, 0.2]])]
+    cfg2 = Depth2Config(enabled=True, theirs_top=2, danger=1)
+
+    def replies(cfg, revealed=None):
+        run = _Deepen(bot, cfg, cfg2, l1, StageClock(), np.random.default_rng(0), "anchored", ("", ""), None,
+                      threat_reply=True, revealed=revealed)
+        return run.reply_set(0, 0)
+
+    # In every world (1 of 1): qualifies, deepened at y = 0.0005.
+    assert replies(bot.search) == [(0, False), (1, False), (2, True), (3, True)]
+    # Too few worlds and not revealed: the y >= danger_min rule applies, and Spore is below it.
+    rare = replace(bot.search, threat_min_worlds=2.0)
+    assert replies(rare) == [(0, False), (1, False), (2, True)]
+    assert replies(rare, revealed={("amoonguss", "spore")}) == [(0, False), (1, False), (2, True), (3, True)]
