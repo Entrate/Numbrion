@@ -334,6 +334,49 @@ def _candidates(bot, leaves: list, s: int, our_side: int, k: int, first: int, te
     return bot.net.candidates(arrays, np.arange(len(leaves)), masks, k=k, first=first, temperature=temperature)
 
 
+LOG_FLOOR = float(np.log(1e-6))  # log-prior of a pair a sibling's policy does not allow, for ranking
+
+
+def common_opponent_sets(tops: list, fulls: list, masks: list, size: int) -> list:
+    """One opponent candidate set for sibling leaves (the same world, opponent reply and chance draw, after different
+    root pairs of ours), so our candidates are compared against the same replies.
+
+    ``tops[l]``: leaf l's own top pairs (most likely first); ``fulls[l]``: its policy, (a0, a1) -> (log-prob at T=1,
+    log-prob at the opponent temperature); ``masks[l]`` [47, 47]: the pairs its opponent may play. The set is the union
+    of the leaves' top pairs ranked by their log-prior averaged over the leaves (LOG_FLOOR where a leaf does not
+    allow a pair), cut to ``size``, plus at most ``size`` more for coverage: every leaf keeps its own most likely pair
+    and at least min(2, its top count) pairs it allows. Returns per leaf (pairs [m, 2] int32, prior [m]): the common
+    pairs that leaf allows, with its own prior renormalised over them."""
+    union = []
+    for top in tops:
+        for pair in top:
+            if pair not in union:
+                union.append(pair)
+
+    def mean_logp(pair):
+        return float(np.mean([full[pair][0] if pair in full else LOG_FLOOR for full in fulls]))
+
+    common = sorted(union, key=lambda pair: (-mean_logp(pair), pair))[:max(size, 1)]
+    extra = 0
+    for top, full, mask in zip(tops, fulls, masks):
+        def covered():
+            usable = sum(1 for pair in common if pair in full and mask[pair])
+            return (not top or top[0] in common) and usable >= min(2, len(top))
+        for pair in top:
+            if covered() or extra >= size:
+                break
+            if pair not in common:
+                common.append(pair)
+                extra += 1
+    out = []
+    for top, full, mask in zip(tops, fulls, masks):
+        pairs = [pair for pair in common if pair in full and mask[pair]] or list(top[:1])
+        logp = np.array([full[pair][1] for pair in pairs], dtype=float)
+        prior = np.exp(logp - logp.max())
+        out.append((np.asarray(pairs, dtype=np.int32).reshape(-1, 2), prior / prior.sum()))
+    return out
+
+
 # ---- the second layer ----------------------------------------------------------------------------------------------
 
 class _Deepen:
@@ -342,6 +385,7 @@ class _Deepen:
         self.bot, self.cfg, self.cfg2, self.l1, self.clock, self.rng = bot, cfg, cfg2, layer1, clock, rng
         self.pick, self.ours_shown, self.describe = pick, ours_shown, describe
         self.threat_reply = threat_reply
+        self.common_opponent = bool(getattr(cfg, "depth2_common_opponent", True))
         self.log_prior = np.log(np.maximum(np.asarray(layer1.our_prior, dtype=float), 1e-300))
         self.requests: dict = {}
         self.side = layer1.side
@@ -490,9 +534,21 @@ class _Deepen:
         found = self.policy_chunks(theirs_rows, self.opp, cfg2.theirs, cfg.opponent_temperature)
         if found is None:
             return False
-        for lf, (pairs, logp, _) in zip(theirs_rows, found):
-            prior = np.exp(logp - logp.max())
-            lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
+        if self.common_opponent:  # siblings (same world, reply and chance draw) share one opponent candidate set
+            siblings: dict = {}
+            for lf, cands in zip(theirs_rows, found):
+                k, _, j, c = lf.key
+                siblings.setdefault((k, j, c), []).append((lf, cands))
+            for members in siblings.values():
+                sets = common_opponent_sets([[tuple(int(v) for v in p) for p in pairs] for _, (pairs, _, _) in members],
+                                            [full for _, (_, _, full) in members],
+                                            [_side_mask(lf, self.opp, self.side) for lf, _ in members], cfg2.theirs)
+                for (lf, _), (pairs, prior) in zip(members, sets):
+                    lf.their, lf.their_prior = pairs, prior
+        else:
+            for lf, (pairs, logp, _) in zip(theirs_rows, found):
+                prior = np.exp(logp - logp.max())
+                lf.their, lf.their_prior = np.asarray(pairs, dtype=np.int32), prior / prior.sum()
         for lf in live:
             if not lf.needs[self.opp]:
                 lf.their, lf.their_prior = np.full((1, 2), -1, dtype=np.int32), np.ones(1)
@@ -904,4 +960,5 @@ def _analysis(run: _Deepen, info: dict, out: dict, clock: StageClock, describe, 
                                            forced_steps=run.forced_steps),
         timing={k: v["ms"] for k, v in clock.totals().items()}, units={k: v["units"] for k, v in clock.totals().items()},
         total_ms=round(total_ms, 1),
-        config=dict(backup=run.cfg2.backup, info=run.cfg2.info, leaf_value=run.cfg2.leaf_value, pick=run.pick))
+        config=dict(backup=run.cfg2.backup, info=run.cfg2.info, leaf_value=run.cfg2.leaf_value, pick=run.pick,
+                    threat_reply=run.threat_reply, common_opponent=run.common_opponent))

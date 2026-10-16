@@ -69,6 +69,21 @@ class SearchConfig:
     seed: int = 0
     max_worlds: int = 32            # budgeted decisions: budget_ms scales the worlds between 2 and this
     depth2: Depth2Config | None = None  # the second layer (training/search2.py); None or enabled=False: off
+    # Threat candidates: in every world, the opponent's best-prior pair using each qualifying sleep move (revealed in
+    # the battle, or in the active foe's set in at least ``threat_min_worlds`` of the worlds) joins its candidates,
+    # beyond ``theirs`` if needed (at most ``threat_extra`` per world), with the prior the policy gives it.
+    # None: on exactly when the second layer is enabled.
+    threat_candidates: bool | None = None
+    threat_min_worlds: float = 0.5
+    threat_extra: int = 2
+    # The second layer's leaves that differ only by our root pair (same world, opponent reply and chance draw) share
+    # one opponent candidate set (common random numbers for comparing our candidates); False: per leaf (ablation).
+    depth2_common_opponent: bool = True
+
+    def threats_on(self) -> bool:
+        if self.threat_candidates is None:
+            return self.depth2 is not None and self.depth2.enabled
+        return bool(self.threat_candidates)
 
     @classmethod
     def from_dict(cls, values: dict | None) -> "SearchConfig":
@@ -663,7 +678,15 @@ class SearchPlayer(Player):
                 self.stats["out_of_time"] = self.stats.get("out_of_time", 0) + 1
                 return self._policy(request, full, started, note="out of time after building the worlds")
             worlds = worlds[:fit]
-        result = run_search(self.bot, cfg, self.battle, side, worlds, pairs, full, rng=self.rng, clock=clock)
+        revealed = set()
+        if cfg.threats_on():
+            try:
+                foe = self.builder.public_state()["sides"][1 - side]["mons"]
+                revealed = {(_id(m["species"]), _id(mv)) for m in foe for mv in m.get("moves", [])}
+            except Exception:  # noqa: BLE001 - threats from the worlds alone
+                revealed = set()
+        result = run_search(self.bot, cfg, self.battle, side, worlds, pairs, full, rng=self.rng, clock=clock,
+                            revealed=revealed)
         if result is None:
             return self._policy(request, full, started, note="no candidate is legal in the sampled worlds")
         if result.get("out_of_time"):
@@ -694,6 +717,8 @@ class SearchPlayer(Player):
                                          value=round(float(qq), 4), weight=round(float(xx), 4))
                                     for p, qq, xx in sorted(zip(pairs, q, x), key=lambda t: -t[2])],
                         opponent=result["opponent"], timing=result["timing"])
+        if cfg.threats_on():
+            analysis["threat_added"] = result["threat_added"]
         try:  # what we saw of the opponent's Pokemon, and what the sampled worlds assumed about them
             analysis["observed"], analysis["inferred"] = opponent_knowledge(self.builder.public_state(), worlds, side)
         except Exception as error:  # noqa: BLE001 - analysis only
@@ -899,6 +924,61 @@ SLEEP_MOVES = {"spore", "sleeppowder", "hypnosis", "yawn", "lovelykiss", "sing",
 THREAT_WEIGHT = 0.05  # a sleep reply this likely (layer-1 opponent weight, averaged over worlds) is a known threat
 
 
+def _move_ids(request: dict, slot: int) -> list[str]:
+    active = request.get("active") or []
+    moves = active[slot].get("moves", []) if slot < len(active) else []
+    return [m.get("id") or _id(m.get("move", "")) for m in moves]
+
+
+def _species(request: dict, slot: int) -> str:
+    mons = request.get("side", {}).get("pokemon", [])
+    return _id(mons[slot]["details"].split(",")[0]) if slot < len(mons) else ""
+
+
+def qualifying_threats(requests: list, revealed: set, min_worlds: float) -> set:
+    """(species id, move id) pairs of foe sleep moves worth adding as threat candidates: revealed in the battle
+    (``revealed``), or in the active foe's set in at least ``min_worlds`` of the worlds (``requests``: each world's
+    request for the opponent, None where it need not act)."""
+    counts: dict = {}
+    for request in requests:
+        if not request:
+            continue
+        for slot in range(len(request.get("active") or [])):
+            species = _species(request, slot)
+            for move in set(_move_ids(request, slot)) & SLEEP_MOVES:
+                counts[(species, move)] = counts.get((species, move), 0) + 1
+    n = max(len(requests), 1)
+    return {key for key, c in counts.items() if key in revealed or c / n >= min_worlds}
+
+
+def add_threat_candidates(request: dict, pairs: np.ndarray, logp: np.ndarray, full: dict, qualifying: set,
+                          extra: int) -> tuple[np.ndarray, np.ndarray, int]:
+    """``pairs`` / ``logp`` (the opponent's candidates and log-priors at its temperature) plus, for each acting foe
+    slot with a qualifying sleep move, the best-prior pair (in ``full``: (a0, a1) -> (logp T=1, logp at T)) whose
+    slot uses it, if no candidate does yet; at most ``extra`` added. Returns (pairs, logp, added)."""
+    have = {(int(a), int(b)) for a, b in pairs}
+    added = []
+    for slot in range(len(request.get("active") or [])):
+        species, ids = _species(request, slot), _move_ids(request, slot)
+        for move in sorted({m for m in ids if (species, m) in qualifying}):
+            def uses(pair):
+                code = pair[slot]
+                return 0 <= code < 40 and code // 10 < len(ids) and ids[code // 10] == move
+            if any(uses(p) for p in have):
+                continue
+            options = [p for p in full if uses(p)]
+            if not options or len(added) >= extra:
+                continue
+            best = max(options, key=lambda p: (full[p][0], p))
+            added.append(best)
+            have.add(best)
+    if not added:
+        return pairs, logp, 0
+    pairs = np.concatenate([np.asarray(pairs, dtype=np.int32).reshape(-1, 2), np.asarray(added, dtype=np.int32)])
+    logp = np.concatenate([np.asarray(logp, dtype=np.float32), np.array([full[p][1] for p in added], np.float32)])
+    return pairs, logp, len(added)
+
+
 def reply_moves(request: dict, pair) -> list[str]:
     """Move ids (``"spore"``) of a pair of action codes in ``request`` (the acting side's own request)."""
     active = request.get("active") or []
@@ -944,10 +1024,14 @@ def layer1_difficulty(layer1: Layer1, request: dict, public: dict | None = None)
 
 
 def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, worlds: list, ours: np.ndarray,
-               our_full: dict, rng: np.random.Generator | None = None, clock=None) -> dict | None:
+               our_full: dict, rng: np.random.Generator | None = None, clock=None,
+               revealed: set | None = None) -> dict | None:
     """Steps 3-6 of the module docstring for one decision; returns the strategy and the analysis pieces, plus
     ``layer1`` (a ``search2_types.Layer1`` for the second layer), ``ys``, ``worlds`` (those searched) and ``stages``
     (one measured ``Stage`` per network batch or grid call). ``rng`` draws the chance seeds (default: the bot's).
+
+    ``revealed``: (species id, move id) of the foe's moves seen so far, for the threat candidates
+    (``SearchConfig.threat_candidates``; the result's ``threat_added`` counts the pairs added).
 
     ``clock`` (a ``search2.StageClock``; None: everything runs) admits each network batch and grid call: the work is
     split into chunks of whole worlds that it admits, and worlds it refuses are dropped. None when no cell is legal;
@@ -972,12 +1056,22 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
             if not worlds:
                 return dict(out_of_time=True)
     their = [None] * len(worlds)
+    threat_added = 0
     if acting:
         encoded = grid.encode_states([states[opp]] * len(acting), [worlds[k].request_json(opp) for k in acting])
         masks = [worlds[k].legal_mask(opp) for k in acting]
         found = net.candidates(encoded, np.arange(len(acting)), masks, cfg.theirs, cfg.first_codes,
                                cfg.opponent_temperature)
-        for k, (pairs, logp, _) in zip(acting, found):
+        qualifying = set()
+        if cfg.threats_on():
+            requests = [json.loads(worlds[k].request_json(opp)) for k in acting]
+            qualifying = qualifying_threats(requests + [None] * (len(worlds) - len(acting)), revealed or set(),
+                                            cfg.threat_min_worlds)
+        for n, (k, (pairs, logp, full)) in enumerate(zip(acting, found)):
+            if qualifying:
+                pairs, logp, added = add_threat_candidates(requests[n], pairs, logp, full, qualifying,
+                                                           cfg.threat_extra)
+                threat_added += added
             prior = np.exp(logp - logp.max())
             their[k] = (pairs, prior / prior.sum())
     timing["opponent_ms"] = (time.perf_counter() - t0) * 1000
@@ -1107,4 +1201,4 @@ def run_search(bot: SearchBot, cfg: SearchConfig, battle: _Battle, side: int, wo
                     their_prior=[t[1] if t is not None else None for t in their], legal=legal, payoffs=payoffs,
                     x=x, ys=ys, q=q, seeds=[np.asarray(s, dtype=np.int64).reshape(-1, 4) for s in world_seeds])
     return dict(x=x, q=q, cells=n, opponent=opponent, timing=timing, payoffs=payoffs, valid=valid, ys=ys,
-                worlds=worlds, layer1=layer1, stages=stages)
+                worlds=worlds, layer1=layer1, stages=stages, threat_added=threat_added)
