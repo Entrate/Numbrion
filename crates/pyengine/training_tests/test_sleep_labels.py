@@ -310,7 +310,7 @@ def test_mixed_sets_sample_by_weight_with_their_value_mix(tmp_path):
     assert abs(stream.drawn[0] / stream.drawn.sum() - 0.25) < 0.05
     # Rows of set a keep a's value mix in the value target.
     batch = next(iter(stream.batches(rng, 64, torch.device("cpu"))))
-    expected = batch["value_mix"] * batch["outcome"] * .995 ** batch["remaining_steps"] + \
+    expected = batch["value_mix"] * batch["outcome"] + \
         (1 - batch["value_mix"]) * batch["search_value"]
     torch.testing.assert_close(value_target(batch, 0.5), expected)
     model = Model(load_dex(), 32, 1)
