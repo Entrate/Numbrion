@@ -826,9 +826,7 @@ def test_resolve_keeps_undeepened_replies_at_their_layer1_values(bot):
     assert resolved["chosen"] == 0 and resolved["rounds"][-1]["q2"][1] < 0.0
 
 
-def test_qualifying_sleep_replies_are_deepened_whatever_their_weight(bot):
-    from dataclasses import replace
-
+def test_sleep_replies_below_danger_min_are_not_deepened(bot):
     battle = sleep_battle()
     joint = battle.legal_mask(1)[1]
     spore = next(tuple(int(v) for v in p) for p in np.argwhere(joint) if p[0] < 10 and 10 <= p[1] < 20)
@@ -836,18 +834,17 @@ def test_qualifying_sleep_replies_are_deepened_whatever_their_weight(bot):
     l1 = synthetic_layer1(n_ours=2, n_worlds=1, m=4)
     l1.worlds, l1.side = [battle], 0
     l1.their = [np.array(plain + [spore], dtype=np.int32)]
-    l1.ys = [np.array([0.6, 0.3, 0.0995, 0.0005])]  # Spore far below danger_min
     l1.payoffs = [np.array([[0.0, 0.1, -0.5, 0.2], [0.0, 0.1, -0.5, 0.2]])]
     cfg2 = Depth2Config(enabled=True, theirs_top=2, danger=1)
 
-    def replies(cfg, revealed=None):
-        run = _Deepen(bot, cfg, cfg2, l1, StageClock(), np.random.default_rng(0), "anchored", ("", ""), None,
+    def replies(ys, revealed=None):
+        l1.ys = [np.array(ys)]
+        run = _Deepen(bot, bot.search, cfg2, l1, StageClock(), np.random.default_rng(0), "anchored", ("", ""), None,
                       threat_reply=True, revealed=revealed)
         return run.reply_set(0, 0)
 
-    # In every world (1 of 1): qualifies, deepened at y = 0.0005.
-    assert replies(bot.search) == [(0, False), (1, False), (2, True), (3, True)]
-    # Too few worlds and not revealed: the y >= danger_min rule applies, and Spore is below it.
-    rare = replace(bot.search, threat_min_worlds=2.0)
-    assert replies(rare) == [(0, False), (1, False), (2, True)]
-    assert replies(rare, revealed={("amoonguss", "spore")}) == [(0, False), (1, False), (2, True), (3, True)]
+    # Spore far below danger_min: not deepened, even when revealed (it carries almost no weight in the backup).
+    assert replies([0.6, 0.3, 0.0995, 0.0005]) == [(0, False), (1, False), (2, True)]
+    assert replies([0.6, 0.3, 0.0995, 0.0005], revealed={("amoonguss", "spore")}) == [(0, False), (1, False), (2, True)]
+    # Spore at y >= danger_min and outside the top/danger picks: deepened as the threat reply.
+    assert replies([0.6, 0.3, 0.07, 0.03]) == [(0, False), (1, False), (2, True), (3, True)]
