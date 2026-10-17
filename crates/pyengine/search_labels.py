@@ -103,10 +103,10 @@ def follow_teacher(directory: Path, current: Teacher | None = None) -> Teacher |
 
 
 @contextmanager
-def output_lock(out: Path):
+def output_lock(out: Path, name: str = ".labels.lock", holder: str = "label maker"):
     """Hold a persistent lock inode until generation, including all worker games, has finished."""
     out.mkdir(parents=True, exist_ok=True)
-    with (out / ".labels.lock").open("a") as lock:
+    with (out / name).open("a") as lock:
         try:
             if sys.platform == "win32":  # locks the file's first byte; released when the process exits
                 lock.seek(0)
@@ -114,7 +114,7 @@ def output_lock(out: Path):
             else:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError as error:  # BlockingIOError (flock) or a lock-violation OSError (msvcrt)
-            raise RuntimeError(f"another label maker holds {out / '.labels.lock'}") from error
+            raise RuntimeError(f"another {holder} holds {out / name}") from error
         yield
 
 

@@ -92,7 +92,7 @@ def parse_args(argv=None):
                         help="share of sleep-eligible searched decisions that play a sleep move (label: the search's)")
     parser.add_argument("--sleep-moves", default=",".join(DEFAULT_SLEEP_MOVES),
                         help="comma-separated move ids that count as sleep moves")
-    parser.add_argument("--nice", type=int, default=10, help="added niceness (0: none)")
+    parser.add_argument("--nice", type=int, default=10, help="added niceness (0: none; Windows: any positive value = below-normal priority)")
     parser.add_argument("--status-seconds", type=float, default=45.0)
     args = parser.parse_args(argv)
     search = json.loads(args.search)
@@ -173,6 +173,19 @@ def cpu_seconds(processes) -> float:
     return total
 
 
+def lower_priority(nice: int) -> None:
+    """Add ``nice`` to the niceness; on Windows a positive value means BELOW_NORMAL (actors inherit it)."""
+    if sys.platform == "win32":
+        import psutil
+        psutil.Process().nice(psutil.BELOW_NORMAL_PRIORITY_CLASS if nice > 0 else psutil.NORMAL_PRIORITY_CLASS)
+    else:
+        os.nice(nice)
+
+
+def load_average() -> float | None:
+    return round(os.getloadavg()[0], 2) if hasattr(os, "getloadavg") else None
+
+
 def main(argv=None) -> dict:
     args = parse_args(argv)
     with output_lock(args.out), stop_signals() as requested:
@@ -181,7 +194,7 @@ def main(argv=None) -> dict:
 
 def generate(args, requested=None) -> dict:
     if args.nice:
-        os.nice(args.nice)
+        lower_priority(args.nice)
     torch.set_num_threads(1)
     (args.out / "config.json").write_text(json.dumps(vars(args), default=str, indent=1))
     teacher = follow_teacher(args.follow) if args.follow else Teacher.load(args.checkpoint)
@@ -219,7 +232,7 @@ def generate(args, requested=None) -> dict:
                     written=totals.get("written", 0), disk_mb=round(size / 2 ** 20, 1),
                     bytes_per_label=round(size / max(totals.get("written", 0), 1)), teacher=teacher.path.name,
                     actor_cores=None if final else round((cpu - last_cpu) / max(now - last_time, 1e-6), 2),
-                    actor_rss_mb=totals.get("actor_rss_mb"), load=round(os.getloadavg()[0], 2), final=final)
+                    actor_rss_mb=totals.get("actor_rss_mb"), load=load_average(), final=final)
         print("Status: " + " ".join(f"{k}={v}" for k, v in line.items()), flush=True)
         with (args.out / "status.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(line) + "\n")

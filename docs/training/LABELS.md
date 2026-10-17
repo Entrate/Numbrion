@@ -84,5 +84,25 @@ They use `Actors(label_only=True)` to skip unused PPO rollout buffers, rollout v
   what was seen, as the full search does, at ~25-35 ms instead of ~4-5 ms per decision. See
   [SEARCH-PREREQUISITES.md](../design/SEARCH-PREREQUISITES.md).
 
+### On the Windows PC, sent to the Mac (2026-10-17)
+
+shallow_labels.py runs on Windows too (a positive `--nice` means below-normal priority there). `send_labels.py`
+runs beside it on the same directory and copies finished shards to the Mac over SSH (key login as `aminaliu` over
+Tailscale). It scp's them into `<remote>/.incoming/`, then one `mv` moves them into the label directory, so
+`distill_train --follow` never reads a partial file. Sent shards move into `<dir>/sent/` locally. The sender exits
+after the maker finishes. Use the Mac's code version and settings, with another `--seed`:
+
+    .venv/Scripts/python.exe crates/pyengine/shallow_labels.py --checkpoint scratch/gen3/teacher-win/numbrion-gen2.pt         --workers 6 --envs 144 --explore 0.25 --ours 4 --theirs 3 --seeds 1 --seed 9001 --minutes 600         --out scratch/win-labels/NAME
+    .venv/Scripts/python.exe crates/pyengine/send_labels.py scratch/win-labels/NAME         --to aminaliu@100.98.169.85:/Users/aminaliu/.t3/projects/numbrion-mac/scratch/gen3/labels-win
+
+- Mac checkpoints pickle `PosixPath`s, which Windows cannot load. Re-save them with the paths as strings, under the
+  same file name, so the labels name the same teacher (`scratch/gen3/teacher-win/`).
+- Ryzen 5 3600 (6 cores / 12 threads), 1.6 min tests: 6 workers x 24 envs gave ~545 labels/s steady (gen2) and
+  ~575/s (Spark), on 5.8 cores, ~450 MB RSS per actor, 0 crashes. 11 workers gave ~595/s, so the hyperthreads
+  add little. That is about a third of the M1 Pro's rate (~1,600/s on gen3), ~2M labels/hour, ~1.8 GB/hour.
+- The shards have the Mac's format: same fields, dtypes and shapes, and teacher `numbrion-gen2.pt`. SSH sends at
+  2-3 MB/s, and labels come at ~0.5 MB/s.
+- Taildrop (`tailscale file cp`) did not work unattended: the Mac holds incoming files until they are accepted.
+
 Then: millions of labels -> a fresh student over several passes -> compare vs m535 and the 256x6 average; if it wins,
 it becomes the next teacher.
