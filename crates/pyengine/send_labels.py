@@ -5,13 +5,14 @@
 
 Runs beside shallow_labels.py (or search_labels.py) on the same ``--out`` directory. Every ``--interval`` seconds it
 sends the finished ``labels-*.npz`` shards, oldest first and ``--batch`` per call (``.npz.tmp`` files are still
-being written and are skipped). scp puts them into ``<remote>/.incoming/``, and one ssh ``mv`` then renames them into
-``<remote>/``. A reader of the remote directory (distill_train --follow globs only ``labels-*.npz`` there and in
-``used/`` / ``heldout/``) never sees a partial file. Each sent shard is then moved into ``<dir>/sent/``
-(``--delete-sent``: deleted). A failed call is retried on the next pass: the same names overwrite the half-sent
-copies in ``.incoming/``. Only a lost reply after a successful mv can resend a shard. The directory's
-``config.json`` goes once as ``<dir name>-config.json``. One sender per directory (``.send.lock``). Key login
-(``ssh -o BatchMode=yes``) must work.
+being written and are skipped). scp puts them into ``<remote>/.incoming/``, and one ssh call then renames each into
+``<remote>/`` unless that name is already in ``<remote>/``, ``used/`` or ``heldout/`` (then the copy is dropped).
+A reader of the remote directory (distill_train --follow globs only ``labels-*.npz`` there and in ``used/`` /
+``heldout/``) never sees a partial file, and a retry never publishes a shard twice. Each sent shard is then moved
+into ``<dir>/sent/`` (``--delete-sent``: deleted). A failed call is retried on the next pass: the same names
+overwrite the half-sent copies in ``.incoming/``. A call past ``--timeout`` is killed with its child processes.
+The directory's ``config.json`` goes once as ``<dir name>-config.json``. One sender per directory (``.send.lock``).
+Key login (``ssh -o BatchMode=yes``) must work. The remote path may hold only letters, digits and ``._/-``.
 
 Stops after a complete pass once the label maker, seen running at least once, has finished (its ``.labels.lock`` is
 free again, e.g. after ``<dir>/STOP``), on ``<dir>/STOP_SEND`` after a complete pass, or at Ctrl+C. It can start
@@ -20,10 +21,12 @@ before the maker. ``--once``: one pass (e.g. for a directory whose maker has alr
 from __future__ import annotations
 
 import argparse
+import re
 import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -48,6 +51,8 @@ def parse_args(argv=None):
     host, _, remote = args.to.partition(":")
     if not host or not remote.startswith("/"):
         parser.error("--to must be USER@HOST:/absolute/path")
+    if not re.fullmatch(r"[A-Za-z0-9._/-]+", remote):  # the same text then works for scp (SFTP or SCP mode) and sh
+        parser.error("the remote path may hold only letters, digits and ._/-")
     args.host, args.remote = host, remote.rstrip("/")
     if args.batch < 1 or args.interval <= 0 or args.timeout <= 0:
         parser.error("--batch, --interval and --timeout must be positive")
@@ -65,17 +70,48 @@ def maker_running(directory: Path) -> bool:
         return True
 
 
-def run(args, command: list[str], what: str) -> bool:
+def kill_tree(process: subprocess.Popen) -> None:
+    """scp starts ssh as a child; kill both so neither outlives the timeout."""
+    import psutil
     try:
-        # Relative names from the label directory: a Windows drive letter would read as an scp host.
-        result = subprocess.run(command, cwd=args.dir, capture_output=True, text=True, timeout=args.timeout)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        print(f"Send failed ({what}): {error}", flush=True)
-        return False
-    if result.returncode:
-        print(f"Send failed ({what}, exit {result.returncode}): {(result.stderr or result.stdout).strip()[:500]}",
-              flush=True)
-        return False
+        family = psutil.Process(process.pid).children(recursive=True)
+    except psutil.Error:
+        family = []
+    for member in family:
+        try:
+            member.kill()
+        except psutil.Error:
+            pass
+    process.kill()
+
+
+def run(args, command: list[str], what: str) -> bool:
+    # Output goes to a file, not a pipe, so a surviving child cannot hold the read open past the timeout.
+    with tempfile.TemporaryFile("w+", encoding="utf-8", errors="replace") as output:
+        try:
+            # Relative names from the label directory: a Windows drive letter would read as an scp host.
+            process = subprocess.Popen(command, cwd=args.dir, stdin=subprocess.DEVNULL, stdout=output,
+                                       stderr=subprocess.STDOUT)
+        except OSError as error:
+            print(f"Send failed ({what}): {error}", flush=True)
+            return False
+        try:
+            code = process.wait(timeout=args.timeout)
+        except subprocess.TimeoutExpired:
+            kill_tree(process)
+            try:
+                process.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                pass
+            print(f"Send failed ({what}): timed out after {args.timeout:g} s", flush=True)
+            return False
+        except KeyboardInterrupt:
+            kill_tree(process)
+            raise
+        if code:
+            output.seek(0)
+            print(f"Send failed ({what}, exit {code}): {output.read().strip()[:500]}", flush=True)
+            return False
     return True
 
 
@@ -83,14 +119,20 @@ def remote(args, script: str, what: str) -> bool:
     return run(args, ["ssh", *SSH_OPTIONS, args.host, script], what)
 
 
+# Publish each staged file unless its name is already in the directory, used/ or heldout/ (a resend after a lost
+# reply, or a shard the trainer already moved on); then drop the staged copy. Fails if any file is left staged.
+PUBLISH = ('status=0; for f in "$@"; do '
+           'if [ -e "../$f" ] || [ -e "../used/$f" ] || [ -e "../heldout/$f" ]; then rm -f -- "$f" || status=1; '
+           'else mv -- "$f" "../$f" || status=1; fi; done; exit $status')
+
+
 def upload(args, names: list[str]) -> bool:
-    """scp into <remote>/.incoming, then one mv into <remote> (rename on one file system: atomic per file)."""
+    """scp into <remote>/.incoming, then publish into <remote> (rename on one file system: atomic per file)."""
     incoming = f"{args.remote}/.incoming"
-    if not run(args, ["scp", "-q", *SSH_OPTIONS, *names, f"{args.host}:{shlex.quote(incoming)}/"],
-               f"scp {len(names)} files"):
+    if not run(args, ["scp", "-q", *SSH_OPTIONS, *names, f"{args.host}:{incoming}/"], f"scp {len(names)} files"):
         return False
-    moves = " ".join(shlex.quote(name) for name in names)
-    return remote(args, f"cd {shlex.quote(incoming)} && mv -f {moves} ..", f"mv {len(names)} files")
+    script = f"cd {shlex.quote(incoming)} && sh -c {shlex.quote(PUBLISH)} publish " + " ".join(map(shlex.quote, names))
+    return remote(args, script, f"publish {len(names)} files")
 
 
 def archive(args, path: Path, sent_dir: Path) -> None:

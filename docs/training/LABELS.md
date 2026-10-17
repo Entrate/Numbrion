@@ -88,8 +88,9 @@ They use `Actors(label_only=True)` to skip unused PPO rollout buffers, rollout v
 
 shallow_labels.py runs on Windows too (a positive `--nice` means below-normal priority there). `send_labels.py`
 runs beside it on the same directory and copies finished shards to the Mac over SSH (key login as `aminaliu` over
-Tailscale). It scp's them into `<remote>/.incoming/`, then one `mv` moves them into the label directory, so
-`distill_train --follow` never reads a partial file. Sent shards move into `<dir>/sent/` locally. The sender exits
+Tailscale). It scp's them into `<remote>/.incoming/`, then renames each into the label directory unless that name
+is already there or in `used/` / `heldout/`. So `distill_train --follow` never reads a partial file, and a retry
+never adds a shard twice. Sent shards move into `<dir>/sent/` locally. The sender exits
 after the maker finishes. Use the Mac's code version and settings, with another `--seed`:
 
     .venv/Scripts/python.exe crates/pyengine/shallow_labels.py --checkpoint scratch/gen3/teacher-win/numbrion-gen2.pt         --workers 6 --envs 144 --explore 0.25 --ours 4 --theirs 3 --seeds 1 --seed 9001 --minutes 600         --out scratch/win-labels/NAME
